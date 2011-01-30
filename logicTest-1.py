@@ -38,11 +38,35 @@ def _or(x,y):
     elif (x == None or y == None): return None
     else: return False
 
-##############################
+########################################
+# аксиомы (выдуманные правила)
+
+def _eq_0(x,y):
+    check([x,y])
+    if   (x == None or y == None): return None
+    elif (x == y): return True
+    else: return False
+
+def _then_0(x,y):
+    check([x,y])
+    if   (x == True and y == True): return True
+    elif (x == True and y == False): return False
+    else: return None
+
+########################################
+# следствия
+
+def _eq(x,y):
+    check([x,y])
+    return _or( _and(x,y), _and(_not(x),_not(y)) )
 
 def _xor(x,y):
     check([x,y])
-    return _and(_or(x,y), _not(_eq(x,y)))
+    return _not(_eq(x,y))
+
+#def _xor_1(x,y):
+#    check([x,y])
+#    return _and(_or(x,y), _not(_eq(x,y)))
 
 def _then(x,y):
     """Удивительно, что эта загогулина работает.
@@ -51,19 +75,6 @@ def _then(x,y):
     check([x,y])
     return _not(_xor( _or(_and(x, _not(_void(y))), None), y ))
 
-
-def _eq(x,y):
-    check([x,y])
-    if   (x == None or y == None): return None
-    elif (x == y): return True
-    else: return False
-
-
-def _then_0(x,y):
-    check([x,y])
-    if   (x == True and y == True): return True
-    elif (x == True and y == False): return False
-    else: return None
 
 
 
@@ -83,7 +94,7 @@ xy.append(map( _and, xy[0], xy[1] ))
 xy.append(map( _or, xy[0], xy[1] ))
 xy.append(map( _xor, xy[0], xy[1] ))
 xy.append(map( _then, xy[0], xy[1] ))
-#xy.append(map( _eq, xy[0], xy[1] ))
+xy.append(map( _eq, xy[0], xy[1] ))
 
 pp.pprint(xy)
 
