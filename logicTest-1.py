@@ -21,6 +21,11 @@ def _not(x):
     elif (x == False): return True
     else: return None
 
+def _void(x):
+    check([x])
+    if   (x == None):  return True
+    else: return False
+
 def _and(x,y):
     check([x,y])
     if   (x == False or y == False): return False
@@ -32,22 +37,34 @@ def _or(x,y):
     if   (x == True or y == True): return True
     elif (x == None or y == None): return None
     else: return False
-    
-def _eq(x,y):
-    check([x,y])
-    if   (x == None or y == None): return None
-    elif (x == y): return True
-    else: return False
+
+##############################
 
 def _xor(x,y):
     check([x,y])
     return _and(_or(x,y), _not(_eq(x,y)))
 
 def _then(x,y):
+    """Удивительно, что эта загогулина работает.
+    Дело в том, что для случаев, где один из аргументов = None,
+    not(xor) работает почти также как and."""
+    check([x,y])
+    return _not(_xor( _or(_and(x, _not(_void(y))), None), y ))
+
+
+def _eq(x,y):
+    check([x,y])
+    if   (x == None or y == None): return None
+    elif (x == y): return True
+    else: return False
+
+
+def _then_0(x,y):
     check([x,y])
     if   (x == True and y == True): return True
     elif (x == True and y == False): return False
     else: return None
+
 
 
 # TEST
@@ -62,16 +79,11 @@ xy = [[True,  True,  True,  None,  None,  None,  False, False, False],
 import pprint
 pp = pprint.PrettyPrinter()
 
-#xy.append( [ _and(xy[0][i],xy[1][i]) for i in range(len(xy[0])) ] )     # сходится
 xy.append(map( _and, xy[0], xy[1] ))
-#xy.append( [ _or(xy[0][i],xy[1][i]) for i in range(len(xy[0])) ] )      # сходится
 xy.append(map( _or, xy[0], xy[1] ))
-#xy.append( [ _xor(xy[0][i],xy[1][i]) for i in range(len(xy[0])) ] )     # сходится
 xy.append(map( _xor, xy[0], xy[1] ))
-#xy.append( [ _then(xy[0][i],xy[1][i]) for i in range(len(xy[0])) ] )    # сходится
 xy.append(map( _then, xy[0], xy[1] ))
-#xy.append( [ _eq(xy[0][i],xy[1][i]) for i in range(len(xy[0])) ] )      # сходится
-xy.append(map( _eq, xy[0], xy[1] ))
+#xy.append(map( _eq, xy[0], xy[1] ))
 
 pp.pprint(xy)
 
