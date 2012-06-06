@@ -96,10 +96,14 @@ decline = (word, gender, grCase) ->
           word
         when CaseDefinition.GENITIVE
           stem + 'а'
-        #when CaseDefinition.DATIVE
-        #when CaseDefinition.ACCUSATIVE
-        #when CaseDefinition.INSTRUMENTAL
-        #when CaseDefinition.PREPOSITIONAL
+        when CaseDefinition.DATIVE
+          stem + 'у'
+        when CaseDefinition.ACCUSATIVE
+          word # или как GENITIVE
+        when CaseDefinition.INSTRUMENTAL
+          stem + 'ом'
+        when CaseDefinition.PREPOSITIONAL
+          stem + 'е'
     when 2
       throw new Error("unsupported")
       #switch grCase
