@@ -55,10 +55,10 @@ window.getDeclension = (word, gender) ->
   
   switch gender
     when Gender.FEMININE 
-      t = word.substr(-1, 1)
+      t = _.last(word)
       `t == "а" || t == "я" ? 2 : 3`
     when Gender.MASCULINE
-      t = word.substr(-1, 1)
+      t = _.last(word)
       `t == "а" || t == "я" ? 2 :
       word == "путь" ? 0 : 1`
     when Gender.NEUTER
@@ -68,6 +68,10 @@ window.getDeclension = (word, gender) ->
     else
       throw new Error("incorrect gender")
 
+###* Доп. проверки для стеммера ###
+getNounStem = (word) ->
+  if _.last(word) is 'л' then return word
+  getStem word
 
 ###* Русский стеммер из Snowball JavaScript Library. ###
 getStem = (word) ->
@@ -77,7 +81,7 @@ getStem = (word) ->
   stemmer.getCurrent();
 
 decline = (word, gender, grCase) ->
-  stem = getStem word
+  stem = getNounStem word
   declension = getDeclension word, gender
   
   switch declension
@@ -95,13 +99,22 @@ decline = (word, gender, grCase) ->
         when CaseDefinition.NOMINATIVE
           word
         when CaseDefinition.GENITIVE
-          stem + 'а'
+          if _.last(word) is 'ь'
+            stem + 'я'
+          else
+            stem + 'а'
         when CaseDefinition.DATIVE
-          stem + 'у'
+          if _.last(word) is 'ь'
+            stem + 'ю'
+          else
+            stem + 'у'
         when CaseDefinition.ACCUSATIVE
           word # или как GENITIVE
         when CaseDefinition.INSTRUMENTAL
-          stem + 'ом'
+          if _.last(word) is 'ь'
+            stem + 'ем'
+          else
+            stem + 'ом'
         when CaseDefinition.PREPOSITIONAL
           stem + 'е'
     when 2
@@ -125,3 +138,22 @@ decline = (word, gender, grCase) ->
 
 window.getStem = getStem
 window.decline = decline
+
+
+test = (data, gender) ->
+  _.each CaseDefinition, ((caseValue, caseId) ->
+    console.log '\n'+caseValue
+    for i in data
+      try
+        console.log decline i, gender, caseValue
+      catch e
+        console.log 'error'
+  )
+
+window.testM = ->
+  d = ['стол', 'путь', 'парашют', 'вокзал', 'параход', 'дирижабль', 'мармелад', 'вася', 'гвоздь', 'пилот', 'матершиник', 'пистолет', 'вопль', 'закат', 'дядя']
+  test d, Gender.MASCULINE
+
+window.testN = ->
+  d = ['окно', 'житие', 'сопло', 'арго', 'вино']
+  test d, Gender.MASCULINE  
