@@ -3,9 +3,24 @@
 # Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
 
 misc = 
-requiredString = (v) ->
+requiredString: (v) ->
   if(typeof v != "string")
     throw new Error(v + " is not a string.")
+
+StemUtil =
+  ###* Доп. проверки для стеммера ###
+  getNounStem: (word) ->
+    if _.last(word) is 'л' then return word
+    StemUtil.getStem word
+  ###* Русский стеммер из Snowball JavaScript Library. ###
+  getStem: (word) ->
+    stemmer = new Snowball('Russian');
+    stemmer.setCurrent(word);
+    stemmer.stem();
+    stemmer.getCurrent();
+  getInit: (s) ->
+    if s.length <= 1 then return ''
+    s.substring(0, s.length-1)
 
 ### Абстракция над справочником слов из БД. ###
 class Vocabulary
@@ -46,8 +61,8 @@ vocabulary = new Vocabulary()
 @returns {integer} склонение (см. DeclensionDefinition)
 ###
 window.getDeclension = (word, gender) ->
-  requiredString(word)
-  requiredString(gender)
+  misc.requiredString(word)
+  misc.requiredString(gender)
   
   # todo: избавиться от substr
   if vocabulary.isIndeclinable word
@@ -68,20 +83,10 @@ window.getDeclension = (word, gender) ->
     else
       throw new Error("incorrect gender")
 
-###* Доп. проверки для стеммера ###
-getNounStem = (word) ->
-  if _.last(word) is 'л' then return word
-  getStem word
 
-###* Русский стеммер из Snowball JavaScript Library. ###
-getStem = (word) ->
-  stemmer = new Snowball('Russian');
-  stemmer.setCurrent(word);
-  stemmer.stem();
-  stemmer.getCurrent();
 
 decline = (word, gender, grCase) ->
-  stem = getNounStem word
+  stem = StemUtil.getNounStem word
   declension = getDeclension word, gender
   
   switch declension
@@ -95,23 +100,26 @@ decline = (word, gender, grCase) ->
       #  when CaseDefinition.INSTRUMENTAL
       #  when CaseDefinition.PREPOSITIONAL
     when 1
+      soft = ->
+        lastChar = _.last(word)
+        lastChar is 'ь' or lastChar is 'e'
       switch grCase
         when CaseDefinition.NOMINATIVE
           word
         when CaseDefinition.GENITIVE
-          if _.last(word) is 'ь'
+          if soft()
             stem + 'я'
           else
             stem + 'а'
         when CaseDefinition.DATIVE
-          if _.last(word) is 'ь'
+          if soft()
             stem + 'ю'
           else
             stem + 'у'
         when CaseDefinition.ACCUSATIVE
           word # или как GENITIVE
         when CaseDefinition.INSTRUMENTAL
-          if _.last(word) is 'ь'
+          if soft()
             stem + 'ем'
           else
             stem + 'ом'
@@ -136,7 +144,6 @@ decline = (word, gender, grCase) ->
       #  when CaseDefinition.INSTRUMENTAL
       #  when CaseDefinition.PREPOSITIONAL
 
-window.getStem = getStem
 window.decline = decline
 
 
@@ -147,13 +154,16 @@ test = (data, gender) ->
       try
         console.log decline i, gender, caseValue
       catch e
-        console.log 'error'
+        if e.message is "unsupported"
+          console.log 'error'
+        else
+          throw e
   )
 
 window.testM = ->
-  d = ['стол', 'путь', 'парашют', 'вокзал', 'параход', 'дирижабль', 'мармелад', 'вася', 'гвоздь', 'пилот', 'матершиник', 'пистолет', 'вопль', 'закат', 'дядя']
+  d = ['стол', 'музей', 'пролетарий', 'лесничий', 'путь', 'парашют', 'вокзал', 'параход', 'дирижабль', 'мармелад', 'вася', 'гвоздь', 'пилот', 'матершиник', 'пистолет', 'вопль', 'закат', 'дядя']
   test d, Gender.MASCULINE
 
 window.testN = ->
-  d = ['окно', 'житие', 'сопло', 'арго', 'вино']
+  d = ['окно', 'житие', 'сопло', 'арго', 'пальто', 'вино']
   test d, Gender.MASCULINE  
