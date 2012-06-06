@@ -16,7 +16,13 @@ class Vocabulary
 
 
 
-
+window.CaseDefinition =
+  NOMINATIVE: "Именительный"
+  GENITIVE: "Родительный"
+  DATIVE: "Дательный"
+  ACCUSATIVE: "Винительный"
+  INSTRUMENTAL: "Творительный"
+  PREPOSITIONAL: "Предложный"
 
 DeclensionDefinition =
   0: 'разносклоняемые "путь" и "дитя"'
@@ -55,10 +61,10 @@ window.getDeclension = (word, gender) ->
       t = word.substr(-1, 1)
       `t == "а" || t == "я" ? 2 :
       word == "путь" ? 0 : 1`
-    when "neuter"
+    when Gender.NEUTER
       `word == "дитя" ? 0 :
       word.substr(-2, 2) == "мя" ? 3 : 1`
-    when "common" then 2  # они все на -а, -я, либо несклоняемые
+    when Gender.COMMON then 2  # они все на -а, -я, либо несклоняемые
     else
       throw new Error("incorrect gender")
 
@@ -70,18 +76,48 @@ getStem = (word) ->
   stemmer.stem();
   stemmer.getCurrent();
 
-decline = (word, gender) ->
+decline = (word, gender, grCase) ->
   stem = getStem word
   declension = getDeclension word, gender
   
   switch declension
-    when 0 then stem
-    when 1
+    when 0
       throw new Error("unsupported")
+      #switch grCase
+      #  when CaseDefinition.NOMINATIVE
+      #  when CaseDefinition.GENITIVE
+      #  when CaseDefinition.DATIVE
+      #  when CaseDefinition.ACCUSATIVE
+      #  when CaseDefinition.INSTRUMENTAL
+      #  when CaseDefinition.PREPOSITIONAL
+    when 1
+      switch grCase
+        when CaseDefinition.NOMINATIVE
+          word
+        when CaseDefinition.GENITIVE
+          stem + 'а'
+        #when CaseDefinition.DATIVE
+        #when CaseDefinition.ACCUSATIVE
+        #when CaseDefinition.INSTRUMENTAL
+        #when CaseDefinition.PREPOSITIONAL
     when 2
       throw new Error("unsupported")
+      #switch grCase
+      #  when CaseDefinition.NOMINATIVE
+      #  when CaseDefinition.GENITIVE
+      #  when CaseDefinition.DATIVE
+      #  when CaseDefinition.ACCUSATIVE
+      #  when CaseDefinition.INSTRUMENTAL
+      #  when CaseDefinition.PREPOSITIONAL
     when 3
       throw new Error("unsupported")
+      #switch grCase
+      #  when CaseDefinition.NOMINATIVE
+      #  when CaseDefinition.GENITIVE
+      #  when CaseDefinition.DATIVE
+      #  when CaseDefinition.ACCUSATIVE
+      #  when CaseDefinition.INSTRUMENTAL
+      #  when CaseDefinition.PREPOSITIONAL
 
 window.getStem = getStem
 window.decline = decline
