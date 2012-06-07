@@ -19,7 +19,6 @@
 <body>
 
 	<p>Это для генерации текста. Пример не имеет отношения к логике.</p>
-	<p>Открой консоль.</p>
 	
 	<textarea id="template" style="display:none;">
 		<style>
@@ -30,12 +29,12 @@
 		</style>
 		<table>
 			<tr>
-				<td>Кто? Что?</td>
-				<td>Кого? Чего?</td>
-				<td>Кому? Чему?</td>
-				<td>Кого? Что?</td>
-				<td>Кем? Чем?</td>
-				<td>О ком? О чем?</td>
+				<td>Есть Кто? Что?</td>
+				<td>Нет Кого? Чего?</td>
+				<td>Давать Кому? Чему?</td>
+				<td>Винить Кого? Что?</td>
+				<td>Доволен Кем? Чем?</td>
+				<td>Думать О ком? О чем?</td>
 			</tr>
 			{{#items}}
 				<tr>
@@ -50,6 +49,7 @@
 		</table>
 	</textarea>
 	<!--<input type="button" onclick="main()" value="Тест"/>-->
+	<div id="stats" style="font-size:50px;font-family:Georgia;margin-bottom:0.5em;"></div>
 	<div id="result"></div>
 	
 </body>
