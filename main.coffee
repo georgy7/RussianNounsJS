@@ -22,6 +22,9 @@ StemUtil =
   getInit: (s) ->
     if s.length <= 1 then return ''
     s.substring(0, s.length-1)
+  getLastTwoChars: (s) ->
+    if s.length <= 1 then return ''
+    s.substring(s.length-2, s.length)
 
 ### Абстракция над справочником слов из БД. ###
 class Vocabulary
@@ -132,7 +135,12 @@ decline = (word, gender, grCase) ->
           else
             stem + 'ом'
         when CaseDefinition.PREPOSITIONAL
-          stem + 'е'
+          if StemUtil.getLastTwoChars(word) is 'ий'
+            head + 'и'
+          else if _.last(word) is 'й'
+            head + 'е'
+          else
+            stem + 'е'
     when 2
       throw new Error("unsupported")
       #switch grCase
