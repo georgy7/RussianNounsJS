@@ -1,6 +1,7 @@
 ﻿
-# основной источник информации:
-# Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
+# источники информации:
+# - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
+# - Англоязычная википедия: http://en.wikipedia.org/wiki/Russian_grammar
 
 misc = 
 requiredString: (v) ->
@@ -87,6 +88,7 @@ window.getDeclension = (word, gender) ->
 
 decline = (word, gender, grCase) ->
   stem = StemUtil.getNounStem word
+  head = StemUtil.getInit word
   declension = getDeclension word, gender
   
   switch declension
@@ -109,11 +111,15 @@ decline = (word, gender, grCase) ->
         when CaseDefinition.GENITIVE
           if soft()
             stem + 'я'
+          else if _.last(word) is 'й'
+            head + 'я'
           else
             stem + 'а'
         when CaseDefinition.DATIVE
           if soft()
             stem + 'ю'
+          else if _.last(word) is 'й'
+            head + 'ю'
           else
             stem + 'у'
         when CaseDefinition.ACCUSATIVE
@@ -121,6 +127,8 @@ decline = (word, gender, grCase) ->
         when CaseDefinition.INSTRUMENTAL
           if soft()
             stem + 'ем'
+          else if _.last(word) is 'й'
+            head + 'ем'
           else
             stem + 'ом'
         when CaseDefinition.PREPOSITIONAL
@@ -155,7 +163,7 @@ test = (data, gender) ->
         console.log decline i, gender, caseValue
       catch e
         if e.message is "unsupported"
-          console.log 'error'
+          console.log e.message
         else
           throw e
   )
