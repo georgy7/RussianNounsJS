@@ -11,11 +11,46 @@
                 type="text/coffeescript" charset="UTF-8"></script>
 	<script src="lib/coffee-script.js"></script>
 	
+	<script src="lib/mustache.js"></script>
+	<script src="lib/jquery.min.js"></script>
+	<script src="test.js"></script>
+	
 </head>
 <body>
 
 	<p>Это для генерации текста. Пример не имеет отношения к логике.</p>
 	<p>Открой консоль.</p>
+	
+	<textarea id="template" style="display:none;">
+		<style>
+			td {
+				border:1px solid black;
+				padding:0.5em;
+			}
+		</style>
+		<table>
+			<tr>
+				<td>Кто? Что?</td>
+				<td>Кого? Чего?</td>
+				<td>Кому? Чему?</td>
+				<td>Кого? Что?</td>
+				<td>Кем? Чем?</td>
+				<td>О ком? О чем?</td>
+			</tr>
+			{{#items}}
+				<tr>
+				{{#wordForms}}
+					{{#failure}}<td style="background-color:#ff8080;">{{/failure}}
+					{{#ok}}<td style="background-color:#d5ffe6;">{{/ok}}
+						{{actual}}
+					</td>
+				{{/wordForms}}
+				</tr>
+			{{/items}}
+		</table>
+	</textarea>
+	<!--<input type="button" onclick="main()" value="Тест"/>-->
+	<div id="result"></div>
 	
 </body>
 </html>
