@@ -5,7 +5,13 @@ var cases = [CaseDefinition.NOMINATIVE, CaseDefinition.GENITIVE, CaseDefinition.
              CaseDefinition.ACCUSATIVE, CaseDefinition.INSTRUMENTAL, CaseDefinition.PREPOSITIONAL];
 
 var dataM = [
-    ['стол', 'стола', 'столу', 'стол', 'столом', 'столе']
+
+    // примеры несклоняемого существительного
+    ['пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто']
+  , ['рагу','рагу','рагу','рагу','рагу','рагу']
+  , ['такси','такси','такси','такси','такси','такси']
+  
+  , ['стол', 'стола', 'столу', 'стол', 'столом', 'столе']
   , ['муж', 'мужа', 'мужу', 'мужа', 'мужем', 'муже']
   
   , ['музей', 'музея', 'музею', 'музей', 'музеем', 'музее']
@@ -115,7 +121,7 @@ console.log(json);
 var template = $('#template').val();
 var html = Mustache.to_html(template, json);
 $('#result').append(html);
-$('#stats').text((totalForms-wrongForms)+'/'+totalForms);
+$('#stats').text((totalForms-wrongForms)+'/'+totalForms + ' (' + ((totalForms-wrongForms)/totalForms*100).toFixed(2) + '%)');
 
 };
 setTimeout(main, 500);
