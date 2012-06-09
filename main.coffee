@@ -34,6 +34,12 @@ class Vocabulary
     false
 
 
+# избегай использования этой функции там, где формируется только окончание слова
+#shi = (s) ->
+#  r = s
+#  r = r.replace(/шы/g,'ши')
+#  r = r.replace(/жы/g,'жи');
+
 
 window.CaseDefinition =
   NOMINATIVE: "Именительный"
@@ -96,14 +102,19 @@ decline = (word, gender, grCase) ->
   
   switch declension
     when 0
-      throw new Error("unsupported")
-      #switch grCase
-      #  when CaseDefinition.NOMINATIVE
-      #  when CaseDefinition.GENITIVE
-      #  when CaseDefinition.DATIVE
-      #  when CaseDefinition.ACCUSATIVE
-      #  when CaseDefinition.INSTRUMENTAL
-      #  when CaseDefinition.PREPOSITIONAL
+      switch grCase
+        when CaseDefinition.NOMINATIVE
+          word
+        when CaseDefinition.GENITIVE
+          throw new Error("unsupported")
+        when CaseDefinition.DATIVE
+          throw new Error("unsupported")
+        when CaseDefinition.ACCUSATIVE
+          throw new Error("unsupported")
+        when CaseDefinition.INSTRUMENTAL
+          throw new Error("unsupported")
+        when CaseDefinition.PREPOSITIONAL
+          throw new Error("unsupported")
     when 1
       soft = ->
         lastChar = _.last(word)
@@ -128,7 +139,7 @@ decline = (word, gender, grCase) ->
         when CaseDefinition.ACCUSATIVE
           word # или как GENITIVE
         when CaseDefinition.INSTRUMENTAL
-          if soft()
+          if soft() or _.contains(['ж','ч'], _.last(stem)) 
             stem + 'ем'
           else if _.last(word) is 'й'
             head + 'ем'
@@ -142,23 +153,51 @@ decline = (word, gender, grCase) ->
           else
             stem + 'е'
     when 2
-      throw new Error("unsupported")
-      #switch grCase
-      #  when CaseDefinition.NOMINATIVE
-      #  when CaseDefinition.GENITIVE
-      #  when CaseDefinition.DATIVE
-      #  when CaseDefinition.ACCUSATIVE
-      #  when CaseDefinition.INSTRUMENTAL
-      #  when CaseDefinition.PREPOSITIONAL
+      soft = ->
+        lastChar = _.last(word)
+        lastChar is 'я'
+      switch grCase
+        when CaseDefinition.NOMINATIVE
+          word
+        when CaseDefinition.GENITIVE
+          if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], _.last(stem)) # soft, sibilant or velar
+            head + 'и'
+          else
+            head + 'ы'
+        when CaseDefinition.DATIVE
+          if StemUtil.getLastTwoChars(word) is 'ия'
+            head + 'и'
+          else
+            head + 'е'
+        when CaseDefinition.ACCUSATIVE
+          if soft()
+            head + 'ю'
+          else
+            head + 'у'
+        when CaseDefinition.INSTRUMENTAL
+          if soft() or _.contains(['ц','ч','ж','ш','щ'], _.last(stem)) 
+            head + 'ей'
+          else
+            head + 'ой'
+        when CaseDefinition.PREPOSITIONAL
+          if StemUtil.getLastTwoChars(word) is 'ия'
+            head + 'и'
+          else
+            head + 'е'
     when 3
-      throw new Error("unsupported")
-      #switch grCase
-      #  when CaseDefinition.NOMINATIVE
-      #  when CaseDefinition.GENITIVE
-      #  when CaseDefinition.DATIVE
-      #  when CaseDefinition.ACCUSATIVE
-      #  when CaseDefinition.INSTRUMENTAL
-      #  when CaseDefinition.PREPOSITIONAL
+      switch grCase
+        when CaseDefinition.NOMINATIVE
+          word
+        when CaseDefinition.GENITIVE
+          throw new Error("unsupported")
+        when CaseDefinition.DATIVE
+          throw new Error("unsupported")
+        when CaseDefinition.ACCUSATIVE
+          throw new Error("unsupported")
+        when CaseDefinition.INSTRUMENTAL
+          throw new Error("unsupported")
+        when CaseDefinition.PREPOSITIONAL
+          throw new Error("unsupported")
 
 window.decline = decline
 
