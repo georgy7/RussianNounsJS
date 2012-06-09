@@ -34,13 +34,7 @@ class Vocabulary
     if _.contains(['пальто','рагу','такси'], word) then true
     else false
 
-
-# избегай использования этой функции там, где формируется только окончание слова
-#shi = (s) ->
-#  r = s
-#  r = r.replace(/шы/g,'ши')
-#  r = r.replace(/жы/g,'жи');
-
+window.Vocabulary = Vocabulary;
 
 window.CaseDefinition =
   NOMINATIVE: "Именительный"
@@ -94,10 +88,71 @@ window.getDeclension = (word, gender) ->
     else
       throw new Error("incorrect gender")
 
+decline1 = (word, grCase, gender) ->
+      stem = StemUtil.getNounStem word
+      head = StemUtil.getInit word
+      soft = ->
+        lastChar = _.last(word)
+        lastChar is 'ь' or lastChar is 'е'
+      iyWord = ->
+        e = StemUtil.getLastTwoChars(word)
+        _.last(word) is 'й' or (e[0] is 'и' and _.contains(['й','е'], e[1]))
+      switch grCase
+        when CaseDefinition.NOMINATIVE
+          word
+        when CaseDefinition.GENITIVE
+          if iyWord()
+            head + 'я'
+          else if soft()
+            stem + 'я'
+          else
+            stem + 'а'
+        when CaseDefinition.DATIVE
+          if iyWord()
+            head + 'ю'
+          else if soft()
+            stem + 'ю'
+          else
+            stem + 'у'
+        when CaseDefinition.ACCUSATIVE
+          if (gender is Gender.NEUTER)
+            word
+          else
+            decline1(word,CaseDefinition.GENITIVE,gender)
+            #word
+        when CaseDefinition.INSTRUMENTAL
+          if iyWord()
+            head + 'ем'
+          else if soft() or _.contains(['ж','ч'], _.last(stem)) 
+            stem + 'ем'
+          else
+            stem + 'ом'
+        when CaseDefinition.PREPOSITIONAL
+          if StemUtil.getLastTwoChars(word) is 'ий' or StemUtil.getLastTwoChars(word) is 'ие'
+            head + 'и'
+          else if _.last(word) is 'й'
+            head + 'е'
+          else
+            stem + 'е'
 
 decline3 = (word, grCase) ->
   stem = StemUtil.getNounStem word
-  switch grCase
+  if StemUtil.getLastTwoChars(word) is 'мя'
+    switch grCase
+        when CaseDefinition.NOMINATIVE
+          word
+        when CaseDefinition.GENITIVE
+          stem + 'ени'
+        when CaseDefinition.DATIVE
+          stem + 'ени'
+        when CaseDefinition.ACCUSATIVE
+          word
+        when CaseDefinition.INSTRUMENTAL
+          stem + 'енем'
+        when CaseDefinition.PREPOSITIONAL
+          stem + 'ени'
+  else
+    switch grCase
         when CaseDefinition.NOMINATIVE
           word
         when CaseDefinition.GENITIVE
@@ -127,45 +182,7 @@ decline = (word, gender, grCase) ->
       else
         throw new Error("unsupported")
     when 1
-      soft = ->
-        lastChar = _.last(word)
-        lastChar is 'ь' or lastChar is 'е'
-      switch grCase
-        when CaseDefinition.NOMINATIVE
-          word
-        when CaseDefinition.GENITIVE
-          if StemUtil.getLastTwoChars(word) is 'ие' or _.last(word) is 'й'
-            head + 'я'
-          else if soft()
-            stem + 'я'
-          else
-            stem + 'а'
-        when CaseDefinition.DATIVE
-          if soft()
-            stem + 'ю'
-          else if _.last(word) is 'й'
-            head + 'ю'
-          else
-            stem + 'у'
-        when CaseDefinition.ACCUSATIVE
-          if (gender is Gender.NEUTER)
-            word
-          else
-            word # или как GENITIVE
-        when CaseDefinition.INSTRUMENTAL
-          if soft() or _.contains(['ж','ч'], _.last(stem)) 
-            stem + 'ем'
-          else if _.last(word) is 'й'
-            head + 'ем'
-          else
-            stem + 'ом'
-        when CaseDefinition.PREPOSITIONAL
-          if StemUtil.getLastTwoChars(word) is 'ий'
-            head + 'и'
-          else if _.last(word) is 'й'
-            head + 'е'
-          else
-            stem + 'е'
+      decline1(word, grCase, gender)
     when 2
       soft = ->
         lastChar = _.last(word)

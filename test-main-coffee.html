@@ -26,6 +26,10 @@
 				border:1px solid black;
 				padding:0.5em;
 			}
+			td.info {
+				/*border:none;*/
+				padding:0.5em;
+			}
 		</style>
 		<table>
 			<tr>
@@ -35,15 +39,23 @@
 				<td>Винить Кого? Что?</td>
 				<td>Доволен Кем? Чем?</td>
 				<td>Думать О ком? О чем?</td>
+				<td class="info">Склонение</td>
+				<td class="info">Род</td>
 			</tr>
 			{{#items}}
 				<tr>
-				{{#wordForms}}
-					{{#failure}}<td style="background-color:#ff8080;">{{/failure}}
-					{{#ok}}<td style="background-color:#d5ffe6;">{{/ok}}
-						{{actual}}
+					{{#wordForms}}
+						{{#failure}}<td style="background-color:#ff8080;">{{/failure}}
+						{{#ok}}<td style="background-color:#d5ffe6;">{{/ok}}
+							{{actual}}
+						</td>
+					{{/wordForms}}
+					<td class="info" style="{{#dColor}} background-color:{{dColor}}; {{/dColor}}">
+						{{declension}}
 					</td>
-				{{/wordForms}}
+					<td class="info" style="{{#genderColor}} background-color:{{genderColor}}; {{/genderColor}}">
+						{{gender}}
+					</td>
 				</tr>
 			{{/items}}
 		</table>

@@ -107,7 +107,24 @@ function test(data, gender) {
 			r.push({"expexted":expected,"actual":actual,"ok":ok,"failure":failure});
 		}
 		
-		result.push({"wordForms":r});
+		if (gender == Gender.MASCULINE) { var g = 'мужской'; var gbg = "#df5" }
+		if (gender == Gender.FEMININE) { var g = 'женский'; var gbg = "#9f5" }
+		if (gender == Gender.NEUTER) { var g = 'средний'; var gbg = "#f59" }
+		if (gender == Gender.COMMON) { var g = 'общий'; }
+		
+		var declension = '';
+		try {
+			var declension = getDeclension(word, gender);
+		} catch (e) {}
+		
+		if (declension === '') { var dColor = '#999999'; }
+		else if (declension === 1) { var dColor = '#3ef481'; }
+		else if (declension === 2) { var dColor = '#96f43e'; }
+		else if (declension === 3) { var dColor = '#f3f43e'; }
+		else { var dColor = '#fff'; }
+		
+		
+		result.push({"wordForms":r,"gender":g, "genderColor":gbg, "declension":declension, "dColor":dColor});
 	}
 }
 
