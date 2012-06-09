@@ -31,7 +31,8 @@ class Vocabulary
   ###* является ли слово несклоняемым ###
   isIndeclinable:(word) ->
     # должно спрашивать из базы (их не так уж много)
-    false
+    if _.contains(['пальто','рагу','такси'], word) then true
+    else false
 
 
 # избегай использования этой функции там, где формируется только окончание слова
@@ -113,6 +114,9 @@ decline3 = (word, grCase) ->
 decline = (word, gender, grCase) ->
   stem = StemUtil.getNounStem word
   head = StemUtil.getInit word
+  
+  if vocabulary.isIndeclinable word then return word
+  
   declension = getDeclension word, gender
   
   switch declension
