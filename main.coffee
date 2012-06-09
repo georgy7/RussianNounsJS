@@ -94,6 +94,21 @@ window.getDeclension = (word, gender) ->
       throw new Error("incorrect gender")
 
 
+decline3 = (word, grCase) ->
+  stem = StemUtil.getNounStem word
+  switch grCase
+        when CaseDefinition.NOMINATIVE
+          word
+        when CaseDefinition.GENITIVE
+          stem + 'и'
+        when CaseDefinition.DATIVE
+          stem + 'и'
+        when CaseDefinition.ACCUSATIVE
+          word
+        when CaseDefinition.INSTRUMENTAL
+          stem + 'ью'
+        when CaseDefinition.PREPOSITIONAL
+          stem + 'и'
 
 decline = (word, gender, grCase) ->
   stem = StemUtil.getNounStem word
@@ -102,31 +117,23 @@ decline = (word, gender, grCase) ->
   
   switch declension
     when 0
-      switch grCase
-        when CaseDefinition.NOMINATIVE
-          word
-        when CaseDefinition.GENITIVE
-          throw new Error("unsupported")
-        when CaseDefinition.DATIVE
-          throw new Error("unsupported")
-        when CaseDefinition.ACCUSATIVE
-          throw new Error("unsupported")
-        when CaseDefinition.INSTRUMENTAL
-          throw new Error("unsupported")
-        when CaseDefinition.PREPOSITIONAL
-          throw new Error("unsupported")
+      if word is 'путь'
+        if grCase is CaseDefinition.INSTRUMENTAL then 'путем'
+        else decline3(word, grCase)
+      else
+        throw new Error("unsupported")
     when 1
       soft = ->
         lastChar = _.last(word)
-        lastChar is 'ь' or lastChar is 'e'
+        lastChar is 'ь' or lastChar is 'е'
       switch grCase
         when CaseDefinition.NOMINATIVE
           word
         when CaseDefinition.GENITIVE
-          if soft()
-            stem + 'я'
-          else if _.last(word) is 'й'
+          if StemUtil.getLastTwoChars(word) is 'ие' or _.last(word) is 'й'
             head + 'я'
+          else if soft()
+            stem + 'я'
           else
             stem + 'а'
         when CaseDefinition.DATIVE
@@ -137,7 +144,10 @@ decline = (word, gender, grCase) ->
           else
             stem + 'у'
         when CaseDefinition.ACCUSATIVE
-          word # или как GENITIVE
+          if (gender is Gender.NEUTER)
+            word
+          else
+            word # или как GENITIVE
         when CaseDefinition.INSTRUMENTAL
           if soft() or _.contains(['ж','ч'], _.last(stem)) 
             stem + 'ем'
@@ -185,19 +195,7 @@ decline = (word, gender, grCase) ->
           else
             head + 'е'
     when 3
-      switch grCase
-        when CaseDefinition.NOMINATIVE
-          word
-        when CaseDefinition.GENITIVE
-          throw new Error("unsupported")
-        when CaseDefinition.DATIVE
-          throw new Error("unsupported")
-        when CaseDefinition.ACCUSATIVE
-          throw new Error("unsupported")
-        when CaseDefinition.INSTRUMENTAL
-          throw new Error("unsupported")
-        when CaseDefinition.PREPOSITIONAL
-          throw new Error("unsupported")
+      decline3(word, grCase)
 
 window.decline = decline
 
