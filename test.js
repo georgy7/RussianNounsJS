@@ -1,4 +1,4 @@
-
+﻿
 var main = function() {
 
 var cases = [CaseDefinition.NOMINATIVE, CaseDefinition.GENITIVE, CaseDefinition.DATIVE, 
