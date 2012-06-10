@@ -33,6 +33,11 @@ class Vocabulary
     # должно спрашивать из базы (их не так уж много)
     if _.contains(['пальто','рагу','такси'], word) then true
     else false
+  isAnimate:(word) ->
+    if _.contains(['муж','пролетарий','дядя'], word) then true
+    else if _.contains(['стол','музей','парашют','вокзал','гвоздь',
+    'параход','дирижабль','мармелад','пистолет','вопль','закат'], word) then false
+    else null
 
 window.Vocabulary = Vocabulary;
 
@@ -118,8 +123,9 @@ decline1 = (word, grCase, gender) ->
           if (gender is Gender.NEUTER)
             word
           else
-            decline1(word,CaseDefinition.GENITIVE,gender)
-            #word
+            a = vocabulary.isAnimate(word)
+            if a is true or a is null then decline1(word,CaseDefinition.GENITIVE,gender)
+            else word
         when CaseDefinition.INSTRUMENTAL
           if iyWord()
             head + 'ем'
@@ -233,10 +239,6 @@ test = (data, gender) ->
         else
           throw e
   )
-
-window.testM = ->
-  d = ['стол', 'музей', 'пролетарий', 'лесничий', 'путь', 'парашют', 'вокзал', 'параход', 'дирижабль', 'мармелад', 'вася', 'гвоздь', 'пилот', 'матершиник', 'пистолет', 'вопль', 'закат', 'дядя']
-  test d, Gender.MASCULINE
 
 window.testN = ->
   d = ['окно', 'житие', 'сопло', 'арго', 'пальто', 'вино']
