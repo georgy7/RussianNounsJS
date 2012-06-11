@@ -36,7 +36,7 @@ class Vocabulary
   isAnimate:(word) ->
     if _.contains(['муж','пролетарий','дядя'], word) then true
     else if _.contains(['стол','музей','парашют','вокзал','гвоздь',
-    'параход','дирижабль','мармелад','пистолет','вопль','закат'], word) then false
+    'параход','дирижабль','мармелад','пистолет','вопль','закат','дворище','чирей'], word) then false
     else null
 
 window.Vocabulary = Vocabulary;
@@ -74,22 +74,23 @@ window.getDeclension = (word, gender) ->
   misc.requiredString(word)
   misc.requiredString(gender)
   
-  # todo: избавиться от substr
   if vocabulary.isIndeclinable word
-    throw new Error("indeclinable word")
+    return -1
   
+  t = _.last(word)
   switch gender
-    when Gender.FEMININE 
-      t = _.last(word)
+    when Gender.FEMININE       
       `t == "а" || t == "я" ? 2 : 3`
     when Gender.MASCULINE
-      t = _.last(word)
       `t == "а" || t == "я" ? 2 :
       word == "путь" ? 0 : 1`
     when Gender.NEUTER
       `word == "дитя" ? 0 :
-      word.substr(-2, 2) == "мя" ? 3 : 1`
-    when Gender.COMMON then 2  # они все на -а, -я, либо несклоняемые
+      StemUtil.getLastTwoChars(word) == "мя" ? 3 : 1`
+    when Gender.COMMON
+      if t is 'а' or t is 'я' then 2
+      else if t is 'и' then -1
+      else 1
     else
       throw new Error("incorrect gender")
 
@@ -102,20 +103,22 @@ decline1 = (word, grCase, gender) ->
       iyWord = ->
         e = StemUtil.getLastTwoChars(word)
         _.last(word) is 'й' or (e[0] is 'и' and _.contains(['й','е'], e[1]))
+      shWord = ->
+        _.contains(['ч','щ'], _.last(stem))
       switch grCase
         when CaseDefinition.NOMINATIVE
           word
         when CaseDefinition.GENITIVE
           if iyWord()
             head + 'я'
-          else if soft()
+          else if soft() and not shWord()
             stem + 'я'
           else
             stem + 'а'
         when CaseDefinition.DATIVE
           if iyWord()
             head + 'ю'
-          else if soft()
+          else if soft() and not shWord()
             stem + 'ю'
           else
             stem + 'у'
@@ -181,6 +184,8 @@ decline = (word, gender, grCase) ->
   declension = getDeclension word, gender
   
   switch declension
+    when -1
+      word
     when 0
       if word is 'путь'
         if grCase is CaseDefinition.INSTRUMENTAL then 'путем'
