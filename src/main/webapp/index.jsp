@@ -1,19 +1,20 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!doctype html>
 <html>
 <head>
 	
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	
-	<script src="lib/underscore.js"></script>
-	<script src="lib/Snowball.js"></script>
+	<script src="js/third-party/underscore.js"></script>
+	<script src="js/third-party/Snowball.js"></script>
 	
-	<script src="main.coffee"
+	<script src="js/main.coffee"
                 type="text/coffeescript" charset="UTF-8"></script>
-	<script src="lib/coffee-script.js"></script>
+	<script src="js/third-party/coffee-script.js"></script>
 	
-	<script src="lib/mustache.js"></script>
-	<script src="lib/jquery.min.js"></script>
-	<script src="test.js"></script>
+	<script src="js/third-party/mustache.js"></script>
+	<script src="js/third-party/jquery.min.js"></script>
+	<script src="js/test.js"></script>
 	
 </head>
 <body>
