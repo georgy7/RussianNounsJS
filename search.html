@@ -1,0 +1,33 @@
+<!doctype html>
+<html ng-app="search_app">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+
+  <script src="js/third-party/underscore.js"></script>
+  <script src="js/third-party/Snowball.js"></script>
+
+  <script src="js/RussianNouns.coffee"
+                type="text/coffeescript" charset="UTF-8"></script>
+
+  <script src="js/MockVocabulary.coffee"
+                type="text/coffeescript" charset="UTF-8"></script>
+
+  <script src="js/third-party/coffee-script.js"></script>
+  <script src="js/third-party/jquery.min.js"></script>
+  <script src="js/third-party/angular.min.js"></script>
+  <link href="js/third-party/angular-busy.min.css" rel="stylesheet">
+  <script src="js/third-party/angular-busy.min.js"></script>
+
+  <script src="js/search.js"></script>
+</head>
+<body>
+
+  <div ng-controller="SearchController">
+    <label>Name:</label>
+    <input type="text" ng-model="yourName" placeholder="Enter a name here">
+    <hr>
+    <h1>Hello {{yourName}}!</h1>
+  </div>
+
+</body>
+</html>

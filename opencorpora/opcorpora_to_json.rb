@@ -1,33 +1,26 @@
 require 'nokogiri'
-require 'solid_assert'
+require 'active_support/all'
 
 require 'set'
 require 'json'
 
 filename = 'dict.opcorpora.xml'
-SolidAssert.enable_assertions
 
 class Parser < Nokogiri::XML::SAX::Document
 
-  def initialize
+  def initialize(letter)
+    @letter_a = letter
     @active = false
-    @output_filename = 'nouns.json'
-    @appended_something = false
-    @all_forms = {}
-    @processed_lemmas = Set.new
+    @result = {}
   end
 
-  def fwrite(str)
-    open(@output_filename, 'a') { |f|
-      f.write str
-    }
+  def result
+    @result.values
   end
 
   def start_element(name, attrs = [])
     if name == 'lemmata'
       @active = true
-      File.delete(@output_filename) if File.exist?(@output_filename)
-      fwrite "{\n"
       return
     end
     return if not @active
@@ -55,7 +48,6 @@ class Parser < Nokogiri::XML::SAX::Document
   def end_element(name)
     if name == 'lemmata'
       @active = false
-      fwrite "\n}\n"
       return
     end
     return if not @active
@@ -64,24 +56,16 @@ class Parser < Nokogiri::XML::SAX::Document
         @word[:g].delete 'NOUN'
         @word[:g] = @word[:g].to_a.sort!
 
-        if @all_forms[:name] != @word[:name]
-          if not @all_forms[:name].nil?
-            if @processed_lemmas.include?(@all_forms[:name])
-              puts "#{@all_forms[:name]} already exported to json"
-            else
-              # assert(!@processed_lemmas.include?(@all_forms[:name]))
-              fwrite ",\n" if @appended_something
-              fwrite "\t\"#{@all_forms[:name]}\": {\n"
-              fwrite "\t\t\"g\": #{JSON.generate(@all_forms[:g])}\n"
-              fwrite "\t}"
-              @processed_lemmas.add(@all_forms[:name])
-              @appended_something = true
-            end
+        first_letter = @word[:name][0].mb_chars.downcase.to_s
+        if @letter_a.include?(first_letter)
+          if @result[@word[:name]].nil?
+            @result[@word[:name]] = {
+              :name => @word[:name],
+              :g => []
+            }
           end
-          @all_forms[:name] = @word[:name]
-          @all_forms[:g] = []
+          @result[@word[:name]][:g].push(@word[:g])
         end
-        @all_forms[:g].push @word[:g]
 
       end
       @word = {}
@@ -89,5 +73,42 @@ class Parser < Nokogiri::XML::SAX::Document
   end
 end
 
-Nokogiri::XML::SAX::Parser.new(Parser.new).parse(File.open(filename))
+class FileAppender
+  def initialize(filename)
+    @output_filename = filename
+    File.delete(@output_filename) if File.exist?(@output_filename)
+  end
 
+  def write(str)
+    open(@output_filename, 'a') { |f|
+      f.write str
+    }
+  end
+end
+
+output_filename_template = 'nouns_LETTER.json'
+[
+  ['а'], ['б'], ['в'], ['г'], ['д'],
+  ['е', 'ё'], ['ж'], ['з'], ['и'],
+  ['й'], ['к'], ['л'], ['м'], ['н'],
+  ['о'], ['п'], ['р'], ['с'], ['т'],
+  ['у'], ['ф'], ['х'], ['ц'], ['ч'],
+  ['ш'], ['щ'], ['ъ'], ['ы'], ['ь'],
+  ['э'], ['ю'], ['я']
+].each { |letter|
+  p = Parser.new letter
+  fn = output_filename_template.sub('LETTER', letter[0])
+  puts "Started #{fn}..."
+  Nokogiri::XML::SAX::Parser.new(p).parse(File.open(filename))
+  f = FileAppender.new(fn)
+  f.write "{\n"
+  appended_something = false
+  p.result.each { |word|
+    f.write ",\n" if appended_something
+    f.write "\t\"#{word[:name]}\": {\n"
+    f.write "\t\t\"g\": #{JSON.generate(word[:g])}\n"
+    f.write "\t}"
+    appended_something = true
+  }
+  f.write "\n}\n"
+}
