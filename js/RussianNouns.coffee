@@ -48,6 +48,16 @@ window.Gender =
   "NEUTER": "средний род"
   "COMMON": "общий род"
 
+###
+interface Vocabulary
+  lemmas:(word) -> Array<Lemma>
+
+interface Lemma
+  text:() -> String
+  isIndeclinable:() -> Boolean
+  isAnimate:() -> Boolean
+###
+
 class RussianNouns
   constructor: (@vocabulary) ->
   getDeclension: (word, gender) ->
@@ -248,21 +258,3 @@ decline = (word, gender, grCase, vocabulary) ->
             head + 'е'
     when 3
       decline3(word, grCase)
-
-
-# test = (data, gender) ->
-  # _.each Case, ((caseValue, caseId) ->
-    # console.log '\n'+caseValue
-    # for i in data
-      # try
-        # console.log decline i, gender, caseValue
-      # catch e
-        # if e.message is "unsupported"
-          # console.log e.message
-        # else
-          # throw e
-  # )
-
-# window.testN = ->
-  # d = ['окно', 'житие', 'сопло', 'арго', 'пальто', 'вино']
-  # test d, Gender.MASCULINE  
