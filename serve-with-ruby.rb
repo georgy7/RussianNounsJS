@@ -39,7 +39,6 @@ class Main
 
     trap("INT") {
       server.shutdown
-      @readers.map(&:clear)
     }
     server.start
   end

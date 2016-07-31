@@ -54,6 +54,7 @@ interface Vocabulary
 
 interface Lemma
   text:() -> String
+  isPluraliaTantum:() -> Boolean
   isIndeclinable:() -> Boolean
   isAnimate:() -> Boolean
 ###
