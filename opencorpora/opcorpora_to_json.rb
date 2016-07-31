@@ -100,11 +100,12 @@ abc = [
   ['э'], ['ю'], ['я']
 ]
 
-Parallel.each(abc, :in_threads => 4) { |letter|
+ram_file = IO.read(filename)
+Parallel.each(abc, :in_processes => 4) { |letter|
   p = Parser.new letter
   fn = output_filename_template.sub('LETTER', letter[0])
   puts "Started #{fn}..."
-  Nokogiri::XML::SAX::Parser.new(p).parse(File.open(filename))
+  Nokogiri::XML::SAX::Parser.new(p).parse(ram_file)
   f = FileAppender.new(fn)
   f.write "{\n"
   appended_something = false
