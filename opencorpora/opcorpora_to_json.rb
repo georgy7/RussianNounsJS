@@ -1,5 +1,6 @@
 require 'nokogiri'
 require 'active_support/all'
+require 'parallel'
 
 require 'set'
 require 'json'
@@ -88,7 +89,8 @@ class FileAppender
 end
 
 output_filename_template = 'nouns_LETTER.json'
-[
+
+abc = [
   ['а'], ['б'], ['в'], ['г'], ['д'],
   ['е', 'ё'], ['ж'], ['з'], ['и'],
   ['й'], ['к'], ['л'], ['м'], ['н'],
@@ -96,7 +98,9 @@ output_filename_template = 'nouns_LETTER.json'
   ['у'], ['ф'], ['х'], ['ц'], ['ч'],
   ['ш'], ['щ'], ['ъ'], ['ы'], ['ь'],
   ['э'], ['ю'], ['я']
-].each { |letter|
+]
+
+Parallel.each(abc, :in_threads => 4) { |letter|
   p = Parser.new letter
   fn = output_filename_template.sub('LETTER', letter[0])
   puts "Started #{fn}..."
