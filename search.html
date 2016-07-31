@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html ng-app="search_app">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
@@ -22,12 +22,20 @@
 </head>
 <body>
 
-  <div ng-controller="SearchController">
-    <label>Name:</label>
-    <input type="text" ng-model="yourName" placeholder="Enter a name here">
+  <div ng-controller="SearchController"><div cg-busy="{promise:vocabularyPromise,message:'Загрузка словаря'}">
+    <form novalidate name="myForm">
+      <input type="text" 
+             ng-model="word" 
+             placeholder="Введите слово"
+             ng-required="true"/>
+      <button ng-click="search()"
+              ng-disabled="myForm.$invalid">
+        Объяснить
+      </button>
+    </form>
     <hr>
-    <h1>Hello {{yourName}}!</h1>
-  </div>
+    <p>{{wordExplanation}}</p>
+  </div></div>
 
 </body>
 </html>

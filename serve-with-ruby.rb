@@ -13,10 +13,14 @@ class MyServlet < WEBrick::HTTPServlet::FileHandler
     if URI.escape(request.path) == request.path
       super(request, response)
     elsif request.path.end_with? '.json'
+      fn = request.path.force_encoding('UTF-8')[1..-1]
+      if !File.exist? fn
+        response.status = 404
+        return
+      end
+      text = IO.read fn
       response.content_type = 'application/json; charset=utf-8'
       response.status = 200
-      fn = request.path.force_encoding('UTF-8')[1..-1]
-      text = IO.read fn
       response.body = text
     else
       response.status = 404
