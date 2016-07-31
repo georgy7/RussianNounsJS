@@ -64,7 +64,8 @@ class Parser < Nokogiri::XML::SAX::Document
               :g => []
             }
           end
-          @result[@word[:name]][:g].push(@word[:g])
+          g_sets = @result[@word[:name]][:g].map { |n| Set.new(n) }
+          @result[@word[:name]][:g].push(@word[:g]) if (!g_sets.include?(Set.new(@word[:g])))
         end
 
       end
