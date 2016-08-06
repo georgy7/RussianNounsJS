@@ -53,10 +53,15 @@ interface Vocabulary
   lemmas:(word) -> Array<Lemma>
 
 interface Lemma
-  text:() -> String
+  text:() -> String                 # Слово в именительном падеже ед.ч.
   isPluraliaTantum:() -> Boolean
   isIndeclinable:() -> Boolean
   isAnimate:() -> Boolean
+  gender:() -> Gender
+
+window.RussianNouns = 
+  # Возвращает список, т.к. бывают "вторые" родительный, винительный и предложный падежи.
+  decline: (lemma, grammaticalCase) -> [String]
 ###
 
 class RussianNouns
