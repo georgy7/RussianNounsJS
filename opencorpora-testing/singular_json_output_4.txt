@@ -1,0 +1,32 @@
+Part 4
+Started nouns_singular_щ.json...
+gen2: щёкоту
+gen2: щёлоку
+gen2: щавелю
+gen2: щебню
+gen2: щебету
+loc2: щели
+Dublicates of the locative case of "щель": ["\u0449\u0435\u043B\u0438", "\u0449\u0435\u043B\u0438"]
+loc2: щиту
+Started nouns_singular_ъ.json...
+Started nouns_singular_ы.json...
+Started nouns_singular_ь.json...
+Started nouns_singular_э.json...
+loc2: электропечи
+Dublicates of the locative case of "электропечь": ["\u044D\u043B\u0435\u043A\u0442\u0440\u043E\u043F\u0435\u0447\u0438", "\u044D\u043B\u0435\u043A\u0442\u0440\u043E\u043F\u0435\u0447\u0438"]
+voct: элин
+voct: элль
+voct: эльвир
+voct: эль
+gen2: эфиру
+Started nouns_singular_ю.json...
+voct: юль
+gen2: юмору
+voct: юр
+Started nouns_singular_я.json...
+gen2: ягелю
+gen2: яду
+loc2: языку
+voct: ян
+loc2: яру
+voct: яш
