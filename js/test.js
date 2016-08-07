@@ -1,4 +1,9 @@
-﻿var dataM = [];
+﻿var window = self;
+importScripts('third-party/underscore.js');
+importScripts('third-party/Snowball.js');
+importScripts('RussianNouns.js');
+
+var dataM = [];
 var dataF = [];
 var dataN = [];
 var dataC = [];
@@ -12,14 +17,21 @@ var cases = [Case.NOMINATIVE, Case.GENITIVE, Case.DATIVE,
 
 var result = [];
 
-var wrongForms = 0;
+var wrongCases = 0;
 var wrongWords = 0;
 var totalCases = 0;
 var totalWords = 0;
+var totalLoadingSteps = 5;
 
-
-function test(data, gender) {
+function test(data, gender, loadingStepCompleted) {
 	for (var i = 0; i < data.length; i++) {
+		
+		if ((i%1000 == 0) || (i == (data.length - 1))) {
+			var stepWidth = 1 / totalLoadingSteps;
+			var loadStatus = stepWidth * (loadingStepCompleted + ((1+i) / data.length));
+			var barWidth = '' + Math.round(100 * loadStatus) + '%';
+			postMessage({type:'loading', status:barWidth});
+		}
 		
 		var word = data[i].name;
 		var expResults = data[i].cases;
@@ -44,7 +56,7 @@ function test(data, gender) {
 		var wordIsWrong = false;
 		for (var j = 0; j < cases.length; j++) {
 			var c = cases[j];
-			var expected = expResults[j][0];
+			var expected = expResults[j];
 			
 			try {
 				var actual = russianNouns.decline(lemma, c);
@@ -52,16 +64,16 @@ function test(data, gender) {
 				var actual = '-----';
 				if (e.message !== "unsupported") throw e;
 			}
-			if (actual == expected) {
+			if (expected.indexOf(actual) >= 0) {
 				var ok = true;
 				var failure = false;
 			} else {
 				var ok = false;
 				var failure = true;
-				wrongForms++;
+				wrongCases++;
 				wordIsWrong = true;
 			}
-			r.push({"expexted":expected,"actual":actual,"ok":ok,"failure":failure});
+			r.push({"expexted":expected.join(),"actual":actual,"ok":ok,"failure":failure});
 		}
 		
 		if (wordIsWrong) {
@@ -91,39 +103,42 @@ function test(data, gender) {
 	}
 }
 
-test(dataM, Gender.MASCULINE);
-test(dataF, Gender.FEMININE);
-test(dataN, Gender.NEUTER);
-test(dataC, Gender.COMMON);
+test(dataM, Gender.MASCULINE, 1);
+test(dataF, Gender.FEMININE, 2);
+test(dataN, Gender.NEUTER, 3);
+test(dataC, Gender.COMMON, 4);
 
-var json = {"items":result};
-// console.log(json);
-
-var template = $('#template').val();
-var html = Mustache.to_html(template, json);
-$('#result').append(html);
-$('#stats .content').text(
-	(totalCases-wrongForms)+'/'+totalCases + ' (' + ((totalCases-wrongForms)/totalCases*100).toFixed(2) + '%)'
-);
-$('#statsWords .content').text(
-	(totalWords-wrongWords)+'/'+totalWords + ' (' + ((totalWords-wrongWords)/totalWords*100).toFixed(2) + '%)'
-);
+postMessage({
+	type: 'testResult',
+	totalCases: totalCases,
+	wrongCases: wrongCases,
+	totalWords: totalWords,
+	wrongWords: wrongWords,
+	resultForTemplate: {"items":result}
+});
 
 };
 
-jQuery.get('opencorpora-testing/nouns_singular_а.json', function (words) {
-	jQuery.each(words, function (wordIndex, lemmaList) {
-		jQuery.each(lemmaList, function (lemmaIndex, lemma) {
-			if (lemma.g.indexOf('masc') >= 0) {
-				dataM.push(lemma);
-			} else if (lemma.g.indexOf('femn') >= 0) {
-				dataF.push(lemma);
-			} else if (lemma.g.indexOf('neut') >= 0) {
-				dataN.push(lemma);
-			} else if (lemma.g.indexOf('Ms-f') >= 0) {
-				dataC.push(lemma);
+onmessage = function(e) {
+	console.log('TestWorker: ', e);
+	if (e.data.type === 'start') {
+		var words = e.data.words;
+		postMessage({type:'started', wordsLen:words.length});
+		for (var wordIndex = 0, wLen = words.length; wordIndex < wLen; wordIndex++) {
+			var lemmaList = words[wordIndex];
+			for (var lemmaIndex = 0, lemmaListLen = lemmaList.length; lemmaIndex < lemmaListLen; lemmaIndex++) {
+				var lemma = lemmaList[lemmaIndex];
+				if (lemma.g.indexOf('masc') >= 0) {
+					dataM.push(lemma);
+				} else if (lemma.g.indexOf('femn') >= 0) {
+					dataF.push(lemma);
+				} else if (lemma.g.indexOf('neut') >= 0) {
+					dataN.push(lemma);
+				} else if (lemma.g.indexOf('Ms-f') >= 0) {
+					dataC.push(lemma);
+				}
 			}
-		});
-	});
-	main();
-});
+		}
+		main();
+	}
+};

@@ -4,19 +4,10 @@
   
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   
-  <script src="js/third-party/underscore.js"></script>
-  <script src="js/third-party/Snowball.js"></script>
-  
-  <script src="js/RussianNouns.coffee"
-                type="text/coffeescript" charset="UTF-8"></script>
-
-  <script src="js/third-party/coffee-script.js"></script>
   <script src="js/third-party/mustache.js"></script>
   <script src="js/third-party/jquery.min.js"></script>
   
-  <script src="opencorpora/openCorporaVocabulary.js"></script>
-  <script src="js/test.js"></script>
-  
+  <script src="js/testRunner.js"></script>
 </head>
 <body>
 
@@ -35,6 +26,11 @@
     }
     .expextedForm {
       font-size: 80%;
+    }
+    #loadingBar .status {
+      width: 0%;
+      background: #77de00;
+      height: 4px;
     }
   </style>
     
@@ -56,7 +52,7 @@
             {{#failure}}<td style="background-color:#ff8080;">{{/failure}}
             {{#ok}}<td style="background-color:#d5ffe6;">{{/ok}}
               {{actual}}
-              <div class="expextedForm">Правильно: {{expexted}}</div>
+              {{#failure}}<div class="expextedForm">Правильно: {{expexted}}</div>{{/failure}}
             </td>
           {{/wordForms}}
           <td class="info" style="{{#dColor}} background-color:{{dColor}}; {{/dColor}}">
@@ -72,11 +68,14 @@
   <!--<input type="button" onclick="main()" value="Тест"/>-->
   <div id="statsWords"
        style="font-size:48px;font-family:Georgia;margin-bottom:0em;">
-    Words correct: <span class="content"></span>
+    Words correct: <span class="content">...</span>
   </div>
   <div id="stats"
        style="font-size:24px;font-family:Georgia;margin:0 0 2em 0.1em;">
-    Word forms correct: <span class="content"></span>
+    Word forms correct: <span class="content">...</span>
+  </div>
+  <div id="loadingBar">
+    <div class="status"></div>
   </div>
   <div id="result"></div>
   
