@@ -23,7 +23,7 @@ THE SOFTWARE.
  */
 
 (function() {
-  var RussianNouns, StemUtil, decline, decline1, decline3, getDeclension, misc;
+  var RussianNouns, StemUtil, decline, decline1, decline3, getDeclension, misc, vowels;
 
   window.Case = {
     NOMINATIVE: "Именительный",
@@ -127,6 +127,8 @@ THE SOFTWARE.
     }
   };
 
+  vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и'];
+
 
   /** 
   Определяет склонение существительных
@@ -169,7 +171,7 @@ THE SOFTWARE.
   };
 
   decline1 = function(lemma, grCase) {
-    var a, gender, head, iyWord, shWord, soft, stem, word;
+    var a, gender, head, iyWord, shWord, soft, stem, tsStem, tsWord, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -187,6 +189,24 @@ THE SOFTWARE.
     shWord = function() {
       return _.contains(['ч', 'щ'], _.last(stem));
     };
+    tsWord = function() {
+      return _.last(word) === 'ц';
+    };
+    tsStem = function() {
+      if ('а' === word[word.length - 2]) {
+        return word.substring(0, word.length - 1);
+      } else if ('е' === word[word.length - 2] && 'л' === word[word.length - 3]) {
+        return word.substring(0, word.length - 2) + 'ь';
+      } else if (_.contains(vowels, word[word.length - 2])) {
+        if (_.contains(vowels, word[word.length - 3])) {
+          return word.substring(0, word.length - 2) + 'й';
+        } else {
+          return word.substring(0, word.length - 2);
+        }
+      } else {
+        return word.substring(0, word.length - 1);
+      }
+    };
     switch (grCase) {
       case Case.NOMINATIVE:
         return word;
@@ -195,6 +215,8 @@ THE SOFTWARE.
           return head + 'я';
         } else if (soft() && !shWord()) {
           return stem + 'я';
+        } else if (tsWord()) {
+          return tsStem() + 'ца';
         } else {
           return stem + 'а';
         }
@@ -204,6 +226,8 @@ THE SOFTWARE.
           return head + 'ю';
         } else if (soft() && !shWord()) {
           return stem + 'ю';
+        } else if (tsWord()) {
+          return tsStem() + 'цу';
         } else {
           return stem + 'у';
         }
@@ -225,6 +249,8 @@ THE SOFTWARE.
           return head + 'ем';
         } else if (soft() || _.contains(['ж', 'ч'], _.last(stem))) {
           return stem + 'ем';
+        } else if (tsWord()) {
+          return tsStem() + 'цем';
         } else {
           return stem + 'ом';
         }
@@ -234,6 +260,8 @@ THE SOFTWARE.
           return head + 'и';
         } else if (_.last(word) === 'й') {
           return head + 'е';
+        } else if (tsWord()) {
+          return tsStem() + 'це';
         } else {
           return stem + 'е';
         }

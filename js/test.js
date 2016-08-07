@@ -26,7 +26,7 @@ var totalLoadingSteps = 5;
 function test(data, gender, loadingStepCompleted) {
 	for (var i = 0; i < data.length; i++) {
 		
-		if ((i%1000 == 0) || (i == (data.length - 1))) {
+		if ((i%200 == 0) || (i == (data.length - 1))) {
 			var stepWidth = 1 / totalLoadingSteps;
 			var loadStatus = stepWidth * (loadingStepCompleted + ((1+i) / data.length));
 			var barWidth = '' + Math.round(100 * loadStatus) + '%';

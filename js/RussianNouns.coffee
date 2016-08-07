@@ -101,6 +101,8 @@ StemUtil =
     if s.length <= 1 then return ''
     s.substring(s.length-2, s.length)
 
+vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и']
+
 ###* 
 Определяет склонение существительных
 @param word слово в именительном падеже
@@ -146,6 +148,20 @@ decline1 = (lemma, grCase) ->
         _.last(word) is 'й' or (e[0] is 'и' and _.contains(['й','е'], e[1]))
       shWord = ->
         _.contains(['ч','щ'], _.last(stem))
+      tsWord = ->
+        _.last(word) is 'ц'
+      tsStem = ->
+        if 'а' == word[word.length - 2]
+          word.substring(0, word.length - 1)
+        else if 'е' == word[word.length - 2] and 'л' == word[word.length - 3]
+          word.substring(0, word.length - 2) + 'ь'
+        else if _.contains(vowels, word[word.length - 2])
+          if _.contains(vowels, word[word.length - 3])
+            word.substring(0, word.length - 2) + 'й'
+          else
+            word.substring(0, word.length - 2)
+        else
+          word.substring(0, word.length - 1)
       switch grCase
         when Case.NOMINATIVE
           word
@@ -154,6 +170,8 @@ decline1 = (lemma, grCase) ->
             head + 'я'
           else if soft() and not shWord()
             stem + 'я'
+          else if tsWord()
+            tsStem() + 'ца'
           else
             stem + 'а'
         when Case.DATIVE
@@ -161,6 +179,8 @@ decline1 = (lemma, grCase) ->
             head + 'ю'
           else if soft() and not shWord()
             stem + 'ю'
+          else if tsWord()
+            tsStem() + 'цу'
           else
             stem + 'у'
         when Case.ACCUSATIVE
@@ -175,6 +195,8 @@ decline1 = (lemma, grCase) ->
             head + 'ем'
           else if soft() or _.contains(['ж','ч'], _.last(stem)) 
             stem + 'ем'
+          else if tsWord()
+            tsStem() + 'цем'
           else
             stem + 'ом'
         when Case.PREPOSITIONAL
@@ -182,6 +204,8 @@ decline1 = (lemma, grCase) ->
             head + 'и'
           else if _.last(word) is 'й'
             head + 'е'
+          else if tsWord()
+            tsStem() + 'це'
           else
             stem + 'е'
 
