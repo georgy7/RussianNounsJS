@@ -162,6 +162,10 @@ decline1 = (lemma, grCase) ->
             word.substring(0, word.length - 2)
         else
           word.substring(0, word.length - 1)
+      surnameLike = ->
+        if lemma.isAnimate() and word.endsWith('ин')
+          return not word.endsWith('стин') and not (word.endsWith('нин') and _.contains(vowels, word[word.length - 4]))
+        word.endsWith('ов') or word.endsWith('ев')
       switch grCase
         when Case.NOMINATIVE
           word
@@ -197,7 +201,7 @@ decline1 = (lemma, grCase) ->
             stem + 'ем'
           else if tsWord()
             tsStem() + 'цем'
-          else if word.endsWith('ов') or word.endsWith('ев')
+          else if surnameLike()
             word + 'ым'
           else
             stem + 'ом'
@@ -269,18 +273,20 @@ decline = (lemma, grCase) ->
       soft = ->
         lastChar = _.last(word)
         lastChar is 'я'
+      surnameLike = ->
+        word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
       switch grCase
         when Case.NOMINATIVE
           word
         when Case.GENITIVE
-          if word.endsWith('ова')
+          if surnameLike()
             head + 'ой'
           else if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], _.last(stem)) # soft, sibilant or velar
             head + 'и'
           else
             head + 'ы'
         when Case.DATIVE
-          if word.endsWith('ова')
+          if surnameLike()
             head + 'ой'
           else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'
@@ -297,7 +303,7 @@ decline = (lemma, grCase) ->
           else
             head + 'ой'
         when Case.PREPOSITIONAL
-          if word.endsWith('ова')
+          if surnameLike()
             head + 'ой'
           else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'

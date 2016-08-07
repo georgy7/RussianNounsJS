@@ -171,7 +171,7 @@ THE SOFTWARE.
   };
 
   decline1 = function(lemma, grCase) {
-    var a, gender, head, iyWord, shWord, soft, stem, tsStem, tsWord, word;
+    var a, gender, head, iyWord, shWord, soft, stem, surnameLike, tsStem, tsWord, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -206,6 +206,12 @@ THE SOFTWARE.
       } else {
         return word.substring(0, word.length - 1);
       }
+    };
+    surnameLike = function() {
+      if (lemma.isAnimate() && word.endsWith('ин')) {
+        return !word.endsWith('стин') && !(word.endsWith('нин') && _.contains(vowels, word[word.length - 4]));
+      }
+      return word.endsWith('ов') || word.endsWith('ев');
     };
     switch (grCase) {
       case Case.NOMINATIVE:
@@ -251,7 +257,7 @@ THE SOFTWARE.
           return stem + 'ем';
         } else if (tsWord()) {
           return tsStem() + 'цем';
-        } else if (word.endsWith('ов') || word.endsWith('ев')) {
+        } else if (surnameLike()) {
           return word + 'ым';
         } else {
           return stem + 'ом';
@@ -307,7 +313,7 @@ THE SOFTWARE.
   };
 
   decline = function(lemma, grCase) {
-    var declension, gender, head, soft, stem, word;
+    var declension, gender, head, soft, stem, surnameLike, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -341,11 +347,14 @@ THE SOFTWARE.
           lastChar = _.last(word);
           return lastChar === 'я';
         };
+        surnameLike = function() {
+          return word.endsWith('ова') || word.endsWith('ева') || (word.endsWith('ина') && !word.endsWith('стина'));
+        };
         switch (grCase) {
           case Case.NOMINATIVE:
             return word;
           case Case.GENITIVE:
-            if (word.endsWith('ова')) {
+            if (surnameLike()) {
               return head + 'ой';
             } else if (soft() || _.contains(['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'], _.last(stem))) {
               return head + 'и';
@@ -354,7 +363,7 @@ THE SOFTWARE.
             }
             break;
           case Case.DATIVE:
-            if (word.endsWith('ова')) {
+            if (surnameLike()) {
               return head + 'ой';
             } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';
@@ -377,7 +386,7 @@ THE SOFTWARE.
             }
             break;
           case Case.PREPOSITIONAL:
-            if (word.endsWith('ова')) {
+            if (surnameLike()) {
               return head + 'ой';
             } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';
