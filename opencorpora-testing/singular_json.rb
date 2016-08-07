@@ -68,7 +68,7 @@ class Parser < Nokogiri::XML::SAX::Document
       @word = {}
       @active_l = true
       @word[:g] = Set.new
-      @word[:cases] = [[], [], [], [], [], []]
+      @word[:cases] = [[], [], [], [], [], [], []]
       @word[:name] = get_attr(attrs, 't')
     elsif name == 'g' && @active_l && !(@word[:name].nil?)
       @word[:g].add(get_attr(attrs, 'v'))
@@ -93,7 +93,7 @@ class Parser < Nokogiri::XML::SAX::Document
     return if not @active
     if name == 'l'
       @active_l = false
-    elsif name == 'f'
+    elsif name == 'f' and @active_f
       if !(@word_form[:name].to_s.strip.empty?) and @word_form[:g].include?('sing')
         if @word_form[:g].include? 'nomn'
           @word[:cases][0][0] = @word_form[:name]
@@ -116,30 +116,43 @@ class Parser < Nokogiri::XML::SAX::Document
           @word[:cases][5][0] = @word_form[:name]
         elsif @word_form[:g].include? 'loc2'
           @word[:cases][5][1] = @word_form[:name]
+        elsif @word_form[:g].include? 'voct'
+          @word[:cases][6][0] = @word_form[:name] # Vocative case
         end
       end
       @active_f = false
       @word_form = nil
     elsif name == 'lemma'
-      if @word[:g].include? 'NOUN'
+      @active_f = false
+      @active_l = false
+
+      if @word[:g].include? 'NOUN' and word_has_all_cases
         @word[:g].delete 'NOUN'
         @word[:g] = @word[:g].to_a.sort!
 
         first_letter = @word[:name][0].mb_chars.downcase.to_s
         if @letter_a.include?(first_letter)
           if @result[@word[:name]].nil?
-            @result[@word[:name]] = {
-              :name => @word[:name],
-              :g => [],
-              :cases => @word[:cases]
-            }
+            @result[@word[:name]] = []
           end
-          g_sets = @result[@word[:name]][:g].map { |n| Set.new(n) }
-          @result[@word[:name]][:g].push(@word[:g]) if (!g_sets.include?(Set.new(@word[:g])))
+          @result[@word[:name]].push({
+            :name => @word[:name],
+            :g => @word[:g],
+            :cases => @word[:cases]
+          })
         end
 
       end
+      @word = {}
+
     end
+  end
+
+  def word_has_all_cases
+    # Except vocative case
+    return @word[:cases][0..5].all? { |case_forms|
+      !(case_forms.empty?)
+    }
   end
 end
 
@@ -164,6 +177,6 @@ Parallel.each(abc, :in_processes => 4) { |letter|
   
   File.delete(fn) if File.exist?(fn)
   File.open(fn, 'w') do |f|
-    f.puts JSON.pretty_generate(p.result)
+    f.puts JSON.pretty_generate(p.result, {indent:"", space:""})
   end
 }
