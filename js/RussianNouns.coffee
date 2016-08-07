@@ -84,7 +84,9 @@ misc =
 StemUtil =
   ###* Доп. проверки для стеммера ###
   getNounStem: (word) ->
-    if _.last(word) is 'л' then return word
+    lastChar = _.last(word)
+    if _.contains(['л','м','н','т','х','в','с'], lastChar) then return word
+    if 'ь' == lastChar then return _.initial(word).join('')
     StemUtil.getStem word
   ###* Русский стеммер из Snowball JavaScript Library. ###
   getStem: (word) ->

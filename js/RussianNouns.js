@@ -94,8 +94,13 @@ THE SOFTWARE.
 
     /** Доп. проверки для стеммера */
     getNounStem: function(word) {
-      if (_.last(word) === 'л') {
+      var lastChar;
+      lastChar = _.last(word);
+      if (_.contains(['л', 'м', 'н', 'т', 'х', 'в', 'с'], lastChar)) {
         return word;
+      }
+      if ('ь' === lastChar) {
+        return _.initial(word).join('');
       }
       return StemUtil.getStem(word);
     },

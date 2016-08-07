@@ -33,7 +33,7 @@ function test(data, gender, loadingStepCompleted) {
 			postMessage({type:'loading', status:barWidth});
 		}
 		
-		var word = data[i].name;
+		var word = data[i].cases[0][0]; // Именительный падеж
 		var expResults = data[i].cases;
 		
 		if (data[i].g.indexOf('Pltm') >= 0) {
@@ -120,7 +120,6 @@ postMessage({
 };
 
 onmessage = function(e) {
-	console.log('TestWorker: ', e);
 	if (e.data.type === 'start') {
 		var words = e.data.words;
 		postMessage({type:'started', wordsLen:words.length});
