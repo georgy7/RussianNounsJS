@@ -16,16 +16,49 @@
       width: 100%;
       table-layout: fixed;
     }
-    td {
+    .transparentWarnings tr.warning {
+      display: none;
+      font-size: 70%;
+      color: #d4d4d4;
+      border-color: #dcdcdc;
+    }
+    .transparentWarnings tr.warning:hover {
+      border-color: black;
+      color: black;
+    }
+    td, th {
       border:1px solid black;
       padding:0 0.5em;
+      text-align: left;
     }
-    td.info {
+    .info {
       /*border:none;*/
       padding:0.5em;
     }
+
+    .transparentWarnings tr.warning td.ok {
+      background-color: #f0fff6;
+    }
+    td.ok,
+    .transparentWarnings tr.warning:hover td.ok {
+      background-color: #d5ffe6;
+    }
+    .transparentWarnings tr.warning td.warn {
+      background-color: #fff5d9;
+    }
+    td.warn,
+    .transparentWarnings tr.warning:hover td.warn {
+      background-color: #ffcb31;
+    }
+    .transparentWarnings tr.warning:not(:hover) .info {
+      background-color: #eee !important;
+    }
+
     .expextedForm {
       font-size: 80%;
+    }
+    .transparentWarnings tr.warning .expextedForm {
+      font-size: 100%;
     }
     #loadingBar .status {
       width: 0%;
@@ -42,27 +75,34 @@
       font-family: Georgia;
       margin: 0 0 2em 0.18em;
     }
+    .resultControls {
+      display: none;
+    }
   </style>
     
   <textarea id="template" style="display:none;">
-    <table>
+    <table id="resultTable" class="transparentWarnings">
       <tr>
-        <td>Есть Кто? Что?</td>
-        <td>Нет Кого? Чего?</td>
-        <td>Давать Кому? Чему?</td>
-        <td>Винить Кого? Что?</td>
-        <td>Доволен Кем? Чем?</td>
-        <td>Думать О&nbsp;ком? О&nbsp;чем?</td>
-        <td class="info" style="width: 5em;">Склонение</td>
-        <td class="info" style="width: 5em;">Род</td>
+        <th class="info" style="width: 2.4em;">№</th>
+        <th>Есть Кто? Что?</th>
+        <th>Нет Кого? Чего?</th>
+        <th>Давать Кому? Чему?</th>
+        <th>Винить Кого? Что?</th>
+        <th>Доволен Кем? Чем?</th>
+        <th>Думать О&nbsp;ком? О&nbsp;чем?</th>
+        <th class="info" style="width: 5em;">Склонение</th>
+        <th class="info" style="width: 5em;">Род</th>
       </tr>
       {{#items}}
-        <tr>
+        {{#correctWithWarnings}}<tr class="item warning">{{/correctWithWarnings}}
+        {{^correctWithWarnings}}<tr class="item">{{/correctWithWarnings}}
+          <td>{{rowNumber}}</td>
           {{#wordForms}}
             {{#failure}}<td style="background-color:#ff8080;">{{/failure}}
-            {{#ok}}<td style="background-color:#d5ffe6;">{{/ok}}
+            {{#warning}}<td class="warn">{{/warning}}
+            {{#ok}}<td class="ok">{{/ok}}
               {{actual}}
-              {{#failure}}<div class="expextedForm">Правильно: {{expexted}}</div>{{/failure}}
+              {{#failureOrWarning}}<div class="expextedForm">Correct: {{expexted}}</div>{{/failureOrWarning}}
             </td>
           {{/wordForms}}
           <td class="info" style="{{#dColor}} background-color:{{dColor}}; {{/dColor}}">
@@ -80,7 +120,11 @@
     Words correct: <span class="content">...</span>
   </div>
   <div id="stats">
-    Word forms correct: <span class="content">...</span>
+    Word forms correct: <span class="content">...</span><br/>
+    Correct words with warnings / words total: <span class="correctWordsWithWarnings">...</span>
+
+    <button class="resultControls" onclick="jQuery('#resultTable').removeClass('transparentWarnings'); jQuery('tr.item').hide(); jQuery('tr.warning').css('display', 'table-row');">Show apart</button>
+    <button class="resultControls" onclick="jQuery('tr.item').css('display', 'table-row'); jQuery('tr.warning').hide()">Hide</button>
   </div>
   <div id="loadingBar">
     <div class="status"></div>

@@ -57,10 +57,12 @@ interface Lemma
   isPluraliaTantum:() -> Boolean
   isIndeclinable:() -> Boolean
   isAnimate:() -> Boolean
+  isSurname:() -> Boolean
   gender:() -> Gender
 
 window.RussianNouns = 
   # Возвращает список, т.к. бывают "вторые" родительный, винительный и предложный падежи.
+  # Также, сущ. ж. р. в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
   decline: (lemma, grammaticalCase) -> [String]
 ###
 
@@ -68,7 +70,7 @@ class RussianNouns
   getDeclension: (lemma) ->
     getDeclension(lemma)
   decline: (lemma, grammaticalCase) ->
-    decline(lemma, grammaticalCase)
+    declineAsList(lemma, grammaticalCase)
 
 window.RussianNouns = RussianNouns
 
@@ -162,10 +164,8 @@ decline1 = (lemma, grCase) ->
             word.substring(0, word.length - 2)
         else
           word.substring(0, word.length - 1)
-      surnameLike = ->
-        if lemma.isAnimate() and word.endsWith('ин')
-          return not word.endsWith('стин') and not (word.endsWith('нин') and _.contains(vowels, word[word.length - 4]))
-        word.endsWith('ов') or word.endsWith('ев')
+      surnameType1 = ->
+        lemma.isSurname() and (word.endsWith('ин') or word.endsWith('ов') or word.endsWith('ев'))
       switch grCase
         when Case.NOMINATIVE
           word
@@ -201,7 +201,7 @@ decline1 = (lemma, grCase) ->
             stem + 'ем'
           else if tsWord()
             tsStem() + 'цем'
-          else if surnameLike()
+          else if surnameType1()
             word + 'ым'
           else
             stem + 'ом'
@@ -246,6 +246,11 @@ decline3 = (word, grCase) ->
         when Case.PREPOSITIONAL
           stem + 'и'
 
+declineAsList = (lemma, grCase) ->
+  r = decline(lemma, grCase)
+  return r if r instanceof Array
+  [r]
+
 decline = (lemma, grCase) ->
   word = lemma.text()
   gender = lemma.gender()
@@ -279,14 +284,14 @@ decline = (lemma, grCase) ->
         when Case.NOMINATIVE
           word
         when Case.GENITIVE
-          if surnameLike()
+          if lemma.isSurname()
             head + 'ой'
           else if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], _.last(stem)) # soft, sibilant or velar
             head + 'и'
           else
             head + 'ы'
         when Case.DATIVE
-          if surnameLike()
+          if lemma.isSurname()
             head + 'ой'
           else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'
@@ -299,11 +304,11 @@ decline = (lemma, grCase) ->
             head + 'у'
         when Case.INSTRUMENTAL
           if soft() or _.contains(['ц','ч','ж','ш','щ'], _.last(stem)) 
-            head + 'ей'
+            [head + 'ей', head + 'ею']
           else
-            head + 'ой'
+            [head + 'ой', head + 'ою']
         when Case.PREPOSITIONAL
-          if surnameLike()
+          if lemma.isSurname()
             head + 'ой'
           else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'

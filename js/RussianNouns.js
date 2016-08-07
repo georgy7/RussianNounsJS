@@ -23,7 +23,7 @@ THE SOFTWARE.
  */
 
 (function() {
-  var RussianNouns, StemUtil, decline, decline1, decline3, getDeclension, misc, vowels;
+  var RussianNouns, StemUtil, decline, decline1, decline3, declineAsList, getDeclension, misc, vowels;
 
   window.Case = {
     NOMINATIVE: "Именительный",
@@ -58,10 +58,12 @@ THE SOFTWARE.
     isPluraliaTantum:() -> Boolean
     isIndeclinable:() -> Boolean
     isAnimate:() -> Boolean
+    isSurname:() -> Boolean
     gender:() -> Gender
   
   window.RussianNouns = 
      * Возвращает список, т.к. бывают "вторые" родительный, винительный и предложный падежи.
+     * Также, сущ. ж. р. в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
     decline: (lemma, grammaticalCase) -> [String]
    */
 
@@ -73,7 +75,7 @@ THE SOFTWARE.
     };
 
     RussianNouns.prototype.decline = function(lemma, grammaticalCase) {
-      return decline(lemma, grammaticalCase);
+      return declineAsList(lemma, grammaticalCase);
     };
 
     return RussianNouns;
@@ -171,7 +173,7 @@ THE SOFTWARE.
   };
 
   decline1 = function(lemma, grCase) {
-    var a, gender, head, iyWord, shWord, soft, stem, surnameLike, tsStem, tsWord, word;
+    var a, gender, head, iyWord, shWord, soft, stem, surnameType1, tsStem, tsWord, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -207,11 +209,8 @@ THE SOFTWARE.
         return word.substring(0, word.length - 1);
       }
     };
-    surnameLike = function() {
-      if (lemma.isAnimate() && word.endsWith('ин')) {
-        return !word.endsWith('стин') && !(word.endsWith('нин') && _.contains(vowels, word[word.length - 4]));
-      }
-      return word.endsWith('ов') || word.endsWith('ев');
+    surnameType1 = function() {
+      return lemma.isSurname() && (word.endsWith('ин') || word.endsWith('ов') || word.endsWith('ев'));
     };
     switch (grCase) {
       case Case.NOMINATIVE:
@@ -257,7 +256,7 @@ THE SOFTWARE.
           return stem + 'ем';
         } else if (tsWord()) {
           return tsStem() + 'цем';
-        } else if (surnameLike()) {
+        } else if (surnameType1()) {
           return word + 'ым';
         } else {
           return stem + 'ом';
@@ -312,6 +311,15 @@ THE SOFTWARE.
     }
   };
 
+  declineAsList = function(lemma, grCase) {
+    var r;
+    r = decline(lemma, grCase);
+    if (r instanceof Array) {
+      return r;
+    }
+    return [r];
+  };
+
   decline = function(lemma, grCase) {
     var declension, gender, head, soft, stem, surnameLike, word;
     word = lemma.text();
@@ -354,7 +362,7 @@ THE SOFTWARE.
           case Case.NOMINATIVE:
             return word;
           case Case.GENITIVE:
-            if (surnameLike()) {
+            if (lemma.isSurname()) {
               return head + 'ой';
             } else if (soft() || _.contains(['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'], _.last(stem))) {
               return head + 'и';
@@ -363,7 +371,7 @@ THE SOFTWARE.
             }
             break;
           case Case.DATIVE:
-            if (surnameLike()) {
+            if (lemma.isSurname()) {
               return head + 'ой';
             } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';
@@ -380,13 +388,13 @@ THE SOFTWARE.
             break;
           case Case.INSTRUMENTAL:
             if (soft() || _.contains(['ц', 'ч', 'ж', 'ш', 'щ'], _.last(stem))) {
-              return head + 'ей';
+              return [head + 'ей', head + 'ею'];
             } else {
-              return head + 'ой';
+              return [head + 'ой', head + 'ою'];
             }
             break;
           case Case.PREPOSITIONAL:
-            if (surnameLike()) {
+            if (lemma.isSurname()) {
               return head + 'ой';
             } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';

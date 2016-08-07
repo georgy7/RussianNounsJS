@@ -19,6 +19,7 @@ var result = [];
 
 var wrongCases = 0;
 var wrongWords = 0;
+var correctWordsWithWarnings = 0;
 var totalCases = 0;
 var totalWords = 0;
 var totalLoadingSteps = 5;
@@ -41,10 +42,12 @@ function test(data, gender, loadingStepCompleted) {
 		}
 		var animate = (data[i].g.indexOf('anim') >= 0);
 		var fixed = (data[i].g.indexOf('Fixd') >= 0);
+		var surname = (data[i].g.indexOf('Surn') >= 0);
 		var lemma = {
 			"text": function () { return word; },
 			"gender": function () { return gender; },
 			"isAnimate": function () { return animate; },
+			"isSurname": function () { return surname; },
 			"isIndeclinable": function () { return fixed; },
 			"isPluraliaTantum": function () { return false; }
 		};
@@ -54,6 +57,7 @@ function test(data, gender, loadingStepCompleted) {
 		totalCases += 6;
 		
 		var wordIsWrong = false;
+		var wordHasWarning = false;
 		for (var j = 0; j < cases.length; j++) {
 			var c = cases[j];
 			var expected = expResults[j];
@@ -61,23 +65,42 @@ function test(data, gender, loadingStepCompleted) {
 			try {
 				var actual = russianNouns.decline(lemma, c);
 			} catch(e) {
-				var actual = '-----';
+				var actual = ['-----'];
 				if (e.message !== "unsupported") throw e;
 			}
-			if (expected.indexOf(actual) >= 0) {
+			var everyExpectedIsInActual = expected.every(function (e) {
+				return actual.indexOf(e) >= 0;
+			});
+			
+			var warning = false;
+			if (everyExpectedIsInActual) {
 				var ok = true;
 				var failure = false;
+				if (_.uniq(actual).length !== _.uniq(expected).length) {
+					warning = true;
+					ok = false;
+					wordHasWarning = true;
+				}
 			} else {
 				var ok = false;
 				var failure = true;
 				wrongCases++;
 				wordIsWrong = true;
 			}
-			r.push({"expexted":expected.join(),"actual":actual,"ok":ok,"failure":failure});
+			r.push({
+				"expexted": expected.join(', '),
+				"actual": actual.join(', '),
+				"ok": ok,
+				"failure": failure,
+				"warning": warning,
+				"failureOrWarning": (failure || warning)
+			});
 		}
 		
 		if (wordIsWrong) {
 			wrongWords++;
+		} else if (wordHasWarning) {
+			correctWordsWithWarnings++;
 		} else {
 			continue;
 		}
@@ -99,7 +122,15 @@ function test(data, gender, loadingStepCompleted) {
 		else { var dColor = '#fff'; }
 		
 		
-		result.push({"wordForms":r,"gender":g, "genderColor":gbg, "declension":declension, "dColor":dColor});
+		result.push({
+			"rowNumber": (result.length + 1),
+			"wordForms": r,
+			"gender": g,
+			"genderColor": gbg,
+			"declension": declension,
+			"correctWithWarnings": (!wordIsWrong && wordHasWarning),
+			"dColor": dColor
+		});
 	}
 }
 
@@ -114,6 +145,7 @@ postMessage({
 	wrongCases: wrongCases,
 	totalWords: totalWords,
 	wrongWords: wrongWords,
+	correctWordsWithWarnings: correctWordsWithWarnings,
 	resultForTemplate: {"items":result}
 });
 
