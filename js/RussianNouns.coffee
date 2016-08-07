@@ -65,11 +65,10 @@ window.RussianNouns =
 ###
 
 class RussianNouns
-  constructor: (@vocabulary) ->
-  getDeclension: (word, gender) ->
-    getDeclension(word, gender, @vocabulary)
-  decline: (word, gender, grammaticalCase) ->
-    decline(word, gender, grammaticalCase, @vocabulary)
+  getDeclension: (lemma) ->
+    getDeclension(lemma)
+  decline: (lemma, grammaticalCase) ->
+    decline(lemma, grammaticalCase)
 
 window.RussianNouns = RussianNouns
 
@@ -106,11 +105,13 @@ StemUtil =
 @param gender пол
 @returns {integer} склонение (см. Declension)
 ###
-getDeclension = (word, gender, vocabulary) ->
+getDeclension = (lemma) ->
+  word = lemma.text()
+  gender = lemma.gender()
   misc.requiredString(word)
   misc.requiredString(gender)
   
-  if vocabulary.isIndeclinable word
+  if lemma.isIndeclinable()
     return -1
   
   t = _.last(word)
@@ -130,7 +131,9 @@ getDeclension = (word, gender, vocabulary) ->
     else
       throw new Error("incorrect gender")
 
-decline1 = (word, grCase, gender, vocabulary) ->
+decline1 = (lemma, grCase) ->
+      word = lemma.text()
+      gender = lemma.gender()
       stem = StemUtil.getNounStem word
       head = StemUtil.getInit word
       soft = ->
@@ -162,8 +165,8 @@ decline1 = (word, grCase, gender, vocabulary) ->
           if (gender is Gender.NEUTER)
             word
           else
-            a = vocabulary.isAnimate(word)
-            if a is true or a is null then decline1(word, Case.GENITIVE,gender, vocabulary)
+            a = lemma.isAnimate()
+            if a is true or a is null then decline1(lemma, Case.GENITIVE)
             else word
         when Case.INSTRUMENTAL
           if iyWord()
@@ -211,13 +214,17 @@ decline3 = (word, grCase) ->
         when Case.PREPOSITIONAL
           stem + 'и'
 
-decline = (word, gender, grCase, vocabulary) ->
+decline = (lemma, grCase) ->
+  word = lemma.text()
+  gender = lemma.gender()
   stem = StemUtil.getNounStem word
   head = StemUtil.getInit word
   
-  if vocabulary.isIndeclinable word then return word
+  if lemma.isIndeclinable() then return word
+  if lemma.isPluraliaTantum()
+    throw "PluraliaTantum words are unsupported."
   
-  declension = getDeclension word, gender, vocabulary
+  declension = getDeclension lemma
   
   switch declension
     when -1
@@ -229,7 +236,7 @@ decline = (word, gender, grCase, vocabulary) ->
       else
         throw new Error("unsupported")
     when 1
-      decline1(word, grCase, gender, vocabulary)
+      decline1(lemma, grCase)
     when 2
       soft = ->
         lastChar = _.last(word)

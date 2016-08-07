@@ -1,126 +1,53 @@
-﻿
+﻿var dataM = [];
+var dataF = [];
+var dataN = [];
+var dataC = [];
+
 var main = function() {
 
-var russianNouns = new RussianNouns(new MockVocabulary())
+var russianNouns = new RussianNouns()
 
 var cases = [Case.NOMINATIVE, Case.GENITIVE, Case.DATIVE, 
              Case.ACCUSATIVE, Case.INSTRUMENTAL, Case.PREPOSITIONAL];
-
-var dataM = [
-    ['стол', 'стола', 'столу', 'стол', 'столом', 'столе']
-  , ['муж', 'мужа', 'мужу', 'мужа', 'мужем', 'муже']
-  
-  , ['музей', 'музея', 'музею', 'музей', 'музеем', 'музее']
-  , ['пролетарий', 'пролетария', 'пролетарию', 'пролетария', 'пролетарием', 'пролетарии']
-  
-  , ['дворище', 'дворища', 'дворищу', 'дворище', 'дворищем', 'дворище']
-  
-  // адьективное склонение
-  , ['лесничий', 'лесничего', 'лесничему', 'лесничего', 'лесничим', 'лесничем']
-  
-  , ['Георгий', 'Георгия', 'Георгию', 'Георгия', 'Георгием', 'Георгии']
-  , ['Алексей', 'Алексея', 'Алексею', 'Алексея', 'Алексеем', 'Алексее']
-  , ['Гоша', 'Гоши', 'Гоше', 'Гошу', 'Гошей', 'Гоше']
-  
-  , ['путь', 'пути', 'пути', 'путь', 'путем', 'пути']
-  , ['дядя', 'дяди', 'дяде', 'дядю', 'дядей', 'дяде']
-  
-  , ['ебарь', 'ебаря', 'ебарю', 'ебаря', 'ебарем', 'ебаре']
-  , ['еж', 'ежа', 'ежу', 'ежа', 'ежом', 'еже']
-  , ['ежик', 'ежика', 'ежику', 'ежика', 'ежиком', 'ежике']
-  , ['ерш', 'ерша', 'ершу', 'ерша', 'ершом', 'ерше']
-  , ['ершик', 'ершика', 'ершику', 'ершика', 'ершиком', 'ершике']
-  
-  , ['чирей', 'чирья', 'чирью', 'чирей', 'чирьем', 'чирье']
-  , ['иудей', 'иудея', 'иудею', 'иудея', 'иудеем', 'иудее']
-  
-  , ['парашют', 'парашюта', 'парашюту', 'парашют', 'парашютом', 'парашюте']
-  , ['вокзал', 'вокзала', 'вокзалу', 'вокзал', 'вокзалом', 'вокзале']
-  , ['параход', 'парахода', 'параходу', 'параход', 'параходом', 'параходе']
-  , ['дирижабль', 'дирижабля', 'дирижаблю', 'дирижабль', 'дирижаблем', 'дирижабле']
-  , ['мармелад', 'мармелада', 'мармеладу', 'мармелад', 'мармеладом', 'мармеладе']
-  , ['Вася', 'Васи', 'Васе', 'Васю', 'Васей', 'Васе']
-  , ['гвоздь', 'гвоздя', 'гвоздю', 'гвоздь', 'гвоздем', 'гвозде']
-  , ['пилот', 'пилота', 'пилоту', 'пилота', 'пилотом', 'пилоте']
-  , ['пистолет', 'пистолета', 'пистолету', 'пистолет', 'пистолетом', 'пистолете']
-  , ['вопль', 'вопля', 'воплю', 'вопль', 'воплем', 'вопле']
-  , ['закат', 'заката', 'закату', 'закат', 'закатом', 'закате']
-  //, ['', '', '', '', '', '']
-];
-
-var dataF = [
-    ['страна', 'страны', 'стране', 'страну', 'страной', 'стране']
-  , ['Ксюха', 'Ксюхи', 'Ксюхе', 'Ксюху', 'Ксюхой', 'Ксюхе']
-  , ['Москва', 'Москвы', 'Москве', 'Москву', 'Москвой', 'Москве']
-  
-  // жи, ши, шипящие
-  , ['чаша', 'чаши', 'чаше', 'чашу', 'чашей', 'чаше']
-  , ['ложа', 'ложи', 'ложе', 'ложу', 'ложей', 'ложе']
-  , ['чаща', 'чащи', 'чаще', 'чащу', 'чащей', 'чаще']  // 4a
-  , ['моча', 'мочи', 'моче', 'мочу', 'мочой', 'моче']  // 4b
-  , ['туча', 'тучи', 'туче', 'тучу', 'тучей', 'туче']
-  
-  , ['мочь', 'мочи', 'мочи', 'мочь', 'мочью', 'мочи']
-  
-  // слова с основой на задненебные
-  , ['рука', 'руки', 'руке', 'руку', 'рукой', 'руке']
-  , ['дуга', 'дуги', 'дуге', 'дугу', 'дугой', 'дуге']
-  , ['сноха', 'снохи', 'снохе', 'сноху', 'снохой', 'снохе']
-  
-  , ['птица', 'птицы', 'птице', 'птицу', 'птицей', 'птице']
-  , ['земля', 'земли', 'земле', 'землю', 'землей', 'земле']
-  , ['армия', 'армии', 'армии', 'армию', 'армией', 'армии']
-  , ['соя', 'сои', 'сое', 'сою', 'соей', 'сое']
-  
-  , ['бровь', 'брови', 'брови', 'бровь', 'бровью', 'брови']
-  
-  //, ['', '', '', '', '', '']
-];
-
-var dataN = [
-    ['село', 'села', 'селу', 'село', 'селом', 'селе']
-  , ['поле', 'поля', 'полю', 'поле', 'полем', 'поле']
-  , ['строение', 'строения', 'строению', 'строение', 'строением', 'строении']
-  , ['вымя', 'вымени', 'вымени', 'вымя', 'выменем', 'вымени']
-  
-    // примеры несклоняемого существительного
-  , ['пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто']
-  , ['рагу','рагу','рагу','рагу','рагу','рагу']
-  , ['такси','такси','такси','такси','такси','такси']
-  //, ['', '', '', '', '', '']
-];
-
-
-var dataC = [
-    ['бедняжка', 'бедняжки', 'бедняжке', 'бедняжку', 'бедняжкой', 'бедняжке']
-  , ['молодец', 'молодца', 'молодцу', 'молодца', 'молодцом', 'молодце']
-  , ['человечище', 'человечища', 'человечищу', 'человечища', 'человечищем', 'человечище']
-  , ['хиппи', 'хиппи', 'хиппи', 'хиппи', 'хиппи', 'хиппи']
-  //, ['', '', '', '', '', '']
-];
 
 var result = [];
 
 var wrongForms = 0;
 var wrongWords = 0;
-var totalForms = (dataM.length + dataF.length + dataN.length) * 6;
-var totalWords = dataM.length + dataF.length + dataN.length;
+var totalCases = 0;
+var totalWords = 0;
 
 
 function test(data, gender) {
 	for (var i = 0; i < data.length; i++) {
 		
-		var word = data[i][0];
-		var expResults = data[i];
+		var word = data[i].name;
+		var expResults = data[i].cases;
+		
+		if (data[i].g.indexOf('Pltm') >= 0) {
+			continue; // PluraliaTantum is unsupported.
+		}
+		var animate = (data[i].g.indexOf('anim') >= 0);
+		var fixed = (data[i].g.indexOf('Fixd') >= 0);
+		var lemma = {
+			"text": function () { return word; },
+			"gender": function () { return gender; },
+			"isAnimate": function () { return animate; },
+			"isIndeclinable": function () { return fixed; },
+			"isPluraliaTantum": function () { return false; }
+		};
 		
 		var r = [];
+		totalWords++;
+		totalCases += 6;
 		
+		var wordIsWrong = false;
 		for (var j = 0; j < cases.length; j++) {
 			var c = cases[j];
-			var expected = expResults[j];
+			var expected = expResults[j][0];
 			
 			try {
-				var actual = russianNouns.decline(word, gender, c);
+				var actual = russianNouns.decline(lemma, c);
 			} catch(e) {
 				var actual = '-----';
 				if (e.message !== "unsupported") throw e;
@@ -132,8 +59,15 @@ function test(data, gender) {
 				var ok = false;
 				var failure = true;
 				wrongForms++;
+				wordIsWrong = true;
 			}
 			r.push({"expexted":expected,"actual":actual,"ok":ok,"failure":failure});
+		}
+		
+		if (wordIsWrong) {
+			wrongWords++;
+		} else {
+			continue;
 		}
 		
 		if (gender == Gender.MASCULINE) { var g = 'мужской'; var gbg = "#df5" }
@@ -143,7 +77,7 @@ function test(data, gender) {
 		
 		var declension = '';
 		try {
-			var declension = russianNouns.getDeclension(word, gender);
+			var declension = russianNouns.getDeclension(lemma);
 		} catch (e) {}
 		
 		if (declension === '') { var dColor = '#999999'; }
@@ -163,12 +97,33 @@ test(dataN, Gender.NEUTER);
 test(dataC, Gender.COMMON);
 
 var json = {"items":result};
-console.log(json);
+// console.log(json);
 
 var template = $('#template').val();
 var html = Mustache.to_html(template, json);
 $('#result').append(html);
-$('#stats').text((totalForms-wrongForms)+'/'+totalForms + ' (' + ((totalForms-wrongForms)/totalForms*100).toFixed(2) + '%)');
+$('#stats .content').text(
+	(totalCases-wrongForms)+'/'+totalCases + ' (' + ((totalCases-wrongForms)/totalCases*100).toFixed(2) + '%)'
+);
+$('#statsWords .content').text(
+	(totalWords-wrongWords)+'/'+totalWords + ' (' + ((totalWords-wrongWords)/totalWords*100).toFixed(2) + '%)'
+);
 
 };
-setTimeout(main, 500);
+
+jQuery.get('opencorpora-testing/nouns_singular_л.json', function (words) {
+	jQuery.each(words, function (wordIndex, lemmaList) {
+		jQuery.each(lemmaList, function (lemmaIndex, lemma) {
+			if (lemma.g.indexOf('masc') >= 0) {
+				dataM.push(lemma);
+			} else if (lemma.g.indexOf('femn') >= 0) {
+				dataF.push(lemma);
+			} else if (lemma.g.indexOf('neut') >= 0) {
+				dataN.push(lemma);
+			} else if (lemma.g.indexOf('Ms-f') >= 0) {
+				dataC.push(lemma);
+			}
+		});
+	});
+	main();
+});
