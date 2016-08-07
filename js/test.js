@@ -111,7 +111,7 @@ $('#statsWords .content').text(
 
 };
 
-jQuery.get('opencorpora-testing/nouns_singular_л.json', function (words) {
+jQuery.get('opencorpora-testing/nouns_singular_а.json', function (words) {
 	jQuery.each(words, function (wordIndex, lemmaList) {
 		jQuery.each(lemmaList, function (lemmaIndex, lemma) {
 			if (lemma.g.indexOf('masc') >= 0) {

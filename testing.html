@@ -33,6 +33,9 @@
       /*border:none;*/
       padding:0.5em;
     }
+    .expextedForm {
+      font-size: 80%;
+    }
   </style>
     
   <textarea id="template" style="display:none;">
@@ -53,6 +56,7 @@
             {{#failure}}<td style="background-color:#ff8080;">{{/failure}}
             {{#ok}}<td style="background-color:#d5ffe6;">{{/ok}}
               {{actual}}
+              <div class="expextedForm">Правильно: {{expexted}}</div>
             </td>
           {{/wordForms}}
           <td class="info" style="{{#dColor}} background-color:{{dColor}}; {{/dColor}}">
