@@ -197,6 +197,8 @@ decline1 = (lemma, grCase) ->
             stem + 'ем'
           else if tsWord()
             tsStem() + 'цем'
+          else if word.endsWith('ов') or word.endsWith('ев')
+            word + 'ым'
           else
             stem + 'ом'
         when Case.PREPOSITIONAL
@@ -271,12 +273,16 @@ decline = (lemma, grCase) ->
         when Case.NOMINATIVE
           word
         when Case.GENITIVE
-          if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], _.last(stem)) # soft, sibilant or velar
+          if word.endsWith('ова')
+            head + 'ой'
+          else if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], _.last(stem)) # soft, sibilant or velar
             head + 'и'
           else
             head + 'ы'
         when Case.DATIVE
-          if StemUtil.getLastTwoChars(word) is 'ия'
+          if word.endsWith('ова')
+            head + 'ой'
+          else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'
           else
             head + 'е'
@@ -291,7 +297,9 @@ decline = (lemma, grCase) ->
           else
             head + 'ой'
         when Case.PREPOSITIONAL
-          if StemUtil.getLastTwoChars(word) is 'ия'
+          if word.endsWith('ова')
+            head + 'ой'
+          else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'
           else
             head + 'е'

@@ -251,6 +251,8 @@ THE SOFTWARE.
           return stem + 'ем';
         } else if (tsWord()) {
           return tsStem() + 'цем';
+        } else if (word.endsWith('ов') || word.endsWith('ев')) {
+          return word + 'ым';
         } else {
           return stem + 'ом';
         }
@@ -343,14 +345,18 @@ THE SOFTWARE.
           case Case.NOMINATIVE:
             return word;
           case Case.GENITIVE:
-            if (soft() || _.contains(['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'], _.last(stem))) {
+            if (word.endsWith('ова')) {
+              return head + 'ой';
+            } else if (soft() || _.contains(['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'], _.last(stem))) {
               return head + 'и';
             } else {
               return head + 'ы';
             }
             break;
           case Case.DATIVE:
-            if (StemUtil.getLastTwoChars(word) === 'ия') {
+            if (word.endsWith('ова')) {
+              return head + 'ой';
+            } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';
             } else {
               return head + 'е';
@@ -371,7 +377,9 @@ THE SOFTWARE.
             }
             break;
           case Case.PREPOSITIONAL:
-            if (StemUtil.getLastTwoChars(word) === 'ия') {
+            if (word.endsWith('ова')) {
+              return head + 'ой';
+            } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';
             } else {
               return head + 'е';
