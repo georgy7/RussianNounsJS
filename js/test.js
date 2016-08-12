@@ -24,6 +24,43 @@ var totalCases = 0;
 var totalWords = 0;
 var totalLoadingSteps = 5;
 
+function ojejojueju(expected, actual) {
+	var uniqExp = _.uniq(expected);
+	var uniqActual = _.uniq(actual);
+	var oj = ['ой', 'ою'];
+	var ej = ['ей', 'ею'];
+	var ojStemsExp = [];
+	var ejStemsExp = [];
+	for (var i = 0, len = uniqExp.length; i < len; i++) {
+		var item = uniqExp[i];
+		if (item.length < 3) {
+			return false;
+		}
+		var ending = item.substring(item.length - 2);
+		var stem = item.substring(0, item.length - 2);
+		if ((oj.indexOf(ending) >= 0) && (ojStemsExp.indexOf(ending) < 0)) {
+			ojStemsExp.push(stem);
+		} else if ((ej.indexOf(ending) >= 0) && (ejStemsExp.indexOf(ending) < 0)) {
+			ejStemsExp.push(stem);
+		} else {
+			return false;
+		}
+	}
+	return _.every(uniqActual, function (item) {
+		if (item.length < 3) {
+			return false;
+		}
+		var ending = item.substring(item.length - 2);
+		var stem = item.substring(0, item.length - 2);
+		if (oj.indexOf(ending) >= 0) {
+			return ojStemsExp.indexOf(stem) >= 0;
+		}
+		if (ej.indexOf(ending) >= 0) {
+			return ejStemsExp.indexOf(stem) >= 0;
+		}
+	});
+}
+
 function test(data, gender, loadingStepCompleted) {
 	for (var i = 0; i < data.length; i++) {
 		
@@ -73,17 +110,18 @@ function test(data, gender, loadingStepCompleted) {
 			});
 			
 			var warning = false;
-			if (everyExpectedIsInActual) {
-				var ok = true;
-				var failure = false;
-				if (_.uniq(actual).length !== _.uniq(expected).length) {
-					warning = true;
-					ok = false;
-					wordHasWarning = true;
-				}
+			var ok, failure;
+			if (everyExpectedIsInActual && (_.uniq(actual).length == _.uniq(expected).length)) {
+				ok = true;
+				failure = false;
+			} else if (everyExpectedIsInActual && ojejojueju(expected, actual)) {
+				ok = false;
+				failure = false;
+				warning = true;
+				wordHasWarning = true;
 			} else {
-				var ok = false;
-				var failure = true;
+				ok = false;
+				failure = true;
 				wrongCases++;
 				wordIsWrong = true;
 			}
