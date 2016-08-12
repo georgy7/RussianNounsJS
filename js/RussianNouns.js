@@ -104,6 +104,9 @@ THE SOFTWARE.
       if ('ь' === lastChar) {
         return _.initial(word).join('');
       }
+      if ('ь' === _.last(_.initial(word))) {
+        return _.initial(word).join('');
+      }
       return StemUtil.getStem(word);
     },
 
@@ -263,7 +266,7 @@ THE SOFTWARE.
         }
         break;
       case Case.PREPOSITIONAL:
-        if (StemUtil.getLastTwoChars(word) === 'ий' || StemUtil.getLastTwoChars(word) === 'ие') {
+        if (_.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))) {
           return head + 'и';
         } else if (_.last(word) === 'й') {
           return head + 'е';
