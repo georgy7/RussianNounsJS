@@ -222,7 +222,9 @@ THE SOFTWARE.
       case Case.NOMINATIVE:
         return word;
       case Case.GENITIVE:
-        if (iyWord()) {
+        if (iyWord() && lemma.isSurname()) {
+          return stem + 'ого';
+        } else if (iyWord()) {
           return head + 'я';
         } else if (soft() && !schWord()) {
           return stem + 'я';
@@ -233,7 +235,9 @@ THE SOFTWARE.
         }
         break;
       case Case.DATIVE:
-        if (iyWord()) {
+        if (iyWord() && lemma.isSurname()) {
+          return stem + 'ому';
+        } else if (iyWord()) {
           return head + 'ю';
         } else if (soft() && !schWord()) {
           return stem + 'ю';
@@ -256,7 +260,9 @@ THE SOFTWARE.
         }
         break;
       case Case.INSTRUMENTAL:
-        if (iyWord()) {
+        if (iyWord() && lemma.isSurname()) {
+          return stem + 'им';
+        } else if (iyWord()) {
           return head + 'ем';
         } else if (soft() || _.contains(['ж', 'ч', 'ш'], _.last(stem))) {
           return stem + 'ем';
@@ -269,7 +275,9 @@ THE SOFTWARE.
         }
         break;
       case Case.PREPOSITIONAL:
-        if (_.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))) {
+        if (iyWord() && lemma.isSurname()) {
+          return stem + 'ом';
+        } else if (_.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))) {
           return head + 'и';
         } else if (_.last(word) === 'й') {
           return head + 'е';
