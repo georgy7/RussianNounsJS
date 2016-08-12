@@ -107,6 +107,9 @@ THE SOFTWARE.
       if ('ь' === _.last(_.initial(word))) {
         return _.initial(word).join('');
       }
+      if ('о' === lastChar && _.contains(['л', 'м', 'н', 'т', 'х', 'в', 'с'], _.last(_.initial(word)))) {
+        return _.initial(word).join('');
+      }
       return StemUtil.getStem(word);
     },
 
