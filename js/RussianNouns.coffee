@@ -149,7 +149,7 @@ decline1 = (lemma, grCase) ->
       iyWord = ->
         e = StemUtil.getLastTwoChars(word)
         _.last(word) is 'й' or (e[0] is 'и' and _.contains(['й','е'], e[1]))
-      shWord = ->
+      schWord = ->
         _.contains(['ч','щ'], _.last(stem))
       tsWord = ->
         _.last(word) is 'ц'
@@ -173,7 +173,7 @@ decline1 = (lemma, grCase) ->
         when Case.GENITIVE
           if iyWord()
             head + 'я'
-          else if soft() and not shWord()
+          else if soft() and not schWord()
             stem + 'я'
           else if tsWord()
             tsStem() + 'ца'
@@ -182,7 +182,7 @@ decline1 = (lemma, grCase) ->
         when Case.DATIVE
           if iyWord()
             head + 'ю'
-          else if soft() and not shWord()
+          else if soft() and not schWord()
             stem + 'ю'
           else if tsWord()
             tsStem() + 'цу'
@@ -198,7 +198,7 @@ decline1 = (lemma, grCase) ->
         when Case.INSTRUMENTAL
           if iyWord()
             head + 'ем'
-          else if soft() or _.contains(['ж','ч'], _.last(stem)) 
+          else if soft() or _.contains(['ж','ч','ш'], _.last(stem)) 
             stem + 'ем'
           else if tsWord()
             tsStem() + 'цем'

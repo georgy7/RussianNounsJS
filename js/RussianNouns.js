@@ -176,7 +176,7 @@ THE SOFTWARE.
   };
 
   decline1 = function(lemma, grCase) {
-    var a, gender, head, iyWord, shWord, soft, stem, surnameType1, tsStem, tsWord, word;
+    var a, gender, head, iyWord, schWord, soft, stem, surnameType1, tsStem, tsWord, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -191,7 +191,7 @@ THE SOFTWARE.
       e = StemUtil.getLastTwoChars(word);
       return _.last(word) === 'й' || (e[0] === 'и' && _.contains(['й', 'е'], e[1]));
     };
-    shWord = function() {
+    schWord = function() {
       return _.contains(['ч', 'щ'], _.last(stem));
     };
     tsWord = function() {
@@ -221,7 +221,7 @@ THE SOFTWARE.
       case Case.GENITIVE:
         if (iyWord()) {
           return head + 'я';
-        } else if (soft() && !shWord()) {
+        } else if (soft() && !schWord()) {
           return stem + 'я';
         } else if (tsWord()) {
           return tsStem() + 'ца';
@@ -232,7 +232,7 @@ THE SOFTWARE.
       case Case.DATIVE:
         if (iyWord()) {
           return head + 'ю';
-        } else if (soft() && !shWord()) {
+        } else if (soft() && !schWord()) {
           return stem + 'ю';
         } else if (tsWord()) {
           return tsStem() + 'цу';
@@ -255,7 +255,7 @@ THE SOFTWARE.
       case Case.INSTRUMENTAL:
         if (iyWord()) {
           return head + 'ем';
-        } else if (soft() || _.contains(['ж', 'ч'], _.last(stem))) {
+        } else if (soft() || _.contains(['ж', 'ч', 'ш'], _.last(stem))) {
           return stem + 'ем';
         } else if (tsWord()) {
           return tsStem() + 'цем';
