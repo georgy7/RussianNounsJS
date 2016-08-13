@@ -323,7 +323,7 @@ decline = (lemma, grCase) ->
             head + 'е'
         when Case.ACCUSATIVE
           if ayaWord()
-            head + 'ую'
+            stem + 'ую'
           else if soft()
             head + 'ю'
           else

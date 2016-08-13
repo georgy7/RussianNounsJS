@@ -402,7 +402,7 @@ THE SOFTWARE.
             break;
           case Case.ACCUSATIVE:
             if (ayaWord()) {
-              return head + 'ую';
+              return stem + 'ую';
             } else if (soft()) {
               return head + 'ю';
             } else {
