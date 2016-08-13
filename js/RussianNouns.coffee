@@ -298,11 +298,13 @@ decline = (lemma, grCase) ->
         lastChar is 'я'
       surnameLike = ->
         word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
+      ayaWord = ->
+        word.endsWith('ая') and not ((word.length < 3) or _.contains(vowels, _.last(stem)))
       switch grCase
         when Case.NOMINATIVE
           word
         when Case.GENITIVE
-          if word.endsWith('ая')
+          if ayaWord()
             stem + 'ой'
           else if lemma.isSurname()
             head + 'ой'
@@ -311,7 +313,7 @@ decline = (lemma, grCase) ->
           else
             head + 'ы'
         when Case.DATIVE
-          if word.endsWith('ая')
+          if ayaWord()
             stem + 'ой'
           else if lemma.isSurname()
             head + 'ой'
@@ -320,21 +322,21 @@ decline = (lemma, grCase) ->
           else
             head + 'е'
         when Case.ACCUSATIVE
-          if word.endsWith('ая')
+          if ayaWord()
             head + 'ую'
           else if soft()
             head + 'ю'
           else
             head + 'у'
         when Case.INSTRUMENTAL
-          if word.endsWith('ая')
+          if ayaWord()
             stem + 'ой'
           else if soft() or _.contains(['ц','ч','ж','ш','щ'], _.last(stem)) 
             [head + 'ей', head + 'ею']
           else
             [head + 'ой', head + 'ою']
         when Case.PREPOSITIONAL
-          if word.endsWith('ая')
+          if ayaWord()
             stem + 'ой'
           else if lemma.isSurname()
             head + 'ой'

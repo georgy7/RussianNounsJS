@@ -335,7 +335,7 @@ THE SOFTWARE.
   };
 
   decline = function(lemma, grCase) {
-    var declension, gender, head, soft, stem, surnameLike, word;
+    var ayaWord, declension, gender, head, soft, stem, surnameLike, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -372,11 +372,14 @@ THE SOFTWARE.
         surnameLike = function() {
           return word.endsWith('ова') || word.endsWith('ева') || (word.endsWith('ина') && !word.endsWith('стина'));
         };
+        ayaWord = function() {
+          return word.endsWith('ая') && !((word.length < 3) || _.contains(vowels, _.last(stem)));
+        };
         switch (grCase) {
           case Case.NOMINATIVE:
             return word;
           case Case.GENITIVE:
-            if (word.endsWith('ая')) {
+            if (ayaWord()) {
               return stem + 'ой';
             } else if (lemma.isSurname()) {
               return head + 'ой';
@@ -387,7 +390,7 @@ THE SOFTWARE.
             }
             break;
           case Case.DATIVE:
-            if (word.endsWith('ая')) {
+            if (ayaWord()) {
               return stem + 'ой';
             } else if (lemma.isSurname()) {
               return head + 'ой';
@@ -398,7 +401,7 @@ THE SOFTWARE.
             }
             break;
           case Case.ACCUSATIVE:
-            if (word.endsWith('ая')) {
+            if (ayaWord()) {
               return head + 'ую';
             } else if (soft()) {
               return head + 'ю';
@@ -407,7 +410,7 @@ THE SOFTWARE.
             }
             break;
           case Case.INSTRUMENTAL:
-            if (word.endsWith('ая')) {
+            if (ayaWord()) {
               return stem + 'ой';
             } else if (soft() || _.contains(['ц', 'ч', 'ж', 'ш', 'щ'], _.last(stem))) {
               return [head + 'ей', head + 'ею'];
@@ -416,7 +419,7 @@ THE SOFTWARE.
             }
             break;
           case Case.PREPOSITIONAL:
-            if (word.endsWith('ая')) {
+            if (ayaWord()) {
               return stem + 'ой';
             } else if (lemma.isSurname()) {
               return head + 'ой';

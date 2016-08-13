@@ -24,7 +24,10 @@ var totalCases = 0;
 var totalWords = 0;
 var totalLoadingSteps = 5;
 
-function ojejojueju(expected, actual) {
+function ojejojueju(expected, actual, grCase) {
+	if (grCase !== Case.INSTRUMENTAL) {
+		return false;
+	}
 	var uniqExp = _.uniq(expected);
 	var uniqActual = _.uniq(actual);
 	var oj = ['ой', 'ою'];
@@ -114,7 +117,7 @@ function test(data, gender, loadingStepCompleted) {
 			if (everyExpectedIsInActual && (_.uniq(actual).length == _.uniq(expected).length)) {
 				ok = true;
 				failure = false;
-			} else if (everyExpectedIsInActual && ojejojueju(expected, actual)) {
+			} else if (everyExpectedIsInActual && ojejojueju(expected, actual, c)) {
 				ok = false;
 				failure = false;
 				warning = true;
