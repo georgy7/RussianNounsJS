@@ -20,9 +20,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ###
 
-# источники информации:
+# Dependencies:
+# - Underscore.js (MIT)
+# - Snowball JavaScript Library (MPL, BSD since v0.4?)
+
+# Sources:
 # - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
 # - Англоязычная википедия: http://en.wikipedia.org/wiki/Russian_grammar
+
+# Demo:
+# - https://georgy7.github.io/russian_nouns/testing.html
+
 
 #------------------------------
 # API
@@ -83,11 +91,14 @@ misc =
     if(typeof v != "string")
       throw new Error(v + " is not a string.")
 
+consonantsExceptJ = ['б','в','г','д','ж','з','к','л','м','н','п','р','с','т','ф','х','ц','ч','ш','щ']
+vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и']
+
 StemUtil =
   ###* Доп. проверки для стеммера ###
   getNounStem: (word) ->
     lastChar = _.last(word)
-    if _.contains(['л','м','н','т','х','в','с'], lastChar) then return word
+    if _.contains(consonantsExceptJ, lastChar) then return word
     if 'ь' == lastChar then return _.initial(word).join('')
     if 'ь' == _.last(_.initial(word)) then return _.initial(word).join('')
     if 'о' == lastChar and _.contains(['л','м','н','т','х','в','с'], _.last(_.initial(word))) then return _.initial(word).join('')
@@ -104,8 +115,6 @@ StemUtil =
   getLastTwoChars: (s) ->
     if s.length <= 1 then return ''
     s.substring(s.length-2, s.length)
-
-vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и']
 
 ###* 
 Определяет склонение существительных
@@ -148,8 +157,7 @@ decline1 = (lemma, grCase) ->
         lastChar = _.last(word)
         lastChar is 'ь' or lastChar is 'е'
       iyWord = ->
-        e = StemUtil.getLastTwoChars(word)
-        _.last(word) is 'й' or (e[0] is 'и' and _.contains(['й','е'], e[1]))
+        _.last(word) is 'й' or _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))
       schWord = ->
         _.contains(['ч','щ'], _.last(stem))
       tsWord = ->
@@ -294,31 +302,41 @@ decline = (lemma, grCase) ->
         when Case.NOMINATIVE
           word
         when Case.GENITIVE
-          if lemma.isSurname()
+          if word.endsWith('ая')
+            stem + 'ой'
+          else if lemma.isSurname()
             head + 'ой'
           else if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], _.last(stem)) # soft, sibilant or velar
             head + 'и'
           else
             head + 'ы'
         when Case.DATIVE
-          if lemma.isSurname()
+          if word.endsWith('ая')
+            stem + 'ой'
+          else if lemma.isSurname()
             head + 'ой'
           else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'
           else
             head + 'е'
         when Case.ACCUSATIVE
-          if soft()
+          if word.endsWith('ая')
+            head + 'ую'
+          else if soft()
             head + 'ю'
           else
             head + 'у'
         when Case.INSTRUMENTAL
-          if soft() or _.contains(['ц','ч','ж','ш','щ'], _.last(stem)) 
+          if word.endsWith('ая')
+            stem + 'ой'
+          else if soft() or _.contains(['ц','ч','ж','ш','щ'], _.last(stem)) 
             [head + 'ей', head + 'ею']
           else
             [head + 'ой', head + 'ою']
         when Case.PREPOSITIONAL
-          if lemma.isSurname()
+          if word.endsWith('ая')
+            stem + 'ой'
+          else if lemma.isSurname()
             head + 'ой'
           else if StemUtil.getLastTwoChars(word) is 'ия'
             head + 'и'

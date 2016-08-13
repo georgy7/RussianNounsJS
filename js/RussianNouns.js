@@ -23,7 +23,7 @@ THE SOFTWARE.
  */
 
 (function() {
-  var RussianNouns, StemUtil, decline, decline1, decline3, declineAsList, getDeclension, misc, vowels;
+  var RussianNouns, StemUtil, consonantsExceptJ, decline, decline1, decline3, declineAsList, getDeclension, misc, vowels;
 
   window.Case = {
     NOMINATIVE: "Именительный",
@@ -92,13 +92,17 @@ THE SOFTWARE.
     }
   };
 
+  consonantsExceptJ = ['б', 'в', 'г', 'д', 'ж', 'з', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ'];
+
+  vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и'];
+
   StemUtil = {
 
     /** Доп. проверки для стеммера */
     getNounStem: function(word) {
       var lastChar;
       lastChar = _.last(word);
-      if (_.contains(['л', 'м', 'н', 'т', 'х', 'в', 'с'], lastChar)) {
+      if (_.contains(consonantsExceptJ, lastChar)) {
         return word;
       }
       if ('ь' === lastChar) {
@@ -134,8 +138,6 @@ THE SOFTWARE.
       return s.substring(s.length - 2, s.length);
     }
   };
-
-  vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и'];
 
 
   /** 
@@ -190,9 +192,7 @@ THE SOFTWARE.
       return lastChar === 'ь' || lastChar === 'е';
     };
     iyWord = function() {
-      var e;
-      e = StemUtil.getLastTwoChars(word);
-      return _.last(word) === 'й' || (e[0] === 'и' && _.contains(['й', 'е'], e[1]));
+      return _.last(word) === 'й' || _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word));
     };
     schWord = function() {
       return _.contains(['ч', 'щ'], _.last(stem));
@@ -376,7 +376,9 @@ THE SOFTWARE.
           case Case.NOMINATIVE:
             return word;
           case Case.GENITIVE:
-            if (lemma.isSurname()) {
+            if (word.endsWith('ая')) {
+              return stem + 'ой';
+            } else if (lemma.isSurname()) {
               return head + 'ой';
             } else if (soft() || _.contains(['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'], _.last(stem))) {
               return head + 'и';
@@ -385,7 +387,9 @@ THE SOFTWARE.
             }
             break;
           case Case.DATIVE:
-            if (lemma.isSurname()) {
+            if (word.endsWith('ая')) {
+              return stem + 'ой';
+            } else if (lemma.isSurname()) {
               return head + 'ой';
             } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';
@@ -394,21 +398,27 @@ THE SOFTWARE.
             }
             break;
           case Case.ACCUSATIVE:
-            if (soft()) {
+            if (word.endsWith('ая')) {
+              return head + 'ую';
+            } else if (soft()) {
               return head + 'ю';
             } else {
               return head + 'у';
             }
             break;
           case Case.INSTRUMENTAL:
-            if (soft() || _.contains(['ц', 'ч', 'ж', 'ш', 'щ'], _.last(stem))) {
+            if (word.endsWith('ая')) {
+              return stem + 'ой';
+            } else if (soft() || _.contains(['ц', 'ч', 'ж', 'ш', 'щ'], _.last(stem))) {
               return [head + 'ей', head + 'ею'];
             } else {
               return [head + 'ой', head + 'ою'];
             }
             break;
           case Case.PREPOSITIONAL:
-            if (lemma.isSurname()) {
+            if (word.endsWith('ая')) {
+              return stem + 'ой';
+            } else if (lemma.isSurname()) {
               return head + 'ой';
             } else if (StemUtil.getLastTwoChars(word) === 'ия') {
               return head + 'и';
