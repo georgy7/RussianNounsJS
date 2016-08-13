@@ -162,6 +162,8 @@ decline1 = (lemma, grCase) ->
         _.contains(['ч','щ'], _.last(stem))
       tsWord = ->
         _.last(word) is 'ц'
+      okWord = ->
+        word.endsWith('ок') and word.length >= 6 and not word.endsWith('шок')
       tsStem = ->
         if 'а' == word[word.length - 2]
           word.substring(0, word.length - 1)
@@ -188,6 +190,8 @@ decline1 = (lemma, grCase) ->
             stem + 'я'
           else if tsWord()
             tsStem() + 'ца'
+          else if okWord()
+            word.substring(0, word.length - 2) + 'ка'
           else
             stem + 'а'
         when Case.DATIVE
@@ -199,6 +203,8 @@ decline1 = (lemma, grCase) ->
             stem + 'ю'
           else if tsWord()
             tsStem() + 'цу'
+          else if okWord()
+            word.substring(0, word.length - 2) + 'ку'
           else
             stem + 'у'
         when Case.ACCUSATIVE
@@ -217,6 +223,8 @@ decline1 = (lemma, grCase) ->
             stem + 'ем'
           else if tsWord()
             tsStem() + 'цем'
+          else if okWord()
+            word.substring(0, word.length - 2) + 'ком'
           else if surnameType1()
             word + 'ым'
           else
@@ -230,6 +238,8 @@ decline1 = (lemma, grCase) ->
             head + 'е'
           else if tsWord()
             tsStem() + 'це'
+          else if okWord()
+            word.substring(0, word.length - 2) + 'ке'
           else
             stem + 'е'
 

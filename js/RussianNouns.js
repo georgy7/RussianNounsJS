@@ -181,7 +181,7 @@ THE SOFTWARE.
   };
 
   decline1 = function(lemma, grCase) {
-    var a, gender, head, iyWord, schWord, soft, stem, surnameType1, tsStem, tsWord, word;
+    var a, gender, head, iyWord, okWord, schWord, soft, stem, surnameType1, tsStem, tsWord, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -199,6 +199,9 @@ THE SOFTWARE.
     };
     tsWord = function() {
       return _.last(word) === 'ц';
+    };
+    okWord = function() {
+      return word.endsWith('ок') && word.length >= 6 && !word.endsWith('шок');
     };
     tsStem = function() {
       if ('а' === word[word.length - 2]) {
@@ -230,6 +233,8 @@ THE SOFTWARE.
           return stem + 'я';
         } else if (tsWord()) {
           return tsStem() + 'ца';
+        } else if (okWord()) {
+          return word.substring(0, word.length - 2) + 'ка';
         } else {
           return stem + 'а';
         }
@@ -243,6 +248,8 @@ THE SOFTWARE.
           return stem + 'ю';
         } else if (tsWord()) {
           return tsStem() + 'цу';
+        } else if (okWord()) {
+          return word.substring(0, word.length - 2) + 'ку';
         } else {
           return stem + 'у';
         }
@@ -268,6 +275,8 @@ THE SOFTWARE.
           return stem + 'ем';
         } else if (tsWord()) {
           return tsStem() + 'цем';
+        } else if (okWord()) {
+          return word.substring(0, word.length - 2) + 'ком';
         } else if (surnameType1()) {
           return word + 'ым';
         } else {
@@ -283,6 +292,8 @@ THE SOFTWARE.
           return head + 'е';
         } else if (tsWord()) {
           return tsStem() + 'це';
+        } else if (okWord()) {
+          return word.substring(0, word.length - 2) + 'ке';
         } else {
           return stem + 'е';
         }
