@@ -7,6 +7,7 @@ var dataM = [];
 var dataF = [];
 var dataN = [];
 var dataC = [];
+var workerIndex, letterIndex;
 
 var main = function() {
 
@@ -70,8 +71,12 @@ function test(data, gender, loadingStepCompleted) {
 		if ((i%200 == 0) || (i == (data.length - 1))) {
 			var stepWidth = 1 / totalLoadingSteps;
 			var loadStatus = stepWidth * (loadingStepCompleted + ((1+i) / data.length));
-			var barWidth = '' + Math.round(100 * loadStatus) + '%';
-			postMessage({type:'loading', status:barWidth});
+			postMessage({
+				type: 'loading',
+				status: loadStatus,
+				workerIndex: workerIndex,
+				letterIndex: letterIndex
+			});
 		}
 		
 		var word = data[i].cases[0][0]; // Именительный падеж
@@ -182,6 +187,8 @@ test(dataC, Gender.COMMON, 4);
 
 postMessage({
 	type: 'testResult',
+	workerIndex: workerIndex,
+	letterIndex: letterIndex,
 	totalCases: totalCases,
 	wrongCases: wrongCases,
 	totalWords: totalWords,
@@ -195,6 +202,8 @@ postMessage({
 onmessage = function(e) {
 	if (e.data.type === 'start') {
 		var words = e.data.words;
+		workerIndex = e.data.workerIndex;
+		letterIndex = e.data.letterIndex;
 		postMessage({type:'started', wordsLen:words.length});
 		for (var wordIndex = 0, wLen = words.length; wordIndex < wLen; wordIndex++) {
 			var lemmaList = words[wordIndex];
