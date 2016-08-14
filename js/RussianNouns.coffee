@@ -93,6 +93,8 @@ misc =
 
 consonantsExceptJ = ['б','в','г','д','ж','з','к','л','м','н','п','р','с','т','ф','х','ц','ч','ш','щ']
 vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и']
+isVowel = (character) ->
+  _.contains(vowels, character)
 
 StemUtil =
   ###* Доп. проверки для стеммера ###
@@ -163,14 +165,14 @@ decline1 = (lemma, grCase) ->
       tsWord = ->
         _.last(word) is 'ц'
       okWord = ->
-        word.endsWith('ок') and word.length >= 6 and not word.endsWith('шок')
+        (word.endsWith('ок') or word.endsWith('чек')) and word.length >= 6 and not word.endsWith('шок')
       tsStem = ->
         if 'а' == word[word.length - 2]
-          word.substring(0, word.length - 1)
+          head
         else if 'е' == word[word.length - 2] and 'л' == word[word.length - 3]
           word.substring(0, word.length - 2) + 'ь'
-        else if _.contains(vowels, word[word.length - 2])
-          if _.contains(vowels, word[word.length - 3])
+        else if isVowel(word[word.length - 2])
+          if isVowel(word[word.length - 3])
             word.substring(0, word.length - 2) + 'й'
           else
             word.substring(0, word.length - 2)
@@ -309,7 +311,7 @@ decline = (lemma, grCase) ->
       surnameLike = ->
         word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
       ayaWord = ->
-        word.endsWith('ая') and not ((word.length < 3) or _.contains(vowels, _.last(stem)))
+        word.endsWith('ая') and not ((word.length < 3) or isVowel(_.last(stem)))
       switch grCase
         when Case.NOMINATIVE
           word

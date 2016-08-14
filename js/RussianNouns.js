@@ -23,7 +23,7 @@ THE SOFTWARE.
  */
 
 (function() {
-  var RussianNouns, StemUtil, consonantsExceptJ, decline, decline1, decline3, declineAsList, getDeclension, misc, vowels;
+  var RussianNouns, StemUtil, consonantsExceptJ, decline, decline1, decline3, declineAsList, getDeclension, isVowel, misc, vowels;
 
   window.Case = {
     NOMINATIVE: "Именительный",
@@ -95,6 +95,10 @@ THE SOFTWARE.
   consonantsExceptJ = ['б', 'в', 'г', 'д', 'ж', 'з', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ'];
 
   vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и'];
+
+  isVowel = function(character) {
+    return _.contains(vowels, character);
+  };
 
   StemUtil = {
 
@@ -201,15 +205,15 @@ THE SOFTWARE.
       return _.last(word) === 'ц';
     };
     okWord = function() {
-      return word.endsWith('ок') && word.length >= 6 && !word.endsWith('шок');
+      return (word.endsWith('ок') || word.endsWith('чек')) && word.length >= 6 && !word.endsWith('шок');
     };
     tsStem = function() {
       if ('а' === word[word.length - 2]) {
-        return word.substring(0, word.length - 1);
+        return head;
       } else if ('е' === word[word.length - 2] && 'л' === word[word.length - 3]) {
         return word.substring(0, word.length - 2) + 'ь';
-      } else if (_.contains(vowels, word[word.length - 2])) {
-        if (_.contains(vowels, word[word.length - 3])) {
+      } else if (isVowel(word[word.length - 2])) {
+        if (isVowel(word[word.length - 3])) {
           return word.substring(0, word.length - 2) + 'й';
         } else {
           return word.substring(0, word.length - 2);
@@ -384,7 +388,7 @@ THE SOFTWARE.
           return word.endsWith('ова') || word.endsWith('ева') || (word.endsWith('ина') && !word.endsWith('стина'));
         };
         ayaWord = function() {
-          return word.endsWith('ая') && !((word.length < 3) || _.contains(vowels, _.last(stem)));
+          return word.endsWith('ая') && !((word.length < 3) || isVowel(_.last(stem)));
         };
         switch (grCase) {
           case Case.NOMINATIVE:
