@@ -1,2 +1,2 @@
-Активная разработка сейчас в ветке gh-pages:
+РђРєС‚РёРІРЅР°СЏ СЂР°Р·СЂР°Р±РѕС‚РєР° СЃРµР№С‡Р°СЃ РІ РІРµС‚РєРµ gh-pages:
 https://github.com/georgy7/russian_nouns/tree/gh-pages
