@@ -113,16 +113,26 @@ function test(data, gender, loadingStepCompleted) {
 				var actual = ['-----'];
 				if (e.message !== "unsupported") throw e;
 			}
+			var sameCount = (_.uniq(actual).length == _.uniq(expected).length);
 			var everyExpectedIsInActual = expected.every(function (e) {
 				return actual.indexOf(e) >= 0;
+			});
+			var actualWithoutYo = actual.map(function (word) {
+				return word.toLowerCase().replace(/ё/g, 'е');
+			});
+			var exactMatchIgnoringYo = sameCount && expected.every(function (word) {
+				var yoLess = word.toLowerCase().replace(/ё/g, 'е');
+				return actualWithoutYo.indexOf(yoLess) >= 0;
 			});
 			
 			var warning = false;
 			var ok, failure;
-			if (everyExpectedIsInActual && (_.uniq(actual).length == _.uniq(expected).length)) {
+			if (everyExpectedIsInActual && sameCount) {
 				ok = true;
 				failure = false;
-			} else if (everyExpectedIsInActual && ojejojueju(expected, actual, c)) {
+			} else if ((everyExpectedIsInActual && ojejojueju(expected, actual, c)) ||
+					(Case.GENITIVE === c && actual[0] === expected[0]) ||
+					exactMatchIgnoringYo) {
 				ok = false;
 				failure = false;
 				warning = true;

@@ -1,19 +1,19 @@
-﻿/*
+﻿
 var abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
 var parts = [];
 parts.push(abc.slice(0, 5));
 parts.push(abc.slice(5, 12));
 parts.push(abc.slice(12, 18));
 parts.push(abc.slice(18, abc.length));
-*/
 
+/*
 var abc = "клмно".split('');
 var parts = [];
 parts.push(abc.slice(0, 1));
 parts.push(abc.slice(1, 2));
 parts.push(abc.slice(2, 3));
 parts.push(abc.slice(3, abc.length));
-
+*/
 
 var loadingStatuses = [
 	_(parts[0].length).times(function(){ return null; }),
