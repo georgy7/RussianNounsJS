@@ -68,7 +68,7 @@ function ojejojueju(expected, actual, grCase) {
 function test(data, gender, loadingStepCompleted) {
 	for (var i = 0; i < data.length; i++) {
 		
-		if ((i%200 == 0) || (i == (data.length - 1))) {
+		if ((i%50 == 0) || (i == (data.length - 1))) {
 			var stepWidth = 1 / totalLoadingSteps;
 			var loadStatus = stepWidth * (loadingStepCompleted + ((1+i) / data.length));
 			postMessage({
