@@ -96,14 +96,22 @@ vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и']
 isVowel = (character) ->
   _.contains(vowels, character)
 
+last = (str) ->
+  _.last(str)
+lastN = (str, n) ->
+  str.substring(str.length - n)
+initial = (s) ->
+  if s.length <= 1 then return ''
+  s.substring(0, s.length-1)
+
 StemUtil =
   ###* Доп. проверки для стеммера ###
   getNounStem: (word) ->
-    lastChar = _.last(word)
+    lastChar = last(word)
     if _.contains(consonantsExceptJ, lastChar) then return word
-    if 'ь' == lastChar then return _.initial(word).join('')
-    if 'ь' == _.last(_.initial(word)) then return _.initial(word).join('')
-    if 'о' == lastChar and _.contains(['л','м','н','т','х','в','с'], _.last(_.initial(word))) then return _.initial(word).join('')
+    if 'ь' == lastChar then return initial(word)
+    if 'ь' == last(initial(word)) then return initial(word)
+    if 'о' == lastChar and _.contains(['л','м','н','т','х','в','с'], last(initial(word))) then return initial(word)
     StemUtil.getStem word
   ###* Русский стеммер из Snowball JavaScript Library. ###
   getStem: (word) ->
@@ -112,8 +120,7 @@ StemUtil =
     stemmer.stem();
     stemmer.getCurrent();
   getInit: (s) ->
-    if s.length <= 1 then return ''
-    s.substring(0, s.length-1)
+    initial(s)
   getLastTwoChars: (s) ->
     if s.length <= 1 then return ''
     s.substring(s.length-2, s.length)
@@ -133,7 +140,7 @@ getDeclension = (lemma) ->
   if lemma.isIndeclinable()
     return -1
   
-  t = _.last(word)
+  t = last(word)
   switch gender
     when Gender.FEMININE       
       `t == "а" || t == "я" ? 2 : 3`
@@ -154,23 +161,23 @@ decline1 = (lemma, grCase) ->
       word = lemma.text()
       gender = lemma.gender()
       stem = StemUtil.getNounStem word
-      head = StemUtil.getInit word
+      head = initial(word)
       soft = ->
-        lastChar = _.last(word)
+        lastChar = last(word)
         lastChar is 'ь' or lastChar is 'е'
       iyWord = ->
-        _.last(word) is 'й' or _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))
+        last(word) is 'й' or _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))
       schWord = ->
-        _.contains(['ч','щ'], _.last(stem))
+        _.contains(['ч','щ'], last(stem))
       tsWord = ->
-        _.last(word) is 'ц'
+        last(word) is 'ц'
       okWord = ->
         (word.endsWith('ок') or word.endsWith('чек')) and word.length >= 6 and not word.endsWith('шок')
       tsStem = ->
         if 'а' == word[word.length - 2]
           head
-        else if 'е' == word[word.length - 2] and 'л' == word[word.length - 3]
-          word.substring(0, word.length - 2) + 'ь'
+        else if lastN(head, 2) == 'ле'
+          initial(head) + 'ь'
         else if isVowel(word[word.length - 2])
           if isVowel(word[word.length - 3])
             word.substring(0, word.length - 2) + 'й'
@@ -221,7 +228,7 @@ decline1 = (lemma, grCase) ->
             stem + 'им'
           else if iyWord()
             head + 'ем'
-          else if soft() or _.contains(['ж','ч','ш'], _.last(stem)) 
+          else if soft() or _.contains(['ж','ч','ш'], last(stem)) 
             stem + 'ем'
           else if tsWord()
             tsStem() + 'цем'
@@ -236,7 +243,7 @@ decline1 = (lemma, grCase) ->
             stem + 'ом'
           else if _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))
             head + 'и'
-          else if _.last(word) is 'й'
+          else if last(word) is 'й'
             head + 'е'
           else if tsWord()
             tsStem() + 'це'
@@ -306,12 +313,12 @@ decline = (lemma, grCase) ->
       decline1(lemma, grCase)
     when 2
       soft = ->
-        lastChar = _.last(word)
+        lastChar = last(word)
         lastChar is 'я'
       surnameLike = ->
         word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
       ayaWord = ->
-        word.endsWith('ая') and not ((word.length < 3) or isVowel(_.last(stem)))
+        word.endsWith('ая') and not ((word.length < 3) or isVowel(last(stem)))
       switch grCase
         when Case.NOMINATIVE
           word
@@ -320,7 +327,7 @@ decline = (lemma, grCase) ->
             stem + 'ой'
           else if lemma.isSurname()
             head + 'ой'
-          else if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], _.last(stem)) # soft, sibilant or velar
+          else if soft() or _.contains(['ч','ж','ш','щ','г','к','х'], last(stem)) # soft, sibilant or velar
             head + 'и'
           else
             head + 'ы'
@@ -343,7 +350,7 @@ decline = (lemma, grCase) ->
         when Case.INSTRUMENTAL
           if ayaWord()
             stem + 'ой'
-          else if soft() or _.contains(['ц','ч','ж','ш','щ'], _.last(stem)) 
+          else if soft() or _.contains(['ц','ч','ж','ш','щ'], last(stem)) 
             [head + 'ей', head + 'ею']
           else
             [head + 'ой', head + 'ою']
