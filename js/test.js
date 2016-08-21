@@ -3,10 +3,7 @@ importScripts('third-party/underscore.js');
 importScripts('third-party/Snowball.js');
 importScripts('RussianNouns.js');
 
-var dataM = [];
-var dataF = [];
-var dataN = [];
-var dataC = [];
+var dataM, dataF, dataN, dataC;
 var workerIndex, letterIndex;
 
 var main = function() {
@@ -16,14 +13,13 @@ var russianNouns = new RussianNouns()
 var cases = [Case.NOMINATIVE, Case.GENITIVE, Case.DATIVE, 
              Case.ACCUSATIVE, Case.INSTRUMENTAL, Case.PREPOSITIONAL];
 
-var result = [];
-
 var wrongCases = 0;
 var wrongWords = 0;
 var correctWordsWithWarnings = 0;
 var totalCases = 0;
 var totalWords = 0;
 var totalLoadingSteps = 5;
+var result = [];
 
 function ojejojueju(expected, actual, grCase) {
 	if (grCase !== Case.INSTRUMENTAL) {
@@ -68,7 +64,7 @@ function ojejojueju(expected, actual, grCase) {
 function test(data, gender, loadingStepCompleted) {
 	for (var i = 0; i < data.length; i++) {
 		
-		if ((i%50 == 0) || (i == (data.length - 1))) {
+		if ((i%250 == 0) || (i == (data.length - 1))) {
 			var stepWidth = 1 / totalLoadingSteps;
 			var loadStatus = stepWidth * (loadingStepCompleted + ((1+i) / data.length));
 			postMessage({
@@ -215,6 +211,10 @@ onmessage = function(e) {
 		workerIndex = e.data.workerIndex;
 		letterIndex = e.data.letterIndex;
 		postMessage({type:'started', wordsLen:words.length});
+		dataM = [];
+		dataF = [];
+		dataN = [];
+		dataC = [];
 		for (var wordIndex = 0, wLen = words.length; wordIndex < wLen; wordIndex++) {
 			var lemmaList = words[wordIndex];
 			for (var lemmaIndex = 0, lemmaListLen = lemmaList.length; lemmaIndex < lemmaListLen; lemmaIndex++) {

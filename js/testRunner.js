@@ -7,12 +7,12 @@ parts.push(abc.slice(12, 18));
 parts.push(abc.slice(18, abc.length));
 
 /*
-var abc = "клмно".split('');
+var abc = "клмнопрсту".split('');
 var parts = [];
-parts.push(abc.slice(0, 1));
-parts.push(abc.slice(1, 2));
-parts.push(abc.slice(2, 3));
-parts.push(abc.slice(3, abc.length));
+parts.push(abc.slice(0, 2));
+parts.push(abc.slice(2, 4));
+parts.push(abc.slice(4, 7));
+parts.push(abc.slice(7, abc.length));
 */
 
 var loadingStatuses = [
@@ -58,7 +58,7 @@ function listenEvents(workerIndex) {
 			if (parts[e.data.workerIndex].length > next) {
 				runLetter(e.data.workerIndex, next);
 			} else {
-				console.log('Process ' + (1 + e.data.workerIndex) + ' completed');
+				console.log(new Date(), 'Process ' + (1 + e.data.workerIndex) + ' completed');
 				completed[e.data.workerIndex] = true;
 				if (completed.every(function (e) { return e; })) {
 					showResults();
@@ -69,6 +69,7 @@ function listenEvents(workerIndex) {
 }
 
 function showResults() {
+	console.log(new Date(), 'Finish.');
 	var totalCases = 0;
 	var wrongCases = 0;
 	var totalWords = 0;
@@ -123,6 +124,7 @@ function updateLoading(loadStatus) {
 }
 
 jQuery(document).ready(function () {
+	console.log(new Date(), 'Start.');
 	for (var i = 0; i < workers.length; i++) {
 		listenEvents(i);
 		runLetter(i, 0);

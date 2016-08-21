@@ -84,7 +84,7 @@
   <textarea id="template" style="display:none;">
     <table id="resultTable" class="transparentWarnings">
       <tr>
-        <th class="info" style="width: 2.4em;">№</th>
+        <!--<th class="info" style="width: 2.4em;">№</th>-->
         <th>Есть Кто? Что?</th>
         <th>Нет Кого? Чего?</th>
         <th>Давать Кому? Чему?</th>
@@ -97,7 +97,7 @@
       {{#items}}
         {{#correctWithWarnings}}<tr class="item warning">{{/correctWithWarnings}}
         {{^correctWithWarnings}}<tr class="item">{{/correctWithWarnings}}
-          <td>{{rowNumber}}</td>
+          <!--<td>{{rowNumber}}</td>-->
           {{#wordForms}}
             {{#failure}}<td style="background-color:#ff8080;">{{/failure}}
             {{#warning}}<td class="warn">{{/warning}}
