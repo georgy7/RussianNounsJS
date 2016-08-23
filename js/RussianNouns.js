@@ -138,11 +138,15 @@ THE SOFTWARE.
 
     /** Русский стеммер из Snowball JavaScript Library. */
     getStem: function(word) {
-      var stemmer;
-      stemmer = new Snowball('Russian');
-      stemmer.setCurrent(word);
-      stemmer.stem();
-      return stemmer.getCurrent();
+      var c;
+      c = last(word);
+      if (('й' === c || isVowel(c)) && isVowel(last(initial(word)))) {
+        return initial(initial(word));
+      }
+      if (isVowel(c)) {
+        return initial(word);
+      }
+      return word;
     },
     getInit: function(s) {
       return initial(s);

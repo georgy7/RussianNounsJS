@@ -22,7 +22,6 @@ THE SOFTWARE.
 
 # Dependencies:
 # - Underscore.js (MIT)
-# - Snowball JavaScript Library (MPL, BSD since v0.4?)
 
 # Sources:
 # - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
@@ -115,10 +114,10 @@ StemUtil =
     StemUtil.getStem word
   ###* Русский стеммер из Snowball JavaScript Library. ###
   getStem: (word) ->
-    stemmer = new Snowball('Russian');
-    stemmer.setCurrent(word);
-    stemmer.stem();
-    stemmer.getCurrent();
+    c = last(word)
+    return initial(initial(word)) if ('й'==c or isVowel(c)) and isVowel(last(initial(word)))
+    return initial(word) if isVowel(c)
+    return word
   getInit: (s) ->
     initial(s)
   getLastTwoChars: (s) ->

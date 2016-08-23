@@ -1,6 +1,5 @@
 ﻿var window = self;
 importScripts('third-party/underscore.js');
-importScripts('third-party/Snowball.js');
 importScripts('RussianNouns.js');
 
 var dataM, dataF, dataN, dataC;
