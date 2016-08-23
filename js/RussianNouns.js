@@ -224,7 +224,7 @@ THE SOFTWARE.
       return word.endsWith('чек') && word.length >= 6;
     };
     okWord = function() {
-      return checkWord() || (word.endsWith('ок') && !word.endsWith('шок') && !isVowel(word[word.length - 3]) && isVowel(word[word.length - 4]) && word.length >= 4);
+      return checkWord() || (word.endsWith('ок') && !word.endsWith('шок') && !(word === 'урок') && !isVowel(word[word.length - 3]) && isVowel(word[word.length - 4]) && word.length >= 4);
     };
     tsStem = function() {
       if ('а' === word[word.length - 2]) {

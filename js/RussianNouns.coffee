@@ -173,7 +173,7 @@ decline1 = (lemma, grCase) ->
       checkWord = ->
         word.endsWith('чек') and word.length >= 6
       okWord = ->
-        checkWord() or (word.endsWith('ок') and not word.endsWith('шок') and not isVowel(word[word.length - 3]) and isVowel(word[word.length - 4]) and word.length >= 4)
+        checkWord() or (word.endsWith('ок') and not word.endsWith('шок') and !(word == 'урок') and not isVowel(word[word.length - 3]) and isVowel(word[word.length - 4]) and word.length >= 4)
       tsStem = ->
         if 'а' == word[word.length - 2]
           head
