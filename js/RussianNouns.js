@@ -197,7 +197,7 @@ THE SOFTWARE.
   };
 
   decline1 = function(lemma, grCase) {
-    var a, gender, head, iyWord, okWord, schWord, soft, stem, surnameType1, tsStem, tsWord, word;
+    var a, checkWord, gender, head, iyWord, okWord, schWord, soft, stem, surnameType1, tsStem, tsWord, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -216,8 +216,11 @@ THE SOFTWARE.
     tsWord = function() {
       return last(word) === 'ц';
     };
+    checkWord = function() {
+      return word.endsWith('чек') && word.length >= 6;
+    };
     okWord = function() {
-      return (word.endsWith('ок') || word.endsWith('чек')) && word.length >= 6 && !word.endsWith('шок');
+      return checkWord() || (word.endsWith('ок') && !word.endsWith('шок') && !isVowel(word[word.length - 3]) && isVowel(word[word.length - 4]) && word.length >= 4);
     };
     tsStem = function() {
       if ('а' === word[word.length - 2]) {
