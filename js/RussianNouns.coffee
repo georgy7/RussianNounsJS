@@ -163,7 +163,7 @@ decline1 = (lemma, grCase) ->
       head = initial(word)
       soft = ->
         lastChar = last(word)
-        lastChar is 'ь' or lastChar is 'е'
+        lastChar is 'ь' or (lastChar is 'е' and !word.endsWith('це'))
       iyWord = ->
         last(word) is 'й' or _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))
       schWord = ->
@@ -235,6 +235,8 @@ decline1 = (lemma, grCase) ->
             stem + 'ем'
           else if tsWord()
             tsStem() + 'цем'
+          else if word.endsWith('це')
+            word + 'м'
           else if okWord()
             word.substring(0, word.length - 2) + 'ком'
           else if surnameType1()

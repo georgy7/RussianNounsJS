@@ -209,7 +209,7 @@ THE SOFTWARE.
     soft = function() {
       var lastChar;
       lastChar = last(word);
-      return lastChar === 'ь' || lastChar === 'е';
+      return lastChar === 'ь' || (lastChar === 'е' && !word.endsWith('це'));
     };
     iyWord = function() {
       return last(word) === 'й' || _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word));
@@ -300,6 +300,8 @@ THE SOFTWARE.
           return stem + 'ем';
         } else if (tsWord()) {
           return tsStem() + 'цем';
+        } else if (word.endsWith('це')) {
+          return word + 'м';
         } else if (okWord()) {
           return word.substring(0, word.length - 2) + 'ком';
         } else if (surnameType1()) {
