@@ -120,6 +120,17 @@ function test(data, gender, loadingStepCompleted) {
 				var yoLess = word.toLowerCase().replace(/ё/g, 'е');
 				return actualWithoutYo.indexOf(yoLess) >= 0;
 			});
+			var exactMatchIgnoringNjeNjiAndYo = sameCount && (1 === actual.length) && (function () {
+				var yoLess = expected[0].toLowerCase().replace(/ё/g, 'е');
+				var actualYoLess = actual[0].toLowerCase().replace(/ё/g, 'е');
+				if (!(yoLess.endsWith('нье') || yoLess.endsWith('ньи'))) {
+					return false;
+				}
+				if (!(actualYoLess.endsWith('нье') || actualYoLess.endsWith('ньи'))) {
+					return false;
+				}
+				return yoLess.substring(0, yoLess.length - 3) === actualYoLess.substring(0, actualYoLess.length - 3);
+			})();
 			
 			var warning = false;
 			var ok, failure;
@@ -128,6 +139,7 @@ function test(data, gender, loadingStepCompleted) {
 				failure = false;
 			} else if ((everyExpectedIsInActual && ojejojueju(expected, actual, c)) ||
 					(Case.GENITIVE === c && actual[0] === expected[0]) ||
+					(Case.PREPOSITIONAL == c && gender == Gender.NEUTER && word.endsWith('нье') && exactMatchIgnoringNjeNjiAndYo) ||
 					exactMatchIgnoringYo) {
 				ok = false;
 				failure = false;
