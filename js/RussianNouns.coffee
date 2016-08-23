@@ -192,7 +192,7 @@ decline1 = (lemma, grCase) ->
         when Case.NOMINATIVE
           word
         when Case.GENITIVE
-          if iyWord() and lemma.isSurname()
+          if (iyWord() and lemma.isSurname()) or (StemUtil.getLastTwoChars(word) == 'ый')
             stem + 'ого'
           else if iyWord()
             head + 'я'
@@ -205,7 +205,7 @@ decline1 = (lemma, grCase) ->
           else
             stem + 'а'
         when Case.DATIVE
-          if iyWord() and lemma.isSurname()
+          if (iyWord() and lemma.isSurname()) or (StemUtil.getLastTwoChars(word) == 'ый')
             stem + 'ому'
           else if iyWord()
             head + 'ю'
@@ -227,6 +227,8 @@ decline1 = (lemma, grCase) ->
         when Case.INSTRUMENTAL
           if iyWord() and lemma.isSurname()
             stem + 'им'
+          else if (StemUtil.getLastTwoChars(word) == 'ый')
+            stem + 'ым'
           else if iyWord()
             head + 'ем'
           else if soft() or _.contains(['ж','ч','ш'], last(stem)) 
@@ -240,7 +242,7 @@ decline1 = (lemma, grCase) ->
           else
             stem + 'ом'
         when Case.PREPOSITIONAL
-          if iyWord() and lemma.isSurname()
+          if (iyWord() and lemma.isSurname()) or (StemUtil.getLastTwoChars(word) == 'ый')
             stem + 'ом'
           else if _.contains(['ий', 'ие'], StemUtil.getLastTwoChars(word))
             head + 'и'
