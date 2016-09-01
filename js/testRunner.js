@@ -15,6 +15,13 @@ parts.push(abc.slice(4, 7));
 parts.push(abc.slice(7, abc.length));
 */
 
+if (tmini) {
+        parts[0] = "к";
+        parts[1] = "м";
+        parts[2] = "о";
+        parts[3] = "с";
+}
+
 var loadingStatuses = [
 	_(parts[0].length).times(function(){ return null; }),
 	_(parts[1].length).times(function(){ return null; }),
