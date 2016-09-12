@@ -15,7 +15,7 @@ parts.push(abc.slice(4, 7));
 parts.push(abc.slice(7, abc.length));
 */
 
-if (tmini) {
+if (typeof tmini !== "undefined") {
         parts[0] = "к";
         parts[1] = "м";
         parts[2] = "о";
