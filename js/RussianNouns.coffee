@@ -112,7 +112,6 @@ StemUtil =
     if 'ь' == last(initial(word)) then return initial(word)
     if 'о' == lastChar and _.contains(['л','м','н','т','х','в','с'], last(initial(word))) then return initial(word)
     StemUtil.getStem word
-  ###* Русский стеммер из Snowball JavaScript Library. ###
   getStem: (word) ->
     c = last(word)
     return initial(initial(word)) if ('й'==c or isVowel(c)) and isVowel(last(initial(word)))
