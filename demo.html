@@ -1,0 +1,193 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+
+  <script src="js/RussianNouns.js"></script>
+  <script src="js/third-party/angular.min.js"></script>
+  <!--<script src="js/third-party/bootstrap-4.3.1-dist/js/bootstrap.js"></script>-->
+  <link rel="stylesheet" href="js/third-party/bootstrap-4.3.1-dist/css/bootstrap.css">
+
+  <script>
+      angular.module('demo', []);
+
+      angular.module('demo').controller('DemoController', DemoController);
+
+      DemoController.$inject = [
+          '$scope'
+      ];
+
+      function DemoController(
+          $scope
+      ) {
+          $scope.input = {};
+
+          $scope.cases = RussianNouns.caseList();
+
+          $scope.fillForm = (gender, word) => {
+              $scope.input.text = word;
+              $scope.input.gender = gender;
+              $scope.changed();
+          };
+
+          $scope.changed = () => {
+              if ($scope.input.text && $scope.input.gender) {
+                  let lemma = RussianNouns.createLemma($scope.input);
+
+                  $scope.result = {};
+                  for (const c of $scope.cases) {
+                      $scope.result[c] = RussianNouns.decline(lemma, c);
+                  }
+
+              } else {
+                  $scope.result = null;
+              }
+          };
+      }
+  </script>
+
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    html, body {
+      background: #f5f5f5;
+      height: 100%;
+    }
+    .container {
+      padding-top: 1em;
+      background: #f9f9f9;
+      height: 100%;
+    }
+
+    html, h1, h2, h3, p, .form-control {
+      font-family: 'Inter', sans-serif;
+    }
+    @supports (font-variation-settings: normal) {
+      html, h1, h2, h3, p, .form-control {
+        font-family: 'Inter var', sans-serif;
+      }
+    }
+
+    .row {
+      margin-bottom: 1em;
+    }
+
+    h2 {
+      font-size: small;
+    }
+
+    h3 {
+      font-weight: 300;
+    }
+
+    th.leftHeader {
+      width: 15em;
+    }
+  </style>
+</head>
+<body ng-app="demo">
+
+  <div class="container" ng-controller="DemoController">
+
+    <div class="row" style="margin-bottom: 4em;">
+      <div class="col-lg-12">
+        <h1>
+          <span style="font-weight: 200;">RussianNouns.js</span>
+          <span style="font-weight: 100;">Demo</span>
+        </h1>
+        <h2 style="padding-left: .1em;">
+          97.5% accurate library
+        </h2>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-2 col-lg-8 text-center">
+        <p>
+          Examples:
+          <a href ng-click="fillForm('мужской', 'арбуз')">арбуз</a>
+          <a href ng-click="fillForm('средний', 'окно')">окно</a>
+          <a href ng-click="fillForm('мужской', 'кот')">кот</a>
+          <a href ng-click="fillForm('женский', 'кошка')">кошка</a>
+          <a href ng-click="fillForm('общий', 'дитя')">дитя</a>
+          <a href ng-click="fillForm('общий', 'задира')">задира</a>
+          <a href ng-click="fillForm('общий', 'хитрюга')">хитрюга</a>
+          <a href ng-click="fillForm('общий', 'нелюдь')">нелюдь</a>
+          <a href ng-click="fillForm('мужской', 'паравоз')">паравоз</a>
+          <a href ng-click="fillForm('мужской', 'Георгий')">Георгий</a>
+          <a href ng-click="fillForm('мужской', 'Устинов')">Устинов</a>
+          <a href ng-click="fillForm('мужской', 'Белозёрский')">Белозёрский</a>
+          <a href ng-click="fillForm('женский', 'Белозёрская')">Белозёрская</a>
+          <a href ng-click="fillForm('мужской', 'кий')">кий</a>
+          <a href ng-click="fillForm('женский', 'елка')">елка</a>
+          <a href ng-click="fillForm('мужской', 'еж')">еж</a>
+          <a href ng-click="fillForm('мужской', 'ерш')">ерш</a>
+          <a href ng-click="fillForm('мужской', 'морж')">морж</a>
+          <a href ng-click="fillForm('женский', 'Иордания')">Иордания</a>
+          <a href ng-click="fillForm('женский', 'ирония')">ирония</a>
+          <a href ng-click="fillForm('средний', 'пальто')">пальто</a>
+          <a href ng-click="fillForm('мужской', 'путь')">путь</a>
+          <a href ng-click="fillForm('женский', 'муть')">муть</a>
+          <a href ng-click="fillForm('женский', 'жуть')">жуть</a>
+          <a href ng-click="fillForm('женский', 'нефть')">нефть</a>
+          <a href ng-click="fillForm('мужской', 'Кодзима')">Кодзима</a>
+          <a href ng-click="fillForm('мужской', 'гений')">гений</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4 text-center">
+        <h3>
+          Input
+        </h3>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4">
+        <input class="form-control"
+               ng-model="input.text"
+               ng-change="changed()"
+               placeholder="a russian noun"/>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4">
+        <select class="form-control" ng-model="input.gender" ng-change="changed()">
+          <option value="">grammatical gender</option>
+          <option value="мужской">мужской</option>
+          <option value="женский">женский</option>
+          <option value="средний">средний</option>
+          <option value="общий">общий</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top: 4rem;" ng-if="result">
+      <div class="offset-lg-4 col-lg-4 text-center">
+        <h3>
+          Output
+        </h3>
+      </div>
+    </div>
+
+    <div class="row" ng-if="result">
+      <div class="offset-lg-3 col-lg-6">
+        <table class="table">
+          <tr ng-repeat="case in cases">
+            <th class="leftHeader">
+              {{case}}
+            </th>
+            <td>
+              {{result[case]}}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

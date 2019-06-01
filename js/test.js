@@ -7,14 +7,7 @@ var workerIndex, letterIndex;
 
 var main = function() {
 
-var cases = [
-    RussianNouns.cases().NOMINATIVE,
-    RussianNouns.cases().GENITIVE,
-    RussianNouns.cases().DATIVE,
-    RussianNouns.cases().ACCUSATIVE,
-    RussianNouns.cases().INSTRUMENTAL,
-    RussianNouns.cases().PREPOSITIONAL
-];
+var cases = RussianNouns.caseList();
 
 var wrongCases = 0;
 var wrongWords = 0;
@@ -87,15 +80,16 @@ function test(data, gender, loadingStepCompleted) {
 		var animate = (data[i].g.indexOf('anim') >= 0);
 		var fixed = (data[i].g.indexOf('Fixd') >= 0);
 		var surname = (data[i].g.indexOf('Surn') >= 0);
-		var lemma = {
-			"text": function () { return word; },
-			"gender": function () { return gender; },
-			"isAnimate": function () { return animate; },
-			"isSurname": function () { return surname; },
-			"isIndeclinable": function () { return fixed; },
-			"isPluraliaTantum": function () { return false; }
-		};
-		
+
+		var lemma = RussianNouns.createLemma({
+			text: word,
+			gender: gender,
+			animate: animate,
+			surname: surname,
+			indeclinable: fixed,
+			pluraliaTantum: false
+		});
+
 		var r = [];
 		totalWords++;
 		totalCases += 6;

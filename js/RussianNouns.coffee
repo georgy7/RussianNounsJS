@@ -1,5 +1,5 @@
 ﻿###
-Copyright (c) 2011-2016 Устинов Георгий Михайлович
+Copyright (c) 2011-2019 Устинов Георгий Михайлович
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,7 @@ THE SOFTWARE.
 # - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
 # - Англоязычная википедия: http://en.wikipedia.org/wiki/Russian_grammar
 
-# Demo:
-# - https://georgy7.github.io/russian_nouns/testing.html
+# https://github.com/georgy7/russian_nouns
 
 
 #------------------------------
@@ -40,6 +39,15 @@ RussianNouns =
     ACCUSATIVE: "винительный"
     INSTRUMENTAL: "творительный"
     PREPOSITIONAL: "предложный"
+  caseList: () ->
+    [
+      "именительный",
+      "родительный",
+      "дательный",
+      "винительный",
+      "творительный",
+      "предложный"
+    ]
   declensions: () ->
     0: 'разносклоняемые "путь" и "дитя"'
     1: 'муж., средний род без окончания'
@@ -55,7 +63,7 @@ RussianNouns =
       if not nominativeSingular? or not gender?
         throw 'A word and a grammatical gender required.'
       if not Object.values(RussianNouns.genders()).includes(gender)
-        throw 'Bad grammatical gender code.'
+        throw 'Bad grammatical gender.'
       @nominativeSingular = '' + nominativeSingular
       @internalGender = gender
     text: () -> @nominativeSingular

@@ -10,7 +10,7 @@
   
   <script src="js/testRunner.js"></script>
 </head>
-<body>
+<body class="transparentWarnings">
 
   <style>
     table {
@@ -61,6 +61,17 @@
     .transparentWarnings tr.warning .expextedForm {
       font-size: 100%;
     }
+
+    body #showWarningsButton {
+      display: none !important;
+    }
+    body.transparentWarnings #hideWarningsButton {
+      display: none !important;
+    }
+    body.transparentWarnings #showWarningsButton {
+      display: inline-block !important;
+    }
+
     #loadingBar .status {
       width: 0%;
       background: #77de00;
@@ -82,7 +93,7 @@
   </style>
     
   <textarea id="template" style="display:none;">
-    <table id="resultTable" class="transparentWarnings">
+    <table id="resultTable">
       <tr>
         <!--<th class="info" style="width: 2.4em;">№</th>-->
         <th>Есть Кто? Что?</th>
@@ -124,8 +135,17 @@
     Word forms correct: <span class="content">...</span><br/>
     Correct words with warnings / words total: <span class="correctWordsWithWarnings">...</span>
 
-    <button class="resultControls" onclick="jQuery('#resultTable').removeClass('transparentWarnings'); jQuery('tr.item').hide(); jQuery('tr.warning').css('display', 'table-row');">Show apart</button>
-    <button class="resultControls" onclick="jQuery('tr.item').css('display', 'table-row'); jQuery('tr.warning').hide()">Hide</button>
+    <button id="showWarningsButton"
+            class="resultControls"
+            onclick="jQuery('body').removeClass('transparentWarnings'); jQuery('tr.item').hide(); jQuery('tr.warning').css('display', 'table-row');">
+      Show warnings
+    </button>
+    <button id="hideWarningsButton"
+            class="resultControls"
+            onclick="jQuery('body').addClass('transparentWarnings'); jQuery('tr.item').css('display', 'table-row'); jQuery('tr.warning').hide()">
+      Hide warnings
+    </button>
+
   </div>
   <div id="loadingBar">
     <div class="status"></div>
