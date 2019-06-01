@@ -7,10 +7,14 @@ var workerIndex, letterIndex;
 
 var main = function() {
 
-var russianNouns = new RussianNouns()
-
-var cases = [Case.NOMINATIVE, Case.GENITIVE, Case.DATIVE, 
-             Case.ACCUSATIVE, Case.INSTRUMENTAL, Case.PREPOSITIONAL];
+var cases = [
+    RussianNouns.cases().NOMINATIVE,
+    RussianNouns.cases().GENITIVE,
+    RussianNouns.cases().DATIVE,
+    RussianNouns.cases().ACCUSATIVE,
+    RussianNouns.cases().INSTRUMENTAL,
+    RussianNouns.cases().PREPOSITIONAL
+];
 
 var wrongCases = 0;
 var wrongWords = 0;
@@ -21,7 +25,7 @@ var totalLoadingSteps = 5;
 var result = [];
 
 function ojejojueju(expected, actual, grCase) {
-	if (grCase !== Case.INSTRUMENTAL) {
+	if (grCase !== RussianNouns.cases().INSTRUMENTAL) {
 		return false;
 	}
 	var uniqExp = _.uniq(expected);
@@ -103,7 +107,7 @@ function test(data, gender, loadingStepCompleted) {
 			var expected = expResults[j];
 			
 			try {
-				var actual = russianNouns.decline(lemma, c);
+				var actual = RussianNouns.decline(lemma, c);
 			} catch(e) {
 				var actual = ['-----'];
 				if (e.message !== "unsupported") throw e;
@@ -136,10 +140,10 @@ function test(data, gender, loadingStepCompleted) {
 			if (everyExpectedIsInActual && sameCount) {
 				ok = true;
 				failure = false;
-			} else if ((everyExpectedIsInActual && ojejojueju(expected, actual, c)) ||
-					(Case.GENITIVE === c && actual[0] === expected[0]) ||
-					(Case.PREPOSITIONAL == c && gender == Gender.NEUTER && word.endsWith('нье') && exactMatchIgnoringNjeNjiAndYo) ||
-					exactMatchIgnoringYo) {
+			} else if ((everyExpectedIsInActual && ojejojueju(expected, actual, c))
+				|| (RussianNouns.cases().GENITIVE === c && actual[0] === expected[0])
+				|| (RussianNouns.cases().PREPOSITIONAL == c && gender == RussianNouns.genders().NEUTER && word.endsWith('нье') && exactMatchIgnoringNjeNjiAndYo)
+				|| exactMatchIgnoringYo) {
 				ok = false;
 				failure = false;
 				warning = true;
@@ -168,14 +172,14 @@ function test(data, gender, loadingStepCompleted) {
 			continue;
 		}
 		
-		if (gender == Gender.MASCULINE) { var g = 'мужской'; var gbg = "#df5" }
-		if (gender == Gender.FEMININE) { var g = 'женский'; var gbg = "#9f5" }
-		if (gender == Gender.NEUTER) { var g = 'средний'; var gbg = "#f59" }
-		if (gender == Gender.COMMON) { var g = 'общий'; }
+		if (gender == RussianNouns.genders().MASCULINE) { var g = 'мужской'; var gbg = "#df5" }
+		if (gender == RussianNouns.genders().FEMININE) { var g = 'женский'; var gbg = "#9f5" }
+		if (gender == RussianNouns.genders().NEUTER) { var g = 'средний'; var gbg = "#f59" }
+		if (gender == RussianNouns.genders().COMMON) { var g = 'общий'; }
 		
 		var declension = '';
 		try {
-			var declension = russianNouns.getDeclension(lemma);
+			var declension = RussianNouns.getDeclension(lemma);
 		} catch (e) {}
 		
 		if (declension === '') { var dColor = '#999999'; }
@@ -197,10 +201,10 @@ function test(data, gender, loadingStepCompleted) {
 	}
 }
 
-test(dataM, Gender.MASCULINE, 1);
-test(dataF, Gender.FEMININE, 2);
-test(dataN, Gender.NEUTER, 3);
-test(dataC, Gender.COMMON, 4);
+test(dataM, RussianNouns.genders().MASCULINE, 1);
+test(dataF, RussianNouns.genders().FEMININE, 2);
+test(dataN, RussianNouns.genders().NEUTER, 3);
+test(dataC, RussianNouns.genders().COMMON, 4);
 
 postMessage({
 	type: 'testResult',
