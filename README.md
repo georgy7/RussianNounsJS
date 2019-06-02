@@ -1,8 +1,8 @@
-```
-RussianNouns.caseList()
+```js
+RussianNouns.caseList();
 ▸ [ "именительный", "родительный", "дательный", "винительный", "творительный", "предложный" ]
 
-RussianNouns.genders()
+RussianNouns.genders();
 ▸ { FEMININE: "женский", MASCULINE: "мужской", NEUTER: "средний", COMMON: "общий" }
 
 RussianNouns.decline({text: 'имя', gender: 'средний'}, 'родительный');
