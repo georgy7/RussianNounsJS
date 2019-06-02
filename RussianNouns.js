@@ -488,7 +488,11 @@
             if (ayaWord()) {
               return stem + 'ой';
             } else if (soft() || ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))) {
-              return [head + 'ей', head + 'ею'];
+              if ('и' === last(head)) {
+                return head + 'ей';
+              } else {
+                return [head + 'ей', head + 'ею'];
+              }
             } else {
               return [head + 'ой', head + 'ою'];
             }
