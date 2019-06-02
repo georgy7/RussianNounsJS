@@ -17,6 +17,39 @@ var totalWords = 0;
 var totalLoadingSteps = 5;
 var result = [];
 
+function iejieu(expected, actual, grCase) {
+    if (grCase !== RussianNouns.cases().INSTRUMENTAL) {
+        return false;
+    }
+
+    var uniqExp = _.uniq(expected);
+    var uniqActual = _.uniq(actual);
+
+    if ((uniqExp.length !== 1) && (uniqActual.length !== 1)) {
+        return false;
+	}
+
+    const e = uniqExp[0];
+    const a = uniqActual[0];
+
+    // «-иею» в творительном падеже — устаревшая форма.
+    // Но я на всякий случай не игнорирую короткие слова, т.к. там могут быть исключения.
+    if (uniqActual[0].length >= 6) {
+
+        let stemExp = e.substring(0, e.length - 3);
+        let stemActual = a.substring(0, a.length - 3);
+
+        let endingExp = e.substring(e.length - 3);
+        let endingActual = a.substring(a.length - 3);
+
+        if ((stemExp === stemActual) && ('иею' == endingExp) && ('ией' == endingActual)) {
+        	return true;
+		}
+    }
+
+    return false;
+}
+
 function ojejojueju(expected, actual, grCase) {
 	if (grCase !== RussianNouns.cases().INSTRUMENTAL) {
 		return false;
@@ -135,6 +168,7 @@ function test(data, gender, loadingStepCompleted) {
 				ok = true;
 				failure = false;
 			} else if ((everyExpectedIsInActual && ojejojueju(expected, actual, c))
+				|| iejieu(expected, actual, c)
 				|| (RussianNouns.cases().GENITIVE === c && actual[0] === expected[0])
 				|| (RussianNouns.cases().PREPOSITIONAL == c && gender == RussianNouns.genders().NEUTER && word.endsWith('нье') && exactMatchIgnoringNjeNjiAndYo)
 				|| exactMatchIgnoringYo) {
