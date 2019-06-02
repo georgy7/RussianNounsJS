@@ -230,7 +230,7 @@ decline1 = (lemma, grCase) ->
         word
       else
         a = lemma.isAnimate()
-        if a is true or a is null then decline1(lemma, Case.GENITIVE)
+        if a is true then decline1(lemma, Case.GENITIVE)
         else word
     when Case.INSTRUMENTAL
       if iyWord() and lemma.isSurname()

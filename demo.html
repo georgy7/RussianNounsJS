@@ -24,9 +24,12 @@
 
           $scope.cases = RussianNouns.caseList();
 
-          $scope.fillForm = (gender, word) => {
+          $scope.fillForm = (gender, word, surname, animate, indeclinable) => {
               $scope.input.text = word;
               $scope.input.gender = gender;
+              $scope.input.surname = surname;
+              $scope.input.animate = animate;
+              $scope.input.indeclinable = indeclinable;
               $scope.changed();
           };
 
@@ -68,7 +71,7 @@
     }
 
     .row {
-      margin-bottom: 1em;
+      margin-bottom: .7rem;
     }
 
     h2 {
@@ -82,6 +85,10 @@
     th.leftHeader {
       width: 15em;
     }
+
+    .table th, .table td {
+      padding: 0.25rem;
+    }
   </style>
 </head>
 <body ng-app="demo">
@@ -89,7 +96,7 @@
   <div class="container" ng-controller="DemoController">
 
     <div class="row" style="margin-bottom: 4em;">
-      <div class="col-lg-12">
+      <div class="col-lg-8">
         <h1>
           <span style="font-weight: 200;">RussianNouns.js</span>
           <span style="font-weight: 100;">Demo</span>
@@ -97,6 +104,9 @@
         <h2 style="padding-left: .1em;">
           97.5% accurate library
         </h2>
+      </div>
+      <div class="col-lg-4 text-lg-right">
+        <iframe src="https://ghbtns.com/github-btn.html?user=georgy7&repo=russian_nouns&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
       </div>
     </div>
 
@@ -106,31 +116,40 @@
           Examples:
           <a href ng-click="fillForm('мужской', 'арбуз')">арбуз</a>
           <a href ng-click="fillForm('средний', 'окно')">окно</a>
-          <a href ng-click="fillForm('мужской', 'кот')">кот</a>
-          <a href ng-click="fillForm('женский', 'кошка')">кошка</a>
-          <a href ng-click="fillForm('общий', 'дитя')">дитя</a>
-          <a href ng-click="fillForm('общий', 'задира')">задира</a>
-          <a href ng-click="fillForm('общий', 'хитрюга')">хитрюга</a>
-          <a href ng-click="fillForm('общий', 'нелюдь')">нелюдь</a>
+          <a href ng-click="fillForm('мужской', 'кот', null, true)">кот</a>
+          <a href ng-click="fillForm('женский', 'кошка', null, true)">кошка</a>
+          <a href ng-click="fillForm('общий', 'дитя', null, true)">дитя</a>
+          <a href ng-click="fillForm('средний', 'знамя')">знамя</a>
+          <a href ng-click="fillForm('средний', 'время')">время</a>
+          <a href ng-click="fillForm('средний', 'семя')">семя</a>
+          <a href ng-click="fillForm('средний', 'вымя')">вымя</a>
+          <a href ng-click="fillForm('средний', 'вымя')">вымя</a>
+          <a href ng-click="fillForm('средний', 'темя')">темя</a>
+          <a href ng-click="fillForm('средний', 'имя')">имя</a>
+          <a href ng-click="fillForm('средний', 'пламя')">пламя</a>
+          <a href ng-click="fillForm('средний', 'стремя')">стремя</a>
+          <a href ng-click="fillForm('общий', 'задира', null, true)">задира</a>
+          <a href ng-click="fillForm('общий', 'хитрюга', null, true)">хитрюга</a>
+          <a href ng-click="fillForm('общий', 'нелюдь', null, true)">нелюдь</a>
           <a href ng-click="fillForm('мужской', 'паравоз')">паравоз</a>
-          <a href ng-click="fillForm('мужской', 'Георгий')">Георгий</a>
-          <a href ng-click="fillForm('мужской', 'Устинов')">Устинов</a>
-          <a href ng-click="fillForm('мужской', 'Белозёрский')">Белозёрский</a>
-          <a href ng-click="fillForm('женский', 'Белозёрская')">Белозёрская</a>
+          <a href ng-click="fillForm('мужской', 'Георгий', null, true)">Георгий</a>
+          <a href ng-click="fillForm('мужской', 'Устинов', true, true)">Устинов</a>
+          <a href ng-click="fillForm('мужской', 'Белозёрский', true, true)">Белозёрский</a>
+          <a href ng-click="fillForm('женский', 'Белозёрская', true, true)">Белозёрская</a>
           <a href ng-click="fillForm('мужской', 'кий')">кий</a>
           <a href ng-click="fillForm('женский', 'елка')">елка</a>
-          <a href ng-click="fillForm('мужской', 'еж')">еж</a>
+          <a href ng-click="fillForm('мужской', 'еж', null, true)">еж</a>
           <a href ng-click="fillForm('мужской', 'ерш')">ерш</a>
-          <a href ng-click="fillForm('мужской', 'морж')">морж</a>
+          <a href ng-click="fillForm('мужской', 'морж', null, true)">морж</a>
           <a href ng-click="fillForm('женский', 'Иордания')">Иордания</a>
           <a href ng-click="fillForm('женский', 'ирония')">ирония</a>
-          <a href ng-click="fillForm('средний', 'пальто')">пальто</a>
+          <a href ng-click="fillForm('средний', 'пальто', null, null, true)">пальто</a>
           <a href ng-click="fillForm('мужской', 'путь')">путь</a>
           <a href ng-click="fillForm('женский', 'муть')">муть</a>
           <a href ng-click="fillForm('женский', 'жуть')">жуть</a>
           <a href ng-click="fillForm('женский', 'нефть')">нефть</a>
-          <a href ng-click="fillForm('мужской', 'Кодзима')">Кодзима</a>
-          <a href ng-click="fillForm('мужской', 'гений')">гений</a>
+          <a href ng-click="fillForm('мужской', 'Кодзима', true, true)">Кодзима</a>
+          <a href ng-click="fillForm('мужской', 'гений', null, true)">гений</a>
         </p>
       </div>
     </div>
@@ -148,19 +167,54 @@
         <input class="form-control"
                ng-model="input.text"
                ng-change="changed()"
-               placeholder="a russian noun"/>
+               placeholder="a russian noun"
+               ng-required="true"/>
       </div>
     </div>
 
     <div class="row">
       <div class="offset-lg-4 col-lg-4">
-        <select class="form-control" ng-model="input.gender" ng-change="changed()">
+        <select class="form-control"
+                ng-model="input.gender"
+                ng-change="changed()"
+                ng-required="true">
           <option value="">grammatical gender</option>
           <option value="мужской">мужской</option>
           <option value="женский">женский</option>
           <option value="средний">средний</option>
           <option value="общий">общий</option>
         </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="surnameCheckBox" ng-model="input.surname" ng-change="changed()">
+          <label class="form-check-label" for="surnameCheckBox">Фамилия</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="animateCheckBox" ng-model="input.animate" ng-change="changed()">
+          <label class="form-check-label" for="animateCheckBox">
+            Одушевленное
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="indeclinableCheckBox" ng-model="input.indeclinable" ng-change="changed()">
+          <label class="form-check-label" for="indeclinableCheckBox">
+            Несклоняемое
+          </label>
+        </div>
       </div>
     </div>
 

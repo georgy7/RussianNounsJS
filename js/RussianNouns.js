@@ -325,7 +325,7 @@
           return word;
         } else {
           a = lemma.isAnimate();
-          if (a === true || a === null) {
+          if (a === true) {
             return decline1(lemma, Case.GENITIVE);
           } else {
             return word;
