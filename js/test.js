@@ -7,7 +7,7 @@ var workerIndex, letterIndex;
 
 var main = function() {
 
-var cases = RussianNouns.caseList();
+let cases = RussianNouns.caseList().slice(0, 6);
 
 var wrongCases = 0;
 var wrongWords = 0;

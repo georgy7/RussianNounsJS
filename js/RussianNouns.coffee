@@ -39,6 +39,7 @@ RussianNouns =
     ACCUSATIVE: "винительный"
     INSTRUMENTAL: "творительный"
     PREPOSITIONAL: "предложный"
+    LOCATIVE: "местный"
   caseList: () ->
     [
       "именительный",
@@ -46,7 +47,8 @@ RussianNouns =
       "дательный",
       "винительный",
       "творительный",
-      "предложный"
+      "предложный",
+      "местный"
     ]
   declensions: () ->
     0: 'разносклоняемые "путь" и "дитя"'
@@ -165,7 +167,7 @@ decline1 = (lemma, grCase) ->
   head = initial(word)
   soft = ->
     lastChar = last(word)
-    lastChar is 'ь' or (lastChar is 'е' and !word.endsWith('це'))
+    lastChar is 'ь' or (['е', 'ё'].includes(lastChar) and !word.endsWith('це'))
   iyWord = ->
     last(word) is 'й' or ['ий', 'ие'].includes(StemUtil.getLastTwoChars(word))
   schWord = ->
@@ -258,8 +260,31 @@ decline1 = (lemma, grCase) ->
         word.substring(0, word.length - 2) + 'ке'
       else
         stem + 'е'
+    when Case.LOCATIVE
+      specialWords =
+        'лёд': 'льду'
+        'лед': 'льду'
+
+      uWords = [
+        'ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг',
+        'мел',
+      ]
+
+      if specialWords.hasOwnProperty(word)
+        return specialWords[word]
+
+      if uWords.includes(word)
+        if last(word) is 'й'
+          return word.substring(0, word.length - 1) + 'ю'
+        else
+          return word + 'у'
+
+      decline1(lemma, Case.PREPOSITIONAL)
 
 decline3 = (word, grCase) ->
+  if (word is 'мать') and not [Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)
+    return decline3('матерь', grCase)
+
   stem = StemUtil.getNounStem word
   if StemUtil.getLastTwoChars(word) is 'мя'
     switch grCase
@@ -275,6 +300,8 @@ decline3 = (word, grCase) ->
         stem + 'енем'
       when Case.PREPOSITIONAL
         stem + 'ени'
+      when Case.LOCATIVE
+        decline3(word, Case.PREPOSITIONAL)
   else
     switch grCase
       when Case.NOMINATIVE
@@ -289,6 +316,8 @@ decline3 = (word, grCase) ->
         stem + 'ью'
       when Case.PREPOSITIONAL
         stem + 'и'
+      when Case.LOCATIVE
+        decline3(word, Case.PREPOSITIONAL)
 
 declineAsList = (lemma, grCase) ->
   r = decline(lemma, grCase)
@@ -373,5 +402,7 @@ decline = (lemma, grCase) ->
             head + 'и'
           else
             head + 'е'
+        when Case.LOCATIVE
+          decline(lemma, Case.PREPOSITIONAL)
     when 3
       decline3(word, grCase)
