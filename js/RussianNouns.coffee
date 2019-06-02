@@ -282,6 +282,67 @@ decline1 = (lemma, grCase) ->
 
       decline1(lemma, Case.PREPOSITIONAL)
 
+decline2 = (lemma, grCase) ->
+  word = lemma.text()
+  stem = StemUtil.getNounStem word
+  head = StemUtil.getInit word
+  soft = ->
+    lastChar = last(word)
+    lastChar is 'я'
+  surnameLike = ->
+    word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
+  ayaWord = ->
+    word.endsWith('ая') and not ((word.length < 3) or isVowel(last(stem)))
+  switch grCase
+    when Case.NOMINATIVE
+      word
+    when Case.GENITIVE
+      if ayaWord()
+        stem + 'ой'
+      else if lemma.isSurname()
+        head + 'ой'
+      else if soft() or ['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'].includes(last(stem)) # soft, sibilant or velar
+        head + 'и'
+      else
+        head + 'ы'
+    when Case.DATIVE
+      if ayaWord()
+        stem + 'ой'
+      else if lemma.isSurname()
+        head + 'ой'
+      else if StemUtil.getLastTwoChars(word) is 'ия'
+        head + 'и'
+      else
+        head + 'е'
+    when Case.ACCUSATIVE
+      if ayaWord()
+        stem + 'ую'
+      else if soft()
+        head + 'ю'
+      else
+        head + 'у'
+    when Case.INSTRUMENTAL
+      if ayaWord()
+        stem + 'ой'
+      else if soft() or ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))
+        if 'и' == last(head)
+          head + 'ей'
+        else
+          [head + 'ей', head + 'ею']
+      else
+        [head + 'ой', head + 'ою']
+    when Case.PREPOSITIONAL
+      if ayaWord()
+        stem + 'ой'
+      else if lemma.isSurname()
+        head + 'ой'
+      else if StemUtil.getLastTwoChars(word) is 'ия'
+        head + 'и'
+      else
+        head + 'е'
+    when Case.LOCATIVE
+      decline2(lemma, Case.PREPOSITIONAL)
+
 decline3 = (word, grCase) ->
   if (word is 'мать') and not [Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)
     return decline3('матерь', grCase)
@@ -327,9 +388,6 @@ declineAsList = (lemma, grCase) ->
 
 decline = (lemma, grCase) ->
   word = lemma.text()
-  gender = lemma.gender()
-  stem = StemUtil.getNounStem word
-  head = StemUtil.getInit word
 
   if lemma.isIndeclinable() then return word
   if lemma.isPluraliaTantum()
@@ -349,61 +407,6 @@ decline = (lemma, grCase) ->
     when 1
       decline1(lemma, grCase)
     when 2
-      soft = ->
-        lastChar = last(word)
-        lastChar is 'я'
-      surnameLike = ->
-        word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
-      ayaWord = ->
-        word.endsWith('ая') and not ((word.length < 3) or isVowel(last(stem)))
-      switch grCase
-        when Case.NOMINATIVE
-          word
-        when Case.GENITIVE
-          if ayaWord()
-            stem + 'ой'
-          else if lemma.isSurname()
-            head + 'ой'
-          else if soft() or ['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'].includes(last(stem)) # soft, sibilant or velar
-            head + 'и'
-          else
-            head + 'ы'
-        when Case.DATIVE
-          if ayaWord()
-            stem + 'ой'
-          else if lemma.isSurname()
-            head + 'ой'
-          else if StemUtil.getLastTwoChars(word) is 'ия'
-            head + 'и'
-          else
-            head + 'е'
-        when Case.ACCUSATIVE
-          if ayaWord()
-            stem + 'ую'
-          else if soft()
-            head + 'ю'
-          else
-            head + 'у'
-        when Case.INSTRUMENTAL
-          if ayaWord()
-            stem + 'ой'
-          else if soft() or ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))
-            if 'и' == last(head)
-              head + 'ей'
-            else
-              [head + 'ей', head + 'ею']
-          else
-            [head + 'ой', head + 'ою']
-        when Case.PREPOSITIONAL
-          if ayaWord()
-            stem + 'ой'
-          else if lemma.isSurname()
-            head + 'ой'
-          else if StemUtil.getLastTwoChars(word) is 'ия'
-            head + 'и'
-          else
-            head + 'е'
-        when Case.LOCATIVE
-          decline(lemma, Case.PREPOSITIONAL)
+      decline2(lemma, grCase)
     when 3
       decline3(word, grCase)
