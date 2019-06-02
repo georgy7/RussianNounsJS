@@ -42,8 +42,28 @@ let mountain = RussianNouns.createLemma({
   ["горой", "горою"]
   ["горе"]
 ]
+
+RussianNouns.getDeclension(mountain);
+▸ 2
+
+let way = RussianNouns.createLemma({
+    text: 'путь',
+    gender: 'мужской'
+});
+
+RussianNouns.getDeclension(way);
+▸ 0
 ```
 
-*Demo:* https://georgy7.github.io/russian_nouns/ :point_left:
+**[Demo](https://georgy7.github.io/russian_nouns/)**  :point_left:
 
-Testing in web-browser (based on OpenCorpora): https://georgy7.github.io/russian_nouns/testing.html
+[Run tests in web-browser](https://georgy7.github.io/russian_nouns/testing.html) (based on OpenCorpora)
+
+## Features/bugs
+
+* Only singular declension.
+* The method getDeclension(lemma) returns 3 for "знамя", "вымя", etc. It works for singular.
+
+## Sources:
+- Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
+- Wikipedia: http://en.wikipedia.org/wiki/Russian_grammar
