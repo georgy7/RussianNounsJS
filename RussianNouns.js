@@ -40,11 +40,12 @@
         DATIVE: "дательный",
         ACCUSATIVE: "винительный",
         INSTRUMENTAL: "творительный",
-        PREPOSITIONAL: "предложный"
+        PREPOSITIONAL: "предложный",
+        LOCATIVE: "местный"
       };
     },
     caseList: function() {
-      return ["именительный", "родительный", "дательный", "винительный", "творительный", "предложный"];
+      return ["именительный", "родительный", "дательный", "винительный", "творительный", "предложный", "местный"];
     },
     declensions: function() {
       return {
@@ -238,7 +239,7 @@
   };
 
   decline1 = function(lemma, grCase) {
-    var a, checkWord, gender, head, iyWord, okWord, schWord, soft, stem, surnameType1, tsStem, tsWord, word;
+    var a, checkWord, gender, head, iyWord, okWord, schWord, soft, specialWords, stem, surnameType1, tsStem, tsWord, uWords, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
@@ -246,7 +247,7 @@
     soft = function() {
       var lastChar;
       lastChar = last(word);
-      return lastChar === 'ь' || (lastChar === 'е' && !word.endsWith('це'));
+      return lastChar === 'ь' || (['е', 'ё'].includes(lastChar) && !word.endsWith('це'));
     };
     iyWord = function() {
       return last(word) === 'й' || ['ий', 'ие'].includes(StemUtil.getLastTwoChars(word));
@@ -361,11 +362,32 @@
         } else {
           return stem + 'е';
         }
+        break;
+      case Case.LOCATIVE:
+        specialWords = {
+          'лёд': 'льду',
+          'лед': 'льду'
+        };
+        uWords = ['ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг', 'мел'];
+        if (specialWords.hasOwnProperty(word)) {
+          return specialWords[word];
+        }
+        if (uWords.includes(word)) {
+          if (last(word) === 'й') {
+            return word.substring(0, word.length - 1) + 'ю';
+          } else {
+            return word + 'у';
+          }
+        }
+        return decline1(lemma, Case.PREPOSITIONAL);
     }
   };
 
   decline3 = function(word, grCase) {
     var stem;
+    if ((word === 'мать') && ![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
+      return decline3('матерь', grCase);
+    }
     stem = StemUtil.getNounStem(word);
     if (StemUtil.getLastTwoChars(word) === 'мя') {
       switch (grCase) {
@@ -381,6 +403,8 @@
           return stem + 'енем';
         case Case.PREPOSITIONAL:
           return stem + 'ени';
+        case Case.LOCATIVE:
+          return decline3(word, Case.PREPOSITIONAL);
       }
     } else {
       switch (grCase) {
@@ -396,6 +420,8 @@
           return stem + 'ью';
         case Case.PREPOSITIONAL:
           return stem + 'и';
+        case Case.LOCATIVE:
+          return decline3(word, Case.PREPOSITIONAL);
       }
     }
   };
@@ -507,6 +533,9 @@
             } else {
               return head + 'е';
             }
+            break;
+          case Case.LOCATIVE:
+            return decline(lemma, Case.PREPOSITIONAL);
         }
         break;
       case 3:
