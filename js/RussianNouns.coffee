@@ -267,7 +267,8 @@ decline1 = (lemma, grCase) ->
 
       uWords = [
         'ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг',
-        'мел',
+        'мел', 'шкаф', 'быт', 'пол',
+        'полк', 'гроб'
       ]
 
       if specialWords.hasOwnProperty(word)
