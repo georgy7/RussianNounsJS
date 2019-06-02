@@ -69,7 +69,7 @@ RussianNouns =
     text: () -> @nominativeSingular
     isPluraliaTantum: () -> @pluraliaTantum
     isIndeclinable: () -> @indeclinable
-    isAnimate: () -> @animate
+    isAnimate: () -> @animate or @surname
     isSurname: () -> @surname
     gender: () -> @internalGender
   createLemma: (o) ->
