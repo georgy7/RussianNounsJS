@@ -70,6 +70,7 @@ RussianNouns.getDeclension(way);
 * Only in the singular.
 * The method getDeclension(lemma) returns 3 for "знамя", "вымя", etc. It works for singular.
 
-## Sources:
+## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
-- Wikipedia: http://en.wikipedia.org/wiki/Russian_grammar
+- http://en.wikipedia.org/wiki/Russian_grammar
+- К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254

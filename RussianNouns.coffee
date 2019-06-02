@@ -20,11 +20,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ###
 
-# Sources:
+# References:
 # - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
-# - Англоязычная википедия: http://en.wikipedia.org/wiki/Russian_grammar
-
-# https://github.com/georgy7/russian_nouns
+# - The article http://en.wikipedia.org/wiki/Russian_grammar
+# - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
 
 #------------------------------
@@ -264,10 +263,13 @@ decline1 = (lemma, grCase) ->
       specialWords =
         'лёд': 'льду'
         'лед': 'льду'
+        'угол': 'углу'
 
       uWords = [
         'ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг',
-        'мел',
+        'мел', 'шкаф', 'быт', 'пол', 'полк', 'гроб', 'тыл',
+        'мозг', 'верх', 'низ', 'зад', 'род', 'строй', 'круг',
+        'сад', 'бор', 'порт'
       ]
 
       if specialWords.hasOwnProperty(word)
@@ -280,6 +282,67 @@ decline1 = (lemma, grCase) ->
           return word + 'у'
 
       decline1(lemma, Case.PREPOSITIONAL)
+
+decline2 = (lemma, grCase) ->
+  word = lemma.text()
+  stem = StemUtil.getNounStem word
+  head = StemUtil.getInit word
+  soft = ->
+    lastChar = last(word)
+    lastChar is 'я'
+  surnameLike = ->
+    word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
+  ayaWord = ->
+    word.endsWith('ая') and not ((word.length < 3) or isVowel(last(stem)))
+  switch grCase
+    when Case.NOMINATIVE
+      word
+    when Case.GENITIVE
+      if ayaWord()
+        stem + 'ой'
+      else if lemma.isSurname()
+        head + 'ой'
+      else if soft() or ['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'].includes(last(stem)) # soft, sibilant or velar
+        head + 'и'
+      else
+        head + 'ы'
+    when Case.DATIVE
+      if ayaWord()
+        stem + 'ой'
+      else if lemma.isSurname()
+        head + 'ой'
+      else if StemUtil.getLastTwoChars(word) is 'ия'
+        head + 'и'
+      else
+        head + 'е'
+    when Case.ACCUSATIVE
+      if ayaWord()
+        stem + 'ую'
+      else if soft()
+        head + 'ю'
+      else
+        head + 'у'
+    when Case.INSTRUMENTAL
+      if ayaWord()
+        stem + 'ой'
+      else if soft() or ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))
+        if 'и' == last(head)
+          head + 'ей'
+        else
+          [head + 'ей', head + 'ею']
+      else
+        [head + 'ой', head + 'ою']
+    when Case.PREPOSITIONAL
+      if ayaWord()
+        stem + 'ой'
+      else if lemma.isSurname()
+        head + 'ой'
+      else if StemUtil.getLastTwoChars(word) is 'ия'
+        head + 'и'
+      else
+        head + 'е'
+    when Case.LOCATIVE
+      decline2(lemma, Case.PREPOSITIONAL)
 
 decline3 = (word, grCase) ->
   if (word is 'мать') and not [Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)
@@ -326,9 +389,6 @@ declineAsList = (lemma, grCase) ->
 
 decline = (lemma, grCase) ->
   word = lemma.text()
-  gender = lemma.gender()
-  stem = StemUtil.getNounStem word
-  head = StemUtil.getInit word
 
   if lemma.isIndeclinable() then return word
   if lemma.isPluraliaTantum()
@@ -348,61 +408,6 @@ decline = (lemma, grCase) ->
     when 1
       decline1(lemma, grCase)
     when 2
-      soft = ->
-        lastChar = last(word)
-        lastChar is 'я'
-      surnameLike = ->
-        word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
-      ayaWord = ->
-        word.endsWith('ая') and not ((word.length < 3) or isVowel(last(stem)))
-      switch grCase
-        when Case.NOMINATIVE
-          word
-        when Case.GENITIVE
-          if ayaWord()
-            stem + 'ой'
-          else if lemma.isSurname()
-            head + 'ой'
-          else if soft() or ['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'].includes(last(stem)) # soft, sibilant or velar
-            head + 'и'
-          else
-            head + 'ы'
-        when Case.DATIVE
-          if ayaWord()
-            stem + 'ой'
-          else if lemma.isSurname()
-            head + 'ой'
-          else if StemUtil.getLastTwoChars(word) is 'ия'
-            head + 'и'
-          else
-            head + 'е'
-        when Case.ACCUSATIVE
-          if ayaWord()
-            stem + 'ую'
-          else if soft()
-            head + 'ю'
-          else
-            head + 'у'
-        when Case.INSTRUMENTAL
-          if ayaWord()
-            stem + 'ой'
-          else if soft() or ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))
-            if 'и' == last(head)
-              head + 'ей'
-            else
-              [head + 'ей', head + 'ею']
-          else
-            [head + 'ой', head + 'ою']
-        when Case.PREPOSITIONAL
-          if ayaWord()
-            stem + 'ой'
-          else if lemma.isSurname()
-            head + 'ой'
-          else if StemUtil.getLastTwoChars(word) is 'ия'
-            head + 'и'
-          else
-            head + 'е'
-        when Case.LOCATIVE
-          decline(lemma, Case.PREPOSITIONAL)
+      decline2(lemma, grCase)
     when 3
       decline3(word, grCase)

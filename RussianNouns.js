@@ -21,13 +21,12 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
   */
-  var Case, Gender, Lemma, RussianNouns, StemUtil, consonantsExceptJ, decline, decline1, decline3, declineAsList, getDeclension, initial, isVowel, last, lastN, misc, vowels;
+  var Case, Gender, Lemma, RussianNouns, StemUtil, consonantsExceptJ, decline, decline1, decline2, decline3, declineAsList, getDeclension, initial, isVowel, last, lastN, misc, vowels;
 
-  // Sources:
+  // References:
   // - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
-  // - Англоязычная википедия: http://en.wikipedia.org/wiki/Russian_grammar
-
-  // https://github.com/georgy7/russian_nouns
+  // - The article http://en.wikipedia.org/wiki/Russian_grammar
+  // - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
   //------------------------------
   // API
@@ -366,9 +365,10 @@
       case Case.LOCATIVE:
         specialWords = {
           'лёд': 'льду',
-          'лед': 'льду'
+          'лед': 'льду',
+          'угол': 'углу'
         };
-        uWords = ['ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг', 'мел'];
+        uWords = ['ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг', 'мел', 'шкаф', 'быт', 'пол', 'полк', 'гроб', 'тыл', 'мозг', 'верх', 'низ', 'зад', 'род', 'строй', 'круг', 'сад', 'бор', 'порт'];
         if (specialWords.hasOwnProperty(word)) {
           return specialWords[word];
         }
@@ -380,6 +380,85 @@
           }
         }
         return decline1(lemma, Case.PREPOSITIONAL);
+    }
+  };
+
+  decline2 = function(lemma, grCase) {
+    var ayaWord, head, soft, stem, surnameLike, word;
+    word = lemma.text();
+    stem = StemUtil.getNounStem(word);
+    head = StemUtil.getInit(word);
+    soft = function() {
+      var lastChar;
+      lastChar = last(word);
+      return lastChar === 'я';
+    };
+    surnameLike = function() {
+      return word.endsWith('ова') || word.endsWith('ева') || (word.endsWith('ина') && !word.endsWith('стина'));
+    };
+    ayaWord = function() {
+      return word.endsWith('ая') && !((word.length < 3) || isVowel(last(stem)));
+    };
+    switch (grCase) {
+      case Case.NOMINATIVE:
+        return word;
+      case Case.GENITIVE:
+        if (ayaWord()) {
+          return stem + 'ой';
+        } else if (lemma.isSurname()) {
+          return head + 'ой';
+        } else if (soft() || ['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'].includes(last(stem))) { // soft, sibilant or velar
+          return head + 'и';
+        } else {
+          return head + 'ы';
+        }
+        break;
+      case Case.DATIVE:
+        if (ayaWord()) {
+          return stem + 'ой';
+        } else if (lemma.isSurname()) {
+          return head + 'ой';
+        } else if (StemUtil.getLastTwoChars(word) === 'ия') {
+          return head + 'и';
+        } else {
+          return head + 'е';
+        }
+        break;
+      case Case.ACCUSATIVE:
+        if (ayaWord()) {
+          return stem + 'ую';
+        } else if (soft()) {
+          return head + 'ю';
+        } else {
+          return head + 'у';
+        }
+        break;
+      case Case.INSTRUMENTAL:
+        if (ayaWord()) {
+          return stem + 'ой';
+        } else if (soft() || ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))) {
+          if ('и' === last(head)) {
+            return head + 'ей';
+          } else {
+            return [head + 'ей', head + 'ею'];
+          }
+        } else {
+          return [head + 'ой', head + 'ою'];
+        }
+        break;
+      case Case.PREPOSITIONAL:
+        if (ayaWord()) {
+          return stem + 'ой';
+        } else if (lemma.isSurname()) {
+          return head + 'ой';
+        } else if (StemUtil.getLastTwoChars(word) === 'ия') {
+          return head + 'и';
+        } else {
+          return head + 'е';
+        }
+        break;
+      case Case.LOCATIVE:
+        return decline2(lemma, Case.PREPOSITIONAL);
     }
   };
 
@@ -436,11 +515,8 @@
   };
 
   decline = function(lemma, grCase) {
-    var ayaWord, declension, gender, head, soft, stem, surnameLike, word;
+    var declension, word;
     word = lemma.text();
-    gender = lemma.gender();
-    stem = StemUtil.getNounStem(word);
-    head = StemUtil.getInit(word);
     if (lemma.isIndeclinable()) {
       return word;
     }
@@ -465,79 +541,7 @@
       case 1:
         return decline1(lemma, grCase);
       case 2:
-        soft = function() {
-          var lastChar;
-          lastChar = last(word);
-          return lastChar === 'я';
-        };
-        surnameLike = function() {
-          return word.endsWith('ова') || word.endsWith('ева') || (word.endsWith('ина') && !word.endsWith('стина'));
-        };
-        ayaWord = function() {
-          return word.endsWith('ая') && !((word.length < 3) || isVowel(last(stem)));
-        };
-        switch (grCase) {
-          case Case.NOMINATIVE:
-            return word;
-          case Case.GENITIVE:
-            if (ayaWord()) {
-              return stem + 'ой';
-            } else if (lemma.isSurname()) {
-              return head + 'ой';
-            } else if (soft() || ['ч', 'ж', 'ш', 'щ', 'г', 'к', 'х'].includes(last(stem))) { // soft, sibilant or velar
-              return head + 'и';
-            } else {
-              return head + 'ы';
-            }
-            break;
-          case Case.DATIVE:
-            if (ayaWord()) {
-              return stem + 'ой';
-            } else if (lemma.isSurname()) {
-              return head + 'ой';
-            } else if (StemUtil.getLastTwoChars(word) === 'ия') {
-              return head + 'и';
-            } else {
-              return head + 'е';
-            }
-            break;
-          case Case.ACCUSATIVE:
-            if (ayaWord()) {
-              return stem + 'ую';
-            } else if (soft()) {
-              return head + 'ю';
-            } else {
-              return head + 'у';
-            }
-            break;
-          case Case.INSTRUMENTAL:
-            if (ayaWord()) {
-              return stem + 'ой';
-            } else if (soft() || ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))) {
-              if ('и' === last(head)) {
-                return head + 'ей';
-              } else {
-                return [head + 'ей', head + 'ею'];
-              }
-            } else {
-              return [head + 'ой', head + 'ою'];
-            }
-            break;
-          case Case.PREPOSITIONAL:
-            if (ayaWord()) {
-              return stem + 'ой';
-            } else if (lemma.isSurname()) {
-              return head + 'ой';
-            } else if (StemUtil.getLastTwoChars(word) === 'ия') {
-              return head + 'и';
-            } else {
-              return head + 'е';
-            }
-            break;
-          case Case.LOCATIVE:
-            return decline(lemma, Case.PREPOSITIONAL);
-        }
-        break;
+        return decline2(lemma, grCase);
       case 3:
         return decline3(word, grCase);
     }
