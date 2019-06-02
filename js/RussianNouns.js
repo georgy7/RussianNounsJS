@@ -23,11 +23,10 @@
   */
   var Case, Gender, Lemma, RussianNouns, StemUtil, consonantsExceptJ, decline, decline1, decline2, decline3, declineAsList, getDeclension, initial, isVowel, last, lastN, misc, vowels;
 
-  // Sources:
+  // References:
   // - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
-  // - Англоязычная википедия: http://en.wikipedia.org/wiki/Russian_grammar
-
-  // https://github.com/georgy7/russian_nouns
+  // - The article http://en.wikipedia.org/wiki/Russian_grammar
+  // - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
   //------------------------------
   // API
@@ -366,9 +365,10 @@
       case Case.LOCATIVE:
         specialWords = {
           'лёд': 'льду',
-          'лед': 'льду'
+          'лед': 'льду',
+          'угол': 'углу'
         };
-        uWords = ['ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг', 'мел', 'шкаф', 'быт', 'пол', 'полк', 'гроб'];
+        uWords = ['ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг', 'мел', 'шкаф', 'быт', 'пол', 'полк', 'гроб', 'тыл', 'мозг', 'верх', 'низ', 'зад', 'род', 'строй', 'круг', 'сад', 'бор', 'порт'];
         if (specialWords.hasOwnProperty(word)) {
           return specialWords[word];
         }
