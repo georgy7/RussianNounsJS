@@ -91,7 +91,7 @@
       }
 
       isAnimate() {
-        return this.animate;
+        return this.animate || this.surname;
       }
 
       isSurname() {
