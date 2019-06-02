@@ -132,12 +132,6 @@ StemUtil =
     if s.length <= 1 then return ''
     s.substring(s.length - 2, s.length)
 
-###* 
-Определяет склонение существительных
-@param word слово в именительном падеже
-@param gender пол
-@returns {integer} склонение (см. Declension)
-###
 getDeclension = (lemma) ->
   word = lemma.text()
   gender = lemma.gender()

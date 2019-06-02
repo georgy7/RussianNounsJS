@@ -21,12 +21,6 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
   */
-  /** 
-  Определяет склонение существительных
-  @param word слово в именительном падеже
-  @param gender пол
-  @returns {integer} склонение (см. Declension)
-  */
   var Case, Gender, Lemma, RussianNouns, StemUtil, consonantsExceptJ, decline, decline1, decline3, declineAsList, getDeclension, initial, isVowel, last, lastN, misc, vowels;
 
   // Sources:
