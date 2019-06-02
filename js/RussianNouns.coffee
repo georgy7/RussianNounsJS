@@ -358,7 +358,10 @@ decline = (lemma, grCase) ->
           if ayaWord()
             stem + 'ой'
           else if soft() or ['ц', 'ч', 'ж', 'ш', 'щ'].includes(last(stem))
-            [head + 'ей', head + 'ею']
+            if 'и' == last(head)
+              head + 'ей'
+            else
+              [head + 'ей', head + 'ею']
           else
             [head + 'ой', head + 'ою']
         when Case.PREPOSITIONAL
