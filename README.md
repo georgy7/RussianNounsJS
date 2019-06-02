@@ -8,7 +8,7 @@ RussianNouns.genders();
 RussianNouns.decline({text: 'имя', gender: 'средний'}, 'родительный');
 ▸ ['имени']
 
-RussianNouns.decline({text: 'вымя', gender: 'средний'}, 'творительный');
+RussianNouns.decline({text: 'имя', gender: 'средний'}, 'творительный');
 ▸ ['именем']
 
 const genders = RussianNouns.genders();
