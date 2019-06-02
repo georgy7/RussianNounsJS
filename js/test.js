@@ -7,7 +7,7 @@ var workerIndex, letterIndex;
 
 var main = function() {
 
-let cases = RussianNouns.caseList().slice(0, 6);
+let cases = RussianNouns.caseList();
 
 var wrongCases = 0;
 var wrongWords = 0;
@@ -129,16 +129,27 @@ function test(data, gender, loadingStepCompleted) {
 		
 		var wordIsWrong = false;
 		var wordHasWarning = false;
-		for (var j = 0; j < cases.length; j++) {
+		for (var j = 0; j < 6; j++) {
 			var c = cases[j];
 			var expected = expResults[j];
 			
 			try {
-				var actual = RussianNouns.decline(lemma, c);
+                var actual = RussianNouns.decline(lemma, c);
+
+			    if (5 === j) {
+			        let locative = RussianNouns.decline(lemma, cases[6]);
+			        for (const x of locative) {
+			            if (!actual.includes(x)) {
+			                actual.push(x);
+                        }
+                    }
+                }
+
 			} catch(e) {
 				var actual = ['-----'];
 				if (e.message !== "unsupported") throw e;
 			}
+
 			var sameCount = (_.uniq(actual).length == _.uniq(expected).length);
 			var everyExpectedIsInActual = expected.every(function (e) {
 				return actual.indexOf(e) >= 0;
