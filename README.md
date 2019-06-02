@@ -61,7 +61,7 @@ RussianNouns.getDeclension(way);
 
 ## Features/bugs
 
-* Only singular declension.
+* Only in the singular.
 * The method getDeclension(lemma) returns 3 for "знамя", "вымя", etc. It works for singular.
 
 ## Sources:
