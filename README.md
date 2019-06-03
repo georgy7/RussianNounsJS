@@ -36,9 +36,7 @@ let mountain = RussianNouns.createLemma({
     gender: 'женский'
 });
 
-RussianNouns.caseList().map(c => {
-    return RussianNouns.decline(mountain, c);
-});
+RussianNouns.caseList().map(c => RussianNouns.decline(mountain, c));
 ▸ [
   ["гора"]
   ["горы"]
