@@ -74,3 +74,7 @@ RussianNouns.getDeclension(way);
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
 - http://en.wikipedia.org/wiki/Russian_grammar
 - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
+
+## Similar software
+
+- [Petrovich — An inflector for Russian anthroponyms](https://github.com/petrovich)
