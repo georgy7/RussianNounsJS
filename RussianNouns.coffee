@@ -32,7 +32,7 @@ SOFTWARE.
 #------------------------------
 
 RussianNouns =
-  cases: () ->
+  cases: () =>
     NOMINATIVE: "именительный"
     GENITIVE: "родительный"
     DATIVE: "дательный"
@@ -40,7 +40,7 @@ RussianNouns =
     INSTRUMENTAL: "творительный"
     PREPOSITIONAL: "предложный"
     LOCATIVE: "местный"
-  caseList: () ->
+  caseList: () =>
     [
       "именительный",
       "родительный",
@@ -50,12 +50,12 @@ RussianNouns =
       "предложный",
       "местный"
     ]
-  declensions: () ->
+  declensions: () =>
     0: 'разносклоняемые "путь" и "дитя"'
     1: 'муж., средний род без окончания'
     2: 'слова на "а", "я" (м., ж. и общий род)'
     3: 'жен. род без окончания, слова на "мя"'
-  genders: () ->
+  genders: () =>
     "FEMININE": "женский"
     "MASCULINE": "мужской"
     "NEUTER": "средний"
@@ -74,16 +74,16 @@ RussianNouns =
     isAnimate: () -> @animate or @surname
     isSurname: () -> @surname
     gender: () -> @internalGender
-  createLemma: (o) ->
+  createLemma: (o) =>
     return o if o instanceof RussianNouns.Lemma
     new RussianNouns.Lemma(o.text, o.gender, o.pluraliaTantum, o.indeclinable, o.animate, o.surname)
-  getDeclension: (lemma) ->
+  getDeclension: (lemma) =>
     getDeclension(RussianNouns.createLemma(lemma))
   ###
   # Возвращает список, т.к. бывают "вторые" родительный, винительный и предложный падежи.
   # Также, сущ. ж. р. в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
   ###
-  decline: (lemma, grammaticalCase) ->
+  decline: (lemma, grammaticalCase) =>
     declineAsList(RussianNouns.createLemma(lemma), grammaticalCase)
 
 window.RussianNouns = RussianNouns
@@ -96,45 +96,45 @@ Case = RussianNouns.cases()
 Gender = RussianNouns.genders()
 
 misc =
-  requiredString: (v) ->
+  requiredString: (v) =>
     if(typeof v != "string")
       throw new Error(v + " is not a string.")
 
 consonantsExceptJ = ['б', 'в', 'г', 'д', 'ж', 'з', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ']
 vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и']
-isVowel = (character) ->
+isVowel = (character) =>
   vowels.includes(character)
 
-last = (str) ->
+last = (str) =>
   if str
     str[str.length - 1]
-lastN = (str, n) ->
+lastN = (str, n) =>
   str.substring(str.length - n)
-initial = (s) ->
+initial = (s) =>
   if s.length <= 1 then return ''
   s.substring(0, s.length - 1)
 
 StemUtil =
 ###* Доп. проверки для стеммера ###
-  getNounStem: (word) ->
+  getNounStem: (word) =>
     lastChar = last(word)
     if consonantsExceptJ.includes(lastChar) then return word
     if 'ь' == lastChar then return initial(word)
     if 'ь' == last(initial(word)) then return initial(word)
     if 'о' == lastChar and ['л', 'м', 'н', 'т', 'х', 'в', 'с'].includes(last(initial(word))) then return initial(word)
     StemUtil.getStem word
-  getStem: (word) ->
+  getStem: (word) =>
     c = last(word)
     return initial(initial(word)) if ('й' == c or isVowel(c)) and isVowel(last(initial(word)))
     return initial(word) if isVowel(c)
     return word
-  getInit: (s) ->
+  getInit: (s) =>
     initial(s)
-  getLastTwoChars: (s) ->
+  getLastTwoChars: (s) =>
     if s.length <= 1 then return ''
     s.substring(s.length - 2, s.length)
 
-getDeclension = (lemma) ->
+getDeclension = (lemma) =>
   word = lemma.text()
   gender = lemma.gender()
   misc.requiredString(word)
@@ -160,25 +160,25 @@ getDeclension = (lemma) ->
     else
       throw new Error("incorrect gender")
 
-decline1 = (lemma, grCase) ->
+decline1 = (lemma, grCase) =>
   word = lemma.text()
   gender = lemma.gender()
   stem = StemUtil.getNounStem word
   head = initial(word)
-  soft = ->
+  soft = =>
     lastChar = last(word)
     lastChar is 'ь' or (['е', 'ё'].includes(lastChar) and !word.endsWith('це'))
-  iyWord = ->
+  iyWord = =>
     last(word) is 'й' or ['ий', 'ие'].includes(StemUtil.getLastTwoChars(word))
-  schWord = ->
+  schWord = =>
     ['ч', 'щ'].includes(last(stem))
-  tsWord = ->
+  tsWord = =>
     last(word) is 'ц'
-  checkWord = ->
+  checkWord = =>
     word.endsWith('чек') and word.length >= 6
-  okWord = ->
+  okWord = =>
     checkWord() or (word.endsWith('ок') and not word.endsWith('шок') and !(word == 'урок') and not isVowel(word[word.length - 3]) and isVowel(word[word.length - 4]) and word.length >= 4)
-  tsStem = ->
+  tsStem = =>
     if 'а' == word[word.length - 2]
       head
     else if lastN(head, 2) == 'ле'
@@ -190,7 +190,7 @@ decline1 = (lemma, grCase) ->
         word.substring(0, word.length - 2)
     else
       word.substring(0, word.length - 1)
-  surnameType1 = ->
+  surnameType1 = =>
     lemma.isSurname() and (word.endsWith('ин') or word.endsWith('ов') or word.endsWith('ев'))
   switch grCase
     when Case.NOMINATIVE
@@ -284,16 +284,16 @@ decline1 = (lemma, grCase) ->
 
       decline1(lemma, Case.PREPOSITIONAL)
 
-decline2 = (lemma, grCase) ->
+decline2 = (lemma, grCase) =>
   word = lemma.text()
   stem = StemUtil.getNounStem word
   head = StemUtil.getInit word
-  soft = ->
+  soft = =>
     lastChar = last(word)
     lastChar is 'я'
-  surnameLike = ->
+  surnameLike = =>
     word.endsWith('ова') or word.endsWith('ева') or (word.endsWith('ина') and not word.endsWith('стина'))
-  ayaWord = ->
+  ayaWord = =>
     word.endsWith('ая') and not ((word.length < 3) or isVowel(last(stem)))
   switch grCase
     when Case.NOMINATIVE
@@ -345,7 +345,7 @@ decline2 = (lemma, grCase) ->
     when Case.LOCATIVE
       decline2(lemma, Case.PREPOSITIONAL)
 
-decline3 = (word, grCase) ->
+decline3 = (word, grCase) =>
   if (word is 'мать') and not [Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)
     return decline3('матерь', grCase)
 
@@ -383,12 +383,12 @@ decline3 = (word, grCase) ->
       when Case.LOCATIVE
         decline3(word, Case.PREPOSITIONAL)
 
-declineAsList = (lemma, grCase) ->
+declineAsList = (lemma, grCase) =>
   r = decline(lemma, grCase)
   return r if r instanceof Array
   [r]
 
-decline = (lemma, grCase) ->
+decline = (lemma, grCase) =>
   word = lemma.text()
 
   if lemma.isIndeclinable() then return word
