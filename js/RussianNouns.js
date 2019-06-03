@@ -26,13 +26,13 @@
   // References:
   // - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
   // - The article http://en.wikipedia.org/wiki/Russian_grammar
-  // - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
+  // - К семантике русского локатива - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
   //------------------------------
   // API
   //------------------------------
   RussianNouns = {
-    cases: function() {
+    cases: () => {
       return {
         NOMINATIVE: "именительный",
         GENITIVE: "родительный",
@@ -43,10 +43,10 @@
         LOCATIVE: "местный"
       };
     },
-    caseList: function() {
+    caseList: () => {
       return ["именительный", "родительный", "дательный", "винительный", "творительный", "предложный", "местный"];
     },
-    declensions: function() {
+    declensions: () => {
       return {
         0: 'разносклоняемые "путь" и "дитя"',
         1: 'муж., средний род без окончания',
@@ -54,7 +54,7 @@
         3: 'жен. род без окончания, слова на "мя"'
       };
     },
-    genders: function() {
+    genders: () => {
       return {
         "FEMININE": "женский",
         "MASCULINE": "мужской",
@@ -103,20 +103,20 @@
       }
 
     },
-    createLemma: function(o) {
+    createLemma: (o) => {
       if (o instanceof RussianNouns.Lemma) {
         return o;
       }
       return new RussianNouns.Lemma(o.text, o.gender, o.pluraliaTantum, o.indeclinable, o.animate, o.surname);
     },
-    getDeclension: function(lemma) {
+    getDeclension: (lemma) => {
       return getDeclension(RussianNouns.createLemma(lemma));
     },
     /*
      * Возвращает список, т.к. бывают "вторые" родительный, винительный и предложный падежи.
      * Также, сущ. ж. р. в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
      */
-    decline: function(lemma, grammaticalCase) {
+    decline: (lemma, grammaticalCase) => {
       return declineAsList(RussianNouns.createLemma(lemma), grammaticalCase);
     }
   };
@@ -131,7 +131,7 @@
   Gender = RussianNouns.genders();
 
   misc = {
-    requiredString: function(v) {
+    requiredString: (v) => {
       if (typeof v !== "string") {
         throw new Error(v + " is not a string.");
       }
@@ -142,21 +142,21 @@
 
   vowels = ['а', 'о', 'у', 'э', 'ы', 'я', 'ё', 'ю', 'е', 'и'];
 
-  isVowel = function(character) {
+  isVowel = (character) => {
     return vowels.includes(character);
   };
 
-  last = function(str) {
+  last = (str) => {
     if (str) {
       return str[str.length - 1];
     }
   };
 
-  lastN = function(str, n) {
+  lastN = (str, n) => {
     return str.substring(str.length - n);
   };
 
-  initial = function(s) {
+  initial = (s) => {
     if (s.length <= 1) {
       return '';
     }
@@ -165,7 +165,7 @@
 
   StemUtil = {
     /** Доп. проверки для стеммера */
-    getNounStem: function(word) {
+    getNounStem: (word) => {
       var lastChar;
       lastChar = last(word);
       if (consonantsExceptJ.includes(lastChar)) {
@@ -182,7 +182,7 @@
       }
       return StemUtil.getStem(word);
     },
-    getStem: function(word) {
+    getStem: (word) => {
       var c;
       c = last(word);
       if (('й' === c || isVowel(c)) && isVowel(last(initial(word)))) {
@@ -193,10 +193,10 @@
       }
       return word;
     },
-    getInit: function(s) {
+    getInit: (s) => {
       return initial(s);
     },
-    getLastTwoChars: function(s) {
+    getLastTwoChars: (s) => {
       if (s.length <= 1) {
         return '';
       }
@@ -204,7 +204,7 @@
     }
   };
 
-  getDeclension = function(lemma) {
+  getDeclension = (lemma) => {
     var gender, t, word;
     word = lemma.text();
     gender = lemma.gender();
@@ -237,33 +237,33 @@
     }
   };
 
-  decline1 = function(lemma, grCase) {
+  decline1 = (lemma, grCase) => {
     var a, checkWord, gender, head, iyWord, okWord, schWord, soft, specialWords, stem, surnameType1, tsStem, tsWord, uWords, word;
     word = lemma.text();
     gender = lemma.gender();
     stem = StemUtil.getNounStem(word);
     head = initial(word);
-    soft = function() {
+    soft = () => {
       var lastChar;
       lastChar = last(word);
       return lastChar === 'ь' || (['е', 'ё'].includes(lastChar) && !word.endsWith('це'));
     };
-    iyWord = function() {
+    iyWord = () => {
       return last(word) === 'й' || ['ий', 'ие'].includes(StemUtil.getLastTwoChars(word));
     };
-    schWord = function() {
+    schWord = () => {
       return ['ч', 'щ'].includes(last(stem));
     };
-    tsWord = function() {
+    tsWord = () => {
       return last(word) === 'ц';
     };
-    checkWord = function() {
+    checkWord = () => {
       return word.endsWith('чек') && word.length >= 6;
     };
-    okWord = function() {
+    okWord = () => {
       return checkWord() || (word.endsWith('ок') && !word.endsWith('шок') && !(word === 'урок') && !isVowel(word[word.length - 3]) && isVowel(word[word.length - 4]) && word.length >= 4);
     };
-    tsStem = function() {
+    tsStem = () => {
       if ('а' === word[word.length - 2]) {
         return head;
       } else if (lastN(head, 2) === 'ле') {
@@ -278,7 +278,7 @@
         return word.substring(0, word.length - 1);
       }
     };
-    surnameType1 = function() {
+    surnameType1 = () => {
       return lemma.isSurname() && (word.endsWith('ин') || word.endsWith('ов') || word.endsWith('ев'));
     };
     switch (grCase) {
@@ -383,20 +383,20 @@
     }
   };
 
-  decline2 = function(lemma, grCase) {
+  decline2 = (lemma, grCase) => {
     var ayaWord, head, soft, stem, surnameLike, word;
     word = lemma.text();
     stem = StemUtil.getNounStem(word);
     head = StemUtil.getInit(word);
-    soft = function() {
+    soft = () => {
       var lastChar;
       lastChar = last(word);
       return lastChar === 'я';
     };
-    surnameLike = function() {
+    surnameLike = () => {
       return word.endsWith('ова') || word.endsWith('ева') || (word.endsWith('ина') && !word.endsWith('стина'));
     };
-    ayaWord = function() {
+    ayaWord = () => {
       return word.endsWith('ая') && !((word.length < 3) || isVowel(last(stem)));
     };
     switch (grCase) {
@@ -462,7 +462,7 @@
     }
   };
 
-  decline3 = function(word, grCase) {
+  decline3 = (word, grCase) => {
     var stem;
     if ((word === 'мать') && ![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
       return decline3('матерь', grCase);
@@ -505,7 +505,7 @@
     }
   };
 
-  declineAsList = function(lemma, grCase) {
+  declineAsList = (lemma, grCase) => {
     var r;
     r = decline(lemma, grCase);
     if (r instanceof Array) {
@@ -514,7 +514,7 @@
     return [r];
   };
 
-  decline = function(lemma, grCase) {
+  decline = (lemma, grCase) => {
     var declension, word;
     word = lemma.text();
     if (lemma.isIndeclinable()) {
