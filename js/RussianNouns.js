@@ -285,7 +285,12 @@
             if ('а' === word[word.length - 2]) {
                 return head;
             } else if (lastN(head, 2) === 'ле') {
-                return initial(head) + 'ь';
+                const beforeLe = last(initial(initial(head)));
+                if (isVowel(beforeLe) || ('л' === beforeLe)) {
+                    return initial(head) + 'ь';
+                } else {
+                    return head;
+                }
             } else if (isVowel(word[word.length - 2])) {
                 if (isVowel(word[word.length - 3])) {
                     return word.substring(0, word.length - 2) + 'й';
@@ -387,7 +392,7 @@
                     'ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг',
                     'мел', 'шкаф', 'быт', 'пол', 'полк', 'гроб', 'тыл',
                     'мозг', 'верх', 'низ', 'зад', 'род', 'строй', 'круг',
-                    'сад', 'бор', 'порт'
+                    'сад', 'бор', 'порт', 'лад'
                 ];
                 if (specialWords.hasOwnProperty(word)) {
                     return specialWords[word];
