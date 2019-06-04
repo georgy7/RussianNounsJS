@@ -62,27 +62,26 @@ RussianNouns.getDeclension(way);
 ```js
 const rn = RussianNouns;
 const getCaseByNumber = (n) => rn.caseList()[n - 1];
+const declineSimple = (word, caseNumber) => rn.decline(word, getCaseByNumber(caseNumber))[0];
 const Gender = rn.genders();
 
-let отец = {text: 'отец', gender: Gender.MASCULINE};
-let генерал = {text: 'генерал', gender: Gender.MASCULINE};
+let отец = {text: 'отец', gender: Gender.MASCULINE, animate: true};
+let генерал = {text: 'генерал', gender: Gender.MASCULINE, animate: true};
 let дуэль = {text: 'дуэль', gender: Gender.FEMININE};
-let подлец = {text: 'подлец', gender: Gender.MASCULINE};
+let подлец = {text: 'подлец', gender: Gender.MASCULINE, animate: true};
 let сердце = {text: 'сердце', gender: Gender.NEUTER};
 
 `
-Ваш ${rn.decline(отец, getCaseByNumber(1))[0]} вызвал ${rn.decline(генерал, getCaseByNumber(2))[0]}
-на ${rn.decline(дуэль, getCaseByNumber(4))[0]}, ${rn.decline(генерал, getCaseByNumber(1))[0]} назвал его... извините,
-${rn.decline(подлец, getCaseByNumber(5))[0]}... Потеха была! Мы напоили после их пьяными и помирили...
-Нет ничего легче, как мирить русских людей... Добряк был ваш ${rn.decline(отец, getCaseByNumber(1))[0]},
-доброе имел ${rn.decline(сердце, getCaseByNumber(4))[0]}.
+Ваш ${declineSimple(отец, 1)} вызвал ${declineSimple(генерал, 2)} на ${declineSimple(дуэль, 4)},
+${declineSimple(генерал, 1)} назвал его... извините, ${declineSimple(подлец, 5)}... Потеха была!
+Мы напоили после их пьяными и помирили... Нет ничего легче, как мирить русских людей...
+Добряк был ваш ${declineSimple(отец, 1)}, доброе имел ${declineSimple(сердце, 4)}.
 `
 ▸ "
-Ваш отец вызвал генерала
-на дуэль, генерал назвал его... извините,
-подльцем... Потеха была! Мы напоили после их пьяными и помирили...
-Нет ничего легче, как мирить русских людей... Добряк был ваш отец,
-доброе имел сердце.
+Ваш отец вызвал генерала на дуэль,
+генерал назвал его... извините, подльцем... Потеха была!
+Мы напоили после их пьяными и помирили... Нет ничего легче, как мирить русских людей...
+Добряк был ваш отец, доброе имел сердце.
 "
 ```
 **[Demo](https://georgy7.github.io/russian_nouns/)**  :point_left:
