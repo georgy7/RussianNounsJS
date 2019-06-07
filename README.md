@@ -84,9 +84,9 @@ ${declineSimple(генерал, 1)} назвал его... извините, ${d
 Добряк был ваш отец, доброе имел сердце.
 "
 ```
-**[Demo](https://georgy7.github.io/russian_nouns/)**  :point_left:
+**[Demo](https://georgy7.github.io/RussianNounsJS/)**  :point_left:
 
-[Run tests in web-browser](https://georgy7.github.io/russian_nouns/testing.html) (based on OpenCorpora)
+[Run tests in web-browser](https://georgy7.github.io/RussianNounsJS/testing.html) (based on OpenCorpora)
 
 ## Features/bugs
 
