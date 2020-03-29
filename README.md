@@ -65,24 +65,32 @@ const getCaseByNumber = (n) => rn.caseList()[n - 1];
 const declineSimple = (word, caseNumber) => rn.decline(word, getCaseByNumber(caseNumber))[0];
 const Gender = rn.genders();
 
-let отец = {text: 'отец', gender: Gender.MASCULINE, animate: true};
-let генерал = {text: 'генерал', gender: Gender.MASCULINE, animate: true};
-let дуэль = {text: 'дуэль', gender: Gender.FEMININE};
-let подлец = {text: 'подлец', gender: Gender.MASCULINE, animate: true};
-let сердце = {text: 'сердце', gender: Gender.NEUTER};
+`Когда мне было 5 лет,
+${declineSimple({text: 'мама', gender: Gender.FEMININE, animate: true}, 1)} всегда говорила,
+что главное в ${declineSimple({text: 'жизнь', gender: Gender.FEMININE}, 7)} –
+${declineSimple({text: 'счастье', gender: Gender.NEUTER}, 1)}. Когда я пошел
+в ${declineSimple({text: 'школа', gender: Gender.FEMININE}, 4)},
+на ${declineSimple({text: 'вопрос', gender: Gender.MASCULINE}, 4)}, кем я хочу быть,
+когда вырасту, я ответил
+“счастливым ${declineSimple({text: 'человек', gender: Gender.MASCULINE, animate: true}, 5)}”.
+Мне тогда сказали, что я не понимаю
+${declineSimple({text: 'вопрос', gender: Gender.MASCULINE}, 4)}, а я ответил, что это они
+не понимают ${declineSimple({text: 'жизнь', gender: Gender.NEUTER}, 4)}.
 
-`
-Ваш ${declineSimple(отец, 1)} вызвал ${declineSimple(генерал, 2)} на ${declineSimple(дуэль, 4)},
-${declineSimple(генерал, 1)} назвал его... извините, ${declineSimple(подлец, 5)}... Потеха была!
-Мы напоили после их пьяными и помирили... Нет ничего легче, как мирить русских людей...
-Добряк был ваш ${declineSimple(отец, 1)}, доброе имел ${declineSimple(сердце, 4)}.
-`
-▸ "
-Ваш отец вызвал генерала на дуэль,
-генерал назвал его... извините, подлецем... Потеха была!
-Мы напоили после их пьяными и помирили... Нет ничего легче, как мирить русских людей...
-Добряк был ваш отец, доброе имел сердце.
-"
+Джон Леннон`
+▸ "Когда мне было 5 лет,
+мама всегда говорила,
+что главное в жизни –
+счастье. Когда я пошел
+в школу,
+на вопрос, кем я хочу быть,
+когда вырасту, я ответил
+“счастливым человеком”.
+Мне тогда сказали, что я не понимаю
+вопрос, а я ответил, что это они
+не понимают жизнь.
+
+Джон Леннон"
 ```
 **[Demo](https://georgy7.github.io/RussianNounsJS/)**  :point_left:
 
