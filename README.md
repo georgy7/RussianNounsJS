@@ -12,11 +12,11 @@ RussianNouns.decline({text: 'имя', gender: 'средний'}, 'творите
 ▸ ['именем']
 
 const genders = RussianNouns.genders();
-let coat = RussianNouns.createLemma({
+let coat = {
     text: 'пальто',
     gender: genders.NEUTER,
     indeclinable: true
-});
+};
 
 RussianNouns.caseList().map(c => {
     return RussianNouns.decline(coat, c);
@@ -31,10 +31,10 @@ RussianNouns.caseList().map(c => {
   ["пальто"]
 ]
 
-let mountain = RussianNouns.createLemma({
+let mountain = {
     text: 'гора',
     gender: 'женский'
-});
+};
 
 RussianNouns.caseList().map(c => RussianNouns.decline(mountain, c));
 ▸ [
@@ -50,10 +50,10 @@ RussianNouns.caseList().map(c => RussianNouns.decline(mountain, c));
 RussianNouns.getDeclension(mountain);
 ▸ 2
 
-let way = RussianNouns.createLemma({
+let way = {
     text: 'путь',
     gender: 'мужской'
-});
+};
 
 RussianNouns.getDeclension(way);
 ▸ 0
