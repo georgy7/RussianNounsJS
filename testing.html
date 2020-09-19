@@ -1,156 +1,215 @@
 <!doctype html>
 <html>
 <head>
-  
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-  
-  <script src="js/third-party/underscore.js"></script>
-  <script src="js/third-party/mustache.js"></script>
-  <script src="js/third-party/jquery.min.js"></script>
-  
-  <script src="js/testRunner.js"></script>
+
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+
+    <script src="js/third-party/angular.min.js"></script>
+    <!--<script src="js/third-party/bootstrap-4.3.1-dist/js/bootstrap.js"></script>-->
+    <link rel="stylesheet" href="js/third-party/bootstrap-4.3.1-dist/css/bootstrap.css">
+
+    <script src="js/third-party/underscore.js"></script>
+    <script src="js/third-party/jquery.min.js"></script>
+    <script src="js/testRunner.js"></script>
 </head>
-<body class="transparentWarnings">
+<body ng-app="testing">
 
-  <style>
-    table {
-      width: 100%;
-      table-layout: fixed;
-    }
-    .transparentWarnings tr.warning {
-      display: none;
-      font-size: 70%;
-      color: #d4d4d4;
-      border-color: #dcdcdc;
-    }
-    .transparentWarnings tr.warning:hover {
-      border-color: black;
-      color: black;
-    }
-    td, th {
-      border:1px solid black;
-      padding:0 0.5em;
-      text-align: left;
-    }
+<style>
+    /*.transparentWarnings tr.warning {*/
+    /*display: none;*/
+    /*font-size: 70%;*/
+    /*color: #d4d4d4;*/
+    /*border-color: #dcdcdc;*/
+    /*}*/
+
+    /*.transparentWarnings tr.warning:hover {*/
+    /*border-color: black;*/
+    /*color: black;*/
+    /*}*/
+
     .info {
-      /*border:none;*/
-      padding:0.5em;
+        /*border:none;*/
+        padding: 0.5em;
     }
 
-    .transparentWarnings tr.warning td.ok {
-      background-color: #f0fff6;
-    }
-    td.ok,
-    .transparentWarnings tr.warning:hover td.ok {
-      background-color: #d5ffe6;
-    }
-    .transparentWarnings tr.warning td.warn {
-      background-color: #fff5d9;
-    }
-    td.warn,
-    .transparentWarnings tr.warning:hover td.warn {
-      background-color: #ffcb31;
-    }
-    .transparentWarnings tr.warning:not(:hover) .info {
-      background-color: #eee !important;
-    }
+    /*.transparentWarnings tr.warning td.ok {*/
+    /*background-color: #f0fff6;*/
+    /*}*/
+    /*td.ok,*/
+    /*.transparentWarnings tr.warning:hover td.ok {*/
+    /*background-color: #d5ffe6;*/
+    /*}*/
+    /*.transparentWarnings tr.warning td.warn {*/
+    /*background-color: #fff5d9;*/
+    /*}*/
+    /*td.warn,*/
+    /*.transparentWarnings tr.warning:hover td.warn {*/
+    /*background-color: #ffcb31;*/
+    /*}*/
+    /*.transparentWarnings tr.warning:not(:hover) .info {*/
+    /*background-color: #eee !important;*/
+    /*}*/
 
-    .expextedForm {
-      font-size: 80%;
-    }
-    .transparentWarnings tr.warning .expextedForm {
-      font-size: 100%;
-    }
+
+    /*.transparentWarnings tr.warning .expextedForm {*/
+    /*font-size: 100%;*/
+    /*}*/
 
     body #showWarningsButton {
-      display: none !important;
-    }
-    body.transparentWarnings #hideWarningsButton {
-      display: none !important;
-    }
-    body.transparentWarnings #showWarningsButton {
-      display: inline-block !important;
+        display: none !important;
     }
 
     #loadingBar .status {
-      width: 0%;
-      background: #77de00;
-      height: 4px;
+        width: 0;
+        background: #77de00;
+        height: 3px;
     }
-    #statsWords {
-      font-size: 48px;
-      font-family: Georgia;
-      margin-bottom: 0em;
-    }
-    #stats {
-      font-size: 24px;
-      font-family: Georgia;
-      margin: 0 0 2em 0.18em;
-    }
-    .resultControls {
-      display: none;
-    }
-  </style>
-    
-  <textarea id="template" style="display:none;">
-    <table id="resultTable">
-      <tr>
-        <!--<th class="info" style="width: 2.4em;">№</th>-->
-        <th>Есть Кто? Что?</th>
-        <th>Нет Кого? Чего?</th>
-        <th>Давать Кому? Чему?</th>
-        <th>Винить Кого? Что?</th>
-        <th>Доволен Кем? Чем?</th>
-        <th>Думать О&nbsp;ком? О&nbsp;чем?</th>
-        <th class="info" style="width: 5em;">Склонение</th>
-        <th class="info" style="width: 5em;">Род</th>
-      </tr>
-      {{#items}}
-        {{#correctWithWarnings}}<tr class="item warning">{{/correctWithWarnings}}
-        {{^correctWithWarnings}}<tr class="item">{{/correctWithWarnings}}
-          <!--<td>{{rowNumber}}</td>-->
-          {{#wordForms}}
-            {{#failure}}<td style="background-color:#ff8080;">{{/failure}}
-            {{#warning}}<td class="warn">{{/warning}}
-            {{#ok}}<td class="ok">{{/ok}}
-              {{actual}}
-              {{#failureOrWarning}}<div class="expextedForm">Correct: {{expexted}}</div>{{/failureOrWarning}}
-            </td>
-          {{/wordForms}}
-          <td class="info" style="{{#dColor}} background-color:{{dColor}}; {{/dColor}}">
-            {{declension}}
-          </td>
-          <td class="info" style="{{#genderColor}} background-color:{{genderColor}}; {{/genderColor}}">
-            {{gender}}
-          </td>
-        </tr>
-      {{/items}}
-    </table>
-  </textarea>
-  <!--<input type="button" onclick="main()" value="Тест"/>-->
-  <div id="statsWords">
-    Words correct: <span class="content">...</span>
-  </div>
-  <div id="stats">
-    Word forms correct: <span class="content">...</span><br/>
-    Correct words with warnings / words total: <span class="correctWordsWithWarnings">...</span>
 
-    <button id="showWarningsButton"
-            class="resultControls"
-            onclick="jQuery('body').removeClass('transparentWarnings'); jQuery('tr.item').hide(); jQuery('tr.warning').css('display', 'table-row');">
-      Show warnings
-    </button>
-    <button id="hideWarningsButton"
-            class="resultControls"
-            onclick="jQuery('body').addClass('transparentWarnings'); jQuery('tr.item').css('display', 'table-row'); jQuery('tr.warning').hide()">
-      Hide warnings
-    </button>
+    #resultTable {
+        table-layout: fixed;
+    }
 
-  </div>
-  <div id="loadingBar">
-    <div class="status"></div>
-  </div>
-  <div id="result"></div>
-  
+    #resultTable td {
+        height: 6.1em;
+    }
+</style>
+
+<div class="container-fluid" ng-controller="TestRunnerController">
+    <div>
+
+        <div ng-if="!items">
+            <div id="loadingBar" class="mt-5">
+                <div class="status"></div>
+            </div>
+        </div>
+
+        <div ng-if="items">
+
+            <div class="mt-3 mb-3">
+                <table>
+                    <tr>
+                        <td class="text-right font-weight-bold pr-3">
+                            Правильные слова
+                        </td>
+                        <td>
+                            {{wordsCorrect}} / {{wordsTotal}} ({{wordsCorrectShare | number:2}}%)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right font-weight-bold pr-3">
+                            Правильные формы слов
+                        </td>
+                        <td>
+                            {{wordFormsCorrect}} / {{wordFormsTotal}} ({{wordFormsCorrectShare | number:2}}%)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-right font-weight-bold pr-3">
+                            Правильные слова с предупреждениями
+                        </td>
+                        <td>
+                            {{wordsHasWarnings}} / {{wordsTotal}} ({{wordsHasWarningsShare | number:2}}%)
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <table id="resultTable" class="table table-hover">
+                <tr>
+                    <th>
+                        <span class="text-muted">Есть</span><br/>
+                        Кто? Что?
+                    </th>
+                    <th>
+                        <span class="text-muted">Нет</span><br/>
+                        Кого? Чего?
+                    </th>
+                    <th>
+                        <span class="text-muted">Доверять</span><br/>
+                        Кому? Чему?
+                    </th>
+                    <th>
+                        <span class="text-muted">Видеть</span><br/>
+                        Кого? Что?
+                    </th>
+                    <th>
+                        <span class="text-muted">Гордиться</span><br/>
+                        Кем? Чем?
+                    </th>
+                    <th>
+                        <span class="text-muted">Думать</span><br/>
+                        О&nbsp;ком? О&nbsp;чем?
+                    </th>
+                    <!--<th>В&nbsp;ком? В&nbsp;чем?</th>-->
+                    <th class="info" style="width: 4em;">Скл.</th>
+                    <th class="info" style="width: 6em;">Род</th>
+                </tr>
+
+                <tr>
+                    <th>
+                        &ndash;
+                    </th>
+                    <th>
+                        у, около, от, без, из, до, для, вокруг, с, после
+                    </th>
+                    <th>
+                        по, к
+                    </th>
+                    <th>
+                        через, про, на, за, под, о, в, во
+                    </th>
+                    <th>
+                        с, со, перед, над, за, между
+                    </th>
+                    <th>
+                        при, о, об, на, в, во
+                    </th>
+                    <!--<th>В&nbsp;ком? В&nbsp;чем?</th>-->
+                    <th></th>
+                    <th></th>
+                </tr>
+
+                <tr ng-repeat="item in itemsView" class="item" ng-class="item.status">
+
+                    <!--&lt;!&ndash;<td>{{rowNumber}}</td>&ndash;&gt;-->
+
+                    <td ng-repeat="wordForm in item.wordForms"
+                        ng-class="{'bg-danger': wordForm.failure, 'bg-warning': wordForm.warning}">
+                        {{wordForm.actual}}
+                        <div ng-if="wordForm.failureOrWarning">Правильно: {{wordForm.expected}}</div>
+                    </td>
+
+                    <td ng-style="{'background-color': declensionColor(item)}">
+                        <div class="w-75 text-right"
+                              ng-if="item.declension == -1"
+                              title="Несклоняемое слово">
+                            {{item.declension}}
+                        </div>
+                        <div class="w-75 text-right"
+                              ng-if="item.declension != -1">
+                            {{item.declension}}
+                        </div>
+                    </td>
+
+                    <td ng-style="{'background-color': genderColor(item)}">
+                        {{item.gender}}
+                    </td>
+
+                </tr>
+            </table>
+
+            <div class="row">
+                <div class="col-12 text-center">
+                    <button class="btn btn-secondary" ng-click="toPreviousPage()">◄</button>
+                    {{itemsViewPosition / itemsViewPageSize + 1}}
+                    <button class="btn btn-secondary" ng-click="toNextPage()">►</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
 </body>
 </html>

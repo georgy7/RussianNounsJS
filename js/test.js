@@ -194,7 +194,7 @@ function test(data, gender, loadingStepCompleted) {
 				wordIsWrong = true;
 			}
 			r.push({
-				"expexted": expected.join(', '),
+				"expected": expected.join(', '),
 				"actual": actual.join(', '),
 				"ok": ok,
 				"failure": failure,
@@ -202,40 +202,30 @@ function test(data, gender, loadingStepCompleted) {
 				"failureOrWarning": (failure || warning)
 			});
 		}
-		
+
+		let wordStatus;
+
 		if (wordIsWrong) {
 			wrongWords++;
+			wordStatus = 'wrong';
 		} else if (wordHasWarning) {
 			correctWordsWithWarnings++;
+			wordStatus = 'hasWarnings';
 		} else {
-			continue;
+			wordStatus = 'correct';
 		}
-		
-		if (gender == RussianNouns.genders().MASCULINE) { var g = 'мужской'; var gbg = "#df5" }
-		if (gender == RussianNouns.genders().FEMININE) { var g = 'женский'; var gbg = "#9f5" }
-		if (gender == RussianNouns.genders().NEUTER) { var g = 'средний'; var gbg = "#f59" }
-		if (gender == RussianNouns.genders().COMMON) { var g = 'общий'; }
-		
+
 		var declension = '';
 		try {
-			var declension = RussianNouns.getDeclension(lemma);
+			declension = RussianNouns.getDeclension(lemma);
 		} catch (e) {}
-		
-		if (declension === '') { var dColor = '#999999'; }
-		else if (declension === 1) { var dColor = '#3ef481'; }
-		else if (declension === 2) { var dColor = '#96f43e'; }
-		else if (declension === 3) { var dColor = '#f3f43e'; }
-		else { var dColor = '#fff'; }
-		
-		
+
 		result.push({
 			"rowNumber": (result.length + 1),
 			"wordForms": r,
-			"gender": g,
-			"genderColor": gbg,
+			"gender": gender,
 			"declension": declension,
-			"correctWithWarnings": (!wordIsWrong && wordHasWarning),
-			"dColor": dColor
+			"status": wordStatus
 		});
 	}
 }
