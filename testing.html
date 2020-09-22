@@ -66,6 +66,23 @@
     .gender-col {
         width: 6em;
     }
+
+    .words-valid,
+    .words-warnings,
+    .words-errors {
+    }
+
+    .words-valid {
+        color: #78b159;
+    }
+
+    .words-warnings {
+        color: #ffac33;
+    }
+
+    .words-errors {
+        color: #dd2e44;
+    }
 </style>
 
 <div class="container-fluid" ng-controller="TestRunnerController">
@@ -128,21 +145,21 @@
                                 class="btn btn-secondary"
                                 ng-class="{'active': (wordTableMode === 1)}"
                                 ng-click="setWordTableMode(1)">
-                            🟩🟧🟥
+                            <span class="words-valid">◼</span><span class="words-warnings">◼</span><span class="words-errors">◼</span>
                         </button>
                         <button type="button"
                                 aria-label="Слова с предупреждениями и ошибками"
                                 class="btn btn-secondary"
                                 ng-class="{'active': (wordTableMode === 2)}"
                                 ng-click="setWordTableMode(2)">
-                            🟧🟥
+                            <span class="words-warnings">◼</span><span class="words-errors">◼</span>
                         </button>
                         <button type="button"
                                 aria-label="Только слова с ошибками"
                                 class="btn btn-secondary"
                                 ng-class="{'active': (wordTableMode === 3)}"
                                 ng-click="setWordTableMode(3)">
-                            🟥
+                            <span class="words-errors">◼</span>
                         </button>
                     </div>
                 </div>
