@@ -89,6 +89,10 @@
             };
         };
 
+        $scope.wordComparableView = (word) => {
+            return word.wordForms[0].expected;
+        };
+
         $scope.showResults = () => {
             console.log(new Date(), 'Finish.');
             let totalCases = 0;
@@ -112,11 +116,16 @@
                 }
             }
 
-            console.log('---------------');
-            console.log(itemLen);
-            console.log(items.length);
-            console.log('---------------');
-            console.log(items);
+            items.sort((a, b) => {
+                const aView = $scope.wordComparableView(a);
+                const bView = $scope.wordComparableView(b);
+                return aView.localeCompare(bView)
+            });
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                item.id = i;
+            }
 
             $scope.items = items;
             $scope.wordTableParams.reload();
@@ -133,10 +142,53 @@
             $scope.wordsHasWarningsShare = correctWordsWithWarnings / totalWords * 100;
         };
 
+        $scope.wordTableMode = 1;
+
+        $scope.setWordTableMode = value => {
+            const previousTopWordView = $scope.wordComparableView($scope.wordTableParams.data[0]);
+
+            $scope.wordTableMode = value;
+
+            const t = $scope.wordTableParams;
+            t.reload();
+
+            const filtered = $scope.filterWords();
+            const count = t.count();
+
+            let pageIndex = 0;
+
+            function nextPageExists() {
+                return (count * (pageIndex + 1) < filtered.length);
+            }
+
+            function lastWordViewOnThisPage() {
+                return $scope.wordComparableView(filtered[count * (pageIndex + 1) - 1]);
+            }
+
+            while (nextPageExists() && (lastWordViewOnThisPage().localeCompare(previousTopWordView) < 0)) {
+                pageIndex++;
+            }
+
+            const pageNumber = pageIndex + 1;
+            const lastPageNumber = Math.floor((t.total() - 1) / t.count()) + 1;
+
+            if (pageNumber > lastPageNumber) {
+                console.warn('Page number correction.');
+                t.page(lastPageNumber);
+            } else {
+                t.page(pageNumber);
+            }
+        };
+
         $scope.filterWords = () => {
             if ($scope.items && $scope.items.length) {
-                // TODO: filter
-                return $scope.items;
+                if (1 === $scope.wordTableMode) {
+                    return $scope.items;
+                } else if (2 === $scope.wordTableMode) {
+                    return $scope.items.filter(a => ['hasWarnings', 'wrong'].includes(a.status));
+                } else {
+                    return $scope.items.filter(a => ['wrong'].includes(a.status));
+                }
             } else {
                 return [];
             }
@@ -147,7 +199,7 @@
             count: 10
         }, {
             total: 0,
-            counts: [10, 25, 100, 1000],
+            counts: [5, 10, 25, 100, 1000],
             getData: (params) => {
                 const filtered = $scope.filterWords();
                 params.total(filtered.length);
@@ -196,7 +248,7 @@
             if (g.startsWith('с')) {
                 return "#f59";
             }
-            return "#000";
+            return "#bfbfbf";
         };
 
         $scope.declensionColor = (item) => {

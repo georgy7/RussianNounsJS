@@ -3,6 +3,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 
+    <meta name="viewport" content="width=1600, initial-scale=1"/>
+
     <script src="js/third-party/jquery-3.5.1.js"></script>
     <script src="js/third-party/angular.min.js"></script>
 
@@ -19,51 +21,8 @@
 
 <style>
     .row {
-        margin: 1.5rem 15px;
-    }
-
-    /*.transparentWarnings tr.warning {*/
-    /*display: none;*/
-    /*font-size: 70%;*/
-    /*color: #d4d4d4;*/
-    /*border-color: #dcdcdc;*/
-    /*}*/
-
-    /*.transparentWarnings tr.warning:hover {*/
-    /*border-color: black;*/
-    /*color: black;*/
-    /*}*/
-
-    .info {
-        /*border:none;*/
-        padding: 0.5em;
-    }
-
-    /*.transparentWarnings tr.warning td.ok {*/
-    /*background-color: #f0fff6;*/
-    /*}*/
-    /*td.ok,*/
-    /*.transparentWarnings tr.warning:hover td.ok {*/
-    /*background-color: #d5ffe6;*/
-    /*}*/
-    /*.transparentWarnings tr.warning td.warn {*/
-    /*background-color: #fff5d9;*/
-    /*}*/
-    /*td.warn,*/
-    /*.transparentWarnings tr.warning:hover td.warn {*/
-    /*background-color: #ffcb31;*/
-    /*}*/
-    /*.transparentWarnings tr.warning:not(:hover) .info {*/
-    /*background-color: #eee !important;*/
-    /*}*/
-
-
-    /*.transparentWarnings tr.warning .expextedForm {*/
-    /*font-size: 100%;*/
-    /*}*/
-
-    body #showWarningsButton {
-        display: none !important;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
     }
 
     #loadingBar .status {
@@ -97,6 +56,7 @@
         border: 0 !important;
 
         height: 6.1em;
+        user-select: auto;
     }
 
     .decl-col {
@@ -112,7 +72,7 @@
     <div>
 
         <div ng-if="!items">
-            <div id="loadingBar" style="margin-top: 3rem;">
+            <div id="loadingBar" style="margin-top: 5rem;">
                 <div class="status"></div>
             </div>
         </div>
@@ -120,7 +80,7 @@
         <div ng-if="items">
 
             <div class="row">
-                <div class="col-12">
+                <div class="col-xs-10">
                     <table>
                         <tr>
                             <td class="text-right" style="padding-right: 1rem;">
@@ -154,10 +114,42 @@
                         </tr>
                     </table>
                 </div>
+                <div class="col-xs-2 text-right">
+                    <iframe src="https://ghbtns.com/github-btn.html?user=georgy7&repo=russian_nouns&type=star&count=true&size=large"
+                            frameborder="0" scrolling="0" width="80px" height="30px"></iframe>
+                </div>
             </div>
 
             <div class="row">
-                <div class="col-12">
+                <div class="col-sm-12">
+                    <div class="btn-group" role="group" aria-label="Режим таблицы">
+                        <button type="button"
+                                aria-label="Все слова"
+                                class="btn btn-secondary"
+                                ng-class="{'active': (wordTableMode === 1)}"
+                                ng-click="setWordTableMode(1)">
+                            🟩🟧🟥
+                        </button>
+                        <button type="button"
+                                aria-label="Слова с предупреждениями и ошибками"
+                                class="btn btn-secondary"
+                                ng-class="{'active': (wordTableMode === 2)}"
+                                ng-click="setWordTableMode(2)">
+                            🟧🟥
+                        </button>
+                        <button type="button"
+                                aria-label="Только слова с ошибками"
+                                class="btn btn-secondary"
+                                ng-class="{'active': (wordTableMode === 3)}"
+                                ng-click="setWordTableMode(3)">
+                            🟥
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-12">
 
                     <table id="resultTableHeader" class="table table-hover">
                         <tr>
@@ -195,19 +187,19 @@
                                 &ndash;
                             </th>
                             <th>
-                                у, около, от, без, из, до, для, вокруг, с, после
+                                у, около, от, без, из, до, для, вокруг, с/со, после
                             </th>
                             <th>
-                                по, к
+                                по, к/ко
                             </th>
                             <th>
-                                через, про, на, за, под, о, в, во
+                                через, про, на, за, под, о/об, в/во
                             </th>
                             <th>
-                                с, со, перед, над, за, между
+                                с/со, перед, над, за, между
                             </th>
                             <th>
-                                при, о, об, на, в, во
+                                при, о/об, на, в/во
                             </th>
                             <!--<th>В&nbsp;ком? В&nbsp;чем?</th>-->
                         </tr>
@@ -215,7 +207,7 @@
 
                     <table id="resultTable" class="table table-hover" ng-table="wordTableParams">
                         <tbody>
-                        <tr ng-repeat="item in $data">
+                        <tr ng-repeat="item in $data track by item.id">
                             <td>
 
                                 <table class="table resultInnerTable">
@@ -226,7 +218,8 @@
                                         <th ng-repeat="wordForm in item.wordForms"
                                             ng-class="{'bg-danger': wordForm.failure, 'bg-warning': wordForm.warning}">
                                             {{wordForm.actual}}
-                                            <div ng-if="wordForm.failureOrWarning">Правильно: {{wordForm.expected}}</div>
+                                            <div ng-if="wordForm.failureOrWarning">Правильно: {{wordForm.expected}}
+                                            </div>
                                         </th>
 
                                         <th ng-style="{'background-color': declensionColor(item)}" class="decl-col">
