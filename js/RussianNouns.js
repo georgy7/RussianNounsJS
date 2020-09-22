@@ -85,6 +85,17 @@
                 this.internalGender = gender;
             }
 
+            clone() {
+                return new RussianNouns.Lemma(
+                    this.nominativeSingular,
+                    this.internalGender,
+                    this.pluraliaTantum,
+                    this.indeclinable,
+                    this.animate,
+                    this.surname
+                );
+            }
+
             text() {
                 return this.nominativeSingular;
             }
@@ -176,13 +187,20 @@
     }
 
     const StemUtil = {
-        getNounStem: (word) => {
+        getNounStem: (lemma) => {
+            const word = lemma.text();
+            const gender = lemma.gender();
+
             const lastChar = last(word);
             if (consonantsExceptJ.includes(lastChar)) {
                 return word;
             }
             if ('ь' === lastChar) {
-                return initial(word);
+                if (word.endsWith('ень') && (gender === Gender.MASCULINE)) {
+                    return word.substring(0, word.length - 3) + 'н';
+                } else {
+                    return initial(word);
+                }
             }
             if ('ь' === last(initial(word))) {
                 return initial(word);
@@ -249,7 +267,7 @@
     function decline1(lemma, grCase) {
         const word = lemma.text();
         const gender = lemma.gender();
-        const stem = StemUtil.getNounStem(word);
+        const stem = StemUtil.getNounStem(lemma);
         const head = initial(word);
 
         function soft() {
@@ -291,7 +309,7 @@
                 } else {
                     return head;
                 }
-            } else if (isVowel(word[word.length - 2])) {
+            } else if (isVowel(word[word.length - 2]) && (word[word.length - 2] !== 'и')) {
                 if (isVowel(word[word.length - 3])) {
                     return word.substring(0, word.length - 2) + 'й';
                 } else {
@@ -384,15 +402,20 @@
                 }
             case Case.LOCATIVE:
                 const specialWords = {
+                    'ветер': 'ветру',
+                    'лоб': 'лбу',
                     'лёд': 'льду',
                     'лед': 'льду',
+                    'мох': 'мху',
                     'угол': 'углу'
                 };
                 const uWords = [
-                    'ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг',
-                    'мел', 'шкаф', 'быт', 'пол', 'полк', 'гроб', 'тыл',
-                    'мозг', 'верх', 'низ', 'зад', 'род', 'строй', 'круг',
-                    'сад', 'бор', 'порт', 'лад'
+                    'ад', 'бок', 'бор', 'быт', 'верх', 'вид', 'глаз', 'горб', 'гроб',
+                    'долг', 'дым', 'зад', 'клей', 'край', 'круг', 'лад',
+                    'лес', 'луг', 'мёд', 'мед', 'мел', 'мех',
+                    'мозг', 'низ', 'нос', 'плен', 'пол', 'полк', 'порт', 'пух',
+                    'рай', 'род', 'сад', 'снег', 'строй', 'тыл', 'ход', 'шкаф',
+                    'яр'
                 ];
                 if (specialWords.hasOwnProperty(word)) {
                     return specialWords[word];
@@ -410,7 +433,7 @@
 
     function decline2(lemma, grCase) {
         const word = lemma.text();
-        const stem = StemUtil.getNounStem(word);
+        const stem = StemUtil.getNounStem(lemma);
         const head = StemUtil.getInit(word);
         const soft = () => {
             const lastChar = last(word);
@@ -482,11 +505,20 @@
         }
     }
 
-    function decline3(word, grCase) {
-        if ((word === 'мать') && ![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
-            return decline3('матерь', grCase);
+    function decline3(lemma, grCase) {
+        const word = lemma.text();
+        if (![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
+            if (word === 'мать') {
+                const lemmaCopy = lemma.clone();
+                lemmaCopy.nominativeSingular = 'матерь';
+                return decline3(lemmaCopy, grCase);
+            } else if (word === 'дочь') {
+                const lemmaCopy = lemma.clone();
+                lemmaCopy.nominativeSingular = 'дочерь';
+                return decline3(lemmaCopy, grCase);
+            }
         }
-        const stem = StemUtil.getNounStem(word);
+        const stem = StemUtil.getNounStem(lemma);
         if (StemUtil.getLastTwoChars(word) === 'мя') {
             switch (grCase) {
                 case Case.NOMINATIVE:
@@ -502,7 +534,7 @@
                 case Case.PREPOSITIONAL:
                     return stem + 'ени';
                 case Case.LOCATIVE:
-                    return decline3(word, Case.PREPOSITIONAL);
+                    return decline3(lemma, Case.PREPOSITIONAL);
             }
         } else {
             switch (grCase) {
@@ -519,7 +551,7 @@
                 case Case.PREPOSITIONAL:
                     return stem + 'и';
                 case Case.LOCATIVE:
-                    return decline3(word, Case.PREPOSITIONAL);
+                    return decline3(lemma, Case.PREPOSITIONAL);
             }
         }
     }
@@ -547,9 +579,9 @@
             case 0:
                 if (word === 'путь') {
                     if (grCase === Case.INSTRUMENTAL) {
-                        return 'путем';
+                        return 'путём';
                     } else {
-                        return decline3(word, grCase);
+                        return decline3(lemma, grCase);
                     }
                 } else {
                     throw new Error("unsupported");
@@ -559,7 +591,7 @@
             case 2:
                 return decline2(lemma, grCase);
             case 3:
-                return decline3(word, grCase);
+                return decline3(lemma, grCase);
         }
     }
 

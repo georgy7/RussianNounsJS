@@ -115,11 +115,12 @@ class Parser < Nokogiri::XML::SAX::Document
         elsif @word_form[:g].include?('loc1') or (@word_form[:g].include?('loct') and !(@word_form[:g].include?('loc2')))
           @word[:cases][5][0] = @word_form[:name]
         elsif @word_form[:g].include? 'loc2'
-          @word[:cases][5][1] = @word_form[:name]
+          @word[:cases][6] = []
+          @word[:cases][6][0] = @word_form[:name]
           puts "loc2: #{@word_form[:name]}"
         elsif @word_form[:g].include? 'voct'
-          @word[:cases][6] = []
-          @word[:cases][6][0] = @word_form[:name] # Vocative case
+          @word[:cases][7] = []
+          @word[:cases][7][0] = @word_form[:name] # Vocative case
           puts "voct: #{@word_form[:name]}"
         end
       end
@@ -132,6 +133,10 @@ class Parser < Nokogiri::XML::SAX::Document
       if @word[:g].include? 'NOUN' and word_has_all_cases
         @word[:g].delete 'NOUN'
         @word[:g] = @word[:g].to_a.sort!
+
+        if @word[:cases][6].nil?
+          @word[:cases][6] = @word[:cases][5].deep_dup
+        end
 
         first_letter = @word[:name][0].mb_chars.downcase.to_s
         if @letter_a.include?(first_letter)
@@ -162,7 +167,7 @@ class Parser < Nokogiri::XML::SAX::Document
   end
 
   def word_has_all_cases
-    # Except vocative case
+    # Except vocative and locative cases
     return @word[:cases][0..5].all? { |case_forms|
       !(case_forms.empty?)
     }

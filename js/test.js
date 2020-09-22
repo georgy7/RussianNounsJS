@@ -129,22 +129,12 @@ function test(data, gender, loadingStepCompleted) {
 		
 		var wordIsWrong = false;
 		var wordHasWarning = false;
-		for (var j = 0; j < 6; j++) {
+		for (var j = 0; j <= 6; j++) {
 			var c = cases[j];
 			var expected = expResults[j];
 			
 			try {
                 var actual = RussianNouns.decline(lemma, c);
-
-			    if (5 === j) {
-			        let locative = RussianNouns.decline(lemma, cases[6]);
-			        for (const x of locative) {
-			            if (!actual.includes(x)) {
-			                actual.push(x);
-                        }
-                    }
-                }
-
 			} catch(e) {
 				var actual = ['-----'];
 				if (e.message !== "unsupported") throw e;
@@ -181,7 +171,12 @@ function test(data, gender, loadingStepCompleted) {
 			} else if ((everyExpectedIsInActual && ojejojueju(expected, actual, c))
 				|| iejieu(expected, actual, c)
 				|| (RussianNouns.cases().GENITIVE === c && actual[0] === expected[0])
-				|| (RussianNouns.cases().PREPOSITIONAL == c && gender == RussianNouns.genders().NEUTER && word.endsWith('нье') && exactMatchIgnoringNjeNjiAndYo)
+				|| (
+					[RussianNouns.cases().PREPOSITIONAL, RussianNouns.cases().LOCATIVE].includes(c)
+					&& gender == RussianNouns.genders().NEUTER
+					&& word.endsWith('нье')
+					&& exactMatchIgnoringNjeNjiAndYo
+				)
 				|| exactMatchIgnoringYo) {
 				ok = false;
 				failure = false;
