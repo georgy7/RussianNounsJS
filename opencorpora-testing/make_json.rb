@@ -69,6 +69,7 @@ class Parser < Nokogiri::XML::SAX::Document
       @active_l = true
       @word[:g] = Set.new
       @word[:cases] = [[], [], [], [], [], []]
+      @word[:casesPlural] = [[], [], [], [], [], [], []]
       @word[:name] = get_attr(attrs, 't')
     elsif name == 'g' && @active_l && !(@word[:name].nil?)
       @word[:g].add(get_attr(attrs, 'v'))
@@ -94,35 +95,72 @@ class Parser < Nokogiri::XML::SAX::Document
     if name == 'l'
       @active_l = false
     elsif name == 'f' and @active_f
-      if !(@word_form[:name].to_s.strip.empty?) and @word_form[:g].include?('sing') and @letter_a.include?(@word_form[:name][0].mb_chars.downcase.to_s)
-        if @word_form[:g].include? 'nomn'
-          @word[:cases][0][0] = @word_form[:name]
-        elsif @word_form[:g].include?('gen1') or (@word_form[:g].include?('gent') and !(@word_form[:g].include?('gen2')))
-          @word[:cases][1][0] = @word_form[:name]
-        elsif @word_form[:g].include? 'gen2'
-          @word[:cases][1][1] = @word_form[:name]
-          puts "gen2: #{@word_form[:name]}"
-        elsif @word_form[:g].include? 'datv'
-          @word[:cases][2][0] = @word_form[:name]
-        elsif @word_form[:g].include? 'accs' and !(@word_form[:g].include?('acc2'))
-          @word[:cases][3][0] = @word_form[:name]
-        elsif @word_form[:g].include? 'acc2'
-          @word[:cases][3][1] = @word_form[:name] if @word[:cases][3].size <= 1
-          @word[:cases][3].push(@word_form[:name]) if @word[:cases][3].size > 1
-          puts "acc2: #{@word_form[:name]}"
-        elsif @word_form[:g].include? 'ablt'
-          @word[:cases][4][0] = @word_form[:name]
-        elsif @word_form[:g].include?('loc1') or (@word_form[:g].include?('loct') and !(@word_form[:g].include?('loc2')))
-          @word[:cases][5][0] = @word_form[:name]
-        elsif @word_form[:g].include? 'loc2'
-          @word[:cases][6] = []
-          @word[:cases][6][0] = @word_form[:name]
-          puts "loc2: #{@word_form[:name]}"
-        elsif @word_form[:g].include? 'voct'
-          @word[:cases][7] = []
-          @word[:cases][7][0] = @word_form[:name] # Vocative case
-          puts "voct: #{@word_form[:name]}"
+      if !(@word_form[:name].to_s.strip.empty?) and @letter_a.include?(@word_form[:name][0].mb_chars.downcase.to_s)
+
+        tags = @word_form[:g]
+        word = @word_form[:name]
+
+        if tags.include?('sing')
+
+          c = @word[:cases]
+
+          if tags.include? 'nomn'
+            c[0][0] = word
+          elsif tags.include?('gen1') or (tags.include?('gent') and !(tags.include?('gen2')))
+            c[1][0] = word
+          elsif tags.include? 'gen2'
+            c[1][1] = word
+            # puts "gen2: #{word}"
+          elsif tags.include? 'datv'
+            c[2][0] = word
+          elsif tags.include? 'accs' and !(tags.include?('acc2'))
+            c[3][0] = word
+          elsif tags.include? 'acc2'
+            c[3][1] = word if c[3].size <= 1
+            c[3].push(word) if c[3].size > 1
+            # puts "acc2: #{word}"
+          elsif tags.include? 'ablt'
+            c[4][0] = word
+          elsif tags.include?('loc1') or (tags.include?('loct') and !(tags.include?('loc2')))
+            c[5][0] = word
+          elsif tags.include? 'loc2'
+            c[6] = []
+            c[6][0] = word
+            # puts "loc2: #{word}"
+          elsif tags.include? 'voct'
+            c[7] = []
+            c[7][0] = word # Vocative case
+            # puts "voct: #{word}"
+          end
+
+        elsif tags.include?('plur')
+
+          c = @word[:casesPlural]
+
+          if tags.include? 'nomn'
+            c[0].append(word)
+          elsif tags.include?('gen1') or (tags.include?('gent') and !(tags.include?('gen2')))
+            c[1].append(word)
+          elsif tags.include? 'gen2'
+            c[1].append(word)
+            puts "plural gen2: #{word}"
+          elsif tags.include? 'datv'
+            c[2].append(word)
+          elsif tags.include? 'accs' and !(tags.include?('acc2'))
+            c[3].append(word)
+          elsif tags.include? 'acc2'
+            c[3].append(word)
+            puts "plural acc2: #{word}"
+          elsif tags.include? 'ablt'
+            c[4].append(word)
+          elsif tags.include?('loc1') or (tags.include?('loct') and !(tags.include?('loc2')))
+            c[5].append(word)
+          elsif tags.include? 'loc2'
+            c[6].append(word)
+          end
+
         end
+
       end
       @active_f = false
       @word_form = nil
@@ -146,9 +184,10 @@ class Parser < Nokogiri::XML::SAX::Document
           @result[@word[:name]].push({
             :name => @word[:name],
             :g => @word[:g],
-            :cases => @word[:cases]
+            :cases => @word[:cases],
+            :casesPlural => @word[:casesPlural]
           })
-          
+
           # Warnings
           @word[:cases].each_with_index { |c, index|
             if [1,3,5].include?(index) and (c.size > 1) and (c.uniq.size < c.size)
