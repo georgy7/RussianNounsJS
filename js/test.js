@@ -17,77 +17,69 @@ var totalWords = 0;
 var totalLoadingSteps = 5;
 var result = [];
 
-function iejieu(expected, actual, grCase) {
-    if (grCase !== RussianNouns.cases().INSTRUMENTAL) {
-        return false;
-    }
+function ojejojuejuStatus(expected, actual, grCase) {
 
-    var uniqExp = _.uniq(expected);
-    var uniqActual = _.uniq(actual);
-
-    if ((uniqExp.length !== 1) && (uniqActual.length !== 1)) {
-        return false;
-	}
-
-    const e = uniqExp[0];
-    const a = uniqActual[0];
-
-    // «-иею» в творительном падеже — устаревшая форма.
-    // Но я на всякий случай не игнорирую короткие слова, т.к. там могут быть исключения.
-    if (uniqActual[0].length >= 6) {
-
-        let stemExp = e.substring(0, e.length - 3);
-        let stemActual = a.substring(0, a.length - 3);
-
-        let endingExp = e.substring(e.length - 3);
-        let endingActual = a.substring(a.length - 3);
-
-        if ((stemExp === stemActual) && ('иею' == endingExp) && ('ией' == endingActual)) {
-        	return true;
-		}
-    }
-
-    return false;
-}
-
-function ojejojueju(expected, actual, grCase) {
 	if (grCase !== RussianNouns.cases().INSTRUMENTAL) {
-		return false;
+		return;
 	}
-	var uniqExp = _.uniq(expected);
-	var uniqActual = _.uniq(actual);
-	var oj = ['ой', 'ою'];
-	var ej = ['ей', 'ею'];
-	var ojStemsExp = [];
-	var ejStemsExp = [];
-	for (var i = 0, len = uniqExp.length; i < len; i++) {
-		var item = uniqExp[i];
-		if (item.length < 3) {
-			return false;
-		}
-		var ending = item.substring(item.length - 2);
-		var stem = item.substring(0, item.length - 2);
-		if ((oj.indexOf(ending) >= 0) && (ojStemsExp.indexOf(ending) < 0)) {
-			ojStemsExp.push(stem);
-		} else if ((ej.indexOf(ending) >= 0) && (ejStemsExp.indexOf(ending) < 0)) {
-			ejStemsExp.push(stem);
+
+	const all = [
+		'ой', 'ей',
+		'ою', 'ею'		// This is a literary norm of the 19th century.
+	];
+
+	const suExpected = _.uniq(expected).sort();
+	const suActual = _.uniq(actual).sort();
+
+
+	// --------- Utility functions --------------
+
+	function tooShort(word) {
+		return word.length < 3;
+	}
+
+	function getEnding(word) {
+		return word.substring(word.length - 2);
+	}
+
+	function getStem(word) {
+		return word.substring(0, word.length - 2)
+	}
+
+	function wordMatches(word) {
+		return all.includes(getEnding(word));
+	}
+
+	// -----------------------------------------
+
+	if (suExpected.find(tooShort) || suActual.find(tooShort)) {
+		return;
+	}
+
+	if (suExpected.find(w => !wordMatches(w)) || suActual.find(w => !wordMatches(w))) {
+		return;
+	}
+
+	let uniqExpStems = _.uniq(suExpected.map(getStem));
+	let uniqActualStems = _.uniq(suActual.map(getStem));
+
+	let expectedVowels = _.uniq(suExpected.map(getEnding).map(_.first)).sort();
+	let actualVowels = _.uniq(suActual.map(getEnding).map(_.first)).sort();
+
+	if ((uniqExpStems.length === 1)
+		&& (uniqActualStems.length === 1)
+		&& (uniqExpStems[0] === uniqActualStems[0])
+		&& (expectedVowels.length === 1)
+		&& (actualVowels.length === 1)
+		&& (expectedVowels[0] === actualVowels[0])) {
+
+		if (_.isEqual(suExpected, suActual)
+			|| ((uniqExpStems[0].length >= 3) && suExpected.every(w => suActual.includes(w)))) {
+			return 'valid';
 		} else {
-			return false;
+			return 'doubtful';
 		}
 	}
-	return _.every(uniqActual, function (item) {
-		if (item.length < 3) {
-			return false;
-		}
-		var ending = item.substring(item.length - 2);
-		var stem = item.substring(0, item.length - 2);
-		if (oj.indexOf(ending) >= 0) {
-			return ojStemsExp.indexOf(stem) >= 0;
-		}
-		if (ej.indexOf(ending) >= 0) {
-			return ejStemsExp.indexOf(stem) >= 0;
-		}
-	});
 }
 
 function test(data, gender, loadingStepCompleted) {
@@ -165,11 +157,10 @@ function test(data, gender, loadingStepCompleted) {
 			
 			var warning = false;
 			var ok, failure;
-			if (everyExpectedIsInActual && sameCount) {
+			if ((everyExpectedIsInActual && sameCount) || ('valid' === ojejojuejuStatus(expected, actual, c))) {
 				ok = true;
 				failure = false;
-			} else if ((everyExpectedIsInActual && ojejojueju(expected, actual, c))
-				|| iejieu(expected, actual, c)
+			} else if (('doubtful' === ojejojuejuStatus(expected, actual, c))
 				|| (RussianNouns.cases().GENITIVE === c && actual[0] === expected[0])
 				|| (
 					[RussianNouns.cases().PREPOSITIONAL, RussianNouns.cases().LOCATIVE].includes(c)
