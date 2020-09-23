@@ -174,7 +174,7 @@ class Parser < Nokogiri::XML::SAX::Document
   end
 end
 
-output_filename_template = 'nouns_singular_LETTER.json'
+output_filename_template = 'nouns_LETTER.json'
 
 abc = [
   ['а'], ['б'], ['в'], ['г'], ['д'],
@@ -190,10 +190,10 @@ ram_file = IO.read(filename)
 part = abc
 
 # On Windows just run from different terminals:
-# ruby singular_json.rb 1 > singular_json_output_1.txt
-# ruby singular_json.rb 2 > singular_json_output_2.txt
-# ruby singular_json.rb 3 > singular_json_output_3.txt
-# ruby singular_json.rb 4 > singular_json_output_4.txt
+# ruby make_json.rb 1 > singular_json_output_1.txt
+# ruby make_json.rb 2 > singular_json_output_2.txt
+# ruby make_json.rb 3 > singular_json_output_3.txt
+# ruby make_json.rb 4 > singular_json_output_4.txt
 if !(ARGV.empty?)
   STDERR.puts "ARGV = #{ARGV}"
   part = abc[0..8] if (ARGV[0].to_s == '1')
@@ -204,6 +204,8 @@ if !(ARGV.empty?)
   STDERR.puts "Part #{ARGV[0]}"
 end
 
+# On Windows, replace this line with simple each-loop:
+# part.each { |letter|
 Parallel.each(part, :in_processes => 4) { |letter|
   p = Parser.new letter
   fn = output_filename_template.sub('LETTER', letter[0])

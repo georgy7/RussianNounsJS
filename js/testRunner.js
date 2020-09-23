@@ -18,6 +18,12 @@
         NgTableParams
     ) {
 
+        $scope.genders = Object.values(RussianNouns.genders()).sort();
+
+        $scope.filter = {
+            gender: null
+        };
+
         const abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
         const parts = [];
         parts.push(abc.slice(0, 5));
@@ -55,7 +61,7 @@
             if (!letter) {
                 throw 'Out of bound of letter list index.';
             }
-            jQuery.get('opencorpora-testing/nouns_singular_' + letter + '.json', function (words) {
+            jQuery.get('opencorpora-testing/nouns_' + letter + '.json', function (words) {
                 worker.postMessage({
                     type: 'start',
                     words: words,
@@ -70,8 +76,15 @@
                 if (e.data.type === 'loading') {
                     $scope.loadingStatuses[e.data.workerIndex][e.data.letterIndex] = e.data;
                     $scope.updateLoading($scope.calculateLoading());
+
                 } else if (e.data.type === 'testResult') {
-                    console.log('' + parts[e.data.workerIndex][e.data.letterIndex] + ' completed');
+
+                    console.log('{1} completed: {2} of {3} words processed.'
+                        .replace('{1}', parts[e.data.workerIndex][e.data.letterIndex])
+                        .replace('{2}', e.data.totalWords)
+                        .replace('{3}', e.data.inputWords)
+                    );
+
                     $scope.results[e.data.workerIndex][e.data.letterIndex] = e.data;
                     var next = e.data.letterIndex + 1;
                     if (parts[e.data.workerIndex].length > next) {
@@ -90,7 +103,11 @@
         };
 
         $scope.wordComparableView = (word) => {
-            return word.wordForms[0].expected;
+            if (word) {
+                return word.wordForms[0].expected;
+            } else {
+                return '';
+            }
         };
 
         $scope.showResults = () => {
@@ -114,6 +131,10 @@
                     items = items.concat(data.resultForTemplate.items);
                     itemLen += data.resultForTemplate.items.length;
                 }
+            }
+
+            if (items.length !== totalWords) {
+                console.error('Incorrect totalWords value.')
             }
 
             items.sort((a, b) => {
@@ -145,14 +166,17 @@
         $scope.wordTableMode = 1;
 
         $scope.setWordTableMode = value => {
-            const previousTopWordView = $scope.wordComparableView($scope.wordTableParams.data[0]);
+            $scope.wordTableMode = value;   // It would not affect until the table reloaded.
+            $scope.updateFilter();
+        };
 
-            $scope.wordTableMode = value;
+        $scope.updateFilter = () => {
+            $scope.previousTopWordView = $scope.wordComparableView($scope.wordTableParams.data[0]);
 
             const t = $scope.wordTableParams;
             t.reload();
 
-            const filtered = $scope.filterWords();
+            const filtered = $scope.wordTableParamsLastFiltered;
             const count = t.count();
 
             let pageIndex = 0;
@@ -165,15 +189,17 @@
                 return $scope.wordComparableView(filtered[count * (pageIndex + 1) - 1]);
             }
 
-            while (nextPageExists() && (lastWordViewOnThisPage().localeCompare(previousTopWordView) < 0)) {
+            while (nextPageExists() && (lastWordViewOnThisPage().localeCompare($scope.previousTopWordView) < 0)) {
                 pageIndex++;
             }
 
             const pageNumber = pageIndex + 1;
-            const lastPageNumber = Math.floor((t.total() - 1) / t.count()) + 1;
+            const lastPageNumber = Math.floor(Math.max(0, t.total() - 1) / t.count()) + 1;
 
             if (pageNumber > lastPageNumber) {
-                console.warn('Page number correction.');
+                console.warn('Page number correction from {1} to {2}.'
+                    .replace('{1}', pageNumber)
+                    .replace('{2}', lastPageNumber));
                 t.page(lastPageNumber);
             } else {
                 t.page(pageNumber);
@@ -181,17 +207,25 @@
         };
 
         $scope.filterWords = () => {
+            let result = [];
+
             if ($scope.items && $scope.items.length) {
+
                 if (1 === $scope.wordTableMode) {
-                    return $scope.items;
+                    result = $scope.items;
                 } else if (2 === $scope.wordTableMode) {
-                    return $scope.items.filter(a => ['hasWarnings', 'wrong'].includes(a.status));
+                    result = $scope.items.filter(a => ['hasWarnings', 'wrong'].includes(a.status));
                 } else {
-                    return $scope.items.filter(a => ['wrong'].includes(a.status));
+                    result = $scope.items.filter(a => ['wrong'].includes(a.status));
                 }
-            } else {
-                return [];
+
+                if ($scope.filter.gender) {
+                    result = result.filter(item => ($scope.filter.gender === item.gender));
+                }
             }
+
+            $scope.wordTableParamsLastFiltered = result;
+            return result;
         };
 
         $scope.wordTableParams = new NgTableParams({

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="js/third-party/ngtable202.css"/>
 
     <script src="js/third-party/underscore.js"></script>
+    <script src="js/RussianNouns.js"></script>
     <script src="js/testRunner.js"></script>
 </head>
 <body ng-app="testApp">
@@ -162,6 +163,16 @@
                             <span class="words-errors">◼</span>
                         </button>
                     </div>
+
+                    <div style="width: 15rem; display: inline-block; vertical-align: middle; margin-left: 1rem;">
+                        <select class="form-control"
+                                ng-model="filter.gender"
+                                ng-change="updateFilter();"
+                                ng-options="g for g in genders">
+                            <option value="">любой род</option>
+                        </select>
+                    </div>
+
                 </div>
             </div>
 
