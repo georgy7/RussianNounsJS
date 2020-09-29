@@ -60,6 +60,10 @@
         user-select: auto;
     }
 
+    .resultInnerTable th.bg-danger {
+        background: #ffbdbd;
+    }
+
     .decl-col {
         width: 4em;
     }
@@ -103,7 +107,7 @@
                         <tr>
                             <td class="text-right" style="padding-right: 1rem;">
                                 <strong>
-                                    Правильные слова
+                                    Правильные слова в ед. ч.
                                 </strong>
                             </td>
                             <td>
@@ -113,7 +117,7 @@
                         <tr>
                             <td class="text-right" style="padding-right: 1rem;">
                                 <strong>
-                                    Правильные формы слов
+                                    Правильные формы слов в ед. ч.
                                 </strong>
                             </td>
                             <td>
@@ -123,7 +127,7 @@
                         <tr>
                             <td class="text-right" style="padding-right: 1rem;">
                                 <strong>
-                                    Правильные слова с предупреждениями
+                                    Правильные слова с предупреждениями в ед. ч.
                                 </strong>
                             </td>
                             <td>
@@ -241,11 +245,11 @@
 
                     <table id="resultTable" class="table table-hover" ng-table="wordTableParams">
                         <tbody>
-                        <tr ng-repeat="item in $data track by item.id">
+                        <tr ng-repeat="item in $data track by item.id" ng-class="item.status">
                             <td>
 
                                 <table class="table resultInnerTable">
-                                    <tr ng-class="item.status">
+                                    <tr>
 
                                         <!--&lt;!&ndash;<td>{{rowNumber}}</td>&ndash;&gt;-->
 
@@ -256,7 +260,9 @@
                                             </div>
                                         </th>
 
-                                        <th ng-style="{'background-color': declensionColor(item)}" class="decl-col">
+                                        <th rowspan="2"
+                                            ng-style="{'background-color': declensionColor(item)}"
+                                            class="decl-col">
                                             <div class="w-75 text-right"
                                                  ng-if="item.declension == -1"
                                                  title="Несклоняемое слово">
@@ -268,8 +274,19 @@
                                             </div>
                                         </th>
 
-                                        <th ng-style="{'background-color': genderColor(item)}" class="gender-col">
+                                        <th rowspan="2"
+                                            ng-style="{'background-color': genderColor(item)}"
+                                            class="gender-col">
                                             {{item.gender}}
+                                        </th>
+
+                                    </tr>
+                                    <tr style="background: #fff3ff;">
+
+                                        <th ng-repeat="wordForm in item.wordForms">
+                                            <div ng-if="$index == 0">
+                                                {{item.pluralForms[0].expected}}
+                                            </div>
                                         </th>
 
                                     </tr>

@@ -230,10 +230,10 @@
 
         $scope.wordTableParams = new NgTableParams({
             page: 1,
-            count: 10
+            count: 3
         }, {
             total: 0,
-            counts: [5, 10, 25, 100, 1000],
+            counts: [3, 5, 10, 25, 100, 1000],
             getData: (params) => {
                 const filtered = $scope.filterWords();
                 params.total(filtered.length);
