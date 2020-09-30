@@ -11,12 +11,15 @@ let main = function () {
     let cases = RussianNouns.caseList();
 
     let wrongCases = 0;
-    let wrongWords = 0;
-    let correctWordsWithWarnings = 0;
+    let wrongWordsSingular = 0;
+    let correctWordsWithWarningsSingular = 0;
     let totalCases = 0;
     let totalWords = 0;
     const totalLoadingSteps = 5;
     const result = [];
+
+    let pluralizeTotal = 0;
+    let pluralizeWrong = 0;
 
     function ojejojuejuStatus(expected, actual, grCase) {
 
@@ -84,7 +87,8 @@ let main = function () {
     }
 
     function test(data, gender, loadingStepCompleted) {
-        for (var i = 0; i < data.length; i++) {
+
+        for (let i = 0; i < data.length; i++) {
 
             if ((i % 250 == 0) || (i == (data.length - 1))) {
                 var stepWidth = 1 / totalLoadingSteps;
@@ -97,17 +101,18 @@ let main = function () {
                 });
             }
 
-            var word = data[i].cases[0][0]; // Именительный падеж
-            var expResults = data[i].cases;
+            const word = data[i].cases[0][0]; // Именительный падеж
+            const expResults = data[i].cases;
 
             if (data[i].g.indexOf('Pltm') >= 0) {
                 continue; // PluraliaTantum is unsupported.
             }
-            var animate = (data[i].g.indexOf('anim') >= 0);
-            var fixed = (data[i].g.indexOf('Fixd') >= 0);
-            var surname = (data[i].g.indexOf('Surn') >= 0);
 
-            var lemma = RussianNouns.createLemma({
+            const animate = (data[i].g.indexOf('anim') >= 0);
+            const fixed = (data[i].g.indexOf('Fixd') >= 0);
+            const surname = (data[i].g.indexOf('Surn') >= 0);
+
+            const lemma = RussianNouns.createLemma({
                 text: word,
                 gender: gender,
                 animate: animate,
@@ -116,37 +121,41 @@ let main = function () {
                 pluraliaTantum: false
             });
 
-            var r = [];
+            const resultWordForms = [];
             totalWords++;
             totalCases += 6;
 
-            var wordIsWrong = false;
-            var wordHasWarning = false;
-            for (var j = 0; j <= 6; j++) {
-                var c = cases[j];
-                var expected = expResults[j];
+            let wordIsWrongSingular = false;
+            let wordHasWarningSingular = false;
+
+            for (let j = 0; j <= 6; j++) {
+
+                const c = cases[j];
+                const expected = expResults[j];
+
+                let actual;
 
                 try {
-                    var actual = RussianNouns.decline(lemma, c);
+                    actual = RussianNouns.decline(lemma, c);
                 } catch (e) {
-                    var actual = ['-----'];
+                    actual = ['-----'];
                     if (e.message !== "unsupported") throw e;
                 }
 
-                var sameCount = (_.uniq(actual).length == _.uniq(expected).length);
-                var everyExpectedIsInActual = expected.every(function (e) {
+                const sameCount = (_.uniq(actual).length == _.uniq(expected).length);
+                const everyExpectedIsInActual = expected.every(function (e) {
                     return actual.indexOf(e) >= 0;
                 });
-                var actualWithoutYo = actual.map(function (word) {
+                const actualWithoutYo = actual.map(function (word) {
                     return word.toLowerCase().replace(/ё/g, 'е');
                 });
-                var exactMatchIgnoringYo = sameCount && expected.every(function (word) {
+                const exactMatchIgnoringYo = sameCount && expected.every(function (word) {
                     var yoLess = word.toLowerCase().replace(/ё/g, 'е');
                     return actualWithoutYo.indexOf(yoLess) >= 0;
                 });
-                var exactMatchIgnoringNjeNjiAndYo = sameCount && (1 === actual.length) && (function () {
-                    var yoLess = expected[0].toLowerCase().replace(/ё/g, 'е');
-                    var actualYoLess = actual[0].toLowerCase().replace(/ё/g, 'е');
+                const exactMatchIgnoringNjeNjiAndYo = sameCount && (1 === actual.length) && (function () {
+                    const yoLess = expected[0].toLowerCase().replace(/ё/g, 'е');
+                    const actualYoLess = actual[0].toLowerCase().replace(/ё/g, 'е');
                     if (!(yoLess.endsWith('нье') || yoLess.endsWith('ньи'))) {
                         return false;
                     }
@@ -156,8 +165,8 @@ let main = function () {
                     return yoLess.substring(0, yoLess.length - 3) === actualYoLess.substring(0, actualYoLess.length - 3);
                 })();
 
-                var warning = false;
-                var ok, failure;
+                let warning = false;
+                let ok, failure;
                 if ((everyExpectedIsInActual && sameCount) || ('valid' === ojejojuejuStatus(expected, actual, c))) {
                     ok = true;
                     failure = false;
@@ -173,14 +182,14 @@ let main = function () {
                     ok = false;
                     failure = false;
                     warning = true;
-                    wordHasWarning = true;
+                    wordHasWarningSingular = true;
                 } else {
                     ok = false;
                     failure = true;
                     wrongCases++;
-                    wordIsWrong = true;
+                    wordIsWrongSingular = true;
                 }
-                r.push({
+                resultWordForms.push({
                     "expected": expected.join(', '),
                     "actual": actual.join(', '),
                     "ok": ok,
@@ -190,27 +199,52 @@ let main = function () {
                 });
             }
 
-            let wordStatus;
-
-            if (wordIsWrong) {
-                wrongWords++;
-                wordStatus = 'wrong';
-            } else if (wordHasWarning) {
-                correctWordsWithWarnings++;
-                wordStatus = 'hasWarnings';
-            } else {
-                wordStatus = 'correct';
+            if (wordIsWrongSingular) {
+                wrongWordsSingular++;
+            } else if (wordHasWarningSingular) {
+                correctWordsWithWarningsSingular++;
             }
 
-            var declension = '';
+            let declension = '';
             try {
                 declension = RussianNouns.getDeclension(lemma);
             } catch (e) {
             }
 
+            let expectedCasesPlural = data[i].casesPlural;
+
+            const resultPluralForms = [];
+
+            resultPluralForms[0] = {
+                "expected": expectedCasesPlural[0].join(', ')
+            };
+
+            if (expectedCasesPlural[0].length > 0) {
+                pluralizeTotal++;
+
+                const actualPluralNominative = RussianNouns.pluralize(lemma);
+                resultPluralForms[0]["actual"] = actualPluralNominative.join(', ');
+                resultPluralForms[0]["failure"] = actualPluralNominative.toString() !== expectedCasesPlural[0].toString();
+
+                if (resultPluralForms[0].failure) {
+                    pluralizeWrong++;
+                }
+            }
+
+            let wordStatus;
+
+            if (wordIsWrongSingular || resultPluralForms[0].failure) {
+                wordStatus = 'wrong';
+            } else if (wordHasWarningSingular) {
+                wordStatus = 'hasWarnings';
+            } else {
+                wordStatus = 'correct';
+            }
+
             result.push({
                 "rowNumber": (result.length + 1),
-                "wordForms": r,
+                "wordForms": resultWordForms,
+                "pluralForms": resultPluralForms,
                 "gender": gender,
                 "declension": declension,
                 "status": wordStatus
@@ -231,8 +265,10 @@ let main = function () {
         wrongCases: wrongCases,
         totalWords: totalWords,
         inputWords: inputLemmaCount,
-        wrongWords: wrongWords,
-        correctWordsWithWarnings: correctWordsWithWarnings,
+        wrongWordsSingular: wrongWordsSingular,
+        correctWordsWithWarningsSingular: correctWordsWithWarningsSingular,
+        pluralizeWrong: pluralizeWrong,
+        pluralizeTotal: pluralizeTotal,
         resultForTemplate: {"items": result}
     });
 

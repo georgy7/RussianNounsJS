@@ -115,9 +115,12 @@
             let totalCases = 0;
             let wrongCases = 0;
             let totalWords = 0;
-            let correctWordsWithWarnings = 0;
-            let wrongWords = 0;
+            let correctWordsWithWarningsSingular = 0;
+            let wrongWordsSingular = 0;
             let items = [];
+
+            let pluralizeWrong = 0;
+            let pluralizeTotal = 0;
 
             let itemLen = 0;
 
@@ -126,8 +129,12 @@
                     totalCases += data.totalCases;
                     wrongCases += data.wrongCases;
                     totalWords += data.totalWords;
-                    correctWordsWithWarnings += data.correctWordsWithWarnings;
-                    wrongWords += data.wrongWords;
+                    correctWordsWithWarningsSingular += data.correctWordsWithWarningsSingular;
+                    wrongWordsSingular += data.wrongWordsSingular;
+
+                    pluralizeWrong += data.pluralizeWrong;
+                    pluralizeTotal += data.pluralizeTotal;
+
                     items = items.concat(data.resultForTemplate.items);
                     itemLen += data.resultForTemplate.items.length;
                 }
@@ -151,16 +158,20 @@
             $scope.items = items;
             $scope.wordTableParams.reload();
 
-            $scope.wordsCorrect = totalWords - wrongWords;
+            $scope.wordsCorrectSingular = totalWords - wrongWordsSingular;
             $scope.wordsTotal = totalWords;
-            $scope.wordsCorrectShare = $scope.wordsCorrect / $scope.wordsTotal * 100;
+            $scope.wordsCorrectSingularShare = $scope.wordsCorrectSingular / $scope.wordsTotal * 100;
 
             $scope.wordFormsCorrect = totalCases - wrongCases;
             $scope.wordFormsTotal = totalCases;
             $scope.wordFormsCorrectShare = $scope.wordFormsCorrect / $scope.wordFormsTotal * 100;
 
-            $scope.wordsHasWarnings = correctWordsWithWarnings;
-            $scope.wordsHasWarningsShare = correctWordsWithWarnings / totalWords * 100;
+            $scope.pluralizeCorrectWords = pluralizeTotal - pluralizeWrong;
+            $scope.pluralizeTotalWords = pluralizeTotal;
+            $scope.pluralizeCorrectShare = $scope.pluralizeCorrectWords / $scope.pluralizeTotalWords * 100;
+
+            $scope.wordsHasWarningsSingular = correctWordsWithWarningsSingular;
+            $scope.wordsHasWarningsSingularShare = correctWordsWithWarningsSingular / totalWords * 100;
         };
 
         $scope.wordTableMode = 1;

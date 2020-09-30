@@ -64,6 +64,10 @@
         background: #ffbdbd;
     }
 
+    .resultInnerTable th.bg-warning {
+        background: #fcea92;
+    }
+
     .decl-col {
         width: 4em;
     }
@@ -111,7 +115,7 @@
                                 </strong>
                             </td>
                             <td>
-                                {{wordsCorrect}} / {{wordsTotal}} ({{wordsCorrectShare | number:2}}%)
+                                {{wordsCorrectSingular}} / {{wordsTotal}} ({{wordsCorrectSingularShare | number:2}}%)
                             </td>
                         </tr>
                         <tr>
@@ -127,11 +131,22 @@
                         <tr>
                             <td class="text-right" style="padding-right: 1rem;">
                                 <strong>
-                                    Правильные слова с предупреждениями в ед. ч.
+                                    Слова с предупреждениями в ед. ч.
                                 </strong>
                             </td>
                             <td>
-                                {{wordsHasWarnings}} / {{wordsTotal}} ({{wordsHasWarningsShare | number:2}}%)
+                                {{wordsHasWarningsSingular}} / {{wordsTotal}} ({{wordsHasWarningsSingularShare |
+                                number:2}}%)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-right" style="padding-right: 1rem;">
+                                <strong>
+                                    Правильная плюрализация
+                                </strong>
+                            </td>
+                            <td>
+                                {{pluralizeCorrectWords}} / {{pluralizeTotalWords}} ({{pluralizeCorrectShare | number:2}}%)
                             </td>
                         </tr>
                     </table>
@@ -283,11 +298,14 @@
                                     </tr>
                                     <tr style="background: #fff3ff;">
 
-                                        <th ng-repeat="wordForm in item.wordForms">
-                                            <div ng-if="$index == 0">
-                                                {{item.pluralForms[0].expected}}
+                                        <th ng-repeat="wordForm in item.wordForms"
+                                            ng-class="{'bg-danger': item.pluralForms[0].failure, 'bg-warning': item.pluralForms[0].warning}">
+                                            <div ng-if="(item.pluralForms[0].expected.length) && ($index == 0)">
+                                                {{item.pluralForms[0].actual}}
+                                                <div ng-if="item.pluralForms[0].failure">Правильно: {{item.pluralForms[0].expected}}</div>
                                             </div>
                                         </th>
+
 
                                     </tr>
                                 </table>

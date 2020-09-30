@@ -38,9 +38,13 @@
                   let lemma = RussianNouns.createLemma($scope.input);
 
                   $scope.result = {};
+                  $scope.plural = {};
+
                   for (const c of $scope.cases) {
                       $scope.result[c] = RussianNouns.decline(lemma, c);
                   }
+
+                  $scope.plural[RussianNouns.caseList()[0]] = RussianNouns.pluralize(lemma);
 
               } else {
                   $scope.result = null;
@@ -119,7 +123,7 @@
           <a href ng-click="fillForm('средний', 'окно')">окно</a>
           <a href ng-click="fillForm('мужской', 'кот', null, true)">кот</a>
           <a href ng-click="fillForm('женский', 'кошка', null, true)">кошка</a>
-          <a href ng-click="fillForm('общий', 'дитя', null, true)">дитя</a>
+          <a href ng-click="fillForm('средний', 'дитя', null, true)">дитя</a>
           <a href ng-click="fillForm('средний', 'знамя')">знамя</a>
           <a href ng-click="fillForm('средний', 'время')">время</a>
           <a href ng-click="fillForm('средний', 'семя')">семя</a>
@@ -139,17 +143,22 @@
 
           <a href ng-click="fillForm('женский', 'мать', null, true)">мать</a>
           <a href ng-click="fillForm('мужской', 'отец', null, true)">отец</a>
+          <a href ng-click="fillForm('мужской', 'сын', null, true)">сын</a>
+          <a href ng-click="fillForm('женский', 'дочь', null, true)">дочь</a>
+          <a href ng-click="fillForm('мужской', 'зять', null, true)">зять</a>
 
           <a href ng-click="fillForm('мужской', 'Георгий', null, true)">Георгий</a>
           <a href ng-click="fillForm('мужской', 'Устинов', true, true)">Устинов</a>
-          <a href ng-click="fillForm('мужской', 'Белозёрский', true, true)">Белозёрский</a>
-          <a href ng-click="fillForm('женский', 'Белозёрская', true, true)">Белозёрская</a>
+
           <a href ng-click="fillForm('мужской', 'кий')">кий</a>
           <a href ng-click="fillForm('женский', 'елка')">елка</a>
           <a href ng-click="fillForm('мужской', 'еж', null, true)">еж</a>
           <a href ng-click="fillForm('мужской', 'ерш')">ерш</a>
           <a href ng-click="fillForm('мужской', 'морж', null, true)">морж</a>
           <a href ng-click="fillForm('женский', 'Иордания')">Иордания</a>
+          <a href ng-click="fillForm('мужской', 'Будапешт', null, null, true)">Будапешт</a>
+          <a href ng-click="fillForm('мужской', 'Белозёрский', true, true)">Белозёрский</a>
+          <a href ng-click="fillForm('женский', 'Белозёрская', true, true)">Белозёрская</a>
           <a href ng-click="fillForm('женский', 'ирония')">ирония</a>
           <a href ng-click="fillForm('средний', 'пальто', null, null, true)">пальто</a>
           <a href ng-click="fillForm('мужской', 'путь')">путь</a>
@@ -246,6 +255,9 @@
             </th>
             <td>
               {{result[case]}}
+            </td>
+            <td>
+              {{plural[case]}}
             </td>
           </tr>
         </table>
