@@ -22,9 +22,9 @@
 (function () {
     'use strict';
 
-    // References:
+    // Ссылки:
     // - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
-    // - The article http://en.wikipedia.org/wiki/Russian_grammar
+    // - Статья http://en.wikipedia.org/wiki/Russian_grammar
     // - К семантике русского локатива - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
     //------------------------------
@@ -33,24 +33,53 @@
     const RussianNouns = {
         cases: () => {
             return {
-                NOMINATIVE: "именительный",
-                GENITIVE: "родительный",
-                DATIVE: "дательный",
-                ACCUSATIVE: "винительный",
-                INSTRUMENTAL: "творительный",
-                PREPOSITIONAL: "предложный",
-                LOCATIVE: "местный"
+                NOMINATIVE: 'именительный',
+                GENITIVE: 'родительный',
+                DATIVE: 'дательный',
+                ACCUSATIVE: 'винительный',
+                INSTRUMENTAL: 'творительный',
+                PREPOSITIONAL: 'предложный',
+
+                /**
+                 * Важно понимать, что отличающийся от предложного падежа локатив иногда используется
+                 * только с одним предлогом (только «в» или только «на»), а с другим или вообще
+                 * не употребляется, или склоняется иначе.
+                 *
+                 * Например, мы говорим «на ветру», «в тылу (врага)». Но мы не говорим «в ветру», «на тылу».
+                 * Обычно говорят «на тыльной стороне чего-либо» и, возможно, «в ветре» (скорее «в воздухе»).
+                 *
+                 * Мы говорим «на бегу», но также «в беге».
+                 *
+                 * Есть существительные, которые одинаково используются с предлогами «в» и «на».
+                 * Например: в снегу — на снегу, во льду — на льду, в пуху — на пуху.
+                 *
+                 * В. А. Плунгян выделяет у слов мужского рода с особыми формами локатива
+                 * семь семантических классов:
+                 *  1. вместилища («в»);
+                 *  2. пространства («в»);
+                 *  3. конфигурации объектов, образующих устойчивые структуры (например, «ряд», «строй» — «в»);
+                 *  4. поверхности («на»);
+                 *  5. объекты с функциональной поверхностью («на»);
+                 *  6. вещества («в» и «на»);
+                 *  7. ситуации («в» и «на»).
+                 *
+                 * А также, у слов женского рода третьего склонения с особыми формами локатива
+                 * пять семантических классов.
+                 * Однако, у локатива в словах женского рода третьего склонения отличается от предложного падежа
+                 * только ударение — смещается на последний слог, на письме они не отличаются.
+                 */
+                LOCATIVE: 'местный'
             };
         },
         caseList: () => {
             return [
-                "именительный",
-                "родительный",
-                "дательный",
-                "винительный",
-                "творительный",
-                "предложный",
-                "местный"
+                RussianNouns.cases().NOMINATIVE,
+                RussianNouns.cases().GENITIVE,
+                RussianNouns.cases().DATIVE,
+                RussianNouns.cases().ACCUSATIVE,
+                RussianNouns.cases().INSTRUMENTAL,
+                RussianNouns.cases().PREPOSITIONAL,
+                RussianNouns.cases().LOCATIVE
             ];
         },
         declensions: () => {
@@ -85,6 +114,17 @@
                 this.internalGender = gender;
             }
 
+            clone() {
+                return new RussianNouns.Lemma(
+                    this.nominativeSingular,
+                    this.internalGender,
+                    this.pluraliaTantum,
+                    this.indeclinable,
+                    this.animate,
+                    this.surname
+                );
+            }
+
             text() {
                 return this.nominativeSingular;
             }
@@ -117,16 +157,64 @@
             return new RussianNouns.Lemma(o.text, o.gender, o.pluraliaTantum, o.indeclinable, o.animate, o.surname);
         },
 
+        /**
+         * «Названия „первое склонение“ и „второе склонение“ в школьной практике и вузовском преподавании
+         * нередко закрепляются за разными разрядами слов. В школьных учебниках первым склонением называют изменение
+         * слов с окончанием -а (вода), во многих вузовских пособиях и академических грамматиках — слов мужского
+         * рода (стол) и среднего рода (окно)».
+         *
+         * Современный русский язык. Морфология — Камынина А.А., Уч. пос. 1999, страница 67,
+         * § 36 Склонение имен существительных
+         *
+         * @param lemma
+         * @returns {number} Склонение по Камыниной; -1 для несклоняемых существительных.
+         */
         getDeclension: (lemma) => {
             return getDeclension(RussianNouns.createLemma(lemma));
         },
 
-        /*
-         * Возвращает список, т.к. бывают "вторые" родительный, винительный и предложный падежи.
-         * Также, сущ. ж. р. в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
+        /**
+         * Почти везде указывают именно это число. Например, в Викисловаре.
+         *
+         * Неправильно работает для существительных pluralia tantum («ножницы», «дрожжи», «белила» и т.п.).
+         *
+         * @param lemma
+         * @returns {number} «Школьный» вариант склонения (вода — первое склонение; стол, окно — второе склонение). Для несклоняемых возвращает минус единицу.
+         */
+        getSchoolDeclension: (lemma) => {
+            const d = getDeclension(RussianNouns.createLemma(lemma));
+            if (d === 1) {
+                return 2;
+            } else if (d === 2) {
+                return 1;
+            } else {
+                return d;
+            }
+        },
+
+        /**
+         *
+         * @param {RussianNouns.Lemma|Object} lemma
+         * @param {string} grammaticalCase
+         * @returns {Array} Список, т.к. бывают вторые родительный, винительный падежи. Существительные
+         * женского рода в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
+         * Второй предложный падеж (местный падеж, локатив) не включен в предложный.
          */
         decline: (lemma, grammaticalCase) => {
             return declineAsList(RussianNouns.createLemma(lemma), grammaticalCase);
+        },
+
+        /**
+         * @param {RussianNouns.Lemma|Object} lemma
+         * @returns {Array}
+         */
+        pluralize: (lemma) => {
+            const o = RussianNouns.createLemma(lemma);
+            if (o.isPluraliaTantum()) {
+                return [o.text()];
+            } else {
+                return pluralize(o);
+            }
         }
     };
 
@@ -158,6 +246,10 @@
         return vowels.includes(character);
     }
 
+    function syllableCount(s) {
+        return s.split('').filter(isVowel).length;
+    }
+
     function last(str) {
         if (str) {
             return str[str.length - 1];
@@ -175,14 +267,43 @@
         return s.substring(0, s.length - 1);
     }
 
+    function nInitial(str, n) {
+        let part = str;
+        for (let i = 1; i <= n; i++) {
+            part = initial(part);
+        }
+        return part;
+    }
+
+    function lastOfNInitial(str, n) {
+        return last(nInitial(str, n));
+    }
+
+    function endsWithAny(word, arr) {
+        return arr.filter(a => word.endsWith(a)).length > 0;
+    }
+
     const StemUtil = {
-        getNounStem: (word) => {
+        getNounStem: (lemma) => {
+            const word = lemma.text();
+            const gender = lemma.gender();
+
             const lastChar = last(word);
             if (consonantsExceptJ.includes(lastChar)) {
                 return word;
             }
             if ('ь' === lastChar) {
-                return initial(word);
+
+                const en2a2b = [
+                    'ясень', 'бюллетень', 'олень', 'гордень', 'пельмень',
+                    'ячмень'
+                ];
+
+                if (word.endsWith('ень') && (gender === Gender.MASCULINE) && !endsWithAny(word, en2a2b)) {
+                    return word.substring(0, word.length - 3) + 'н';
+                } else {
+                    return initial(word);
+                }
             }
             if ('ь' === last(initial(word))) {
                 return initial(word);
@@ -195,7 +316,7 @@
         getStem: (word) => {
             const c = last(word);
             if (('й' === c || isVowel(c)) && isVowel(last(initial(word)))) {
-                return initial(initial(word));
+                return nInitial(word, 2);
             }
             if (isVowel(c)) {
                 return initial(word);
@@ -246,16 +367,64 @@
         }
     }
 
+    function tsWord(word) {
+        return last(word) === 'ц';
+    }
+
+    function tsStem(word) {
+        const head = initial(word);
+        if ('а' === last(head)) {
+            return head;
+        } else if ('близнец' === word) {    // Также, польские имена могут сюда попадать.
+            return head;
+        } else if (lastN(head, 2) === 'ле') {
+            const beforeLe = lastOfNInitial(head, 2);
+            if (isVowel(beforeLe) || ('л' === beforeLe)) {
+                return initial(head) + 'ь';
+            } else {
+                return head;
+            }
+        } else if (isVowel(word[word.length - 2]) && (word[word.length - 2] !== 'и')) {
+            if (isVowel(word[word.length - 3])) {
+                return nInitial(word, 2) + 'й';
+            } else {
+                return nInitial(word, 2);
+            }
+        } else {
+            return head;
+        }
+    }
+
+    function okWord(word) {
+        const tok = [
+            'лапоток', 'желток'
+        ];
+        const tok2 = [
+            'поток', 'приток', 'переток', 'проток', 'биоток', 'электроток',
+            'восток', 'водосток', 'водоток', 'воток',
+            'знаток'
+        ];
+        return (endsWithAny(word, ['чек', 'шек']) && (word.length >= 6))
+            || endsWithAny(word, tok)
+            || (
+                word.endsWith('ок') && !word.endsWith('шок') && !(word === 'урок')
+                && !endsWithAny(word, tok2)
+                && !isVowel(lastOfNInitial(word, 2))
+                && (isVowel(lastOfNInitial(word, 3)) || endsWithAny(nInitial(word, 2), ['ст', 'рт']))
+                && word.length >= 4
+            );
+    }
+
+    function softD1(word) {
+        const lastChar = last(word);
+        return lastChar === 'ь' || (['е', 'ё'].includes(lastChar) && !word.endsWith('це'));
+    }
+
     function decline1(lemma, grCase) {
         const word = lemma.text();
         const gender = lemma.gender();
-        const stem = StemUtil.getNounStem(word);
+        const stem = StemUtil.getNounStem(lemma);
         const head = initial(word);
-
-        function soft() {
-            const lastChar = last(word);
-            return lastChar === 'ь' || (['е', 'ё'].includes(lastChar) && !word.endsWith('це'));
-        }
 
         function iyWord() {
             return last(word) === 'й' || ['ий', 'ие'].includes(StemUtil.getLastTwoChars(word));
@@ -265,74 +434,42 @@
             return ['ч', 'щ'].includes(last(stem));
         }
 
-        function tsWord() {
-            return last(word) === 'ц';
-        }
-
-        function checkWord() {
-            return word.endsWith('чек') && word.length >= 6;
-        }
-
-        function okWord() {
-            return checkWord()
-                || (
-                    word.endsWith('ок') && !word.endsWith('шок') && !(word === 'урок')
-                    && !isVowel(word[word.length - 3]) && isVowel(word[word.length - 4]) && word.length >= 4
-                );
-        }
-
-        function tsStem() {
-            if ('а' === word[word.length - 2]) {
-                return head;
-            } else if (lastN(head, 2) === 'ле') {
-                const beforeLe = last(initial(initial(head)));
-                if (isVowel(beforeLe) || ('л' === beforeLe)) {
-                    return initial(head) + 'ь';
-                } else {
-                    return head;
-                }
-            } else if (isVowel(word[word.length - 2])) {
-                if (isVowel(word[word.length - 3])) {
-                    return word.substring(0, word.length - 2) + 'й';
-                } else {
-                    return word.substring(0, word.length - 2);
-                }
-            } else {
-                return word.substring(0, word.length - 1);
-            }
-        }
-
         function surnameType1() {
             return lemma.isSurname() && (word.endsWith('ин') || word.endsWith('ов') || word.endsWith('ев'));
+        }
+
+        function iyoy() {
+            return (StemUtil.getLastTwoChars(word) === 'ый')
+                || (word.endsWith('ной') && syllableCount(word) >= 2);
         }
 
         switch (grCase) {
             case Case.NOMINATIVE:
                 return word;
             case Case.GENITIVE:
-                if ((iyWord() && lemma.isSurname()) || (StemUtil.getLastTwoChars(word) === 'ый')) {
+                if ((iyWord() && lemma.isSurname()) || iyoy()) {
                     return stem + 'ого';
                 } else if (iyWord()) {
                     return head + 'я';
-                } else if (soft() && !schWord()) {
+                } else if (softD1(word) && !schWord()) {
                     return stem + 'я';
-                } else if (tsWord()) {
-                    return tsStem() + 'ца';
-                } else if (okWord()) {
+                } else if (tsWord(word)) {
+                    return tsStem(word) + 'ца';
+                } else if (okWord(word)) {
                     return word.substring(0, word.length - 2) + 'ка';
                 } else {
                     return stem + 'а';
                 }
             case Case.DATIVE:
-                if ((iyWord() && lemma.isSurname()) || (StemUtil.getLastTwoChars(word) === 'ый')) {
+                if ((iyWord() && lemma.isSurname()) || iyoy()) {
                     return stem + 'ому';
                 } else if (iyWord()) {
                     return head + 'ю';
-                } else if (soft() && !schWord()) {
+                } else if (softD1(word) && !schWord()) {
                     return stem + 'ю';
-                } else if (tsWord()) {
-                    return tsStem() + 'цу';
-                } else if (okWord()) {
+                } else if (tsWord(word)) {
+                    return tsStem(word) + 'цу';
+                } else if (okWord(word)) {
                     return word.substring(0, word.length - 2) + 'ку';
                 } else {
                     return stem + 'у';
@@ -351,17 +488,17 @@
             case Case.INSTRUMENTAL:
                 if (iyWord() && lemma.isSurname()) {
                     return stem + 'им';
-                } else if (StemUtil.getLastTwoChars(word) === 'ый') {
+                } else if (iyoy()) {
                     return stem + 'ым';
                 } else if (iyWord()) {
                     return head + 'ем';
-                } else if (soft() || ['ж', 'ч', 'ш'].includes(last(stem))) {
+                } else if (softD1(word) || ['ж', 'ч', 'ш'].includes(last(stem))) {
                     return stem + 'ем';
-                } else if (tsWord()) {
-                    return tsStem() + 'цем';
+                } else if (tsWord(word)) {
+                    return tsStem(word) + 'цем';
                 } else if (word.endsWith('це')) {
                     return word + 'м';
-                } else if (okWord()) {
+                } else if (okWord(word)) {
                     return word.substring(0, word.length - 2) + 'ком';
                 } else if (surnameType1()) {
                     return word + 'ым';
@@ -369,30 +506,35 @@
                     return stem + 'ом';
                 }
             case Case.PREPOSITIONAL:
-                if ((iyWord() && lemma.isSurname()) || (StemUtil.getLastTwoChars(word) === 'ый')) {
+                if ((iyWord() && lemma.isSurname()) || iyoy()) {
                     return stem + 'ом';
                 } else if (['ий', 'ие'].includes(StemUtil.getLastTwoChars(word))) {
                     return head + 'и';
                 } else if (last(word) === 'й') {
                     return head + 'е';
-                } else if (tsWord()) {
-                    return tsStem() + 'це';
-                } else if (okWord()) {
+                } else if (tsWord(word)) {
+                    return tsStem(word) + 'це';
+                } else if (okWord(word)) {
                     return word.substring(0, word.length - 2) + 'ке';
                 } else {
                     return stem + 'е';
                 }
             case Case.LOCATIVE:
                 const specialWords = {
+                    'ветер': 'ветру',
+                    'лоб': 'лбу',
                     'лёд': 'льду',
                     'лед': 'льду',
+                    'мох': 'мху',
                     'угол': 'углу'
                 };
                 const uWords = [
-                    'ад', 'вид', 'рай', 'снег', 'дым', 'лес', 'луг',
-                    'мел', 'шкаф', 'быт', 'пол', 'полк', 'гроб', 'тыл',
-                    'мозг', 'верх', 'низ', 'зад', 'род', 'строй', 'круг',
-                    'сад', 'бор', 'порт', 'лад'
+                    'ад', 'бок', 'бор', 'быт', 'верх', 'вид', 'глаз', 'горб', 'гроб',
+                    'долг', 'дым', 'зад', 'клей', 'край', 'круг', 'лад',
+                    'лес', 'луг', 'мёд', 'мед', 'мел', 'мех',
+                    'мозг', 'низ', 'нос', 'плен', 'пол', 'полк', 'порт', 'пух',
+                    'рай', 'род', 'сад', 'снег', 'строй', 'тыл', 'ход', 'шкаф',
+                    'яр'
                 ];
                 if (specialWords.hasOwnProperty(word)) {
                     return specialWords[word];
@@ -410,7 +552,7 @@
 
     function decline2(lemma, grCase) {
         const word = lemma.text();
-        const stem = StemUtil.getNounStem(word);
+        const stem = StemUtil.getNounStem(lemma);
         const head = StemUtil.getInit(word);
         const soft = () => {
             const lastChar = last(word);
@@ -482,11 +624,21 @@
         }
     }
 
-    function decline3(word, grCase) {
-        if ((word === 'мать') && ![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
-            return decline3('матерь', grCase);
+    const specialD3 = {
+        'дочь': 'дочерь',
+        'мать': 'матерь'
+    };
+
+    function decline3(lemma, grCase) {
+        const word = lemma.text();
+        if (![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
+            if (specialD3.hasOwnProperty(word)) {
+                const lemmaCopy = lemma.clone();
+                lemmaCopy.nominativeSingular = specialD3[word];
+                return decline3(lemmaCopy, grCase);
+            }
         }
-        const stem = StemUtil.getNounStem(word);
+        const stem = StemUtil.getNounStem(lemma);
         if (StemUtil.getLastTwoChars(word) === 'мя') {
             switch (grCase) {
                 case Case.NOMINATIVE:
@@ -502,7 +654,7 @@
                 case Case.PREPOSITIONAL:
                     return stem + 'ени';
                 case Case.LOCATIVE:
-                    return decline3(word, Case.PREPOSITIONAL);
+                    return decline3(lemma, Case.PREPOSITIONAL);
             }
         } else {
             switch (grCase) {
@@ -519,7 +671,7 @@
                 case Case.PREPOSITIONAL:
                     return stem + 'и';
                 case Case.LOCATIVE:
-                    return decline3(word, Case.PREPOSITIONAL);
+                    return decline3(lemma, Case.PREPOSITIONAL);
             }
         }
     }
@@ -547,9 +699,22 @@
             case 0:
                 if (word === 'путь') {
                     if (grCase === Case.INSTRUMENTAL) {
-                        return 'путем';
+                        return 'путём';
                     } else {
-                        return decline3(word, grCase);
+                        return decline3(lemma, grCase);
+                    }
+                } else if (word === 'дитя') {
+                    switch (grCase) {
+                        case Case.NOMINATIVE:
+                        case Case.ACCUSATIVE:
+                            return word;
+                        case Case.GENITIVE:
+                        case Case.DATIVE:
+                        case Case.PREPOSITIONAL:
+                        case Case.LOCATIVE:
+                            return 'дитяти';
+                        case Case.INSTRUMENTAL:
+                            return ['дитятей', 'дитятею'];
                     }
                 } else {
                     throw new Error("unsupported");
@@ -559,8 +724,245 @@
             case 2:
                 return decline2(lemma, grCase);
             case 3:
-                return decline3(word, grCase);
+                return decline3(lemma, grCase);
         }
+    }
+
+    function pluralize(lemma) {
+        const result = [];
+
+        const word = lemma.text();
+        const stem = StemUtil.getNounStem(lemma);
+        const gender = lemma.gender();
+        const declension = getDeclension(lemma);
+
+        const simpleFirstPart = (('й' == last(word) || isVowel(last(word))) && isVowel(last(initial(word))))
+            ? initial(word)
+            : stem;
+
+        function softPatronymic() {
+            if (word.endsWith('евич') || word.endsWith('евна')) {
+                return word.indexOf('ье') >= 0;
+            }
+        }
+
+        function softPatronymicForm2() {
+            const i = simpleFirstPart.indexOf('ье');
+            return simpleFirstPart.substring(0, i) + 'и' + simpleFirstPart.substring(i + 1);
+        }
+
+        function ы_и() {
+            if (['г', 'х', 'ч', 'ж', 'ш', 'щ', 'к'].includes(last(stem))
+                || ['я', 'й', 'ь'].includes(last(word))) {
+
+                if (softPatronymic()) {
+                    result.push(softPatronymicForm2() + 'и');
+                    result.push(simpleFirstPart + 'и');
+                } else {
+                    result.push(simpleFirstPart + 'и');
+                }
+
+            } else if (tsWord(word)) {
+                result.push(tsStem(word) + 'цы');
+
+            } else {
+
+                if (softPatronymic()) {
+                    result.push(softPatronymicForm2() + 'ы');
+                    result.push(simpleFirstPart + 'ы');
+                } else {
+                    result.push(simpleFirstPart + 'ы');
+                }
+
+            }
+        }
+
+        switch (declension) {
+            case -1:
+                result.push(word);
+                break;
+            case 0:
+                if (word === 'путь') {
+                    result.push('пути');
+                } else if (word === 'дитя') {
+                    result.push('дети');
+                } else {
+                    throw new Error("unsupported");
+                }
+                break;
+            case 1:
+                if (Gender.MASCULINE === gender) {
+
+                    const aWords = [
+                        'адрес',
+                        'берег', 'бок',
+                        'век',
+                        'вес',
+                        'вечер',
+                        'лес', 'снег',
+                        'глаз',
+                        'дом',
+                        'детдом',
+                        'счет', 'счёт'
+                    ];
+
+                    const aWords2 = [
+                        'поезд',
+                        'цех'
+                    ];
+
+                    const aWords3 = [
+                        'год',
+                        'вексель',
+                        'ветер'     // TODO ветр-а / ветр-ы
+                    ];
+
+                    const ya = [
+                        'зять',
+                        'брат', 'собрат',
+                        'лист', 'стул',
+                        'брус',
+                        'обод', 'полоз',
+                        'струп',
+                        'подмастерье'
+                    ];
+
+                    const ya2 = [
+                        'лоскут',
+                        'повод',
+                        'прут',
+                        'сук'
+                    ];
+
+                    const softStem = (last(stem) === 'ь')
+                        ? stem
+                        : (
+                            (last(stem) === 'к') ? (initial(stem) + 'чь') : (stem + 'ь')
+                        );
+
+                    if ('сын' === word) {
+
+                        result.push('сыновья');
+                        ы_и();
+
+                    } else if ('человек' === word) {
+
+                        result.push('люди');
+                        ы_и();
+
+                    } else if (ya.includes(word)) {
+
+                        result.push(softStem + 'я');
+
+                    } else if (ya2.includes(word)) {
+
+                        ы_и();
+                        result.push(softStem + 'я');
+
+                    } else if (aWords.includes(word) || endsWithAny(word, aWords2) || aWords3.includes(word)) {
+
+                        const s = stem.replace('ё', 'е');
+
+                        if (softD1(word)) {
+                            result.push(s + 'я');
+                        } else {
+                            result.push(s + 'а');
+                        }
+
+                        if (aWords3.includes(word)) {
+                            ы_и();
+                        }
+
+                    } else if (
+                        word.endsWith('анин') || word.endsWith('янин')      // Кроме имён.
+                        || ['барин', 'боярин'].includes(word)
+                    ) {
+                        // "барин" - "бары" тоже фигурирует в словарях,
+                        // но может возникать путаница с "барами" (от слова "бар").
+                        result.push(nInitial(word, 2) + 'е');
+                    } else if (['цыган'].includes(word)) {
+                        result.push(word + 'е');
+                    } else if ((word.endsWith('ёнок') || word.endsWith('енок'))
+                        && !endsWithAny(word, ['коленок', 'стенок', 'венок', 'ценок'])) {
+                        result.push(nInitial(word, 4) + 'ята');
+                    } else if (word.endsWith('ёночек')) {
+                        result.push(nInitial(word, 6) + 'ятки');
+                    } else if (word.endsWith('онок')
+                        && ['ч', 'ж', 'ш'].includes(lastOfNInitial(word, 4))
+                        && !word.endsWith('бочонок')) {
+                        result.push(nInitial(word, 4) + 'ата');
+                    } else if (okWord(word)) {
+                        result.push(word.substring(0, word.length - 2) + 'ки')
+                    } else if (word.endsWith('ый') || endsWithAny(word, ['щий', 'чий', 'жний', 'шний'])) {
+                        result.push(initial(word) + 'е');
+                    } else if ((word.endsWith('вой') && syllableCount(nInitial(word, 3)) >= 2)
+                        || (word.endsWith('ной') && word.length >= 6)) {
+                        result.push(nInitial(word, 2) + 'ые');
+                    } else if (word.endsWith('его')) {
+                        result.push(nInitial(word, 3) + 'ие');
+                    } else {
+                        ы_и();
+                    }
+                } else if (Gender.NEUTER === gender) {
+                    if (word.endsWith('ко')) {
+                        result.push(initial(word) + 'и');
+                    } else if (word.endsWith('имое')) {
+                        result.push(stem + 'ые')
+                    } else if (word.endsWith('ое')) {
+
+                        if (endsWithAny(stem, ['ск', 'цк'])) {
+                            result.push(stem + 'ие');
+                        } else {
+                            result.push(stem + 'ые');
+                        }
+
+                    } else if (word.endsWith('ие')) {
+                        result.push(nInitial(word, 2) + 'ия');
+                    } else if (word.endsWith('ье')) {
+                        result.push(nInitial(word, 2) + 'ия');
+                        result.push(nInitial(word, 2) + 'ья');
+                    } else if (endsWithAny(word, [
+                        'дерево', 'звено', 'крыло'
+                    ])) {
+                        result.push(stem + 'ья');
+                    } else if (word.endsWith('ле')) {
+                        result.push(stem + 'я');
+                    } else {
+                        result.push(stem + 'а');
+                    }
+                } else {
+                    result.push(stem + 'и');
+                }
+                break;
+            case 2:
+                if (word.endsWith('ая')) {
+                    if (['ж', 'ш'].includes(last(stem)) || endsWithAny(stem, ['ск', 'цк'])) {
+                        result.push(stem + 'ие');
+                    } else {
+                        result.push(stem + 'ые');
+                    }
+                } else {
+                    ы_и();
+                }
+                break;
+            case 3:
+                if (StemUtil.getLastTwoChars(word) === 'мя') {
+                    result.push(stem + 'ена');
+                } else if (specialD3.hasOwnProperty(word)) {
+                    result.push(initial(specialD3[word]) + 'и');
+                } else if (Gender.FEMININE === gender) {
+                    result.push(simpleFirstPart + 'и');
+                } else {
+                    if (last(simpleFirstPart) === 'и') {
+                        result.push(simpleFirstPart + 'я');
+                    } else {
+                        result.push(simpleFirstPart + 'а');
+                    }
+                }
+                break;
+        }
+
+        return result;
     }
 
 })();
