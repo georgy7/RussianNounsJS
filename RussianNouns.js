@@ -543,7 +543,7 @@
             case Case.GENITIVE:
                 if ((iyWord() && lemma.isSurname())
                     || iyoy()
-                    || endsWithAny(word, ['ое', 'нький', 'евой', 'овой'])) {
+                    || endsWithAny(word, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                     return stem + 'ого';
                 } else if (word.endsWith('ее')) {
                     return stem + 'его';
@@ -561,7 +561,7 @@
             case Case.DATIVE:
                 if ((iyWord() && lemma.isSurname())
                     || iyoy()
-                    || endsWithAny(word, ['ое', 'нький', 'евой', 'овой'])) {
+                    || endsWithAny(word, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                     return stem + 'ому';
                 } else if (word.endsWith('ее')) {
                     return stem + 'ему';
@@ -588,7 +588,7 @@
                     }
                 }
             case Case.INSTRUMENTAL:
-                if ((iyWord() && lemma.isSurname()) || endsWithAny(word, ['ое', 'ее', 'нький'])) {
+                if ((iyWord() && lemma.isSurname()) || endsWithAny(word, ['ое', 'ее', 'нький', 'ский'])) {
 
                     if (word !== 'целое') {
                         return stem + 'им';
@@ -616,7 +616,7 @@
             case Case.PREPOSITIONAL:
                 if ((iyWord() && lemma.isSurname())
                     || iyoy()
-                    || endsWithAny(word, ['ое', 'нький', 'евой', 'овой'])) {
+                    || endsWithAny(word, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                     return stem + 'ом';
                 } else if (word.endsWith('ее')) {
                     return stem + 'ем';

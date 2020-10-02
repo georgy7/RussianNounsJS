@@ -1,9 +1,36 @@
+# RussianNounsJS
+
+## Features
+
+* Declination of words. Only in the singular yet.
+* Pluralization in the nominative case.
+
+## Requirements
+
+* EcmaScript 6
+
+## Usage
+
 ```js
 RussianNouns.caseList();
-▸ ["именительный", "родительный", "дательный", "винительный", "творительный", "предложный", "местный"]
+▸ [
+    "именительный",
+    "родительный",
+    "дательный",
+    "винительный",
+    "творительный",
+    "предложный",
+    "местный"
+]
 
+// Grammatical gender is a noun class system in Russian.
 RussianNouns.genders();
-▸ { FEMININE: "женский", MASCULINE: "мужской", NEUTER: "средний", COMMON: "общий" }
+▸ {
+    FEMININE: "женский",
+    MASCULINE: "мужской",
+    NEUTER: "средний",
+    COMMON: "общий"
+}
 
 RussianNouns.decline({text: 'имя', gender: 'средний'}, 'родительный');
 ▸ ['имени']
@@ -22,14 +49,17 @@ RussianNouns.caseList().map(c => {
     return RussianNouns.decline(coat, c);
 });
 ▸ [
-  ["пальто"],
-  ["пальто"],
-  ["пальто"],
-  ["пальто"],
-  ["пальто"],
-  ["пальто"],
-  ["пальто"]
+    ["пальто"],
+    ["пальто"],
+    ["пальто"],
+    ["пальто"],
+    ["пальто"],
+    ["пальто"],
+    ["пальто"]
 ]
+
+RussianNouns.getDeclension(way);
+▸ -1
 
 let mountain = {
     text: 'гора',
@@ -38,17 +68,23 @@ let mountain = {
 
 RussianNouns.caseList().map(c => RussianNouns.decline(mountain, c));
 ▸ [
-  ["гора"]
-  ["горы"]
-  ["горе"]
-  ["гору"]
-  ["горой", "горою"]
-  ["горе"],
-  ["горе"]
+    ["гора"]
+    ["горы"]
+    ["горе"]
+    ["гору"]
+    ["горой", "горою"]
+    ["горе"],
+    ["горе"]
 ]
+
+RussianNouns.pluralize(mountain);
+▸ [ "горы" ]
 
 RussianNouns.getDeclension(mountain);
 ▸ 2
+
+RussianNouns.getSchoolDeclension(mountain);
+▸ 1
 
 let way = {
     text: 'путь',
@@ -95,11 +131,6 @@ ${declineSimple({text: 'вопрос', gender: Gender.MASCULINE}, 4)}, а я о�
 **[Demo](https://georgy7.github.io/RussianNounsJS/)**  :point_left:
 
 [Run tests in web-browser](https://georgy7.github.io/RussianNounsJS/testing.html) (based on OpenCorpora)
-
-## Features/bugs
-
-* Only in the singular.
-* The method getDeclension(lemma) returns 3 for "знамя", "вымя", etc. It works for singular.
 
 ## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
