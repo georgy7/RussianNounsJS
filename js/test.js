@@ -222,20 +222,29 @@ let main = function () {
             if (expectedCasesPlural[0].length > 0) {
                 pluralizeTotal++;
 
-                const actualPluralNominative = RussianNouns.pluralize(lemma);
-                resultPluralForms[0]["actual"] = actualPluralNominative.join(', ');
-                resultPluralForms[0]["failure"] = actualPluralNominative.toString() !== expectedCasesPlural[0].toString();
+                const r = resultPluralForms[0];
 
-                if (resultPluralForms[0].failure) {
+                const actualPluralNominative = RussianNouns.pluralize(lemma);
+                r.actual = actualPluralNominative.join(', ');
+
+                r.failure =
+                    actualPluralNominative.slice().sort().toString() !==
+                    expectedCasesPlural[0].slice().sort().toString();
+
+                if (r.failure) {
                     pluralizeWrong++;
+                } else {
+                    r.warning = actualPluralNominative.toString() !== expectedCasesPlural[0].toString();
                 }
+
+                r.failureOrWarning = r.failure || r.warning;
             }
 
             let wordStatus;
 
             if (wordIsWrongSingular || resultPluralForms[0].failure) {
                 wordStatus = 'wrong';
-            } else if (wordHasWarningSingular) {
+            } else if (wordHasWarningSingular || resultPluralForms[0].warning) {
                 wordStatus = 'hasWarnings';
             } else {
                 wordStatus = 'correct';

@@ -318,7 +318,7 @@
                                             ng-class="{'bg-danger': item.pluralForms[0].failure, 'bg-warning': item.pluralForms[0].warning}">
                                             <div ng-if="(item.pluralForms[0].expected.length) && ($index == 0)">
                                                 {{item.pluralForms[0].actual}}
-                                                <div ng-if="item.pluralForms[0].failure">Правильно: {{item.pluralForms[0].expected}}</div>
+                                                <div ng-if="item.pluralForms[0].failureOrWarning">Правильно: {{item.pluralForms[0].expected}}</div>
                                             </div>
                                         </th>
 
