@@ -61,11 +61,27 @@
     }
 
     .resultInnerTable th.bg-danger {
-        background: #ffbdbd;
+        background: #ffcfbf;
     }
 
     .resultInnerTable th.bg-warning {
         background: #fcea92;
+    }
+
+    .table-hover > tbody > tr:hover .resultInnerTable th.bg-danger {
+        background: #ffbba6;
+    }
+
+    .table-hover > tbody > tr:hover .resultInnerTable th.bg-warning {
+        background: #ffe573;
+    }
+
+    .resultInnerTable tr.plural {
+        background: #fffafa;
+    }
+
+    .table-hover > tbody > tr:hover .resultInnerTable tr.plural {
+        background: transparent;
     }
 
     .decl-col {
@@ -296,7 +312,7 @@
                                         </th>
 
                                     </tr>
-                                    <tr style="background: #fff3ff;">
+                                    <tr class="plural">
 
                                         <th ng-repeat="wordForm in item.wordForms"
                                             ng-class="{'bg-danger': item.pluralForms[0].failure, 'bg-warning': item.pluralForms[0].warning}">
