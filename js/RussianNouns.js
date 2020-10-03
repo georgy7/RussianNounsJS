@@ -99,24 +99,53 @@
             };
         },
         Lemma: class Lemma {
-            constructor(nominativeSingular, gender, pluraliaTantum, indeclinable, animate, surname) {
+            constructor(text, gender, pluraliaTantum, indeclinable, animate, surname) {
+
+                function checkBool(x) {
+                    if (!['undefined', 'boolean'].includes(typeof x)) {
+                        throw 'Must be boolean.';
+                    }
+                }
+
+                checkBool(pluraliaTantum);
+                checkBool(indeclinable);
+                checkBool(animate);
+                checkBool(surname);
+
                 this.pluraliaTantum = pluraliaTantum;
                 this.indeclinable = indeclinable;
                 this.animate = animate;
                 this.surname = surname;
-                if ((nominativeSingular == null) || (gender == null)) {
-                    throw 'A word and a grammatical gender required.';
+
+                // TODO
+                if (text == null) {
+                    throw 'A cyrillic word required.';
                 }
-                if (!Object.values(RussianNouns.genders()).includes(gender)) {
-                    throw 'Bad grammatical gender.';
+
+                if (pluraliaTantum) {
+
+                    // Это слова так называемого парного рода.
+
+                    this.nominativePlural = text;
+
+                } else {
+
+                    if (gender == null) {
+                        throw 'A word and a grammatical gender required.';
+                    }
+                    if (!Object.values(RussianNouns.genders()).includes(gender)) {
+                        throw 'Bad grammatical gender.';
+                    }
+
+                    this.nominativeSingular = text;
+                    this.internalGender = gender;
+
                 }
-                this.nominativeSingular = '' + nominativeSingular;
-                this.internalGender = gender;
             }
 
             clone() {
                 return new RussianNouns.Lemma(
-                    this.nominativeSingular,
+                    this.text(),
                     this.internalGender,
                     this.pluraliaTantum,
                     this.indeclinable,
@@ -126,7 +155,11 @@
             }
 
             text() {
-                return this.nominativeSingular;
+                if (this.isPluraliaTantum()) {
+                    return this.nominativePlural;
+                } else {
+                    return this.nominativeSingular;
+                }
             }
 
             isPluraliaTantum() {
@@ -150,11 +183,27 @@
             }
 
         },
+
+        /**
+         * Чтобы ускорить работу библиотеки, можно предварительно сконвертировать
+         * слова в формат внутренних объектов. При этом будут сделаны все необходимые проверки.
+         *
+         * @param o
+         * @returns {RussianNouns.Lemma} Иммутабельный объект.
+         */
         createLemma: (o) => {
             if (o instanceof RussianNouns.Lemma) {
                 return o;
             }
-            return new RussianNouns.Lemma(o.text, o.gender, o.pluraliaTantum, o.indeclinable, o.animate, o.surname);
+
+            const r = new RussianNouns.Lemma(
+                o.text, o.gender, o.pluraliaTantum,
+                o.indeclinable, o.animate, o.surname
+            );
+
+            Object.freeze(r);
+
+            return r;
         },
 
         /**
@@ -234,14 +283,6 @@
 
     const Gender = RussianNouns.genders();
 
-    const misc = {
-        requiredString: (v) => {
-            if (typeof v !== "string") {
-                throw new Error(v + " is not a string.");
-            }
-        }
-    };
-
     const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
 
     const vowels = 'аоуэыяёюеи';
@@ -262,22 +303,17 @@
 
     const nLast = (str, n) => str.substring(str.length - n);
 
-    const initial = s => {
-        if (s.length <= 1) {
-            return '';
-        }
-        return s.substring(0, s.length - 1);
-    };
+    const init = s => s.substring(0, s.length - 1);
 
-    const nInitial = (str, n) => {
+    const nInit = (str, n) => {
         let part = str;
         for (let i = 1; i <= n; i++) {
-            part = initial(part);
+            part = init(part);
         }
         return part;
     };
 
-    const lastOfNInitial = (str, n) => last(nInitial(str, n));
+    const lastOfNInitial = (str, n) => last(nInit(str, n));
 
     const endsWithAny = (w, arr) => arr.filter(a => w.endsWith(a)).length > 0;
 
@@ -292,13 +328,13 @@
         const lastChar = last(word);
 
         if (['ветер', 'пес', 'пёс', 'шов'].includes(lcWord)) {
-            return nInitial(word, 2) + lastChar;
+            return nInit(word, 2) + lastChar;
         }
 
         if (lcWord.endsWith('рёк') && syllableCount(word) >= 2) {
-            return nInitial(word, 2) + 'ьк';
+            return nInit(word, 2) + 'ьк';
         } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
-            return nInitial(word, 2) + 'йк';
+            return nInit(word, 2) + 'йк';
         }
 
         if (consonantsExceptJ.includes(last(lcWord))) {
@@ -314,22 +350,22 @@
             if (lcWord.endsWith('ень') && (gender === Gender.MASCULINE) && !endsWithAny(lcWord, en2a2b)) {
                 return word.substring(0, word.length - 3) + 'н';
             } else {
-                return initial(word);
+                return init(word);
             }
         }
-        if ('ь' === last(initial(lcWord))) {
-            return initial(word);
+        if ('ь' === last(init(lcWord))) {
+            return init(word);
         }
-        if ('о' === last(lcWord) && 'влмнстх'.includes(last(initial(lcWord)))) {
-            return initial(word);
+        if ('о' === last(lcWord) && 'влмнстх'.includes(last(init(lcWord)))) {
+            return init(word);
         }
 
         const c = lastChar.toLowerCase();
-        if (('й' === c || isVowel(c)) && isVowel(last(initial(word)))) {
-            return nInitial(word, 2);
+        if (('й' === c || isVowel(c)) && isVowel(last(init(word)))) {
+            return nInit(word, 2);
         }
         if (isVowel(c)) {
-            return initial(word);
+            return init(word);
         }
         return word;
     }
@@ -338,8 +374,6 @@
         const word = lemma.text();
         const lcWord = word.toLowerCase();
         const gender = lemma.gender();
-        misc.requiredString(word);
-        misc.requiredString(gender);
 
         if (lemma.isIndeclinable()) {
             return -1;
@@ -372,7 +406,7 @@
 
     function tsStem(word) {
         const lcWord = word.toLowerCase();
-        const head = initial(word);
+        const head = init(word);
         const lcHead = head.toLowerCase();
         if ('а' === last(lcHead)) {
             return head;
@@ -381,15 +415,15 @@
         } else if (nLast(lcHead, 2) === 'ле') {
             const beforeLe = lastOfNInitial(lcHead, 2);
             if (isVowel(beforeLe) || ('л' === beforeLe)) {
-                return initial(head) + 'ь';
+                return init(head) + 'ь';
             } else {
                 return head;
             }
         } else if (isVowel(word[word.length - 2]) && (lcWord[lcWord.length - 2] !== 'и')) {
             if (isVowel(word[word.length - 3])) {
-                return nInitial(word, 2) + 'й';
+                return nInit(word, 2) + 'й';
             } else {
-                return nInitial(word, 2);
+                return nInit(word, 2);
             }
         } else {
             return head;
@@ -411,7 +445,7 @@
                 w.endsWith('ок') && !w.endsWith('шок') && !(w === 'урок')
                 && !endsWithAny(w, tok2)
                 && !isVowel(lastOfNInitial(w, 2))
-                && (isVowel(lastOfNInitial(w, 3)) || endsWithAny(nInitial(w, 2), ['ст', 'рт']))
+                && (isVowel(lastOfNInitial(w, 3)) || endsWithAny(nInit(w, 2), ['ст', 'рт']))
                 && w.length >= 4
             );
     }
@@ -443,7 +477,7 @@
         const lcWord = word.toLowerCase();
         if (lcWord.endsWith('путь')) {
             if (grCase === Case.INSTRUMENTAL) {
-                return initial(word) + 'ём';
+                return init(word) + 'ём';
             } else {
                 return decline3(lemma, grCase);
             }
@@ -490,22 +524,22 @@
                     if ([Case.PREPOSITIONAL, Case.LOCATIVE].includes(grCase)) {
                         return word;
                     } else {
-                        lemmaCopy.nominativeSingular = initial(w) + 'ь';
+                        lemmaCopy.nominativeSingular = init(w) + 'ь';
                         return decline0(lemmaCopy, grCase);
                     }
                 } else if (w.toLowerCase().endsWith('зни')) {
-                    lemmaCopy.nominativeSingular = initial(w) + 'ь';
+                    lemmaCopy.nominativeSingular = init(w) + 'ь';
                     return decline3(lemmaCopy, grCase);
                 } else {
                     const e = (last(w).toLowerCase() === 'н') ? 'я' : 'а';
-                    lemmaCopy.nominativeSingular = initial(w) + e;
+                    lemmaCopy.nominativeSingular = init(w) + e;
                     return decline2(lemmaCopy, grCase);
                 }
             }
         }
 
         let stem = getNounStem(lemma);
-        let head = initial(word);
+        let head = init(word);
 
         const soft = (half && lcWord.endsWith('я')) || softD1(lcWord);
 
@@ -660,7 +694,7 @@
         const stem = getNounStem(lemma);
         const lcStem = stem.toLowerCase();
 
-        const head = initial(word);
+        const head = init(word);
         const soft = () => {
             return last(lcWord) === 'я';
         };
@@ -823,8 +857,8 @@
         const gender = lemma.gender();
         const declension = getDeclension(lemma);
 
-        const simpleFirstPart = (('й' == last(lcWord) || isVowel(last(word))) && isVowel(last(initial(word))))
-            ? initial(word)
+        const simpleFirstPart = (('й' == last(lcWord) || isVowel(last(word))) && isVowel(last(init(word))))
+            ? init(word)
             : stem;
 
         const softPatronymic = () => (lcWord.endsWith('евич') || lcWord.endsWith('евна'))
@@ -871,7 +905,7 @@
                 if (lcWord === 'путь') {
                     result.push('пути');
                 } else if (lcWord.endsWith('дитя')) {
-                    result.push(nInitial(word, 3) + 'ети');
+                    result.push(nInit(word, 3) + 'ети');
                 } else {
                     throw new Error("unsupported");
                 }
@@ -895,8 +929,8 @@
                 const softStem = (last(lcStem) === 'ь')
                     ? stem
                     : (
-                        (last(lcStem) === 'к') ? (initial(stem) + 'чь') : (
-                            (last(lcStem) === 'г') ? (initial(stem) + 'зь') : (stem + 'ь')
+                        (last(lcStem) === 'к') ? (init(stem) + 'чь') : (
+                            (last(lcStem) === 'г') ? (init(stem) + 'зь') : (stem + 'ь')
                         )
                     );
 
@@ -973,27 +1007,27 @@
                     ) {
                         // "барин" - "бары" тоже фигурирует в словарях,
                         // но может возникать путаница с "барами" (от слова "бар").
-                        result.push(nInitial(word, 2) + 'е');
+                        result.push(nInit(word, 2) + 'е');
                     } else if (['цыган'].includes(lcWord)) {
                         result.push(word + 'е');
                     } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
                         && !endsWithAny(lcWord, ['коленок', 'стенок', 'венок', 'ценок'])) {
-                        result.push(nInitial(word, 4) + 'ята');
+                        result.push(nInit(word, 4) + 'ята');
                     } else if (lcWord.endsWith('ёночек')) {
-                        result.push(nInitial(word, 6) + 'ятки');
+                        result.push(nInit(word, 6) + 'ятки');
                     } else if (lcWord.endsWith('онок')
                         && 'жчш'.includes(lastOfNInitial(lcWord, 4))
                         && !lcWord.endsWith('бочонок')) {
-                        result.push(nInitial(word, 4) + 'ата');
+                        result.push(nInit(word, 4) + 'ата');
                     } else if (okWord(lcWord)) {
                         result.push(word.substring(0, word.length - 2) + 'ки')
                     } else if (lcWord.endsWith('ый') || endsWithAny(lcWord, ['щий', 'чий', 'жний', 'шний'])) {
-                        result.push(initial(word) + 'е');
-                    } else if ((lcWord.endsWith('вой') && syllableCount(nInitial(word, 3)) >= 2)
+                        result.push(init(word) + 'е');
+                    } else if ((lcWord.endsWith('вой') && syllableCount(nInit(word, 3)) >= 2)
                         || (lcWord.endsWith('ной') && word.length >= 6)) {
-                        result.push(nInitial(word, 2) + 'ые');
+                        result.push(nInit(word, 2) + 'ые');
                     } else if (lcWord.endsWith('его')) {
-                        result.push(nInitial(word, 3) + 'ие');
+                        result.push(nInit(word, 3) + 'ие');
                     } else {
                         ы_и();
                     }
@@ -1006,7 +1040,7 @@
                     } else if (endsWithAny(lcWord, ['ко', 'чо'])
                         && !endsWithAny(lcWord, ['войско', 'облако'])
                     ) {
-                        result.push(initial(word) + 'и');
+                        result.push(init(word) + 'и');
                     } else if (lcWord.endsWith('имое')) {
                         result.push(stem + 'ые')
 
@@ -1022,11 +1056,11 @@
                         }
 
                     } else if (endsWithAny(lcWord, ['ие', 'иё'])) {
-                        result.push(nInitial(word, 2) + 'ия');
+                        result.push(nInit(word, 2) + 'ия');
 
                     } else if (endsWithAny(lcWord, ['ье', 'ьё'])) {
 
-                        let w = nInitial(word, 2);
+                        let w = nInit(word, 2);
 
                         if (last(lcWord) === 'е') {
                             result.push(w + 'ия');
@@ -1080,7 +1114,7 @@
                 if (nLast(lcWord, 2) === 'мя') {
                     result.push(stem + 'ена');
                 } else if (specialD3.hasOwnProperty(lcWord)) {
-                    result.push(initial(specialD3[lcWord]) + 'и');
+                    result.push(init(specialD3[lcWord]) + 'и');
                 } else if (Gender.FEMININE === gender) {
                     result.push(simpleFirstPart + 'и');
                 } else {
