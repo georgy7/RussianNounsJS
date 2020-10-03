@@ -121,6 +121,9 @@ let main = function () {
                 pluraliaTantum: false
             });
 
+            const lemmaUpperCase = lemma.clone();
+            lemmaUpperCase.nominativeSingular = lemma.text().toUpperCase();
+
             const resultWordForms = [];
             totalWords++;
             totalCases += 6;
@@ -137,9 +140,22 @@ let main = function () {
 
                 try {
                     actual = RussianNouns.decline(lemma, c);
+
+                    const actualUpperCase = RussianNouns.decline(lemmaUpperCase, c);
+                    const aString = actual.toString().toLowerCase();
+                    const auString = actualUpperCase.toString().toLowerCase();
+
+                    if (aString !== auString) {
+                        throw `Different upper-case result: ${word}, gender: ${gender}, case: ${c}, "${aString} !== ${auString}".`
+                    }
+
                 } catch (e) {
                     actual = ['-----'];
-                    if (e.message !== "unsupported") throw e;
+                    if (e.message !== "unsupported") {
+                        throw e;
+                    } else {
+                        console.log(`Unsupported: "${word}"`);
+                    }
                 }
 
                 const sameCount = (_.uniq(actual).length == _.uniq(expected).length);
@@ -225,6 +241,15 @@ let main = function () {
                 const r = resultPluralForms[0];
 
                 const actualPluralNominative = RussianNouns.pluralize(lemma);
+
+                const pluralUpperCase = RussianNouns.pluralize(lemmaUpperCase);
+                const aString = actualPluralNominative.toString().toLowerCase();
+                const auString = pluralUpperCase.toString().toLowerCase();
+
+                if (aString !== auString) {
+                    throw `Different upper-case plurals: ${word}, gender: ${lemma.gender()}, "${aString} !== ${auString}".`
+                }
+
                 r.actual = actualPluralNominative.join(', ');
 
                 r.failure =
