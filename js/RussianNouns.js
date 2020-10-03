@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011-2019 Устинов Георгий Михайлович
+  Copyright (c) 2011-2020 Устинов Георгий Михайлович
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -295,6 +295,8 @@
 
             if (word.endsWith('рёк') && syllableCount(word) >= 2) {
                 return nInitial(word, 2) + 'ьк';
+            } else if (word.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
+                return nInitial(word, 2) + 'йк';
             }
 
             if (consonantsExceptJ.includes(lastChar)) {
@@ -641,7 +643,8 @@
                     'угол': 'углу'
                 };
                 const uWords = [
-                    'ад', 'бок', 'бор', 'быт', 'верх', 'вид', 'глаз', 'горб', 'гроб',
+                    'ад', 'бок', 'бор', 'бред', 'быт', 'верх', 'вид',
+                    'глаз', 'горб', 'гроб',
                     'долг', 'дым', 'зад', 'клей', 'край', 'круг', 'лад',
                     'лес', 'луг', 'мёд', 'мед', 'мел', 'мех',
                     'мозг', 'низ', 'нос', 'плен', 'пол', 'полк', 'порт', 'пух',
@@ -1050,7 +1053,11 @@
                         result.push('чуда');
                     } else if (endsWithAny(word, ['ле', 'ре'])) {
                         result.push(stem + 'я');
-                    } else if (['тесло', 'стекло', 'чело', 'стегно', 'стебло'].includes(word)) {
+                    } else if ([
+                        'тесло', 'стекло',
+                        'бедро', 'берцо',
+                        'чело', 'стегно', 'стебло'
+                    ].includes(word)) {
                         // "Стекла" легко перепутать с глаголом,
                         // "тесла" — c Tesla,
                         // другие слова — с родительным падежом ед. ч.
