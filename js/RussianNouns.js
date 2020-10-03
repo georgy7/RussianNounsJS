@@ -289,6 +289,14 @@
         return arr.filter(a => w.endsWith(a)).length > 0;
     }
 
+    function unYo(s) {
+        return s.replace('ё', 'е').replace('Ё', 'Е');
+    }
+
+    function reYo(s) {
+        return s.replace('е', 'ё').replace('Е', 'Ё');
+    }
+
     const StemUtil = {
         getNounStem: (lemma) => {
             const word = lemma.text();
@@ -537,7 +545,7 @@
         }
 
         function iyWord() {
-            return last(lcWord) === 'й' || ['ий', 'ие'].includes(StemUtil.getLastTwoChars(lcWord));
+            return last(lcWord) === 'й' || ['ий', 'ие', 'иё'].includes(StemUtil.getLastTwoChars(lcWord));
         }
 
         function schWord() {
@@ -638,7 +646,7 @@
                     return stem + 'ем';
                 } else if (['ий', 'ие'].includes(StemUtil.getLastTwoChars(lcWord))) {
                     return head + 'и';
-                } else if (last(lcWord) === 'й') {
+                } else if ((last(lcWord) === 'й') || ('иё' === StemUtil.getLastTwoChars(lcWord))) {
                     return head + 'е';
                 } else if (tsWord(lcWord)) {
                     return tsStem(word) + 'це';
@@ -988,7 +996,7 @@
 
                     } else if (aWords.includes(lcWord) || endsWithAny(lcWord, aWords2) || aWords3.includes(lcWord)) {
 
-                        const s = stem.replace('ё', 'е').replace('Ё', 'Е');
+                        const s = unYo(stem);
 
                         if (softD1(lcWord)) {
                             result.push(s + 'я');
@@ -1086,7 +1094,7 @@
                         // "Стекла" легко перепутать с глаголом,
                         // "тесла" — c Tesla,
                         // другие слова — с родительным падежом ед. ч.
-                        result.push(stem.replace('е', 'ё').replace('Е', 'Ё') + 'а');
+                        result.push(reYo(stem) + 'а');
                     } else {
                         result.push(stem + 'а');
                     }
