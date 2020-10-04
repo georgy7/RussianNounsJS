@@ -231,9 +231,11 @@ let main = function () {
 
             const resultPluralForms = [];
 
-            resultPluralForms[0] = {
-                "expected": expectedCasesPlural[0].join(', ')
-            };
+            for (let j = 0; j <= 5; j++) {
+                resultPluralForms[j] = {
+                    "expected": expectedCasesPlural[j].join(', ')
+                };
+            }
 
             if (expectedCasesPlural[0].length > 0) {
                 pluralizeTotal++;

@@ -102,7 +102,7 @@
             constructor(text, gender, pluraliaTantum, indeclinable, animate, surname) {
 
                 function checkBool(x) {
-                    if (!['undefined', 'boolean'].includes(typeof x)) {
+                    if ((null != x) && (typeof x != 'boolean')) {
                         throw 'Must be boolean.';
                     }
                 }
@@ -217,6 +217,9 @@
          *
          * Справку по возвращаемым значениям выдаёт метод {@link RussianNouns.declensions()}.
          *
+         * Понятие "склонение" сложно применить к словам pluralia tantum,
+         * поэтому этот метод возвращает для них undefined.
+         *
          * @param lemma
          * @returns {number} Склонение по Камыниной; -1 для несклоняемых существительных.
          */
@@ -229,7 +232,8 @@
          * Иногда в школьных учебниках 10 слов на «-мя» относят к разносклоняемым.
          * Здесь это третье склонение.
          *
-         * Неправильно работает для существительных pluralia tantum («ножницы», «дрожжи», «белила» и т.п.).
+         * Понятие "склонение" сложно применить к словам pluralia tantum,
+         * поэтому этот метод возвращает для них undefined.
          *
          * @param lemma
          * @returns {number} «Школьный» вариант склонения:
@@ -249,14 +253,17 @@
 
         /**
          *
-         * @param {RussianNouns.Lemma|Object} lemma
-         * @param {string} grammaticalCase
+         * @param {RussianNouns.Lemma|Object} lemma Слово в именительном падеже с метаинформацией.
+         * @param {string} grammaticalCase Падеж.
+         * @param {string} pluralForm Форма во множественном числе.
+         * Если указана, результат будет тоже во множественном.
+         * У pluralia tantum игнорируется.
          * @returns {Array} Список, т.к. бывают вторые родительный, винительный падежи. Существительные
          * женского рода в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
          * Второй предложный падеж (местный падеж, локатив) не включен в предложный.
          */
-        decline: (lemma, grammaticalCase) => {
-            return declineAsList(RussianNouns.createLemma(lemma), grammaticalCase);
+        decline: (lemma, grammaticalCase, pluralForm) => {
+            return declineAsList(RussianNouns.createLemma(lemma), grammaticalCase, pluralForm);
         },
 
         /**
@@ -284,6 +291,8 @@
     const Gender = RussianNouns.genders();
 
     const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
+
+    const consonants = consonantsExceptJ.concat('й');
 
     const vowels = 'аоуэыяёюеи';
 
@@ -319,7 +328,43 @@
 
     const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
 
-    const reYo = s => s.replace('е', 'ё').replace('Е', 'Ё');
+    const reYo = s => {
+        const index = Math.max(
+            s.toLowerCase().lastIndexOf('е'),
+            s.toLowerCase().lastIndexOf('ё')
+        );
+        const r = isUpper(s[index]) ? 'Ё' : 'ё';
+        return s.substring(0, index) + r + s.substring(index + 1);
+    };
+
+    const singleEYo = s => (s.replace(/[^её]/g, '').length === 1);
+
+    const wordsWithFixedStemAccent = [
+        'балансер', 'брех',
+        'дёрн',
+        'идиш',
+        'имидж',
+        'шофер'
+    ];
+
+    const wordsWithFixedStemAccentSingular = wordsWithFixedStemAccent.concat([
+        'мед'
+    ]);
+
+    const wordsWithFixedStemAccentPlural = wordsWithFixedStemAccent.concat([
+        'тесло', 'стекло',
+        'бедро', 'берцо', 'блесна',
+        'чело', 'стегно', 'стебло'
+    ]);
+
+    // Кроме локатива.
+    const hasFixedStemAccentSingular = (w, fuzzy) =>
+        fuzzy ? endsWithAny(unYo(w).toLowerCase(), wordsWithFixedStemAccentSingular)
+            : wordsWithFixedStemAccentSingular.includes(unYo(w).toLowerCase());
+
+    const hasFixedStemAccentPlural = (w, fuzzy) =>
+        fuzzy ? endsWithAny(unYo(w).toLowerCase(), wordsWithFixedStemAccentPlural)
+            : wordsWithFixedStemAccentPlural.includes(unYo(w).toLowerCase());
 
     function getNounStem(lemma) {
         const word = lemma.text();
@@ -374,6 +419,10 @@
         const word = lemma.text();
         const lcWord = word.toLowerCase();
         const gender = lemma.gender();
+
+        if (lemma.isPluraliaTantum()) {
+            return undefined;
+        }
 
         if (lemma.isIndeclinable()) {
             return -1;
@@ -430,6 +479,27 @@
         }
     }
 
+    function hasStressedEndingSingular(lemma, grCase) {
+        const lcWord = lemma.text().toLowerCase();
+        const gender = lemma.gender();
+
+        if (hasFixedStemAccentSingular(lcWord)) {
+            return false;
+        }
+
+        if (grCase === Case.INSTRUMENTAL) {
+            if (Gender.MASCULINE === gender) {
+
+                return false;
+
+            }
+        }
+    }
+
+    function hasUnstressedEndingSingular(lemma, grCase) {
+        return !hasStressedEndingSingular(lemma, grCase);
+    }
+
     function okWord(w) {
         const tok = [
             'лапоток', 'желток'
@@ -465,7 +535,7 @@
             // Сюда не должны попадать как минимум
             // мягкий и твердый знаки помимо гласных.
 
-            return (offset >= 0) && consonantsExceptJ.concat('й').includes(subWord[offset].toLowerCase());
+            return (offset >= 0) && consonants.includes(subWord[offset].toLowerCase());
 
         } else {
             return false;
@@ -550,13 +620,16 @@
 
         let lcStem = stem.toLowerCase();
 
+        const eStem = (hasFixedStemAccentSingular(word) || lemma.isSurname()) ? stem : unYo(stem);
+        const eHead = (hasFixedStemAccentSingular(word) || lemma.isSurname()) ? head : unYo(head);
+
         const iyWord = () => last(lcWord) === 'й'
             || ['ий', 'ие', 'иё'].includes(nLast(lcWord, 2));
 
         const schWord = () => 'чщ'.includes(last(lcStem));
 
         const surnameType1 = () => lemma.isSurname()
-            && (lcWord.endsWith('ин') || lcWord.endsWith('ов') || lcWord.endsWith('ев'));
+            && (lcWord.endsWith('ин') || lcWord.endsWith('ов') || lcWord.endsWith('ев') || lcWord.endsWith('ёв'));
 
         const iyoy = () => (nLast(lcWord, 2) === 'ый')
             || (lcWord.endsWith('ной') && syllableCount(word) >= 2);
@@ -580,7 +653,7 @@
                 } else if (okWord(lcWord)) {
                     return word.substring(0, word.length - 2) + 'ка';
                 } else {
-                    return stem + 'а';
+                    return eStem + 'а';
                 }
             case Case.DATIVE:
                 if ((iyWord() && lemma.isSurname())
@@ -598,7 +671,7 @@
                 } else if (okWord(lcWord)) {
                     return word.substring(0, word.length - 2) + 'ку';
                 } else {
-                    return stem + 'у';
+                    return eStem + 'у';
                 }
             case Case.ACCUSATIVE:
                 if (gender === Gender.NEUTER) {
@@ -624,10 +697,14 @@
                     return stem + 'ым';
                 } else if (iyWord()) {
                     return head + 'ем';
-                } else if (soft || 'жчш'.includes(last(lcStem))) {
+                } else if (soft || ('жчш'.includes(last(lcStem)) && hasUnstressedEndingSingular(lemma, grCase))) {
                     return stem + 'ем';
                 } else if (tsWord(lcWord)) {
-                    return tsStem(word) + 'цем';
+                    if (hasUnstressedEndingSingular(lemma, grCase)) {
+                        return tsStem(word) + 'цем';
+                    } else {
+                        return tsStem(word) + 'цом';
+                    }
                 } else if (lcWord.endsWith('це')) {
                     return word + 'м';
                 } else if (okWord(lcWord)) {
@@ -635,7 +712,7 @@
                 } else if (surnameType1()) {
                     return word + 'ым';
                 } else {
-                    return stem + 'ом';
+                    return eStem + 'ом';
                 }
             case Case.PREPOSITIONAL:
                 if ((iyWord() && lemma.isSurname())
@@ -653,7 +730,7 @@
                 } else if (okWord(lcWord)) {
                     return word.substring(0, word.length - 2) + 'ке';
                 } else {
-                    return stem + 'е';
+                    return eStem + 'е';
                 }
             case Case.LOCATIVE:
                 const specialWords = {
@@ -678,9 +755,9 @@
                 }
                 if (uWords.includes(lcWord)) {
                     if (last(lcWord) === 'й') {
-                        return word.substring(0, word.length - 1) + 'ю';
+                        return unYo(word).substring(0, word.length - 1) + 'ю';
                     } else {
-                        return word + 'у';
+                        return unYo(word) + 'у';
                     }
                 }
                 return decline1(lemma, Case.PREPOSITIONAL);
@@ -814,22 +891,27 @@
         }
     }
 
-    function declineAsList(lemma, grCase) {
-        const r = decline(lemma, grCase);
+    function declineAsList(lemma, grCase, pluralForm) {
+        const r = decline(lemma, grCase, pluralForm);
         if (r instanceof Array) {
             return r;
         }
         return [r];
     }
 
-    function decline(lemma, grCase) {
+    function decline(lemma, grCase, pluralForm) {
         const word = lemma.text();
+
         if (lemma.isIndeclinable()) {
             return word;
         }
+
         if (lemma.isPluraliaTantum()) {
-            throw "PluraliaTantum words are unsupported.";
+            return declinePlural(lemma, grCase, word);
+        } else if (pluralForm) {
+            return declinePlural(lemma, grCase, pluralForm);
         }
+
         const declension = getDeclension(lemma);
         switch (declension) {
             case -1:
@@ -951,6 +1033,7 @@
                         'город',
                         'дом',
                         'детдом',
+                        'катер',
                         'счет', 'счёт'
                     ];
 
@@ -989,7 +1072,7 @@
 
                     } else if (aWords.includes(lcWord) || endsWithAny(lcWord, aWords2) || aWords3.includes(lcWord)) {
 
-                        const s = unYo(stem);
+                        const s = hasFixedStemAccentPlural(word) ? (singleEYo(stem) ? reYo(stem) : stem) : unYo(stem);
 
                         if (softD1(lcWord)) {
                             result.push(s + 'я');
@@ -1005,9 +1088,13 @@
                         lcWord.endsWith('анин') || lcWord.endsWith('янин')      // Кроме имён.
                         || ['барин', 'боярин'].includes(lcWord)
                     ) {
-                        // "барин" - "бары" тоже фигурирует в словарях,
-                        // но может возникать путаница с "барами" (от слова "бар").
                         result.push(nInit(word, 2) + 'е');
+
+                        // В корпусе фигурирует 🤷‍♂️
+                        if ('барин' === lcWord) {
+                            result.push(nInit(word, 2) + 'ы');
+                        }
+
                     } else if (['цыган'].includes(lcWord)) {
                         result.push(word + 'е');
                     } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
@@ -1079,14 +1166,7 @@
                         result.push('чуда');
                     } else if (endsWithAny(lcWord, ['ле', 'ре'])) {
                         result.push(stem + 'я');
-                    } else if ([
-                        'тесло', 'стекло',
-                        'бедро', 'берцо',
-                        'чело', 'стегно', 'стебло'
-                    ].includes(lcWord)) {
-                        // "Стекла" легко перепутать с глаголом,
-                        // "тесла" — c Tesla,
-                        // другие слова — с родительным падежом ед. ч.
+                    } else if (hasFixedStemAccentPlural(lcWord, true)) {
                         result.push(reYo(stem) + 'а');
                     } else {
                         result.push(stem + 'а');
@@ -1128,6 +1208,22 @@
         }
 
         return result;
+    }
+
+    function declinePlural(lemma, grCase, word) {
+
+        if (Case.DATIVE === grCase) {
+
+        } else if (Case.INSTRUMENTAL === grCase) {
+
+        } else if (Case.PREPOSITIONAL === grCase) {
+
+        }
+
+
+        const declension = getDeclension(lemma);
+        // TODO
+        return word;
     }
 
 })();

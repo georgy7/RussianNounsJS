@@ -10,12 +10,9 @@ const Ⰴ = (word, caseNumber) => {
 };
 
 const ⰃⰃ = (word, caseNumber) => {
-
-    if (caseNumber !== 1) {
-        return 'TODO';
-    }
-
-    return RussianNouns.pluralize(word)[0];
+    const c = RussianNouns.caseList()[caseNumber - 1];
+    const pluralForm = RussianNouns.pluralize(word)[0];
+    return RussianNouns.decline(word, c, pluralForm)[0];
 };
 
 const L = RussianNouns.createLemma;
