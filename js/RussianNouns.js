@@ -19,7 +19,18 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-(function () {
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        // AMD
+        define([], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // CommonJS
+        module.exports = factory();
+    } else {
+        root.RussianNouns = factory();
+    }
+}(typeof self !== 'undefined' ? self : this, function () {
     'use strict';
 
     // Ссылки:
@@ -27,10 +38,7 @@
     // - Статья http://en.wikipedia.org/wiki/Russian_grammar
     // - К семантике русского локатива - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
-    //------------------------------
-    // API
-    //------------------------------
-    const RussianNouns = {
+    const API = {
         cases: () => {
             return {
                 NOMINATIVE: 'именительный',
@@ -73,13 +81,13 @@
         },
         caseList: () => {
             return [
-                RussianNouns.cases().NOMINATIVE,
-                RussianNouns.cases().GENITIVE,
-                RussianNouns.cases().DATIVE,
-                RussianNouns.cases().ACCUSATIVE,
-                RussianNouns.cases().INSTRUMENTAL,
-                RussianNouns.cases().PREPOSITIONAL,
-                RussianNouns.cases().LOCATIVE
+                API.cases().NOMINATIVE,
+                API.cases().GENITIVE,
+                API.cases().DATIVE,
+                API.cases().ACCUSATIVE,
+                API.cases().INSTRUMENTAL,
+                API.cases().PREPOSITIONAL,
+                API.cases().LOCATIVE
             ];
         },
         declensions: () => {
@@ -133,7 +141,7 @@
                     if (gender == null) {
                         throw 'A word and a grammatical gender required.';
                     }
-                    if (!Object.values(RussianNouns.genders()).includes(gender)) {
+                    if (!Object.values(API.genders()).includes(gender)) {
                         throw 'Bad grammatical gender.';
                     }
 
@@ -144,7 +152,7 @@
             }
 
             clone() {
-                return new RussianNouns.Lemma(
+                return new API.Lemma(
                     this.text(),
                     this.internalGender,
                     this.pluraliaTantum,
@@ -192,11 +200,11 @@
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
         createLemma: (o) => {
-            if (o instanceof RussianNouns.Lemma) {
+            if (o instanceof API.Lemma) {
                 return o;
             }
 
-            const r = new RussianNouns.Lemma(
+            const r = new API.Lemma(
                 o.text, o.gender, o.pluraliaTantum,
                 o.indeclinable, o.animate, o.surname
             );
@@ -224,7 +232,7 @@
          * @returns {number} Склонение по Камыниной; -1 для несклоняемых существительных.
          */
         getDeclension: (lemma) => {
-            return getDeclension(RussianNouns.createLemma(lemma));
+            return getDeclension(API.createLemma(lemma));
         },
 
         /**
@@ -241,7 +249,7 @@
          * разносклоняемые — 0; несклоняемые — минус единица.
          */
         getSchoolDeclension: (lemma) => {
-            const d = getDeclension(RussianNouns.createLemma(lemma));
+            const d = getDeclension(API.createLemma(lemma));
             if (d === 1) {
                 return 2;
             } else if (d === 2) {
@@ -263,7 +271,7 @@
          * Второй предложный падеж (местный падеж, локатив) не включен в предложный.
          */
         decline: (lemma, grammaticalCase, pluralForm) => {
-            return declineAsList(RussianNouns.createLemma(lemma), grammaticalCase, pluralForm);
+            return declineAsList(API.createLemma(lemma), grammaticalCase, pluralForm);
         },
 
         /**
@@ -271,7 +279,7 @@
          * @returns {Array}
          */
         pluralize: (lemma) => {
-            const o = RussianNouns.createLemma(lemma);
+            const o = API.createLemma(lemma);
             if (o.isPluraliaTantum()) {
                 return [o.text()];
             } else {
@@ -280,15 +288,9 @@
         }
     };
 
-    window.RussianNouns = RussianNouns;
+    const Case = API.cases();
 
-    //------------------------------
-    // End of API
-    //------------------------------
-
-    const Case = RussianNouns.cases();
-
-    const Gender = RussianNouns.genders();
+    const Gender = API.genders();
 
     const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
 
@@ -1226,4 +1228,5 @@
         return word;
     }
 
-})();
+    return API;
+}));
