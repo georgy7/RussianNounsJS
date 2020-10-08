@@ -24,6 +24,8 @@
 
           $scope.cases = RussianNouns.caseList();
 
+          const rne = new RussianNouns.Engine();
+
           $scope.fillForm = (gender, word, surname, animate, indeclinable) => {
               $scope.input.text = word;
               $scope.input.gender = gender;
@@ -41,10 +43,10 @@
                   $scope.plural = {};
 
                   for (const c of $scope.cases) {
-                      $scope.result[c] = RussianNouns.decline(lemma, c);
+                      $scope.result[c] = rne.decline(lemma, c);
                   }
 
-                  $scope.plural[RussianNouns.caseList()[0]] = RussianNouns.pluralize(lemma);
+                  $scope.plural[RussianNouns.caseList()[0]] = rne.pluralize(lemma);
 
               } else {
                   $scope.result = null;
@@ -106,12 +108,19 @@
           <span style="font-weight: 100;">Demo</span>
         </h1>
         <h2 style="padding-left: .1em;">
-          97.5% accurate library
+          98% accurate library
         </h2>
       </div>
       <div class="col-lg-4 text-lg-right">
-        <iframe src="https://ghbtns.com/github-btn.html?user=georgy7&repo=russian_nouns&type=star&count=true&size=large"
-                frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
+
+        <a class="btn btn-lg btn-outline-dark"
+           style="padding: .1rem 1.1rem .19rem .8rem;"
+           href="https://github.com/georgy7/RussianNounsJS"
+           title="Star RussianNounsJS on GitHub.">
+          <span style="vertical-align: -5%; font-size: 127%; line-height: 1;">★</span>
+          <span style="vertical-align: middle; font-size: 85%;">Star</span>
+        </a>
+
       </div>
     </div>
 

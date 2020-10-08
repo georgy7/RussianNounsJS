@@ -86,7 +86,7 @@ let main = function () {
         }
     }
 
-    function test(data, gender, loadingStepCompleted) {
+    function test(rne, data, gender, loadingStepCompleted) {
 
         for (let i = 0; i < data.length; i++) {
 
@@ -139,9 +139,9 @@ let main = function () {
                 let actual;
 
                 try {
-                    actual = RussianNouns.decline(lemma, c);
+                    actual = rne.decline(lemma, c);
 
-                    const actualUpperCase = RussianNouns.decline(lemmaUpperCase, c);
+                    const actualUpperCase = rne.decline(lemmaUpperCase, c);
                     const aString = actual.toString().toLowerCase();
                     const auString = actualUpperCase.toString().toLowerCase();
 
@@ -242,9 +242,9 @@ let main = function () {
 
                 const r = resultPluralForms[0];
 
-                const actualPluralNominative = RussianNouns.pluralize(lemma);
+                const actualPluralNominative = rne.pluralize(lemma);
 
-                const pluralUpperCase = RussianNouns.pluralize(lemmaUpperCase);
+                const pluralUpperCase = rne.pluralize(lemmaUpperCase);
                 const aString = actualPluralNominative.toString().toLowerCase();
                 const auString = pluralUpperCase.toString().toLowerCase();
 
@@ -288,10 +288,11 @@ let main = function () {
         }
     }
 
-    test(dataM, RussianNouns.genders().MASCULINE, 1);
-    test(dataF, RussianNouns.genders().FEMININE, 2);
-    test(dataN, RussianNouns.genders().NEUTER, 3);
-    test(dataC, RussianNouns.genders().COMMON, 4);
+    const rne = new RussianNouns.Engine();
+    test(rne, dataM, RussianNouns.genders().MASCULINE, 1);
+    test(rne, dataF, RussianNouns.genders().FEMININE, 2);
+    test(rne, dataN, RussianNouns.genders().NEUTER, 3);
+    test(rne, dataC, RussianNouns.genders().COMMON, 4);
 
     postMessage({
         type: 'testResult',

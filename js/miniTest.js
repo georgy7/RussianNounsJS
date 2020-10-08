@@ -1,18 +1,20 @@
+const rne = new RussianNouns.Engine();
+
 const Ⰳ = (word, caseNumber) => {
     const c = RussianNouns.caseList()[caseNumber - 1];
-    return RussianNouns.decline(word, c)[0];
+    return rne.decline(word, c)[0];
 };
 
 const Ⰴ = (word, caseNumber) => {
     const c = RussianNouns.caseList()[caseNumber - 1];
-    const result = RussianNouns.decline(word, c);
+    const result = rne.decline(word, c);
     return result[result.length - 1];
 };
 
 const ⰃⰃ = (word, caseNumber) => {
     const c = RussianNouns.caseList()[caseNumber - 1];
-    const pluralForm = RussianNouns.pluralize(word)[0];
-    return RussianNouns.decline(word, c, pluralForm)[0];
+    const pluralForm = rne.pluralize(word)[0];
+    return rne.decline(word, c, pluralForm)[0];
 };
 
 const L = RussianNouns.createLemma;
