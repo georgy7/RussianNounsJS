@@ -447,14 +447,29 @@
             }
         }
 
+        function putM(settings, word) {
+            d.put(
+                {text: word, gender: Gender.MASCULINE},
+                settings
+            );
+        }
+
         putAll({gender: Gender.MASCULINE}, API.FIXED_STEM_STRESS, [
             'брёх', 'дёрн', 'идиш', 'имидж', 'мед'
         ]);
 
-        d.put(
-            {text: 'мёд', gender: Gender.MASCULINE},
-            'sssssse-eeeeee'
-        );
+        putAll({gender: Gender.MASCULINE}, 'sssssss-eeeeee', [
+            'адрес', 'век', 'вечер', 'город',
+            'детдом', 'поезд'
+        ]);
+
+        putAll({gender: Gender.MASCULINE}, 'sssssse-eeeeee', [
+            'берег', 'бок',
+            'вес', 'лес', 'снег',
+            'дом', 'катер',
+            'счёт',
+            'мёд'
+        ]);
 
         putAll({gender: Gender.MASCULINE, animate: true}, API.FIXED_STEM_STRESS, [
             'балансёр'
@@ -464,6 +479,14 @@
             {text: 'шофёр', gender: Gender.MASCULINE, animate: true},
             'sssssss-bbbbbb'
         );
+
+        putAll({gender: Gender.MASCULINE}, 'sssssss-bbbbbb', [
+            'вексель', 'ветер'
+        ]);
+
+        putM('sssssse-eseeee', 'глаз');
+        putM('sssssse-beebee', 'год');
+        putM('ssssssb-bbbbbb', 'цех');
 
         for (let word of [
             'тесло', 'стекло',
@@ -853,12 +876,12 @@
                     return head + 'ем';
                 } else if (soft || ('жчш'.includes(last(lcStem)))) {
 
-                    return eStem(stem,(s, stressedEnding) => stressedEnding
-                            ? (s + 'ом') : (s + 'ем'));
+                    return eStem(stem, (s, stressedEnding) => stressedEnding
+                        ? (s + 'ом') : (s + 'ем'));
 
                 } else if (tsWord(lcWord)) {
 
-                    return eStem(word,(w, stressedEnding) => stressedEnding
+                    return eStem(word, (w, stressedEnding) => stressedEnding
                         ? (tsStem(w) + 'цом') : (tsStem(w) + 'цем'));
 
                 } else if (lcWord.endsWith('це')) {
@@ -1096,6 +1119,11 @@
         const stem = getNounStem(lemma);
         const lcStem = stem.toLowerCase();
 
+        const stressedEnding = engine.sd
+            .hasStressedEndingPlural(lemma, Case.NOMINATIVE);
+
+        Object.freeze(stressedEnding);
+
         const yoStem = (f) => {
             const stressedStem = engine.sd
                 .hasStressedEndingPlural(lemma, Case.NOMINATIVE).map(x => !x);
@@ -1111,13 +1139,12 @@
         };
 
         const eStem = (s, f) => {
-            const stressedEnding = engine.sd
-                .hasStressedEndingPlural(lemma, Case.NOMINATIVE);
+            const stressedEndingCopy = stressedEnding.slice();
 
-            if (!stressedEnding.length) {
-                stressedEnding.push(false);
+            if (!stressedEndingCopy.length) {
+                stressedEndingCopy.push(false);
             }
-            return stressedEnding.map(b => b ? f(unYo(s)) : f(s));
+            return stressedEndingCopy.map(b => b ? f(unYo(s)) : f(s));
         };
 
         const gender = lemma.gender();
@@ -1207,30 +1234,9 @@
 
                 } else if (Gender.MASCULINE === gender) {
 
-                    const aWords = [
-                        'адрес',
-                        'берег', 'бок',
-                        'век',
-                        'вес',
-                        'вечер',
-                        'лес', 'снег',
-                        'глаз',
-                        'город',
-                        'дом',
-                        'детдом',
-                        'катер',
-                        'счет', 'счёт'
-                    ];
-
                     const aWords2 = [
                         'поезд',
                         'цех'
-                    ];
-
-                    const aWords3 = [
-                        'год',
-                        'вексель',
-                        'ветер'
                     ];
 
                     const ya2 = [
@@ -1255,7 +1261,8 @@
                         ы_и();
                         result.push(softStem + 'я');
 
-                    } else if (aWords.includes(lcWord) || endsWithAny(lcWord, aWords2) || aWords3.includes(lcWord)) {
+                    } else if ((stressedEnding.includes(true) && lcWord !== 'мёд')
+                        || endsWithAny(lcWord, aWords2)) {
 
                         if (softD1(lcWord)) {
                             Array.prototype.push.apply(result, yoStem(s => s + 'я'));
@@ -1263,7 +1270,7 @@
                             Array.prototype.push.apply(result, yoStem(s => s + 'а'));
                         }
 
-                        if (aWords3.includes(lcWord)) {
+                        if (stressedEnding.includes(false)) {
                             ы_и();
                         }
 
