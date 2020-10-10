@@ -7,84 +7,80 @@
 
 ## Requirements
 
-* EcmaScript 6
+* EcmaScript 7
 
 ## Usage
 
 ```js
 RussianNouns.caseList();
-▸ [
-    "именительный",
-    "родительный",
-    "дательный",
-    "винительный",
-    "творительный",
-    "предложный",
-    "местный"
-]
+// [
+//     "именительный",
+//     "родительный",
+//     "дательный",
+//     "винительный",
+//     "творительный",
+//     "предложный",
+//     "местный"
+// ]
 
 // Grammatical gender is a noun class system in Russian.
 RussianNouns.genders();
-▸ {
-    FEMININE: "женский",
-    MASCULINE: "мужской",
-    NEUTER: "средний",
-    COMMON: "общий"
-}
+// {
+//     FEMININE: "женский",
+//     MASCULINE: "мужской",
+//     NEUTER: "средний",
+//     COMMON: "общий"
+// }
 
-RussianNouns.decline({text: 'имя', gender: 'средний'}, 'родительный');
-▸ ['имени']
+const rne = new RussianNouns.Engine();
 
-RussianNouns.decline({text: 'имя', gender: 'средний'}, 'творительный');
-▸ ['именем']
+rne.decline({text: 'имя', gender: 'средний'}, 'родительный');
+// [ "имени" ]
 
-const genders = RussianNouns.genders();
+rne.decline({text: 'имя', gender: 'средний'}, 'творительный');
+// [ "именем" ]
+
+const Gender = RussianNouns.genders();
+const Case = RussianNouns.cases();
+
 let coat = {
     text: 'пальто',
-    gender: genders.NEUTER,
+    gender: Gender.NEUTER,
     indeclinable: true
 };
 
-RussianNouns.caseList().map(c => {
-    return RussianNouns.decline(coat, c);
-});
-▸ [
-    ["пальто"],
-    ["пальто"],
-    ["пальто"],
-    ["пальто"],
-    ["пальто"],
-    ["пальто"],
-    ["пальто"]
-]
+rne.decline(coat, Case.GENITIVE);
+// [ "пальто" ]
 
-RussianNouns.getDeclension(way);
-▸ -1
+RussianNouns.getDeclension(coat);
+// -1
 
 let mountain = {
     text: 'гора',
     gender: 'женский'
 };
 
-RussianNouns.caseList().map(c => RussianNouns.decline(mountain, c));
-▸ [
-    ["гора"]
-    ["горы"]
-    ["горе"]
-    ["гору"]
-    ["горой", "горою"]
-    ["горе"],
-    ["горе"]
-]
+RussianNouns.caseList().map(c => {
+    return rne.decline(mountain, c);
+});
+// [
+//     ["гора"]
+//     ["горы"]
+//     ["горе"]
+//     ["гору"]
+//     ["горой", "горою"]
+//     ["горе"],
+//     ["горе"]
+// ]
 
-RussianNouns.pluralize(mountain);
-▸ [ "горы" ]
+rne.pluralize(mountain);
+// [ "горы" ]
 
 RussianNouns.getDeclension(mountain);
-▸ 2
+// 2
 
 RussianNouns.getSchoolDeclension(mountain);
-▸ 1
+// 1
 
 let way = {
     text: 'путь',
@@ -92,7 +88,7 @@ let way = {
 };
 
 RussianNouns.getDeclension(way);
-▸ 0
+// 0
 ```
 
 ```js

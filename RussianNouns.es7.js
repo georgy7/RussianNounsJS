@@ -405,11 +405,9 @@
         },
         Engine: class Engine {
 
-            /**
-             * Словарь ударений. Его можно редактировать.
-             * @type {StressDictionary|API.StressDictionary}
-             */
-            sd = makeDefaultStressDictionary();
+            constructor() {
+                this.sd = makeDefaultStressDictionary();
+            }
 
             /**
              *
