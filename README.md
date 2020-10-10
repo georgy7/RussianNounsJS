@@ -89,6 +89,27 @@ let way = {
 
 RussianNouns.getDeclension(way);
 // 0
+
+let кринж = {
+    text: 'кринж',
+    gender: Gender.MASCULINE
+};
+
+rne.decline(кринж, Case.INSTRUMENTAL);
+// [ "кринжем" ]
+
+// Changing stresses.
+// Before the hyphen, there are singular settings.
+// After the hyphen are the plural settings.
+// The letter number in the settings is the case number in caseList().
+// s — stress on the stem.
+// e — stress on the ending.
+// b — both.
+rne.sd.put(кринж, 'seesese-eeeeee');
+
+rne.decline(кринж, Case.INSTRUMENTAL);
+// [ "кринжом" ]
+
 ```
 
 ```js
