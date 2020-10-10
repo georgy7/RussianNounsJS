@@ -2,3 +2,5 @@
 /opencorpora/dict.opcorpora.xml
 /opencorpora-testing/dict.opcorpora.xml
 /opencorpora-testing/s.rb
+/js/node_modules
+/js/package-lock.json
