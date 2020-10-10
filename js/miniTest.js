@@ -21,6 +21,8 @@
 
     console.log(rne.decline(coat, Case.GENITIVE));
 
+    console.log(RussianNouns.getDeclension(coat));
+
     let mountain = {
         text: 'гора',
         gender: 'женский'
@@ -43,6 +45,23 @@
 
     console.log(RussianNouns.getDeclension(way));
 
+    let кринж = {
+        text: 'кринж',
+        gender: Gender.MASCULINE
+    };
+
+    console.log(rne.decline(кринж, Case.INSTRUMENTAL));
+
+    // Changing stresses.
+    // Before the hyphen, there are singular settings.
+    // After the hyphen are the plural settings.
+    // The letter number in the settings is the case number in caseList().
+    // s — stress on the stem.
+    // e — stress on the ending.
+    // b — both.
+    rne.sd.put(кринж, 'seesese-eeeeee');
+
+    console.log(rne.decline(кринж, Case.INSTRUMENTAL));
 })();
 
 (() => {
