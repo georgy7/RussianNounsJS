@@ -98,7 +98,7 @@ let кринж = {
 rne.decline(кринж, Case.INSTRUMENTAL);
 // [ "кринжем" ]
 
-// Changing stresses.
+// Change of stresses.
 // Before the hyphen, there are singular settings.
 // After the hyphen are the plural settings.
 // The letter number in the settings is the case number in caseList().
