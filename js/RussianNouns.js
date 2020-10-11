@@ -479,13 +479,8 @@
         ]);
 
         putAll({gender: Gender.MASCULINE, animate: true}, API.FIXED_STEM_STRESS, [
-            'балансёр'
+            'балансёр', 'шофёр'
         ]);
-
-        d.put(
-            {text: 'шофёр', gender: Gender.MASCULINE, animate: true},
-            'sssssss-bbbbbb'
-        );
 
         putAll({gender: Gender.MASCULINE}, 'sssssss-bbbbbb', [
             'вексель', 'ветер'
@@ -497,6 +492,8 @@
 
         for (let word of [
             'тесло', 'стекло',
+            'автостекло', 'бронестекло', 'оргстекло', 'пеностекло',
+            'смарт-стекло', 'спецстекло',
             'бедро', 'берцо', 'блесна',
             'чело', 'стегно', 'стебло'
         ]) {
@@ -544,6 +541,8 @@
     const lastOfNInitial = (str, n) => last(nInit(str, n));
 
     const endsWithAny = (w, arr) => arr.filter(a => w.endsWith(a)).length > 0;
+
+    const unique = a => a.filter((item, index) => a.indexOf(item) === index);
 
     const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
 
@@ -1136,12 +1135,12 @@
                 .hasStressedEndingPlural(lemma, Case.NOMINATIVE).map(x => !x);
 
             if (!stressedStem.length) {
-                stressedStem.push(false);
+                return [f(stem)];
             }
 
             return stressedStem.map(b => b
                 ? (singleEYo(lcStem) ? f(reYo(stem)) : f(stem))
-                : f(stem)
+                : f(unYo(stem))
             );
         };
 
@@ -1172,7 +1171,7 @@
             return part.substring(0, index) + r + part.substring(index + 1);
         }
 
-        function ы_и() {
+        function ы_и(doNotUnYo) {
             if ('гжкхчшщ'.includes(last(lcStem))
                 || 'яйь'.includes(last(lcWord))) {
 
@@ -1190,6 +1189,8 @@
 
                 if (softPatronymic()) {
                     result.push(softPatronymicForm2() + 'ы');
+                    result.push(simpleFirstPart + 'ы');
+                } else if (doNotUnYo) {
                     result.push(simpleFirstPart + 'ы');
                 } else {
                     Array.prototype.push.apply(result,
@@ -1215,7 +1216,7 @@
             case 1:
 
                 const ya = [
-                    'зять',
+                    'зять', 'князь',
                     'друг',
                     'брат', 'собрат',
                     'лист', 'стул',
@@ -1274,12 +1275,14 @@
 
                         if (softD1(lcWord)) {
                             Array.prototype.push.apply(result, yoStem(s => s + 'я'));
+                        } else if (stressedEnding.includes(true)) {
+                            result.push(unYo(stem) + 'а');
                         } else {
-                            Array.prototype.push.apply(result, yoStem(s => s + 'а'));
+                            result.push(stem + 'а');
                         }
 
                         if (stressedEnding.includes(false)) {
-                            ы_и();
+                            ы_и(true);
                         }
 
                     } else if (
@@ -1306,7 +1309,7 @@
                         result.push(nInit(word, 4) + 'ата');
                     } else if (okWord(lcWord)) {
                         result.push(word.substring(0, word.length - 2) + 'ки')
-                    } else if (lcWord.endsWith('ый') || endsWithAny(lcWord, ['щий', 'чий', 'жний', 'шний'])) {
+                    } else if (lcWord.endsWith('ый') || endsWithAny(lcWord, ['щий', 'чий', 'жний', 'шний', 'ский'])) {
                         result.push(init(word) + 'е');
                     } else if ((lcWord.endsWith('вой') && syllableCount(nInit(word, 3)) >= 2)
                         || (lcWord.endsWith('ной') && word.length >= 6)) {
@@ -1403,7 +1406,7 @@
                 break;
         }
 
-        return result;
+        return unique(result);
     }
 
     function declinePlural(engine, lemma, grCase, word) {

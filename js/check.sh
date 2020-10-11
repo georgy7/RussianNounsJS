@@ -2,4 +2,10 @@
 
 # npm i es-check
 
-npx es-check --module es7 RussianNouns.es7.js
+#   To run in on ES6 engine,
+#   you will need at least polyfills for:
+#
+#       • Array.prototype.includes
+#       • Object.values
+
+npx es-check --module es6 RussianNouns.es8.js
