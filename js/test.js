@@ -111,12 +111,14 @@ let main = function () {
             const animate = (data[i].g.indexOf('anim') >= 0);
             const fixed = (data[i].g.indexOf('Fixd') >= 0);
             const surname = (data[i].g.indexOf('Surn') >= 0);
+            const name = (data[i].g.indexOf('Name') >= 0);
 
             const lemma = RussianNouns.createLemma({
                 text: word,
                 gender: gender,
                 animate: animate,
                 surname: surname,
+                name: name,
                 indeclinable: fixed,
                 pluraliaTantum: false
             });
