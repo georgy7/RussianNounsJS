@@ -62,6 +62,10 @@
     rne.sd.put(кринж, 'seesese-eeeeee');
 
     console.log(rne.decline(кринж, Case.INSTRUMENTAL));
+
+    rne.sd.put(кринж, 'seesbse-eeeeee');
+
+    console.log(rne.decline(кринж, Case.INSTRUMENTAL));
 })();
 
 (() => {

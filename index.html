@@ -64,7 +64,7 @@
     .container {
       padding-top: 1em;
       background: #f9f9f9;
-      height: 100%;
+      min-height: 100%;
     }
 
     html, h1, h2, h3, p, .form-control {
@@ -89,7 +89,7 @@
     }
 
     th.leftHeader {
-      width: 15em;
+      text-transform: uppercase;
     }
 
     .table th, .table td {
@@ -176,6 +176,11 @@
           <a href ng-click="fillForm('женский', 'нефть')">нефть</a>
           <a href ng-click="fillForm('мужской', 'гений', null, true)">гений</a>
           <a href ng-click="fillForm('мужской', 'гений', null, false)">гений</a>
+
+          <a href ng-click="fillForm('средний', 'λ-выражение')">λ-выражение</a>
+          <a href ng-click="fillForm('женский', 'α-частица')">α-частица</a>
+          <a href ng-click="fillForm('мужской', 'рок-н-ролл')">рок-н-ролл</a>
+          <a href ng-click="fillForm('женский', 'теле-пресс-конференция')">теле-пресс-конференция</a>
         </p>
       </div>
     </div>
@@ -256,11 +261,11 @@
     </div>
 
     <div class="row" ng-if="result">
-      <div class="offset-lg-3 col-lg-6">
-        <table class="table">
+      <div class="offset-lg-2 col-lg-8">
+        <table class="table table-hover">
           <tr ng-repeat="case in cases">
             <th class="leftHeader">
-              {{case}}
+              {{case[0]}}
             </th>
             <td>
               {{result[case]}}
@@ -272,6 +277,8 @@
         </table>
       </div>
     </div>
+
+    <div class="mt-5 overflow-hidden"></div>
 
   </div>
 
