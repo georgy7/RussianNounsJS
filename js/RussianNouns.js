@@ -292,8 +292,8 @@
             }
         },
 
-        FIXED_STEM_STRESS: 'sssssss-ssssss',
-        FIXED_ENDING_STRESS: 'eeeeeee-eeeeee',
+        FIXED_STEM_STRESS: 'SSSSSSS-SSSSSS',
+        FIXED_ENDING_STRESS: 'EEEEEEE-EEEEEE',
 
         /**
          * Словарь ударений. В него можно вносить изменения в рантайме,
@@ -313,7 +313,7 @@
 
                 // "b" значит "both": можно ставить ударение и на окончание, и на основу.
 
-                if (!(settings.match(/^[seb]{7}-[seb]{6}$/))) {
+                if (!(settings.match(/^[SsbeE]{7}-[SsbeE]{6}$/))) {
                     throw new Error('Bad settings format.');
                 }
 
@@ -384,9 +384,13 @@
                     if (v) {
                         const singular = v.split('-')[0];
 
-                        if (singular[caseIndex] === 'e') {
+                        if (singular[caseIndex] === 'E') {
                             return [true];
+                        } else if (singular[caseIndex] === 'e') {
+                            return [true, false];
                         } else if (singular[caseIndex] === 'b') {
+                            return [false, true];
+                        } else if (singular[caseIndex] === 's') {
                             return [false, true];
                         } else {
                             return [false];
@@ -406,9 +410,13 @@
                     if (v) {
                         const plural = v.split('-')[1];
 
-                        if (plural[caseIndex] === 'e') {
+                        if (plural[caseIndex] === 'E') {
                             return [true];
+                        } else if (plural[caseIndex] === 'e') {
+                            return [true, false];
                         } else if (plural[caseIndex] === 'b') {
+                            return [false, true];
+                        } else if (plural[caseIndex] === 's') {
                             return [false, true];
                         } else {
                             return [false];
@@ -503,11 +511,11 @@
             'брёх,дёрн,идиш,имидж,мед');
 
         putAll({gender: Gender.MASCULINE},
-            'sssssss-eeeeee',
+            'SSSSSSS-EEEEEE',
             'адрес,век,вечер,город,детдом,поезд');
 
         putAll({gender: Gender.MASCULINE},
-            'sssssse-eeeeee',
+            'SSSSSSE-EEEEEE',
             'берег,бок,вес,лес,снег,дом,катер,счёт,мёд');
 
         putAll({gender: Gender.MASCULINE, animate: true},
@@ -515,17 +523,17 @@
             'балансёр,шофёр');
 
         putAll({gender: Gender.MASCULINE},
-            'sssssss-bbbbbb',
+            'SSSSSSS-bbbbbb',
             'вексель,ветер');
 
-        putM('sssssse-eseeee', 'глаз');
-        putM('sssssse-beebee', 'год');
-        putM('ssssssb-bbbbbb', 'цех');
+        putM('SSSSSSE-ESEEEE', 'глаз');
+        putM('SSSSSSE-bEEbEE', 'год');
+        putM('SSSSSSb-bbbbbb', 'цех');
 
-        putM('sssssse-eeeeee', 'счёт'); // не путать со счётами (p.t.)
+        putM('SSSSSSE-EEEEEE', 'счёт'); // не путать со счётами (p.t.)
 
         putAll({gender: Gender.NEUTER},
-            'eeeeeee-ssssss',
+            'EEEEEEE-SSSSSS',
             'тесло,' +
             'стекло,автостекло,бронестекло,оргстекло,' +
             'пеностекло,смарт-стекло,спецстекло,' +
@@ -544,11 +552,24 @@
         // и некоторые названия жителей населенных пунктов.
 
         putAll({gender: Gender.MASCULINE},
-            'sbbsbbb-bbbbbb',
+            'SbbSbbb-bbbbbb',
             'грош,шприц');
 
         putAll({gender: Gender.MASCULINE},
-            'seeseee-eeeeee',
+            'SssSsss-ssssss',
+            'кишмиш,' +
+            'кряж,' +  // обрубок бревна; гряда холмов
+            'слеш,слэш');
+
+        putAll({gender: Gender.MASCULINE, animate: true},
+            'Sssssss-ssssss',
+            'паныч');
+
+        putM('SEESeEE-EEEEEE', 'стеллаж');
+        putM('SeeSeee-eeeeee', 'шиномонтаж');
+
+        putAll({gender: Gender.MASCULINE},
+            'SEESEEE-EEEEEE',
             'багаж,' +
             // Встречаются в законах, условиях/правилах для пасажиров.
             'грузобагаж,товаробагаж,' +
@@ -581,7 +602,7 @@
             'неплатёж,нож,нутрец,овсец,огурец,' +
             'орлец,' + // камень, коврик
             'острец,' + // растение
-            'паж,палаш,паралич,первач,пернач,песец,пиздец,хуец,' +
+            'падеж,падёж,паж,палаш,паралич,первач,пернач,песец,пиздец,хуец,' +
             'пихтач,платёж,погребец,подэтаж,поставец,поташ,правёж,путец,пыж,' +
             'пугач,' + // игрушечный пистолет
             'резец,ржанец,рубеж,рубец,' +
@@ -596,11 +617,11 @@
             'тупец,тупыш,' + // тупой скорняжный нож
             'целкач,чабрец,чепец,' +
             'фураж,хвостец,хлопунец,холодец,' +
-            'чертёж,чистец,шалаш,шантаж,шиш,' +
+            'чертёж,чистец,шалаш,шантаж,шиш,щипец,' +
             'электронож,этаж,ясенец');
 
         putAll({gender: Gender.MASCULINE, animate: true},
-            'seeeeee-eeeeee',
+            'SEEEEEE-EEEEEE',
             'алкаш,' +
             'басмач,беглец,белец,бирюч,бич,' +
             'близнец,бомж,богач,' +
@@ -628,10 +649,11 @@
             'мокрец,' + // насекомое
             'москвич,' + // житель Москвы
             'мудрец,мураш,носач,оголец,омич,' +
+            'отец,праотец,' +
             'паж,камер-паж,палач,' +
             'пантач,певец,песец,писец,плавунец,подлец,племяш,пловец,портач,' +
             'продавец,перепродавец,' +
-            'пошлец,праотец,пришлец,простец,птенец,пузач,' +
+            'пошлец,пришлец,простец,птенец,пузач,' +
             'пугач,' + // филин
             'рвач,рифмач,рогач,рунец,рыбец,' +
             'ремнец,' + // паразитический плоский червь

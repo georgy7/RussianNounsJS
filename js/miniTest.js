@@ -56,15 +56,21 @@
     // Before the hyphen, there are singular settings.
     // After the hyphen are the plural settings.
     // The letter number in the settings is the case number in caseList().
-    // s — stress on the stem.
-    // e — stress on the ending.
-    // b — both.
-    rne.sd.put(кринж, 'seesese-eeeeee');
-
+    // S — Stress is on the stem only.
+    // s — Stress is more often on the stem.
+    // b — Stress can be both on the stem and the ending equally.
+    // e — Stress is more often on the ending.
+    // E — Stress is on the ending only.
+    rne.sd.put(кринж, 'SEESESE-EEEEEE');
     console.log(rne.decline(кринж, Case.INSTRUMENTAL));
 
-    rne.sd.put(кринж, 'seesbse-eeeeee');
+    rne.sd.put(кринж, 'SEESbSE-EEEEEE');
+    console.log(rne.decline(кринж, Case.INSTRUMENTAL));
 
+    rne.sd.put(кринж, 'SEESsSE-EEEEEE');
+    console.log(rne.decline(кринж, Case.INSTRUMENTAL));
+
+    rne.sd.put(кринж, 'SEESeSE-EEEEEE');
     console.log(rne.decline(кринж, Case.INSTRUMENTAL));
 })();
 
