@@ -91,10 +91,9 @@ let кринж = {
     gender: Gender.MASCULINE
 };
 
-rne.decline(кринж, Case.INSTRUMENTAL);
-// [ "кринжем" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем" ]
 
-// Changing stresses.
+// Change of stresses.
 // Before the hyphen, there are singular settings.
 // After the hyphen are the plural settings.
 // The letter number in the settings is the case number in caseList().
@@ -104,20 +103,17 @@ rne.decline(кринж, Case.INSTRUMENTAL);
 // e — Stress is more often on the ending.
 // E — Stress is on the ending only.
 rne.sd.put(кринж, 'SEESESE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);
-// [ "кринжом" ]
+
+rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом" ]
 
 rne.sd.put(кринж, 'SEESbSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);
-// [ "кринжем", "кринжом" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем", "кринжом" ]
 
 rne.sd.put(кринж, 'SEESsSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);
-// [ "кринжем", "кринжом" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем", "кринжом" ]
 
 rne.sd.put(кринж, 'SEESeSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);
-// [ "кринжом", "кринжем" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом", "кринжем" ]
 ```
 
 ```js
@@ -192,4 +188,9 @@ ${cap(ⰃⰃ(вихрь, 4))} снежные крутя;
 
 ## Similar software
 
-- [Petrovich — An inflector for Russian anthroponyms](https://github.com/petrovich)
+- [Morphos](https://github.com/wapmorgan/Morphos) (PHP, MIT)
+
+For anthroponyms only:
+
+- [Petrovich](https://github.com/petrovich) — (JS, Java, Python and more, MIT)
+- [sklonenie](https://github.com/danakt/sklonenie) (JS, MIT)
