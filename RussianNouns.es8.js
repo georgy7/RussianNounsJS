@@ -752,6 +752,10 @@
             return nInit(w, 2) + last(w);
         }
 
+        if ('лев' === lcWord) {
+            return nInit(word, 2) + (isUpper(last(init(word))) ? 'Ь' : 'ь') + last(word);
+        }
+
         if (lcWord.endsWith('рёк') && syllableCount(word) >= 2) {
             return nInit(word, 2) + 'ьк';
         } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
