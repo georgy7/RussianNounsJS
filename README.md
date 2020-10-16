@@ -5,10 +5,6 @@
 * Declination of words. Only in the singular yet.
 * Pluralization in the nominative case.
 
-## Requirements
-
-* EcmaScript 7
-
 ## Usage
 
 ```js
@@ -98,52 +94,92 @@ let кринж = {
 rne.decline(кринж, Case.INSTRUMENTAL);
 // [ "кринжем" ]
 
-// Change of stresses.
+// Changing stresses.
 // Before the hyphen, there are singular settings.
 // After the hyphen are the plural settings.
 // The letter number in the settings is the case number in caseList().
-// s — stress on the stem.
-// e — stress on the ending.
-// b — both.
-rne.sd.put(кринж, 'seesese-eeeeee');
-
+// S — Stress is on the stem only.
+// s — Stress is more often on the stem.
+// b — Stress can be both on the stem and the ending equally.
+// e — Stress is more often on the ending.
+// E — Stress is on the ending only.
+rne.sd.put(кринж, 'SEESESE-EEEEEE');
 rne.decline(кринж, Case.INSTRUMENTAL);
 // [ "кринжом" ]
 
+rne.sd.put(кринж, 'SEESbSE-EEEEEE');
+rne.decline(кринж, Case.INSTRUMENTAL);
+// [ "кринжем", "кринжом" ]
+
+rne.sd.put(кринж, 'SEESsSE-EEEEEE');
+rne.decline(кринж, Case.INSTRUMENTAL);
+// [ "кринжем", "кринжом" ]
+
+rne.sd.put(кринж, 'SEESeSE-EEEEEE');
+rne.decline(кринж, Case.INSTRUMENTAL);
+// [ "кринжом", "кринжем" ]
 ```
 
 ```js
-const rn = RussianNouns;
-const getCaseByNumber = (n) => rn.caseList()[n - 1];
-const declineSimple = (word, caseNumber) => rn.decline(word, getCaseByNumber(caseNumber))[0];
-const Gender = rn.genders();
+const rne = new RussianNouns.Engine();
 
-`Когда мне было 5 лет,
-${declineSimple({text: 'мама', gender: Gender.FEMININE, animate: true}, 1)} всегда говорила,
-что главное в ${declineSimple({text: 'жизнь', gender: Gender.FEMININE}, 7)} –
-${declineSimple({text: 'счастье', gender: Gender.NEUTER}, 1)}. Когда я пошел
-в ${declineSimple({text: 'школа', gender: Gender.FEMININE}, 4)},
-на ${declineSimple({text: 'вопрос', gender: Gender.MASCULINE}, 4)}, кем я хочу быть,
-когда вырасту, я ответил
-“счастливым ${declineSimple({text: 'человек', gender: Gender.MASCULINE, animate: true}, 5)}”.
-Мне тогда сказали, что я не понимаю
-${declineSimple({text: 'вопрос', gender: Gender.MASCULINE}, 4)}, а я ответил, что это они
-не понимают ${declineSimple({text: 'жизнь', gender: Gender.NEUTER}, 4)}.
+const Ⰳ = (word, caseNumber) => {
+    const c = RussianNouns.caseList()[caseNumber - 1];
+    return rne.decline(word, c)[0];
+};
 
-Джон Леннон`
-▸ "Когда мне было 5 лет,
-мама всегда говорила,
-что главное в жизни –
-счастье. Когда я пошел
-в школу,
-на вопрос, кем я хочу быть,
-когда вырасту, я ответил
-“счастливым человеком”.
-Мне тогда сказали, что я не понимаю
-вопрос, а я ответил, что это они
-не понимают жизнь.
+const Ⰴ = (word, caseNumber) => {
+    const c = RussianNouns.caseList()[caseNumber - 1];
+    const result = rne.decline(word, c);
+    return result[result.length - 1];
+};
 
-Джон Леннон"
+const ⰃⰃ = (word, caseNumber) => {
+    const c = RussianNouns.caseList()[caseNumber - 1];
+    const pluralForm = rne.pluralize(word)[0];
+    return rne.decline(word, c, pluralForm)[0];
+};
+
+const L = RussianNouns.createLemma;
+const Gender = RussianNouns.genders();
+const cap = (str) => str[0].toUpperCase() + str.substring(1);
+
+// -----------------------------------------------
+
+// Александр Сергеевич Пушкин
+// Зимний вечер (фрагмент)
+
+const буря = L({text: 'буря', gender: Gender.FEMININE});
+const мгла = L({text: 'мгла', gender: Gender.FEMININE});
+const небо = L({text: 'небо', gender: Gender.NEUTER});
+const вихрь = L({text: 'вихрь', gender: Gender.MASCULINE});
+
+const зверь = L({text: 'зверь', gender: Gender.MASCULINE, animate: true});
+const дитя = L({text: 'дитя', gender: Gender.NEUTER, animate: true});
+
+const кровля = L({text: 'кровля', gender: Gender.FEMININE});
+const солома = L({text: 'солома', gender: Gender.FEMININE});
+
+const путник = L({text: 'путник', gender: Gender.MASCULINE, animate: true});
+const окошко = L({text: 'окошко', gender: Gender.NEUTER});
+
+console.log(`${cap(Ⰳ(буря, 1))} ${Ⰴ(мгла, 5)} ${Ⰳ(небо, 4)} кроет,
+${cap(ⰃⰃ(вихрь, 4))} снежные крутя;
+То, как ${Ⰳ(зверь, 1)}, она завоет,
+То заплачет, как ${Ⰳ(дитя, 1)},
+То по ${Ⰳ(кровля, 3)} обветшалой
+Вдруг ${Ⰳ(солома, 5)} зашумит,
+То, как ${Ⰳ(путник, 1)} запоздалый,
+К нам в ${Ⰳ(окошко, 4)} застучит.`);
+
+// Буря мглою небо кроет,
+// Вихри снежные крутя;
+// То, как зверь, она завоет,
+// То заплачет, как дитя,
+// То по кровле обветшалой
+// Вдруг соломой зашумит,
+// То, как путник запоздалый,
+// К нам в окошко застучит.
 ```
 **[Demo](https://georgy7.github.io/RussianNounsJS/)**  :point_left:
 
