@@ -730,9 +730,12 @@
         const lcWord = word.toLowerCase();
         const gender = lemma.getGender();
         const lastChar = last(word);
+        const lcLastChar = lastChar.toLowerCase();
 
-        if (['ветер', 'пес', 'пёс', 'шов'].includes(lcWord)) {
-            return nInit(word, 2) + lastChar;
+        if (['ветер', 'пес', 'пёс', 'шов'].includes(lcWord)
+            || endsWithAny(lcWord, ['узел', 'уголь', 'чок', 'ешок'])) {
+            const w = (lcLastChar === 'ь') ? init(word) : word;
+            return nInit(w, 2) + last(w);
         }
 
         if (lcWord.endsWith('рёк') && syllableCount(word) >= 2) {
@@ -764,11 +767,10 @@
             return init(word);
         }
 
-        const c = lastChar.toLowerCase();
-        if (('й' === c || isVowel(c)) && isVowel(last(init(word)))) {
+        if (('й' === lcLastChar || isVowel(lcLastChar)) && isVowel(last(init(word)))) {
             return nInit(word, 2);
         }
-        if (isVowel(c)) {
+        if (isVowel(lcLastChar)) {
             return init(word);
         }
         return word;
@@ -986,7 +988,10 @@
         const schWord = () => 'чщ'.includes(last(lcStem));
 
         const surnameType1 = () => lemma.isASurname()
-            && (lcWord.endsWith('ин') || lcWord.endsWith('ов') || lcWord.endsWith('ев') || lcWord.endsWith('ёв'));
+            && (
+                lcWord.endsWith('ын') || lcWord.endsWith('ин')
+                || lcWord.endsWith('ов') || lcWord.endsWith('ев') || lcWord.endsWith('ёв')
+            );
 
         const iyoy = () => (nLast(lcWord, 2) === 'ый')
             || (lcWord.endsWith('ной') && syllableCount(word) >= 2);
