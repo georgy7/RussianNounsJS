@@ -26,12 +26,14 @@
 
           const rne = new RussianNouns.Engine();
 
-          $scope.fillForm = (gender, word, surname, animate, indeclinable) => {
+          $scope.fillForm = (gender, word, surname, animate, indeclinable, watercraft) => {
               $scope.input.text = word;
               $scope.input.gender = gender;
               $scope.input.surname = surname;
               $scope.input.animate = animate;
               $scope.input.indeclinable = indeclinable;
+              $scope.input.transport = watercraft;
+              $scope.input.watercraft = watercraft;
               $scope.changed();
           };
 
@@ -174,13 +176,16 @@
           <a href ng-click="fillForm('женский', 'муть')">муть</a>
           <a href ng-click="fillForm('женский', 'жуть')">жуть</a>
           <a href ng-click="fillForm('женский', 'нефть')">нефть</a>
-          <a href ng-click="fillForm('мужской', 'гений', null, true)">гений</a>
-          <a href ng-click="fillForm('мужской', 'гений', null, false)">гений</a>
+          <a href ng-click="fillForm('мужской', 'гений', null, true)">гений (человек)</a>
+          <a href ng-click="fillForm('мужской', 'гений', null, false)">гений (дар)</a>
 
           <a href ng-click="fillForm('средний', 'λ-выражение')">λ-выражение</a>
           <a href ng-click="fillForm('женский', 'α-частица')">α-частица</a>
           <a href ng-click="fillForm('мужской', 'рок-н-ролл')">рок-н-ролл</a>
           <a href ng-click="fillForm('женский', 'теле-пресс-конференция')">теле-пресс-конференция</a>
+
+          <a href ng-click="fillForm('средний', 'судно', null, null, null, null)">судно (мед.)</a>
+          <a href ng-click="fillForm('средний', 'судно', null, null, null, true)">судно (лодка)</a>
         </p>
       </div>
     </div>
@@ -247,6 +252,31 @@
           <input type="checkbox" class="form-check-input" id="indeclinableCheckBox" ng-model="input.indeclinable" ng-change="changed()">
           <label class="form-check-label" for="indeclinableCheckBox">
             Несклоняемое
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="transportCheckBox" ng-model="input.transport" ng-change="changed()">
+          <label class="form-check-label" for="transportCheckBox">
+            Транспорт
+          </label>
+          <span class="text-info" ng-if="input.watercraft && !input.transport">
+            ignored
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-lg-4 col-lg-4">
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" id="watercraftCheckBox" ng-model="input.watercraft" ng-change="changed()">
+          <label class="form-check-label" for="watercraftCheckBox">
+            Водный транспорт
           </label>
         </div>
       </div>

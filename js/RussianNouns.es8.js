@@ -1025,7 +1025,7 @@
             } else if (okWord(lcWord)) {
                 return word.substring(0, word.length - 2) + 'ка';
             } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
-                return lcStem + 'а';
+                return stem + 'а';
             } else {
                 return eStem(stem, s => s + 'а');
             }
@@ -1047,7 +1047,7 @@
             } else if (okWord(lcWord)) {
                 return word.substring(0, word.length - 2) + 'ку';
             } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
-                return lcStem + 'у';
+                return stem + 'у';
             } else {
                 return eStem(stem, s => s + 'у');
             }
@@ -1096,7 +1096,7 @@
             } else if (surnameType1()) {
                 return word + 'ым';
             } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
-                return lcStem + 'ом';
+                return stem + 'ом';
             } else {
                 return eStem(stem, s => s + 'ом');
             }
@@ -1121,7 +1121,7 @@
             } else if (okWord(lcWord)) {
                 return word.substring(0, word.length - 2) + 'ке';
             } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
-                return lcStem + 'е';
+                return stem + 'е';
             } else {
                 return eStem(stem, s => s + 'е');
             }
@@ -1600,6 +1600,11 @@
                         result.push('чуда');
                     } else if (endsWithAny(lcWord, ['ле', 'ре'])) {
                         result.push(stem + 'я');
+                    } else if (('судно' === lcWord) && lemma.isATransport()) {
+                        result.push('суда');
+                        if (!lemma.isAWatercraft()) {
+                            result.push('судна'); // "воздушные судна" употребляется, но реже.
+                        }
                     } else {
                         Array.prototype.push.apply(result, yoStem(s => s + 'а'));
                     }
