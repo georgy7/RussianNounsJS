@@ -25,7 +25,7 @@
 
     let mountain = {
         text: 'гора',
-        gender: 'женский'
+        gender: Gender.FEMININE
     };
 
     console.log(RussianNouns.caseList().map(c => {
@@ -40,7 +40,7 @@
 
     let way = {
         text: 'путь',
-        gender: 'мужской'
+        gender: Gender.MASCULINE
     };
 
     console.log(RussianNouns.getDeclension(way));

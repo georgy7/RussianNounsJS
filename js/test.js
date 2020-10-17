@@ -124,7 +124,8 @@ let main = function () {
             });
 
             const lemmaUpperCase = lemma.clone();
-            lemmaUpperCase.nominativeSingular = lemma.text().toUpperCase();
+            lemmaUpperCase.internalText = lemma.text().toUpperCase();
+            Object.freeze(lemmaUpperCase);
 
             const resultWordForms = [];
             totalWords++;
@@ -291,10 +292,18 @@ let main = function () {
     }
 
     const rne = new RussianNouns.Engine();
+
     test(rne, dataM, RussianNouns.genders().MASCULINE, 1);
+    dataM = null;
+
     test(rne, dataF, RussianNouns.genders().FEMININE, 2);
+    dataF = null;
+
     test(rne, dataN, RussianNouns.genders().NEUTER, 3);
+    dataN = null;
+
     test(rne, dataC, RussianNouns.genders().COMMON, 4);
+    dataC = null;
 
     postMessage({
         type: 'testResult',
