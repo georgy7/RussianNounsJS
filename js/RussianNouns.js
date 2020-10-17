@@ -38,74 +38,67 @@
     // - Статья http://en.wikipedia.org/wiki/Russian_grammar
     // - К семантике русского локатива - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
-    const API = {
-        cases: () => {
-            return {
-                NOMINATIVE: 'именительный',
-                GENITIVE: 'родительный',
-                DATIVE: 'дательный',
-                ACCUSATIVE: 'винительный',
-                INSTRUMENTAL: 'творительный',
-                PREPOSITIONAL: 'предложный',
+    const Case = Object.freeze({
+        NOMINATIVE: 'именительный',
+        GENITIVE: 'родительный',
+        DATIVE: 'дательный',
+        ACCUSATIVE: 'винительный',
+        INSTRUMENTAL: 'творительный',
+        PREPOSITIONAL: 'предложный',
 
-                /**
-                 * Важно понимать, что отличающийся от предложного падежа локатив иногда используется
-                 * только с одним предлогом (только «в» или только «на»), а с другим или вообще
-                 * не употребляется, или склоняется иначе.
-                 *
-                 * Например, мы говорим «на ветру», «в тылу (врага)». Но мы не говорим «в ветру», «на тылу».
-                 * Обычно говорят «на тыльной стороне чего-либо» и, возможно, «в ветре» (скорее «в воздухе»).
-                 *
-                 * Мы говорим «на бегу», но также «в беге».
-                 *
-                 * Есть существительные, которые одинаково используются с предлогами «в» и «на».
-                 * Например: в снегу — на снегу, во льду — на льду, в пуху — на пуху.
-                 *
-                 * В. А. Плунгян выделяет у слов мужского рода с особыми формами локатива
-                 * семь семантических классов:
-                 *  1. вместилища («в»);
-                 *  2. пространства («в»);
-                 *  3. конфигурации объектов, образующих устойчивые структуры (например, «ряд», «строй» — «в»);
-                 *  4. поверхности («на»);
-                 *  5. объекты с функциональной поверхностью («на»);
-                 *  6. вещества («в» и «на»);
-                 *  7. ситуации («в» и «на»).
-                 *
-                 * А также, у слов женского рода третьего склонения с особыми формами локатива
-                 * пять семантических классов.
-                 * Однако, у локатива в словах женского рода третьего склонения отличается от предложного падежа
-                 * только ударение — смещается на последний слог, на письме они не отличаются.
-                 */
-                LOCATIVE: 'местный'
-            };
-        },
-        caseList: () => {
-            return Object.freeze([
-                API.cases().NOMINATIVE,
-                API.cases().GENITIVE,
-                API.cases().DATIVE,
-                API.cases().ACCUSATIVE,
-                API.cases().INSTRUMENTAL,
-                API.cases().PREPOSITIONAL,
-                API.cases().LOCATIVE
-            ]);
-        },
-        declensions: () => {
-            return Object.freeze({
-                0: 'разносклоняемые "путь" и "дитя"',
-                1: 'муж., средний род без окончания',
-                2: 'слова на "а", "я" (м., ж. и общий род)',
-                3: 'жен. род без окончания, слова на "мя"'
-            });
-        },
-        genders: () => {
-            return Object.freeze({
-                "FEMININE": "женский",
-                "MASCULINE": "мужской",
-                "NEUTER": "средний",
-                "COMMON": "общий"
-            });
-        },
+        /**
+         * Важно понимать, что отличающийся от предложного падежа локатив иногда используется
+         * только с одним предлогом (только «в» или только «на»), а с другим или вообще
+         * не употребляется, или склоняется иначе.
+         *
+         * Например, мы говорим «на ветру», «в тылу (врага)». Но мы не говорим «в ветру», «на тылу».
+         * Обычно говорят «на тыльной стороне чего-либо» и, возможно, «в ветре» (скорее «в воздухе»).
+         *
+         * Мы говорим «на бегу», но также «в беге».
+         *
+         * Есть существительные, которые одинаково используются с предлогами «в» и «на».
+         * Например: в снегу — на снегу, во льду — на льду, в пуху — на пуху.
+         *
+         * В. А. Плунгян выделяет у слов мужского рода с особыми формами локатива
+         * семь семантических классов:
+         *  1. вместилища («в»);
+         *  2. пространства («в»);
+         *  3. конфигурации объектов, образующих устойчивые структуры (например, «ряд», «строй» — «в»);
+         *  4. поверхности («на»);
+         *  5. объекты с функциональной поверхностью («на»);
+         *  6. вещества («в» и «на»);
+         *  7. ситуации («в» и «на»).
+         *
+         * А также, у слов женского рода третьего склонения с особыми формами локатива
+         * пять семантических классов.
+         * Однако, у локатива в словах женского рода третьего склонения отличается от предложного падежа
+         * только ударение — смещается на последний слог, на письме они не отличаются.
+         */
+        LOCATIVE: 'местный'
+    });
+
+    const Gender = Object.freeze({
+        "FEMININE": "женский",
+        "MASCULINE": "мужской",
+        "NEUTER": "средний",
+        "COMMON": "общий"
+    });
+
+    const CASES = Object.freeze([
+        Case.NOMINATIVE,
+        Case.GENITIVE,
+        Case.DATIVE,
+        Case.ACCUSATIVE,
+        Case.INSTRUMENTAL,
+        Case.PREPOSITIONAL,
+        Case.LOCATIVE
+    ]);
+
+    const API = {
+        Case: Case,
+        Gender: Gender,
+
+        CASES: CASES,
 
         /**
          * Нормальная форма слова.
@@ -114,9 +107,13 @@
          * Пожалуйста, используйте {@link RussianNouns.createLemma} вместо конструктора.
          */
         Lemma: class Lemma {
-            constructor(text, gender, pluraliaTantum, indeclinable,
-                        animate, surname, name,
-                        transport, watercraft) {
+
+            /**
+             * *Не для внешнего использования!*
+             * Пожалуйста, используйте {@link RussianNouns.createLemma} вместо конструктора.
+             * @param {RussianNouns.Lemma|Object} o
+             */
+            constructor(o) {
 
                 function checkBool(x) {
                     if ((null != x) && (typeof x != 'boolean')) {
@@ -124,60 +121,81 @@
                     }
                 }
 
-                checkBool(pluraliaTantum);
-                checkBool(indeclinable);
+                if (o instanceof API.Lemma) {
 
-                this.pluraliaTantum = !!pluraliaTantum;
-                this.indeclinable = !!indeclinable;
+                    this.pluraliaTantum = o.pluraliaTantum;
+                    this.indeclinable = o.indeclinable;
 
-                checkBool(animate);
-                checkBool(surname);
-                checkBool(name);
-                checkBool(transport);
-                checkBool(watercraft);
+                    this.animate = o.animate;
+                    this.surname = o.surname;
+                    this.name = o.name;
+                    this.transport = o.transport;
+                    this.watercraft = o.watercraft;
 
-                this.animate = !!animate;
-                this.surname = !!surname;
-                this.name = !!name;
-                this.transport = !!transport;
-                this.watercraft = !!watercraft;
+                    this.internalText = o.internalText;
+                    this.lowerCaseText = o.lowerCaseText;
 
-                // TODO
-                if (text == null) {
-                    throw new Error('A cyrillic word required.');
-                }
+                    this.internalGender = o.internalGender;
 
-                this.internalText = text;
+                } else {
 
-                if (!pluraliaTantum) {  // Это слова т. н. парного рода.
-                    if (gender == null) {
-                        throw new Error('A word and a grammatical gender required.');
+                    checkBool(o.pluraliaTantum);
+                    checkBool(o.indeclinable);
+
+                    this.pluraliaTantum = !!(o.pluraliaTantum);
+                    this.indeclinable = !!(o.indeclinable);
+
+                    checkBool(o.animate);
+                    checkBool(o.surname);
+                    checkBool(o.name);
+                    checkBool(o.transport);
+                    checkBool(o.watercraft);
+
+                    this.animate = !!(o.animate);
+                    this.surname = !!(o.surname);
+                    this.name = !!(o.name);
+                    this.transport = !!(o.transport);
+                    this.watercraft = !!(o.watercraft);
+
+                    // TODO
+                    if (o.text == null) {
+                        throw new Error('A cyrillic word required.');
                     }
 
-                    if (!Object.values(API.genders()).includes(gender)) {
-                        throw new Error('Bad grammatical gender.');
+                    this.internalText = o.text;
+                    this.lowerCaseText = this.internalText.toLowerCase();
+
+                    if (!(o.pluraliaTantum)) {  // Это слова т. н. парного рода.
+                        if (o.gender == null) {
+                            throw new Error('A word and a grammatical gender required.');
+                        }
+
+                        if (!Object.values(Gender).includes(o.gender)) {
+                            throw new Error('Bad grammatical gender.');
+                        }
+
+                        this.internalGender = o.gender;
                     }
 
-                    this.internalGender = gender;
                 }
             }
 
-            /**
-             * @returns {Lemma|API.Lemma} Мутабельный объект.
-             * После редактирования его следует заморозить.
-             */
-            clone() {
-                return new API.Lemma(
-                    this.text(), this.internalGender, this.pluraliaTantum,
-                    this.indeclinable, this.animate,
-                    this.surname, this.name,
-                    this.transport, this.watercraft
-                );
+            newText(f) {
+                const lemmaCopy = new API.Lemma(this);
+                lemmaCopy.internalText = f(lemmaCopy);
+                lemmaCopy.lowerCaseText = lemmaCopy.internalText.toLowerCase();
+                return Object.freeze(lemmaCopy);
+            }
+
+            newGender(f) {
+                const lemmaCopy = new API.Lemma(this);
+                lemmaCopy.internalGender = f(lemmaCopy);
+                return Object.freeze(lemmaCopy);
             }
 
             equals(o) {
                 return (o instanceof API.Lemma)
-                    && (this.text().toLowerCase() === o.text().toLowerCase())
+                    && (this.lower() === o.lower())
                     && (this.isPluraliaTantum() === o.isPluraliaTantum())
                     && (this.isPluraliaTantum() || (this.getGender() === o.getGender()))
                     && (this.isIndeclinable() === o.isIndeclinable())
@@ -190,7 +208,7 @@
 
             fuzzyEquals(o) {
                 return (o instanceof API.Lemma)
-                    && (unYo(this.text()).toLowerCase() === unYo(o.text()).toLowerCase())
+                    && (unYo(this.lower()) === unYo(o.lower()))
                     && (this.isPluraliaTantum() === o.isPluraliaTantum())
                     && (this.isPluraliaTantum() || (this.getGender() === o.getGender()))
                     && (this.isIndeclinable() === o.isIndeclinable());
@@ -200,28 +218,54 @@
                 return this.internalText;
             }
 
-            isPluraliaTantum = () => this.pluraliaTantum;
+            lower() {
+                return this.lowerCaseText;
+            }
 
-            getGender = () => this.internalGender;
+            isPluraliaTantum() {
+                return this.pluraliaTantum;
+            }
 
-            isIndeclinable = () => this.indeclinable;
+            getGender() {
+                return this.internalGender;
+            }
 
-            isAnimate = () => this.animate || this.surname || this.name;
+            isIndeclinable() {
+                return this.indeclinable;
+            }
 
-            isASurname = () => this.surname;
+            isAnimate() {
+                return this.animate || this.surname || this.name;
+            }
 
-            isAName = () => this.name;
+            isASurname() {
+                return this.surname;
+            }
 
-            isATransport = () => this.transport || this.watercraft;
+            isAName() {
+                return this.name;
+            }
 
-            isAWatercraft = () => this.watercraft;
+            isATransport() {
+                return this.transport || this.watercraft;
+            }
+
+            isAWatercraft() {
+                return this.watercraft;
+            }
         },
 
         /**
-         * Чтобы ускорить работу библиотеки, можно предварительно сконвертировать
-         * слова в формат внутренних объектов. При этом будут сделаны все необходимые проверки.
+         * Интерфейс с именованными параметрами для создания лемм.
+         * Если параметр — уже лемма, вернет тот же объект, а не копию.
          *
-         * @param o
+         * Леммы, которые в коде используются много раз, следует
+         * конструировать через эту функцию, иначе они будут
+         * неявно конструироваться на каждый вызов любой функции
+         * или метода в этой библиотеке.
+         *
+         * @param {RussianNouns.Lemma|Object} o
+         * @throws {Error} Ошибки из конструктора леммы.
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
         createLemma: o => {
@@ -229,15 +273,27 @@
                 return o;
             }
 
-            const r = new API.Lemma(
-                o.text, o.gender, o.pluraliaTantum,
-                o.indeclinable, o.animate,
-                o.surname, o.name,
-                o.transport, o.watercraft
-            );
+            return Object.freeze(new API.Lemma(o));
+        },
 
-            Object.freeze(r);
-            return r;
+        /**
+         * Склонение существительного.
+         *
+         * Возможные значения:
+         * + -1 — несклоняемые, в основном заимствованные слова;
+         * + 0 — разносклоняемые "путь" и "дитя";
+         * + 1 — мужской и средний род без окончания;
+         * + 2 — слова на "а", "я" (м., ж. и общий род);
+         * + 3 — жен. род без окончания; слова, оканчивающиеся на "мя".
+         *
+         * Понятие "склонение" сложно применить к словам pluralia tantum,
+         * поэтому этот метод возвращает для них undefined.
+         *
+         * @param {RussianNouns.Lemma|Object} lemma
+         * @returns {number|undefined}
+         */
+        getDeclension: lemma => {
+            return getDeclension(API.createLemma(lemma));
         },
 
         /**
@@ -246,22 +302,8 @@
          * слов с окончанием -а (вода), во многих вузовских пособиях и академических грамматиках — слов мужского
          * рода (стол) и среднего рода (окно)».
          *
-         * Современный русский язык. Морфология — Камынина А.А., Уч. пос. 1999, страница 67,
-         * § 36 Склонение имен существительных
+         * Современный русский язык. Морфология — Камынина А.А., 1999, стр. 67
          *
-         * Справку по возвращаемым значениям выдаёт метод {@link RussianNouns.declensions()}.
-         *
-         * Понятие "склонение" сложно применить к словам pluralia tantum,
-         * поэтому этот метод возвращает для них undefined.
-         *
-         * @param lemma
-         * @returns {number} Склонение по Камыниной; -1 для несклоняемых существительных.
-         */
-        getDeclension: lemma => {
-            return getDeclension(API.createLemma(lemma));
-        },
-
-        /**
          * Почти везде указывают это число. Например, в Викисловаре.
          * Иногда в школьных учебниках 10 слов на «-мя» относят к разносклоняемым.
          * Здесь это третье склонение.
@@ -303,7 +345,7 @@
              * @param {RussianNouns.Lemma|Object} lemma
              * @param {string} settings Строка настроек в формате 1234567-123456.
              * До дефиса — единственное число, после дефиса — множественное.
-             * Номер символа — номер падежа в {@link RussianNouns.caseList}.
+             * Номер символа — номер падежа в {@link RussianNouns.CASES}.
              * Возможные значения каждого символа:
              * S — ударение только на основу;
              * s — чаще на основу;
@@ -320,7 +362,7 @@
                 }
 
                 const lemmaObject = API.createLemma(lemma);
-                const hash = unYo(lemmaObject.text()).toLowerCase();
+                const hash = unYo(lemmaObject.lower());
 
                 let homonyms = this.data[hash];
 
@@ -345,7 +387,7 @@
              */
             get(lemma, fuzzy) {
                 const lemmaObject = API.createLemma(lemma);
-                const hash = unYo(lemmaObject.text()).toLowerCase();
+                const hash = unYo(lemmaObject.lower());
 
                 const homonyms = this.data[hash];
 
@@ -364,7 +406,7 @@
 
             remove(lemma) {
                 const lemmaObject = API.createLemma(lemma);
-                const hash = unYo(lemmaObject.text()).toLowerCase();
+                const hash = unYo(lemmaObject.lower());
 
                 const homonyms = this.data[hash];
 
@@ -378,7 +420,7 @@
             }
 
             hasStressedEndingSingular(lemma, grCase) {
-                const caseIndex = API.caseList().indexOf(grCase);
+                const caseIndex = CASES.indexOf(grCase);
 
                 if (caseIndex >= 0) {
                     const v = this.get(lemma, true);
@@ -404,7 +446,7 @@
             }
 
             hasStressedEndingPlural(lemma, grCase) {
-                const caseIndex = API.caseList().indexOf(grCase);
+                const caseIndex = CASES.indexOf(grCase);
 
                 if (caseIndex >= 0 && caseIndex < 6) {
                     const v = this.get(lemma, true);
@@ -676,8 +718,6 @@
         return d;
     }
 
-    const Case = API.cases();
-    const Gender = API.genders();
     const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
     const consonants = consonantsExceptJ + 'й';
     const vowels = 'аоуэыяёюеи';
@@ -723,7 +763,7 @@
 
     function getNounStem(lemma) {
         const word = lemma.text();
-        const lcWord = word.toLowerCase();
+        const lcWord = lemma.lower();
         const gender = lemma.getGender();
         const lcLastChar = last(lcWord);
 
@@ -778,7 +818,7 @@
 
     function getDeclension(lemma) {
         const word = lemma.text();
-        const lcWord = word.toLowerCase();
+        const lcWord = lemma.lower();
         const gender = lemma.getGender();
 
         if (lemma.isPluraliaTantum()) {
@@ -816,9 +856,8 @@
     const tsWord = w => last(w) === 'ц';
 
     function tsStem(word, lemma) {
-        const lcWord = word.toLowerCase();
         const head = init(word);
-        const lcHead = head.toLowerCase();
+        const lcHead = init(lemma.lower());
         if ('а' === last(lcHead)) {
             return head;
         } else if ((['зне', 'жне', 'гре', 'спе'].includes(nLast(lcHead, 3)))
@@ -889,7 +928,7 @@
 
     function decline0(engine, lemma, grCase) {
         const word = lemma.text();
-        const lcWord = word.toLowerCase();
+        const lcWord = lemma.lower();
         if (lcWord.endsWith('путь')) {
             if (grCase === Case.INSTRUMENTAL) {
                 return init(word) + 'ём';
@@ -922,7 +961,7 @@
      */
     function decline1(engine, lemma, grCase) {
         const word = lemma.text();
-        const lcWord = word.toLowerCase();
+        const lcWord = lemma.lower();
         const gender = lemma.getGender();
 
         const half = halfSomething(lcWord);
@@ -938,25 +977,21 @@
                     w = 'полу' + w.substring(3);
                 }
 
-                const lemmaCopy = lemma.clone();
-                lemmaCopy.internalGender = Gender.FEMININE;
+                let lemmaCopy = lemma.newGender(o => Gender.FEMININE);
 
                 if ('полпути' === lcWord) {
                     if ([Case.PREPOSITIONAL, Case.LOCATIVE].includes(grCase)) {
                         return word;
                     } else {
-                        lemmaCopy.internalText = init(w) + 'ь';
-                        Object.freeze(lemmaCopy);
+                        lemmaCopy = lemmaCopy.newText(o => init(w) + 'ь');
                         return decline0(engine, lemmaCopy, grCase);
                     }
-                } else if (w.toLowerCase().endsWith('зни')) {
-                    lemmaCopy.internalText = init(w) + 'ь';
-                    Object.freeze(lemmaCopy);
+                } else if (lcWord.endsWith('зни')) {
+                    lemmaCopy = lemmaCopy.newText(o => init(w) + 'ь');
                     return decline3(engine, lemmaCopy, grCase);
                 } else {
-                    const e = (last(w).toLowerCase() === 'н') ? 'я' : 'а';
-                    lemmaCopy.internalText = init(w) + e;
-                    Object.freeze(lemmaCopy);
+                    const e = (last(lcWord) === 'н') ? 'я' : 'а';
+                    lemmaCopy = lemmaCopy.newText(o => init(w) + e);
                     return decline2(engine, lemmaCopy, grCase);
                 }
             }
@@ -1154,12 +1189,14 @@
 
     function decline2(engine, lemma, grCase) {
         const word = lemma.text();
-        const lcWord = word.toLowerCase();
+        const lcWord = lemma.lower();
 
         const stem = getNounStem(lemma);
         const lcStem = stem.toLowerCase();
 
         const head = init(word);
+        const lcHead = init(lcWord);
+
         const soft = () => {
             return last(lcWord) === 'я';
         };
@@ -1203,7 +1240,7 @@
                 if (ayaWord()) {
                     return stem + 'ой';
                 } else if (soft() || 'жцчшщ'.includes(last(lcStem))) {
-                    if ('и' === last(head).toLowerCase()) {
+                    if ('и' === last(lcHead)) {
                         return head + 'ей';
                     } else {
                         return [head + 'ей', head + 'ею'];
@@ -1233,13 +1270,11 @@
 
     function decline3(engine, lemma, grCase) {
         const word = lemma.text();
-        const lcWord = word.toLowerCase();
+        const lcWord = lemma.lower();
 
         if (![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
             if (Object.keys(specialD3).includes(lcWord)) {
-                const lemmaCopy = lemma.clone();
-                lemmaCopy.internalText = specialD3[lcWord];
-                Object.freeze(lemmaCopy);
+                const lemmaCopy = lemma.newText(o => specialD3[lcWord]);
                 return decline3(engine, lemmaCopy, grCase);
             }
         }
@@ -1324,7 +1359,7 @@
         const result = [];
 
         const word = lemma.text();
-        const lcWord = word.toLowerCase();
+        const lcWord = lemma.lower();
 
         const stem = getNounStem(lemma);
         const lcStem = stem.toLowerCase();
@@ -1653,7 +1688,5 @@
         return word;
     }
 
-    Object.freeze(API);
-
-    return API;
+    return Object.freeze(API);
 }));

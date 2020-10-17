@@ -22,7 +22,7 @@
       ) {
           $scope.input = {};
 
-          $scope.cases = RussianNouns.caseList();
+          $scope.cases = RussianNouns.CASES;
 
           const rne = new RussianNouns.Engine();
 
@@ -48,7 +48,7 @@
                       $scope.result[c] = rne.decline(lemma, c);
                   }
 
-                  $scope.plural[RussianNouns.caseList()[0]] = rne.pluralize(lemma);
+                  $scope.plural[RussianNouns.CASES[0]] = rne.pluralize(lemma);
 
               } else {
                   $scope.result = null;
@@ -97,6 +97,10 @@
     .table th, .table td {
       padding: 0.25rem;
     }
+
+    #examples a {
+        white-space: nowrap;
+    }
   </style>
 </head>
 <body ng-app="demo">
@@ -126,7 +130,7 @@
       </div>
     </div>
 
-    <div class="row">
+    <div id="examples" class="row">
       <div class="offset-lg-2 col-lg-8 text-center">
         <p>
           Examples:

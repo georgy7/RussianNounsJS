@@ -18,7 +18,7 @@
         NgTableParams
     ) {
 
-        $scope.genders = Object.values(RussianNouns.genders()).sort();
+        $scope.genders = Object.values(RussianNouns.Gender).sort();
 
         $scope.filter = {
             gender: null
@@ -26,34 +26,30 @@
 
         const abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
         const parts = [];
-        parts.push(abc.slice(0, 5));
-        parts.push(abc.slice(5, 12));
-        parts.push(abc.slice(12, 18));
-        parts.push(abc.slice(18, abc.length));
 
-        $scope.loadingStatuses = [
-            _(parts[0].length).times(function () {
-                return null;
-            }),
-            _(parts[1].length).times(function () {
-                return null;
-            }),
-            _(parts[2].length).times(function () {
-                return null;
-            }),
-            _(parts[3].length).times(function () {
-                return null;
-            })
-        ];
+        for (let i = 0; i < 7; i++) {
+            parts.push(abc.slice(3 * i, 3 * i + 3));
+        }
 
-        $scope.results = [[], [], [], []];
-        $scope.completed = [false, false, false, false];
+        parts.push(abc.slice(3 * 7, abc.length));
 
+        $scope.loadingStatuses = [];
+        $scope.results = [];
+        $scope.completed = [];
         $scope.workers = [];
-        $scope.workers.push(new Worker('js/test.js'));
-        $scope.workers.push(new Worker('js/test.js'));
-        $scope.workers.push(new Worker('js/test.js'));
-        $scope.workers.push(new Worker('js/test.js'));
+
+        for (let part of parts) {
+            $scope.results.push([]);
+            $scope.completed.push(false);
+
+            $scope.loadingStatuses.push(
+                _(part.length).times(function () {
+                    return null;
+                })
+            );
+
+            $scope.workers.push(new Worker('js/test.js'));
+        }
 
         $scope.runLetter = (workerIndex, letterIndex) => {
             var worker = $scope.workers[workerIndex];
@@ -92,6 +88,7 @@
                     } else {
                         console.log(new Date(), 'Process ' + (1 + e.data.workerIndex) + ' completed');
                         $scope.completed[e.data.workerIndex] = true;
+                        $scope.workers[workerIndex].terminate();
                         if ($scope.completed.every(x => x)) {
                             $scope.$apply(() => {
                                 $scope.showResults();

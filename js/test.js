@@ -8,7 +8,7 @@ let workerIndex, letterIndex;
 
 let main = function () {
 
-    let cases = RussianNouns.caseList();
+    let cases = RussianNouns.CASES;
 
     let wrongCases = 0;
     let wrongWordsSingular = 0;
@@ -23,7 +23,7 @@ let main = function () {
 
     function ojejojuejuStatus(expected, actual, grCase) {
 
-        if (grCase !== RussianNouns.cases().INSTRUMENTAL) {
+        if (grCase !== RussianNouns.Case.INSTRUMENTAL) {
             return;
         }
 
@@ -123,9 +123,7 @@ let main = function () {
                 pluraliaTantum: false
             });
 
-            const lemmaUpperCase = lemma.clone();
-            lemmaUpperCase.internalText = lemma.text().toUpperCase();
-            Object.freeze(lemmaUpperCase);
+            const lemmaUpperCase = lemma.newText(o => o.text().toUpperCase());
 
             const resultWordForms = [];
             totalWords++;
@@ -190,10 +188,10 @@ let main = function () {
                     ok = true;
                     failure = false;
                 } else if (('doubtful' === ojejojuejuStatus(expected, actual, c))
-                    || (RussianNouns.cases().GENITIVE === c && actual[0] === expected[0])
+                    || (RussianNouns.Case.GENITIVE === c && actual[0] === expected[0])
                     || (
-                        [RussianNouns.cases().PREPOSITIONAL, RussianNouns.cases().LOCATIVE].includes(c)
-                        && gender == RussianNouns.genders().NEUTER
+                        [RussianNouns.Case.PREPOSITIONAL, RussianNouns.Case.LOCATIVE].includes(c)
+                        && gender == RussianNouns.Gender.NEUTER
                         && word.endsWith('нье')
                         && exactMatchIgnoringNjeNjiAndYo
                     )
@@ -293,17 +291,10 @@ let main = function () {
 
     const rne = new RussianNouns.Engine();
 
-    test(rne, dataM, RussianNouns.genders().MASCULINE, 1);
-    dataM = null;
-
-    test(rne, dataF, RussianNouns.genders().FEMININE, 2);
-    dataF = null;
-
-    test(rne, dataN, RussianNouns.genders().NEUTER, 3);
-    dataN = null;
-
-    test(rne, dataC, RussianNouns.genders().COMMON, 4);
-    dataC = null;
+    test(rne, dataM, RussianNouns.Gender.MASCULINE, 1);
+    test(rne, dataF, RussianNouns.Gender.FEMININE, 2);
+    test(rne, dataN, RussianNouns.Gender.NEUTER, 3);
+    test(rne, dataC, RussianNouns.Gender.COMMON, 4);
 
     postMessage({
         type: 'testResult',
