@@ -493,11 +493,15 @@
         },
         Engine: class Engine {
 
-            /**
-             * Словарь ударений. Его можно редактировать.
-             * @type {StressDictionary|API.StressDictionary}
-             */
-            sd = makeDefaultStressDictionary();
+            constructor() {
+
+                /**
+                 * @description Словарь ударений. Его можно редактировать в рантайме.
+                 * @type {API.StressDictionary}
+                 */
+                this.sd = makeDefaultStressDictionary();
+
+            }
 
             /**
              *
@@ -817,7 +821,6 @@
     }
 
     function getDeclension(lemma) {
-        const word = lemma.text();
         const lcWord = lemma.lower();
         const gender = lemma.getGender();
 
@@ -971,27 +974,23 @@
             if ([Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
                 return word;
             } else {
-                let w = word;
 
-                if (!['полминуты'].includes(lcWord)) {
-                    w = 'полу' + w.substring(3);
-                }
-
-                let lemmaCopy = lemma.newGender(o => Gender.FEMININE);
+                const h = o => (!['полминуты'].includes(o.lower()))
+                    ? ('полу' + o.text().substring(3)) : o.text();
 
                 if ('полпути' === lcWord) {
                     if ([Case.PREPOSITIONAL, Case.LOCATIVE].includes(grCase)) {
                         return word;
                     } else {
-                        lemmaCopy = lemmaCopy.newText(o => init(w) + 'ь');
+                        let lemmaCopy = lemma.newText(o => init(h(o)) + 'ь');
                         return decline0(engine, lemmaCopy, grCase);
                     }
                 } else if (lcWord.endsWith('зни')) {
-                    lemmaCopy = lemmaCopy.newText(o => init(w) + 'ь');
+                    let lemmaCopy = lemma.newText(o => init(h(o)) + 'ь');
                     return decline3(engine, lemmaCopy, grCase);
                 } else {
-                    const e = (last(lcWord) === 'н') ? 'я' : 'а';
-                    lemmaCopy = lemmaCopy.newText(o => init(w) + e);
+                    let lemmaCopy = lemma.newText(o => init(h(o)) +
+                        ((last(o.lower()) === 'н') ? 'я' : 'а'));
                     return decline2(engine, lemmaCopy, grCase);
                 }
             }
@@ -1274,7 +1273,7 @@
 
         if (![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
             if (Object.keys(specialD3).includes(lcWord)) {
-                const lemmaCopy = lemma.newText(o => specialD3[lcWord]);
+                const lemmaCopy = lemma.newText(() => specialD3[lcWord]);
                 return decline3(engine, lemmaCopy, grCase);
             }
         }
@@ -1675,6 +1674,9 @@
     function declinePlural(engine, lemma, grCase, word) {
 
         if (Case.DATIVE === grCase) {
+
+
+            // TODO !
 
         } else if (Case.INSTRUMENTAL === grCase) {
 

@@ -8,4 +8,4 @@
 #       • Array.prototype.includes
 #       • Object.values
 
-npx es-check --module es6 RussianNouns.es8.js
+npx es-check --module es6 RussianNouns.js
