@@ -33,6 +33,8 @@
 // Просто для разминки мозгов (плохо знаю C++).
 // Это C++11.
 
+// Принимает строки только в UTF-8.
+
 namespace RussianNouns {
 
 enum class Gender : char {
@@ -46,29 +48,29 @@ enum class Gender : char {
 class LemmaBuilder;
 
 // Попытался сделать леммы иммутабельными, насколько это возможно.
-// У меня есть сомнения про иммутабельность const std::wstring.
+// У меня есть сомнения про иммутабельность const std::string.
 class Lemma final {
   friend class LemmaBuilder;
 
 public:
-  ~Lemma() { std::wcout << L"deleted Lemma" << std::endl; }
+  ~Lemma() { std::wcout << u8"deleted Lemma" << std::endl; }
 
   LemmaBuilder copy() noexcept;
 
-  std::wstring str() noexcept {
-    std::wostringstream rs;
-    auto bs = [](bool x) { return x ? L", true" : L", false"; };
-    rs << L"{ \"" << internalText << L"\", ";
-    rs << static_cast<wchar_t>(internalGender);
+  std::string str() noexcept {
+    std::ostringstream rs;
+    auto bs = [](bool x) { return x ? u8", true" : u8", false"; };
+    rs << u8"{ \"" << internalText << u8"\", ";
+    rs << static_cast<char>(internalGender);
     rs << bs(pluraliaTantum) << bs(indeclinable);
     rs << bs(animate) << bs(surname) << bs(name);
-    rs << bs(transport) << bs(watercraft) << L" }";
+    rs << bs(transport) << bs(watercraft) << u8" }";
     return rs.str();
   }
 
-  std::wstring text() noexcept { return internalText; }
+  std::string text() noexcept { return internalText; }
 
-  std::wstring lower() noexcept { return lowerCaseText; }
+  std::string lower() noexcept { return lowerCaseText; }
 
   bool isPluraliaTantum() noexcept { return pluraliaTantum; }
 
@@ -93,7 +95,7 @@ public:
 private:
   Lemma(Gender gender, bool pluraliaTantum, bool indeclinable, bool animate,
         bool surname, bool name, bool transport, bool watercraft,
-        std::wstring internalText, std::wstring lowerCaseText) noexcept
+        std::string internalText, std::string lowerCaseText) noexcept
       : internalGender(gender), pluraliaTantum(pluraliaTantum),
         indeclinable(indeclinable), animate(animate), surname(surname),
         name(name), transport(transport), watercraft(watercraft),
@@ -102,52 +104,48 @@ private:
   const Gender internalGender;
   const bool pluraliaTantum, indeclinable;
   const bool animate, surname, name, transport, watercraft;
-  const std::wstring internalText, lowerCaseText;
+  const std::string internalText, lowerCaseText;
 };
 
-static std::wstring toRussianLowerCase(std::wstring input) {
-  std::wstring r = input;
+static std::string toRussianLowerCaseUtf8(const std::string input) {
+  std::string r = input;
 
-  // На моих тестах это было немного быстрее std::towlower.
-  // И это не зависит от локали.
-  // Я так думал вначале, но потом почитал,
-  // и оказалось, что нет гарантий не только,
-  // UCS-4 в wstring или UTF-16, но и что wchar_t даже
-  // больше 8 бит на всех платформах.
-  // Еще и исходные коды не везде определятся как UTF-8.
-  // И я задумался, как вообще живут C++-разработчики?
-  // В чем смысл всего этого?
-  // Зачем? Почему?
-  auto f = [](wint_t c) -> wint_t {
-    if ((c >= 1040) && (c <= 1071)) {
-      return c + 32;
-    } else if (1025 == c) {
-      return c + 80;
-    } else {
-      return c;
+  for (size_t i = 0; i < r.size(); i++) {
+    const auto c0 = r[i - 1];
+    const auto c = r[i];
+
+    if ((char)0xD0 == c0) {
+      if (((char)0x90 <= c) && (c <= (char)0x9F)) { // А-П
+        r[i] = r[i] + (char)0x20;
+      } else if (((char)0xA0 <= c) && (c <= (char)0xAF)) { // Р-Я
+        r[i - 1] = (char)0xD1;
+        r[i] = r[i] - (char)0x20;
+      } else if ((char)0x81 == c) { // Ё
+        r[i - 1] = (char)0xD1;
+        r[i] = (char)0x91;
+      }
     }
-  };
+  }
 
-  std::transform(r.begin(), r.end(), r.begin(), f);
   return r;
 }
 
 class LemmaBuilder {
 public:
-  LemmaBuilder(const std::wstring text) noexcept {
+  LemmaBuilder(const std::string text) noexcept {
     this->internalText = text;
-    this->lowerCaseText = toRussianLowerCase(text);
+    this->lowerCaseText = toRussianLowerCaseUtf8(text);
   }
 
   /// Допустим, надо создать копию леммы, где будет отличаться одно поле.
   LemmaBuilder(const Lemma &b) noexcept;
 
-  ~LemmaBuilder() { std::wcout << L"deleted Builder" << std::endl; }
+  ~LemmaBuilder() { std::wcout << u8"deleted Builder" << std::endl; }
 
   /// Чтобы редактировать билдер, созданный из леммы.
-  LemmaBuilder &withText(const std::wstring text) noexcept {
+  LemmaBuilder &withText(const std::string text) noexcept {
     this->internalText = text;
-    this->lowerCaseText = toRussianLowerCase(text);
+    this->lowerCaseText = toRussianLowerCaseUtf8(text);
     return *this;
   }
 
@@ -220,8 +218,8 @@ private:
   bool transport = false;
   bool watercraft = false;
 
-  std::wstring internalText;
-  std::wstring lowerCaseText;
+  std::string internalText;
+  std::string lowerCaseText;
 
   Gender checkedGender() {
     Gender g = internalGender;
