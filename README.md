@@ -8,7 +8,7 @@
 ## Usage
 
 ```js
-RussianNouns.caseList();
+RussianNouns.CASES;
 // [
 //     "именительный",
 //     "родительный",
@@ -20,7 +20,7 @@ RussianNouns.caseList();
 // ]
 
 // Grammatical gender is a noun class system in Russian.
-RussianNouns.genders();
+RussianNouns.Gender;
 // {
 //     FEMININE: "женский",
 //     MASCULINE: "мужской",
@@ -36,8 +36,8 @@ rne.decline({text: 'имя', gender: 'средний'}, 'родительный'
 rne.decline({text: 'имя', gender: 'средний'}, 'творительный');
 // [ "именем" ]
 
-const Gender = RussianNouns.genders();
-const Case = RussianNouns.cases();
+const Gender = RussianNouns.Gender;
+const Case = RussianNouns.Case;
 
 let coat = {
     text: 'пальто',
@@ -53,10 +53,10 @@ RussianNouns.getDeclension(coat);
 
 let mountain = {
     text: 'гора',
-    gender: 'женский'
+    gender: Gender.FEMININE
 };
 
-RussianNouns.caseList().map(c => {
+RussianNouns.CASES.map(c => {
     return rne.decline(mountain, c);
 });
 // [
@@ -80,7 +80,7 @@ RussianNouns.getSchoolDeclension(mountain);
 
 let way = {
     text: 'путь',
-    gender: 'мужской'
+    gender: Gender.MASCULINE
 };
 
 RussianNouns.getDeclension(way);
@@ -96,7 +96,7 @@ rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем" ]
 // Change of stresses.
 // Before the hyphen, there are singular settings.
 // After the hyphen are the plural settings.
-// The letter number in the settings is the case number in caseList().
+// The letter number in the settings is the case number in CASES.
 // S — Stress is on the stem only.
 // s — Stress is more often on the stem.
 // b — Stress can be both on the stem and the ending equally.
@@ -120,24 +120,24 @@ rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом", "кринж�
 const rne = new RussianNouns.Engine();
 
 const Ⰳ = (word, caseNumber) => {
-    const c = RussianNouns.caseList()[caseNumber - 1];
+    const c = RussianNouns.CASES[caseNumber - 1];
     return rne.decline(word, c)[0];
 };
 
 const Ⰴ = (word, caseNumber) => {
-    const c = RussianNouns.caseList()[caseNumber - 1];
+    const c = RussianNouns.CASES[caseNumber - 1];
     const result = rne.decline(word, c);
     return result[result.length - 1];
 };
 
 const ⰃⰃ = (word, caseNumber) => {
-    const c = RussianNouns.caseList()[caseNumber - 1];
+    const c = RussianNouns.CASES[caseNumber - 1];
     const pluralForm = rne.pluralize(word)[0];
     return rne.decline(word, c, pluralForm)[0];
 };
 
 const L = RussianNouns.createLemma;
-const Gender = RussianNouns.genders();
+const Gender = RussianNouns.Gender;
 const cap = (str) => str[0].toUpperCase() + str.substring(1);
 
 // -----------------------------------------------
