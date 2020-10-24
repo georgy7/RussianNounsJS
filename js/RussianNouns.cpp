@@ -22,8 +22,6 @@
 
 #include "RussianNouns.h"
 
-#include <sstream>
-
 // Draft ! Draft ! Draft ! Draft ! Draft ! Draft ! Draft ! Draft ! Draft !
 
 // Просто для разминки мозгов (плохо знаю C++).
@@ -33,43 +31,40 @@ namespace RussianNouns {
 
 Lemma::~Lemma() {}
 
-LemmaBuilder Lemma::copy() noexcept { return LemmaBuilder(*this); }
+LemmaBuilder Lemma::copy() const noexcept { return LemmaBuilder(*this); }
 
-std::string Lemma::str() noexcept {
-  std::ostringstream rs;
-  auto bs = [](bool x) { return x ? u8", true" : u8", false"; };
-  rs << u8"{ \"" << internalText << u8"\", ";
-  rs << static_cast<char>(internalGender);
-  rs << bs(pluraliaTantum) << bs(indeclinable);
-  rs << bs(animate) << bs(surname) << bs(name);
-  rs << bs(transport) << bs(watercraft) << u8" }";
-  return rs.str();
+std::string Lemma::str() const noexcept {
+  auto bs = [](bool x) { return x ? u8"1" : u8"0"; };
+  return u8"{ " + std::string(1, static_cast<char>(internalGender)) + u8", " +
+         bs(pluraliaTantum) + bs(indeclinable) + bs(animate) + bs(surname) +
+         bs(name) + bs(transport) + bs(watercraft) + u8", \"" + internalText +
+         u8"\" }";
 }
 
-const std::string &Lemma::text() noexcept { return internalText; }
+const std::string &Lemma::text() const noexcept { return internalText; }
 
-const std::string &Lemma::lower() noexcept { return lowerCaseText; }
+const std::string &Lemma::lower() const noexcept { return lowerCaseText; }
 
-bool Lemma::isPluraliaTantum() noexcept { return pluraliaTantum; }
+bool Lemma::isPluraliaTantum() const noexcept { return pluraliaTantum; }
 
-Gender Lemma::getGender() noexcept { return internalGender; }
+Gender Lemma::getGender() const noexcept { return internalGender; }
 
-bool Lemma::isIndeclinable() noexcept { return indeclinable; }
+bool Lemma::isIndeclinable() const noexcept { return indeclinable; }
 
-bool Lemma::isAnimate() noexcept { return animate || surname || name; }
+bool Lemma::isAnimate() const noexcept { return animate || surname || name; }
 
-bool Lemma::isASurname() noexcept { return surname; }
+bool Lemma::isASurname() const noexcept { return surname; }
 
-bool Lemma::isAName() noexcept { return name; }
+bool Lemma::isAName() const noexcept { return name; }
 
-bool Lemma::isATransport() noexcept { return transport || watercraft; }
+bool Lemma::isATransport() const noexcept { return transport || watercraft; }
 
-bool Lemma::isAWatercraft() noexcept { return watercraft; }
+bool Lemma::isAWatercraft() const noexcept { return watercraft; }
 
 Lemma::Lemma(Gender gender, bool pluraliaTantum, bool indeclinable,
              bool animate, bool surname, bool name, bool transport,
-             bool watercraft, std::string internalText,
-             std::string lowerCaseText) noexcept
+             bool watercraft, const std::string &internalText,
+             const std::string &lowerCaseText) noexcept
     : internalGender(gender), pluraliaTantum(pluraliaTantum),
       indeclinable(indeclinable), animate(animate), surname(surname),
       name(name), transport(transport), watercraft(watercraft),
@@ -100,7 +95,7 @@ static std::string toRussianLowerCaseUtf8(const std::string &input) {
   return r;
 }
 
-LemmaBuilder::LemmaBuilder(const std::string text) noexcept {
+LemmaBuilder::LemmaBuilder(const std::string &text) noexcept {
   this->internalGender = Gender::GENDERLESS;
 
   this->pluraliaTantum = false;
@@ -137,7 +132,7 @@ LemmaBuilder::LemmaBuilder(const Lemma &b) noexcept {
 LemmaBuilder::~LemmaBuilder() {}
 
 /// Чтобы редактировать билдер, созданный из леммы.
-LemmaBuilder &LemmaBuilder::withText(const std::string text) noexcept {
+LemmaBuilder &LemmaBuilder::withText(const std::string &text) noexcept {
   this->internalText = text;
   this->lowerCaseText = toRussianLowerCaseUtf8(text);
   return *this;

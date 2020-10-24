@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 
+// Locale-independent.
 // It only supports UTF-8.
 
 namespace RussianNouns {
@@ -45,29 +46,30 @@ class Lemma final {
 
 public:
   ~Lemma();
-  LemmaBuilder copy() noexcept;
+  LemmaBuilder copy() const noexcept;
 
   /// For debugging. It's like var_dump in PHP.
-  std::string str() noexcept;
+  std::string str() const noexcept;
 
   // TODO equals
   // TODO fuzzyEquals
 
-  const std::string &text() noexcept;
-  const std::string &lower() noexcept;
-  bool isPluraliaTantum() noexcept;
-  Gender getGender() noexcept;
-  bool isIndeclinable() noexcept;
-  bool isAnimate() noexcept;
-  bool isASurname() noexcept;
-  bool isAName() noexcept;
-  bool isATransport() noexcept;
-  bool isAWatercraft() noexcept;
+  const std::string &text() const noexcept;
+  const std::string &lower() const noexcept;
+  bool isPluraliaTantum() const noexcept;
+  Gender getGender() const noexcept;
+  bool isIndeclinable() const noexcept;
+  bool isAnimate() const noexcept;
+  bool isASurname() const noexcept;
+  bool isAName() const noexcept;
+  bool isATransport() const noexcept;
+  bool isAWatercraft() const noexcept;
 
 private:
   Lemma(Gender gender, bool pluraliaTantum, bool indeclinable, bool animate,
         bool surname, bool name, bool transport, bool watercraft,
-        std::string internalText, std::string lowerCaseText) noexcept;
+        const std::string &internalText,
+        const std::string &lowerCaseText) noexcept;
 
   const Gender internalGender;
   const bool pluraliaTantum, indeclinable;
@@ -77,11 +79,11 @@ private:
 
 class LemmaBuilder {
 public:
-  LemmaBuilder(const std::string text) noexcept;
+  LemmaBuilder(const std::string &text) noexcept;
   LemmaBuilder(const Lemma &b) noexcept;
   ~LemmaBuilder();
 
-  LemmaBuilder &withText(const std::string text) noexcept;
+  LemmaBuilder &withText(const std::string &text) noexcept;
   LemmaBuilder &withGender(const Gender g) noexcept;
   LemmaBuilder &withPluraliaTantum(const bool pt) noexcept;
   LemmaBuilder &withIndeclinable(const bool indeclinable) noexcept;
