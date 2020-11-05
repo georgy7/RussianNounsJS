@@ -46,9 +46,15 @@
 
                   for (const c of $scope.cases) {
                       $scope.result[c] = rne.decline(lemma, c);
-                  }
 
-                  $scope.plural[RussianNouns.CASES[0]] = rne.pluralize(lemma);
+                      if (RussianNouns.Case.NOMINATIVE === c) {
+                        $scope.plural[c] = rne.pluralize(lemma);
+                      } else if ($scope.plural[RussianNouns.Case.NOMINATIVE]) {
+                        for (let p of $scope.plural[RussianNouns.Case.NOMINATIVE]) {
+                          $scope.plural[c] = rne.decline(lemma, c, p);
+                        }
+                      }
+                  }
 
               } else {
                   $scope.result = null;

@@ -21,6 +21,9 @@ let main = function () {
     let pluralizeTotal = 0;
     let pluralizeWrong = 0;
 
+    let totalCasesPluralExceptTheNominativeCase = 0;
+    let wrongCasesPluralExceptTheNominativeCase = 0;
+
     function ojejojuejuStatus(expected, actual, grCase) {
 
         if (grCase !== RussianNouns.Case.INSTRUMENTAL) {
@@ -228,51 +231,105 @@ let main = function () {
             } catch (e) {
             }
 
-            let expectedCasesPlural = data[i].casesPlural;
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             const resultPluralForms = [];
 
-            for (let j = 0; j <= 5; j++) {
-                resultPluralForms[j] = {
-                    "expected": expectedCasesPlural[j].join(', ')
-                };
-            }
+            let wordIsWrongPlural = false;
+            let wordHasWarningPlural = false;
 
-            if (expectedCasesPlural[0].length > 0) {
-                pluralizeTotal++;
+            if (data[i].casesPlural.length > 0) {
 
-                const r = resultPluralForms[0];
+                const expectedCasesPlural = data[i].casesPlural;
 
-                const actualPluralNominative = rne.pluralize(lemma);
-
-                const pluralUpperCase = rne.pluralize(lemmaUpperCase);
-                const aString = actualPluralNominative.toString().toLowerCase();
-                const auString = pluralUpperCase.toString().toLowerCase();
-
-                if (aString !== auString) {
-                    throw `Different upper-case plurals: ${word}, gender: ${lemma.gender()}, "${aString} !== ${auString}".`
+                for (let j = 0; j <= 5; j++) {
+                    resultPluralForms[j] = {
+                        "expected": expectedCasesPlural[j].join(', ')
+                    };
                 }
 
-                r.actual = actualPluralNominative.join(', ');
+                let currentLemmaActualPluralNominativeArray = null;
+                let currentLemmaActualPluralNominativeUpperCaseArray = null;
 
-                r.failure =
-                    actualPluralNominative.slice().sort().toString() !==
-                    expectedCasesPlural[0].slice().sort().toString();
+                for (let j = 0; j <= 5; j++) {
+                    if (expectedCasesPlural[j].length > 0) {
 
-                if (r.failure) {
-                    pluralizeWrong++;
-                } else {
-                    r.warning = actualPluralNominative.toString() !== expectedCasesPlural[0].toString();
+                        const r = resultPluralForms[j];
+
+                        let pluralSimple;
+                        let pluralUpperCase;
+
+                        if (0 === j) {
+                            pluralizeTotal++;
+                            currentLemmaActualPluralNominativeArray = rne.pluralize(lemma);
+                            currentLemmaActualPluralNominativeUpperCaseArray = rne.pluralize(lemmaUpperCase);
+                            pluralSimple = currentLemmaActualPluralNominativeArray;
+                            pluralUpperCase = currentLemmaActualPluralNominativeUpperCaseArray;
+                        } else {
+                            totalCasesPluralExceptTheNominativeCase++;
+                            pluralSimple = [];
+                            pluralUpperCase = [];
+
+                            if (currentLemmaActualPluralNominativeArray) {
+                                const c = cases[j];
+
+                                for (let pluralizedIndex = 0;
+                                     pluralizedIndex < currentLemmaActualPluralNominativeArray.length;
+                                     pluralizedIndex++
+                                ) {
+                                    const pluralized1 = currentLemmaActualPluralNominativeArray[pluralizedIndex];
+                                    const pluralized2 = currentLemmaActualPluralNominativeUpperCaseArray[pluralizedIndex];
+                                    pluralSimple.push(rne.decline(lemma, c, pluralized1));
+                                    pluralUpperCase.push(rne.decline(lemmaUpperCase, c, pluralized2));
+                                }
+                            }
+
+                            pluralSimple = _.uniq(_.flatten(pluralSimple));
+                            pluralUpperCase = _.uniq(_.flatten(pluralUpperCase));
+                        }
+
+                        const aString = pluralSimple.toString().toLowerCase();
+                        const auString = pluralUpperCase.toString().toLowerCase();
+
+                        if (aString !== auString) {
+                            throw `Different upper-case plurals: ${word}, gender: ${lemma.getGender()}, "${aString} !== ${auString}".`
+                        }
+
+                        r.actual = pluralSimple.join(', ');
+
+                        r.failure =
+                            pluralSimple.slice().sort().toString() !==
+                            expectedCasesPlural[j].slice().sort().toString();
+
+                        if (r.failure) {
+
+                            if (0 === j) {
+                                pluralizeWrong++;
+                            } else {
+                                wrongCasesPluralExceptTheNominativeCase++;
+                            }
+
+                            wordIsWrongPlural = true;
+
+                        } else {
+                            r.warning = pluralSimple.toString() !== expectedCasesPlural[j].toString();
+
+                            if (r.warning) {
+                                wordHasWarningPlural = true;
+                            }
+                        }
+
+                        r.failureOrWarning = r.failure || r.warning;
+                    }
                 }
 
-                r.failureOrWarning = r.failure || r.warning;
             }
 
             let wordStatus;
 
-            if (wordIsWrongSingular || resultPluralForms[0].failure) {
+            if (wordIsWrongSingular || wordIsWrongPlural) {
                 wordStatus = 'wrong';
-            } else if (wordHasWarningSingular || resultPluralForms[0].warning) {
+            } else if (wordHasWarningSingular || wordHasWarningPlural) {
                 wordStatus = 'hasWarnings';
             } else {
                 wordStatus = 'correct';
@@ -308,6 +365,8 @@ let main = function () {
         correctWordsWithWarningsSingular: correctWordsWithWarningsSingular,
         pluralizeWrong: pluralizeWrong,
         pluralizeTotal: pluralizeTotal,
+        totalCasesPluralExceptTheNominativeCase: totalCasesPluralExceptTheNominativeCase,
+        wrongCasesPluralExceptTheNominativeCase: wrongCasesPluralExceptTheNominativeCase,
         resultForTemplate: {"items": result}
     });
 

@@ -119,6 +119,9 @@
             let pluralizeWrong = 0;
             let pluralizeTotal = 0;
 
+            let totalCasesPluralExceptTheNominativeCase = 0;
+            let wrongCasesPluralExceptTheNominativeCase = 0;
+
             let itemLen = 0;
 
             for (let eArray of $scope.results) {
@@ -131,6 +134,9 @@
 
                     pluralizeWrong += data.pluralizeWrong;
                     pluralizeTotal += data.pluralizeTotal;
+
+                    totalCasesPluralExceptTheNominativeCase += data.totalCasesPluralExceptTheNominativeCase;
+                    wrongCasesPluralExceptTheNominativeCase += data.wrongCasesPluralExceptTheNominativeCase;
 
                     items = items.concat(data.resultForTemplate.items);
                     itemLen += data.resultForTemplate.items.length;
@@ -166,6 +172,11 @@
             $scope.pluralizeCorrectWords = pluralizeTotal - pluralizeWrong;
             $scope.pluralizeTotalWords = pluralizeTotal;
             $scope.pluralizeCorrectShare = $scope.pluralizeCorrectWords / $scope.pluralizeTotalWords * 100;
+
+            $scope.pluralWordFormsCorrect =
+                totalCasesPluralExceptTheNominativeCase - wrongCasesPluralExceptTheNominativeCase;
+            $scope.pluralWordFormsTotal = totalCasesPluralExceptTheNominativeCase;
+            $scope.pluralWordFormsCorrectShare = $scope.pluralWordFormsCorrect / $scope.pluralWordFormsTotal * 100;
 
             $scope.wordsHasWarningsSingular = correctWordsWithWarningsSingular;
             $scope.wordsHasWarningsSingularShare = correctWordsWithWarningsSingular / totalWords * 100;

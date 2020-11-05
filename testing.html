@@ -108,6 +108,14 @@
     .words-errors {
         color: #dd2e44;
     }
+
+    #summary tr > td:first-of-type {
+        padding-left: 1rem;
+    }
+
+    #summary td {
+        padding-right: 1rem;
+    }
 </style>
 
 <div class="container-fluid" ng-controller="TestRunnerController">
@@ -123,9 +131,9 @@
 
             <div class="row">
                 <div class="col-xs-10">
-                    <table>
-                        <tr>
-                            <td class="text-right" style="padding-right: 1rem;">
+                    <table id="summary">
+                        <tr class="bg-success">
+                            <td class="text-right">
                                 <strong>
                                     Правильные слова в ед. ч.
                                 </strong>
@@ -134,8 +142,8 @@
                                 {{wordsCorrectSingular}} / {{wordsTotal}} ({{wordsCorrectSingularShare | number:2}}%)
                             </td>
                         </tr>
-                        <tr>
-                            <td class="text-right" style="padding-right: 1rem;">
+                        <tr class="bg-success">
+                            <td class="text-right">
                                 <strong>
                                     Правильные формы слов в ед. ч.
                                 </strong>
@@ -144,8 +152,8 @@
                                 {{wordFormsCorrect}} / {{wordFormsTotal}} ({{wordFormsCorrectShare | number:2}}%)
                             </td>
                         </tr>
-                        <tr>
-                            <td class="text-right" style="padding-right: 1rem;">
+                        <tr class="bg-warning">
+                            <td class="text-right">
                                 <strong>
                                     Слова с предупреждениями в ед. ч.
                                 </strong>
@@ -155,14 +163,26 @@
                                 number:2}}%)
                             </td>
                         </tr>
-                        <tr>
-                            <td class="text-right" style="padding-right: 1rem;">
+                        <tr class="bg-success">
+                            <td class="text-right">
                                 <strong>
                                     Правильная плюрализация
                                 </strong>
                             </td>
                             <td>
-                                {{pluralizeCorrectWords}} / {{pluralizeTotalWords}} ({{pluralizeCorrectShare | number:2}}%)
+                                {{pluralizeCorrectWords}} / {{pluralizeTotalWords}}
+                                ({{pluralizeCorrectShare | number:2}}%)
+                            </td>
+                        </tr>
+                        <tr class="bg-success">
+                            <td class="text-right">
+                                <strong>
+                                    Правильное склонение в мн. ч. (формы слов)
+                                </strong>
+                            </td>
+                            <td>
+                                {{pluralWordFormsCorrect}} / {{pluralWordFormsTotal}}
+                                ({{pluralWordFormsCorrectShare | number:2}}%)
                             </td>
                         </tr>
                     </table>
@@ -322,11 +342,11 @@
                                     </tr>
                                     <tr class="plural">
 
-                                        <th ng-repeat="wordForm in item.wordForms"
-                                            ng-class="{'bg-danger': item.pluralForms[0].failure, 'bg-warning': item.pluralForms[0].warning}">
-                                            <div ng-if="(item.pluralForms[0].expected.length) && ($index == 0)">
-                                                {{item.pluralForms[0].actual}}
-                                                <div ng-if="item.pluralForms[0].failureOrWarning">Правильно: {{item.pluralForms[0].expected}}</div>
+                                        <th ng-repeat="pluralForm in item.pluralForms"
+                                            ng-class="{'bg-danger': pluralForm.failure, 'bg-warning': pluralForm.warning}">
+                                            <div ng-if="(pluralForm.expected.length)">
+                                                {{pluralForm.actual}}
+                                                <div ng-if="pluralForm.failureOrWarning">Правильно: {{pluralForm.expected}}</div>
                                             </div>
                                         </th>
 
