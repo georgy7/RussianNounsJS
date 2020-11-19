@@ -1,0 +1,34 @@
+{
+  "name": "russian-nouns-js",
+  "version": "1.0.0",
+  "description": "Declination and pluralization of Russian nouns.",
+  "main": "RussianNouns.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/georgy7/RussianNounsJS.git"
+  },
+  "keywords": [
+    "Russian",
+    "nouns",
+    "noun",
+    "inflect",
+    "inflector",
+    "declination",
+    "русский язык",
+    "русский",
+    "язык",
+    "падежи",
+    "существительные",
+    "pluralize",
+    "plural"
+  ],
+  "author": "Georgy Ustinov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/georgy7/RussianNounsJS/issues"
+  },
+  "homepage": "https://github.com/georgy7/RussianNounsJS#readme"
+}

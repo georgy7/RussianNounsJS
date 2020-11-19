@@ -1,10 +1,5 @@
 # RussianNounsJS
 
-## Features
-
-* Declination of words. Only in the singular yet.
-* Pluralization in the nominative case.
-
 ## Usage
 
 ```js
