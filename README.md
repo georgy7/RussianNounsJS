@@ -1,5 +1,40 @@
 # RussianNounsJS
 
+## Setup
+
+### Frontend
+
+```html
+<script src="RussianNouns.js"></script>
+```
+
+or (without [AMD](https://en.wikipedia.org/wiki/Asynchronous_module_definition))
+
+```html
+<!-- from the same domain -->
+<script type="module" src="myscript.js"></script>
+```
+
+```js
+import 'RussianNouns.js';
+```
+
+or (in a Web Worker)
+
+```js
+importScripts('RussianNouns.js');
+```
+
+### Backend
+
+```
+npm i russian-nouns-js
+```
+
+```js
+const RussianNouns = require('russian-nouns-js')
+```
+
 ## Usage
 
 ```js
