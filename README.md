@@ -32,7 +32,7 @@ npm i russian-nouns-js
 ```
 
 ```js
-const RussianNouns = require('russian-nouns-js')
+const RussianNouns = require('russian-nouns-js');
 ```
 
 ## Usage
