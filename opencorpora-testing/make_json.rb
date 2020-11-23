@@ -69,7 +69,7 @@ class Parser < Nokogiri::XML::SAX::Document
       @active_l = true
       @word[:g] = Set.new
       @word[:cases] = [[], [], [], [], [], []]
-      @word[:casesPlural] = [[], [], [], [], [], [], []]
+      @word[:casesPlural] = [[], [], [], [], [], []]
       @word[:name] = get_attr(attrs, 't')
     elsif name == 'g' && @active_l && !(@word[:name].nil?)
       @word[:g].add(get_attr(attrs, 'v'))
@@ -153,10 +153,8 @@ class Parser < Nokogiri::XML::SAX::Document
             puts "plural acc2: #{word}"
           elsif tags.include? 'ablt'
             c[4].append(word)
-          elsif tags.include?('loc1') or (tags.include?('loct') and !(tags.include?('loc2')))
+          elsif tags.include?('loc1') or tags.include?('loct') or tags.include?('loc2')
             c[5].append(word)
-          elsif tags.include? 'loc2'
-            c[6].append(word)
           end
 
         end
@@ -206,10 +204,16 @@ class Parser < Nokogiri::XML::SAX::Document
   end
 
   def word_has_all_cases
-    # Except vocative and locative cases
-    return @word[:cases][0..5].all? { |case_forms|
-      !(case_forms.empty?)
-    }
+    if @word[:g].include?('Pltm')
+      return @word[:casesPlural][0..5].all? {|case_forms|
+        !(case_forms.empty?)
+      }
+    else
+      # Except vocative and locative cases
+      return @word[:cases][0..5].all? {|case_forms|
+        !(case_forms.empty?)
+      }
+    end
   end
 end
 

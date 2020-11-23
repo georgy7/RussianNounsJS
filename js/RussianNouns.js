@@ -1,4 +1,6 @@
-/*
+/*!
+  RussianNounsJS v1.1.0.SNAPSHOT
+
   Copyright (c) 2011-2020 Устинов Георгий Михайлович
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -100,6 +102,12 @@
 
         CASES: CASES,
 
+        LemmaException: class LemmaException extends Error {
+        },
+
+        StressDictionaryException: class StressDictionaryException extends Error {
+        },
+
         /**
          * Нормальная форма слова.
          * Объекты этого класса содержат также грамматическую и семантическую информацию,
@@ -115,9 +123,9 @@
              */
             constructor(o) {
 
-                function checkBool(x) {
+                function checkBoolOrNull(x) {
                     if ((null != x) && (typeof x != 'boolean')) {
-                        throw new Error('Must be boolean.');
+                        throw new API.LemmaException('Must be boolean.');
                     }
                 }
 
@@ -137,19 +145,23 @@
 
                     this.internalGender = o.internalGender;
 
+                } else if (null == o) {
+
+                    throw new API.LemmaException('No parameters specified.');
+
                 } else {
 
-                    checkBool(o.pluraliaTantum);
-                    checkBool(o.indeclinable);
+                    checkBoolOrNull(o.pluraliaTantum);
+                    checkBoolOrNull(o.indeclinable);
 
                     this.pluraliaTantum = !!(o.pluraliaTantum);
                     this.indeclinable = !!(o.indeclinable);
 
-                    checkBool(o.animate);
-                    checkBool(o.surname);
-                    checkBool(o.name);
-                    checkBool(o.transport);
-                    checkBool(o.watercraft);
+                    checkBoolOrNull(o.animate);
+                    checkBoolOrNull(o.surname);
+                    checkBoolOrNull(o.name);
+                    checkBoolOrNull(o.transport);
+                    checkBoolOrNull(o.watercraft);
 
                     this.animate = !!(o.animate);
                     this.surname = !!(o.surname);
@@ -159,7 +171,7 @@
 
                     // TODO
                     if (o.text == null) {
-                        throw new Error('A cyrillic word required.');
+                        throw new API.LemmaException('A cyrillic word required.');
                     }
 
                     this.internalText = o.text;
@@ -167,11 +179,11 @@
 
                     if (!(o.pluraliaTantum)) {  // Это слова т. н. парного рода.
                         if (o.gender == null) {
-                            throw new Error('A word and a grammatical gender required.');
+                            throw new API.LemmaException('A grammatical gender required.');
                         }
 
                         if (!Object.values(Gender).includes(o.gender)) {
-                            throw new Error('Bad grammatical gender.');
+                            throw new API.LemmaException('Bad grammatical gender.');
                         }
 
                         this.internalGender = o.gender;
@@ -265,7 +277,7 @@
          * или метода в этой библиотеке.
          *
          * @param {RussianNouns.Lemma|Object} o
-         * @throws {Error} Ошибки из конструктора леммы.
+         * @throws {RussianNouns.LemmaException} Ошибки из конструктора леммы.
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
         createLemma: o => {
@@ -352,13 +364,14 @@
              * b — оба варианта употребляются одинаково часто;
              * e — чаще на окончание;
              * E — только на окончание.
+             * @throws {RussianNouns.StressDictionaryException}
              */
             put(lemma, settings) {
 
                 // "b" значит "both".
 
                 if (!(settings.match(/^[SsbeE]{7}-[SsbeE]{6}$/))) {
-                    throw new Error('Bad settings format.');
+                    throw new API.StressDictionaryException('Bad settings format.');
                 }
 
                 const lemmaObject = API.createLemma(lemma);

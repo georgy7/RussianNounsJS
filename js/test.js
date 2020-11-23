@@ -1,6 +1,6 @@
 ﻿var window = self;
 importScripts('third-party/underscore.js');
-importScripts('RussianNouns.js');
+importScripts('RussianNouns.min.js');
 
 let inputLemmaCount;
 let dataM, dataF, dataN, dataC;
