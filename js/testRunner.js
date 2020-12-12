@@ -101,7 +101,11 @@
 
         $scope.wordComparableView = (word) => {
             if (word) {
-                return word.wordForms[0].expected;
+                if ((word.wordForms[0]) && (typeof word.wordForms[0].expected === 'string')) {
+                    return word.wordForms[0].expected;
+                } else {
+                    return word.pluralForms[0].expected;
+                }
             } else {
                 return '';
             }
@@ -112,6 +116,7 @@
             let totalCases = 0;
             let wrongCases = 0;
             let totalWords = 0;
+            let totalWordsSingular = 0;
             let correctWordsWithWarningsSingular = 0;
             let wrongWordsSingular = 0;
             let items = [];
@@ -129,6 +134,7 @@
                     totalCases += data.totalCases;
                     wrongCases += data.wrongCases;
                     totalWords += data.totalWords;
+                    totalWordsSingular += data.totalWordsSingular;
                     correctWordsWithWarningsSingular += data.correctWordsWithWarningsSingular;
                     wrongWordsSingular += data.wrongWordsSingular;
 
@@ -161,9 +167,11 @@
             $scope.items = items;
             $scope.wordTableParams.reload();
 
-            $scope.wordsCorrectSingular = totalWords - wrongWordsSingular;
             $scope.wordsTotal = totalWords;
-            $scope.wordsCorrectSingularShare = $scope.wordsCorrectSingular / $scope.wordsTotal * 100;
+
+            $scope.wordsCorrectSingular = totalWordsSingular - wrongWordsSingular;
+            $scope.totalWordsSingular = totalWordsSingular;
+            $scope.wordsCorrectSingularShare = $scope.wordsCorrectSingular / $scope.totalWordsSingular * 100;
 
             $scope.wordFormsCorrect = totalCases - wrongCases;
             $scope.wordFormsTotal = totalCases;
@@ -179,7 +187,7 @@
             $scope.pluralWordFormsCorrectShare = $scope.pluralWordFormsCorrect / $scope.pluralWordFormsTotal * 100;
 
             $scope.wordsHasWarningsSingular = correctWordsWithWarningsSingular;
-            $scope.wordsHasWarningsSingularShare = correctWordsWithWarningsSingular / totalWords * 100;
+            $scope.wordsHasWarningsSingularShare = correctWordsWithWarningsSingular / totalWordsSingular * 100;
         };
 
         $scope.wordTableMode = 1;
