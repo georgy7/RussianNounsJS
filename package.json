@@ -1,6 +1,6 @@
 {
   "name": "russian-nouns-js",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Declination and pluralization of Russian nouns.",
   "main": "RussianNouns.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "язык",
     "падежи",
     "существительные",
+    "склонение-слов",
     "pluralize",
     "plural"
   ],
