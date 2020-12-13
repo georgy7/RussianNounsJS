@@ -255,6 +255,7 @@ ${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`);
 
 ## Similar software
 
+- [russian_inflect](https://github.com/estum/russian_inflect) (Ruby, MIT)
 - [Morphos](https://github.com/wapmorgan/Morphos) (PHP, MIT)
 
 For anthroponyms only:
