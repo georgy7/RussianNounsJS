@@ -28,7 +28,7 @@ importScripts('RussianNouns.js');
 ### Backend
 
 ```
-npm i russian-nouns-js
+npm i --save russian-nouns-js
 ```
 
 ```js
@@ -102,7 +102,7 @@ RussianNouns.CASES.map(c => {
 rne.pluralize(mountain);
 // [ "горы" ]
 
-RussianNouns.CASES.slice(0, 6).map(c => {
+RussianNouns.CASES.map(c => {
     return rne.decline(mountain, c, 'горы');
 });
 
@@ -112,6 +112,7 @@ RussianNouns.CASES.slice(0, 6).map(c => {
 //     [ 'горам' ]
 //     [ 'горы' ]
 //     [ 'горами' ]
+//     [ 'горах' ]
 //     [ 'горах' ]
 // ]
 
@@ -128,6 +129,27 @@ let way = {
 
 RussianNouns.getDeclension(way);
 // 0
+
+let scissors = {
+    text: 'ножницы',
+    pluraliaTantum: true
+};
+
+rne.pluralize(scissors);
+// [ 'ножницы' ]
+
+RussianNouns.CASES.map(c => {
+    return rne.decline(scissors, c);
+});
+// [
+//     [ 'ножницы' ]
+//     [ 'ножниц' ]
+//     [ 'ножницам' ]
+//     [ 'ножницы' ]
+//     [ 'ножницами' ]
+//     [ 'ножницах' ]
+//     [ 'ножницах' ] 
+// ]
 
 let кринж = {
     text: 'кринж',

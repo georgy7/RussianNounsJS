@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.1.0
+  RussianNounsJS v1.1.1
 
   Copyright (c) 2011-2020 Устинов Георгий Михайлович
 
@@ -1768,7 +1768,7 @@
                 return stem + 'ами';
             }
 
-        } else if (Case.PREPOSITIONAL === grCase) {
+        } else if ([Case.PREPOSITIONAL, Case.LOCATIVE].includes(grCase)) {
 
             if (surnameType1()) {
                 return plural + 'х';
