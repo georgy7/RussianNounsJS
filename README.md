@@ -102,6 +102,19 @@ RussianNouns.CASES.map(c => {
 rne.pluralize(mountain);
 // [ "горы" ]
 
+RussianNouns.CASES.slice(0, 6).map(c => {
+    return rne.decline(mountain, c, 'горы');
+});
+
+// [ 
+//     [ 'горы' ]
+//     [ 'гор' ]
+//     [ 'горам' ]
+//     [ 'горы' ]
+//     [ 'горами' ]
+//     [ 'горах' ]
+// ]
+
 RussianNouns.getDeclension(mountain);
 // 2
 
@@ -206,7 +219,31 @@ ${cap(ⰃⰃ(вихрь, 4))} снежные крутя;
 // Вдруг соломой зашумит,
 // То, как путник запоздалый,
 // К нам в окошко застучит.
+
+// -----------------------------------------------
+
+// Николай Степанович Гумилев
+// Рассказ девушки (фрагмент)
+
+const ворота = L({text: 'ворота', pluraliaTantum: true});
+const тень = L({text: 'тень', gender: Gender.FEMININE});
+const ель = L({text: 'ель', gender: Gender.FEMININE});
+const снег = L({text: 'снег', gender: Gender.MASCULINE});
+const высота = L({text: 'высота', gender: Gender.FEMININE});
+
+console.log(`* * *
+Я отдыхала у ${ⰃⰃ(ворота, 2)}
+Под ${Ⰳ(тень, 5)} милой, старой ${Ⰳ(ель, 2)},
+А надо мною пламенели
+${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`);
+
+// * * *
+// Я отдыхала у ворот
+// Под тенью милой, старой ели,
+// А надо мною пламенели
+// Снега неведомых высот.
 ```
+
 **[Demo](https://georgy7.github.io/RussianNounsJS/)**  :point_left:
 
 [Run tests in web-browser](https://georgy7.github.io/RussianNounsJS/testing.html) (based on OpenCorpora)

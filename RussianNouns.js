@@ -1,4 +1,6 @@
-/*
+/*!
+  RussianNounsJS v1.1.0
+
   Copyright (c) 2011-2020 Устинов Георгий Михайлович
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -100,6 +102,12 @@
 
         CASES: CASES,
 
+        LemmaException: class LemmaException extends Error {
+        },
+
+        StressDictionaryException: class StressDictionaryException extends Error {
+        },
+
         /**
          * Нормальная форма слова.
          * Объекты этого класса содержат также грамматическую и семантическую информацию,
@@ -115,9 +123,9 @@
              */
             constructor(o) {
 
-                function checkBool(x) {
+                function checkBoolOrNull(x) {
                     if ((null != x) && (typeof x != 'boolean')) {
-                        throw new Error('Must be boolean.');
+                        throw new API.LemmaException('Must be boolean.');
                     }
                 }
 
@@ -137,19 +145,23 @@
 
                     this.internalGender = o.internalGender;
 
+                } else if (null == o) {
+
+                    throw new API.LemmaException('No parameters specified.');
+
                 } else {
 
-                    checkBool(o.pluraliaTantum);
-                    checkBool(o.indeclinable);
+                    checkBoolOrNull(o.pluraliaTantum);
+                    checkBoolOrNull(o.indeclinable);
 
                     this.pluraliaTantum = !!(o.pluraliaTantum);
                     this.indeclinable = !!(o.indeclinable);
 
-                    checkBool(o.animate);
-                    checkBool(o.surname);
-                    checkBool(o.name);
-                    checkBool(o.transport);
-                    checkBool(o.watercraft);
+                    checkBoolOrNull(o.animate);
+                    checkBoolOrNull(o.surname);
+                    checkBoolOrNull(o.name);
+                    checkBoolOrNull(o.transport);
+                    checkBoolOrNull(o.watercraft);
 
                     this.animate = !!(o.animate);
                     this.surname = !!(o.surname);
@@ -159,7 +171,7 @@
 
                     // TODO
                     if (o.text == null) {
-                        throw new Error('A cyrillic word required.');
+                        throw new API.LemmaException('A cyrillic word required.');
                     }
 
                     this.internalText = o.text;
@@ -167,11 +179,11 @@
 
                     if (!(o.pluraliaTantum)) {  // Это слова т. н. парного рода.
                         if (o.gender == null) {
-                            throw new Error('A word and a grammatical gender required.');
+                            throw new API.LemmaException('A grammatical gender required.');
                         }
 
                         if (!Object.values(Gender).includes(o.gender)) {
-                            throw new Error('Bad grammatical gender.');
+                            throw new API.LemmaException('Bad grammatical gender.');
                         }
 
                         this.internalGender = o.gender;
@@ -265,7 +277,7 @@
          * или метода в этой библиотеке.
          *
          * @param {RussianNouns.Lemma|Object} o
-         * @throws {Error} Ошибки из конструктора леммы.
+         * @throws {RussianNouns.LemmaException} Ошибки из конструктора леммы.
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
         createLemma: o => {
@@ -352,13 +364,14 @@
              * b — оба варианта употребляются одинаково часто;
              * e — чаще на окончание;
              * E — только на окончание.
+             * @throws {RussianNouns.StressDictionaryException}
              */
             put(lemma, settings) {
 
                 // "b" значит "both".
 
                 if (!(settings.match(/^[SsbeE]{7}-[SsbeE]{6}$/))) {
-                    throw new Error('Bad settings format.');
+                    throw new API.StressDictionaryException('Bad settings format.');
                 }
 
                 const lemmaObject = API.createLemma(lemma);
@@ -1708,6 +1721,7 @@
 
     function declinePlural(engine, lemma, grCase, plural) {
         const lcPlural = plural.toLowerCase();
+        const gender = lemma.getGender();
 
         const stem = lcPlural.endsWith('цы') ? init(plural) : getNounStem0(plural);
         const softEndings = [
@@ -1723,9 +1737,14 @@
         const hardAdjectiveLike = () => lcPlural.endsWith('ые');
         const softAdjectiveLike = () => lcPlural.endsWith('ие');
 
+        const surnameType1 = () => endsWithAny(lcPlural, ['овы', 'евы', 'ёвы', 'ины', 'ыны'])
+            && (lemma.isASurname() || (gender === Gender.COMMON));
+
         if (Case.DATIVE === grCase) {
 
-            if (hardAdjectiveLike()) {
+            if (surnameType1()) {
+                return plural + 'м';
+            } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ым';
             } else if (softAdjectiveLike()) {
                 return nInit(plural, 2) + 'им';
@@ -1737,7 +1756,9 @@
 
         } else if (Case.INSTRUMENTAL === grCase) {
 
-            if (hardAdjectiveLike()) {
+            if (surnameType1()) {
+                return plural + 'ми';
+            } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ыми';
             } else if (softAdjectiveLike()) {
                 return nInit(plural, 2) + 'ими';
@@ -1749,7 +1770,9 @@
 
         } else if (Case.PREPOSITIONAL === grCase) {
 
-            if (hardAdjectiveLike()) {
+            if (surnameType1()) {
+                return plural + 'х';
+            } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ых';
             } else if (softAdjectiveLike()) {
                 return nInit(plural, 2) + 'их';
@@ -1759,122 +1782,125 @@
                 return stem + 'ах';
             }
 
-        } else if ((Case.GENITIVE === grCase) || ((Case.ACCUSATIVE === grCase) && lemma.isAnimate())) {
+        }
 
-            if (hardAdjectiveLike()) {
+        if ([Case.GENITIVE, Case.ACCUSATIVE].includes(grCase)) {
+
+            if (endsWithAny(lcPlural, ['овичи', 'евичи'])) {
+                return init(plural) + 'ей';
+            }
+
+            if (lcPlural.endsWith('вны')) {
+                return nInit(plural, 2) + 'ен';
+            }
+
+        }
+
+        if ((Case.GENITIVE === grCase) || ((Case.ACCUSATIVE === grCase) && lemma.isAnimate())) {
+
+            if (surnameType1()) {
+                return plural + 'х';
+            } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ых';
             } else if (softAdjectiveLike()) {
                 return nInit(plural, 2) + 'их';
             }
 
-        }
+            const declension = getDeclension(lemma);
 
-        const declension = getDeclension(lemma);
-
-        if (1 === declension) {
-
-            if ([Case.GENITIVE, Case.ACCUSATIVE].includes(grCase)) {
-                if (endsWithAny(lcPlural, ['овичи', 'евичи'])) {
+            if ([3, 0].includes(declension)) {
+                if (lcPlural.endsWith('и')) {
                     return init(plural) + 'ей';
                 }
             }
 
-            if ((Case.GENITIVE === grCase) || ((Case.ACCUSATIVE === grCase) && lemma.isAnimate())) {
+            if (Gender.FEMININE !== gender) {
                 if (endsWithAny(lcPlural, ['жи', 'ши', 'ля', 'ли', 'чи', 'ри'])) {
                     return init(plural) + 'ей';
                 } else if (endsWithAny(lcPlural, ['звенья', 'крылья'])) {
                     return init(plural) + 'ев';
+                } else if (endsWithAny(lcPlural, ['зятья'])) {
+                    return init(plural) + 'ёв';
                 } else if (endsWithAny(lcPlural, ['ья', 'ия'])) {
                     return nInit(plural, 2) + 'ий';
+                } else if (lcPlural.endsWith('мена')) {
+                    return nInit(plural, 3) + 'ён';
                 } else if (endsWithAny(lcPlural, ['а', 'не', 'ищи'])
-                    && !endsWithAny(lcPlural, ['поезда', 'цеха'])
+                    && !endsWithAny(lcPlural, ['поезда', 'цеха', 'снега'])
                 ) {
                     return stem;
-                } else if (lcPlural.endsWith('цы')
+                } else if (endsWithAny(lcPlural, ['ницы', 'лицы', 'пицы', 'бицы'])) {
+                    return init(plural);
+                } else if ((lcPlural.endsWith('цы') && !(['отцы'].includes(lcPlural)))
                     || (lcPlural.endsWith('и') && isVowel(lastOfNInitial(lcPlural, 1)))
                 ) {
                     return init(plural) + 'ев';
-                } else {
+                } else if (endsWithAny(lcPlural, ['ы', 'и', 'а'])) {
                     return init(plural) + 'ов';
                 }
             }
 
-        } else if (2 === declension) {
+            if (lcPlural.endsWith('йки')) {
+                return nInit(plural, 3) + 'ек';
+            } else if (lcPlural.endsWith('ки')) {
+                const c = lastOfNInitial(lcPlural, 2);
+                if (c === 'ь') {
+                    const end = last(init(plural));
+                    return nInit(plural, 3) + upperLike('е', end) + end;
+                } else if (['ж', 'ш', 'ч'].includes(c)) {
+                    return nInit(plural, 2) + 'ек';
+                } else if (consonantsExceptJ.includes(c)) {
+                    return nInit(plural, 2) + 'ок';
+                }
+            }
 
-            if ([Case.GENITIVE, Case.ACCUSATIVE].includes(grCase)) {
-                if (lcPlural.endsWith('вны')) {
+            if (['сакли', 'распри'].includes(lcPlural)) {
+                return init(plural) + 'ей';
+            } else if (lcPlural.endsWith('еи')) {
+                return nInit(plural, 2) + 'ей';
+            } else if ('свечи' === lcPlural) {
+                return [init(plural), init(plural) + 'ей'];
+            } else if ('пригоршни' === lcPlural) {
+                return [init(plural) + 'ей', nInit(plural, 2) + 'ен'];
+            } else if ('тихони' === lcPlural) {
+                return [nInit(plural, 2) + 'нь', init(plural) + 'ей'];
+            }
+
+            if (endsWithAny(lcPlural, ['ьи', 'ии'])) {
+                if (engine.sd.hasStressedEndingSingular(lemma, grCase).includes(true)) {
+                    return nInit(plural, 2) + 'ей';
+                } else {
+                    return nInit(plural, 2) + 'ий';
+                }
+            }
+
+            if (lcPlural.endsWith('ни') && consonantsExceptJ.includes(lastOfNInitial(lcPlural, 2))) {
+                if (['барышни', 'боярышни', 'деревни'].includes(lcPlural)) {
+                    return nInit(plural, 2) + 'ень';
+                } else if ('кухни' === lcPlural) {
+                    return nInit(plural, 2) + 'онь';
+                } else {
                     return nInit(plural, 2) + 'ен';
                 }
             }
 
-            if ((Case.GENITIVE === grCase) || ((Case.ACCUSATIVE === grCase) && lemma.isAnimate())) {
+            if (stem.toLowerCase().endsWith('ийк')) {
+                return nInit(stem, 2) + 'ек';
+            }
 
-                if (lcPlural.endsWith('йки')) {
-                    return nInit(plural, 3) + 'ек';
-                } else if (lcPlural.endsWith('ки')) {
-                    const c = lastOfNInitial(lcPlural, 2);
-                    if (c === 'ь') {
-                        const end = last(init(plural));
-                        return nInit(plural, 3) + upperLike('е', end) + end;
-                    } else if (['ж', 'ш', 'ч'].includes(c)) {
-                        return nInit(plural, 2) + 'ек';
-                    } else if (consonantsExceptJ.includes(c)) {
-                        return nInit(plural, 2) + 'ок';
-                    }
-                }
+            if ((stem.length === lcPlural.length - 1) && endsWithAny(lcPlural, softEndings)) {
 
-                if (['сакли', 'юноши', 'дяди', 'распри'].includes(lcPlural)) {
-                    return init(plural) + 'ей';
-                } else if (lcPlural.endsWith('еи')) {
-                    return nInit(plural, 2) + 'ей';
-                } else if ('свечи' === lcPlural) {
-                    return [init(plural), init(plural) + 'ей'];
-                } else if ('пригоршни' === lcPlural) {
-                    return [init(plural) + 'ей', nInit(plural, 2) + 'ен'];
-                } else if ('тихони' === lcPlural) {
-                    return [nInit(plural, 2) + 'нь', init(plural) + 'ей'];
-                }
-
-                if (endsWithAny(lcPlural, ['ьи', 'ии'])) {
-                    if (engine.sd.hasStressedEndingSingular(lemma, grCase).includes(true)) {
-                        return nInit(plural, 2) + 'ей';
-                    } else {
-                        return nInit(plural, 2) + 'ий';
-                    }
-                }
-
-                if (lcPlural.endsWith('ни') && consonantsExceptJ.includes(lastOfNInitial(lcPlural, 2))) {
-                    if (['барышни', 'боярышни', 'деревни'].includes(lcPlural)) {
-                        return nInit(plural, 2) + 'ень';
-                    } else if ('кухни' === lcPlural) {
-                        return nInit(plural, 2) + 'онь';
-                    } else {
-                        return nInit(plural, 2) + 'ен';
-                    }
-                }
-
-                if (stem.toLowerCase().endsWith('ийк')) {
-                    return nInit(stem, 2) + 'ек';
-                }
-
-                if ((stem.length === lcPlural.length - 1) && endsWithAny(lcPlural, softEndings)) {
-
-                    if (['ь', 'й'].includes(lastOfNInitial(stem, 1).toLowerCase())) {
-                        const end = last(stem);
-                        return nInit(stem, 2) + upperLike('е', end) + end;
-                    } else {
-                        return stem + 'ь';
-                    }
-
+                if (['ь', 'й'].includes(lastOfNInitial(stem, 1).toLowerCase())) {
+                    const end = last(stem);
+                    return nInit(stem, 2) + upperLike('е', end) + end;
                 } else {
-                    return stem;
+                    return stem + 'ь';
                 }
+
+            } else {
+                return stem;
             }
 
-        } else if ([3, 0].includes(declension)) {
-            if ((Case.GENITIVE === grCase) || ((Case.ACCUSATIVE === grCase) && lemma.isAnimate())) {
-                return stem + 'ей';
-            }
         }
 
         return plural;
