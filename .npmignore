@@ -3,3 +3,4 @@ js/
 opencorpora-testing/
 CONTRIBUTING.RU.md
 RussianNouns.min.js
+.travis.yml
