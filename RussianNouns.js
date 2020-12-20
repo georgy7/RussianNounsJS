@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.1.2
+  RussianNounsJS v1.1.3
 
   Copyright (c) 2011-2020 Устинов Георгий Михайлович
 
