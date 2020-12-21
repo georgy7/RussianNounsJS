@@ -266,12 +266,12 @@ ${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`);
 // Снега неведомых высот.
 ```
 
-Please [take the survey](https://docs.google.com/forms/d/e/1FAIpQLSeZgtDuRFQhl7bX-i_6E5hJRhyzdxhPmf3ZVBNJh3tUD6cBVg/viewform?usp=sf_link)
-to make this better.
-
 **[Demo](https://georgy7.github.io/RussianNounsJS/)**  :point_left:
 
 [Run tests in web-browser](https://georgy7.github.io/RussianNounsJS/testing.html) (based on OpenCorpora)
+
+Please [take the survey](https://docs.google.com/forms/d/e/1FAIpQLSeZgtDuRFQhl7bX-i_6E5hJRhyzdxhPmf3ZVBNJh3tUD6cBVg/viewform?usp=sf_link)
+to make the library better.
 
 ## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
