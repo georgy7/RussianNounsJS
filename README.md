@@ -1,3 +1,5 @@
+[![npm version][npm-shield]][npm-url]
+
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
@@ -302,3 +304,9 @@ For anthroponyms only:
 
 - [Petrovich](https://github.com/petrovich) — (JS, Java, Python and more, MIT)
 - [sklonenie](https://github.com/danakt/sklonenie) (JS, MIT)
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[npm-shield]: https://img.shields.io/npm/v/russian-nouns-js.svg?style=for-the-badge
+[npm-url]: https://www.npmjs.com/package/russian-nouns-js
