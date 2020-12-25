@@ -8,7 +8,7 @@
   <h3 align="center">RussianNounsJS</h3>
 
   <p align="center">
-    A declining javascript library.
+    A JavaScript library that inflects words.
     <br />
     <br />
     <a href="https://georgy7.github.io/RussianNounsJS/">View Demo</a>
