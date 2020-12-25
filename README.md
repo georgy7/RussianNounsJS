@@ -1,4 +1,6 @@
 [![npm version][npm-shield]][npm-url]
+[![MIT License][license-shield]][license-url]
+
 
 <!-- PROJECT LOGO -->
 <br />
@@ -330,3 +332,5 @@ For anthroponyms only:
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [npm-shield]: https://img.shields.io/npm/v/russian-nouns-js.svg?style=for-the-badge
 [npm-url]: https://www.npmjs.com/package/russian-nouns-js
+[license-shield]: https://img.shields.io/github/license/georgy7/RussianNounsJS.svg?style=for-the-badge
+[license-url]: https://github.com/georgy7/RussianNounsJS/blob/master/LICENSE.txt
