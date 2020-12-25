@@ -314,7 +314,8 @@ to make the library better.
 
 ## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
-- http://en.wikipedia.org/wiki/Russian_grammar
+- [Russian grammar (English Wikipedia)](http://en.wikipedia.org/wiki/Russian_grammar)
+- [OpenCorpora (Russian text corpus)](http://opencorpora.org/)
 - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
 ## Similar software
