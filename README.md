@@ -1,4 +1,23 @@
-# RussianNounsJS
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <img src="octopus-5835160-logo.png" alt="Logo" width="128" height="122">
+
+  <h3 align="center">RussianNounsJS</h3>
+
+  <p align="center">
+    A declining javascript library.
+    <br />
+    <br />
+    <a href="https://georgy7.github.io/RussianNounsJS/">View Demo</a>
+    ·
+    <a href="https://georgy7.github.io/RussianNounsJS/testing.html">Run Tests</a>
+    ·
+    <a href="https://github.com/georgy7/RussianNounsJS/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/georgy7/RussianNounsJS/issues">Request Feature</a>
+  </p>
+</p>
 
 ## Setup
 
@@ -265,10 +284,6 @@ ${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`);
 // А надо мною пламенели
 // Снега неведомых высот.
 ```
-
-**[Demo](https://georgy7.github.io/RussianNounsJS/)**  :point_left:
-
-[Run tests in web-browser](https://georgy7.github.io/RussianNounsJS/testing.html) (based on OpenCorpora)
 
 Please [take the survey](https://docs.google.com/forms/d/e/1FAIpQLSeZgtDuRFQhl7bX-i_6E5hJRhyzdxhPmf3ZVBNJh3tUD6cBVg/viewform?usp=sf_link)
 to make the library better.
