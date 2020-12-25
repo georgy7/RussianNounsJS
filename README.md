@@ -21,7 +21,27 @@
   </p>
 </p>
 
-## Setup
+
+
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#installation">Installation</a>
+      <ul>
+        <li><a href="#frontend">Frontend</a></li>
+        <li><a href="#backend">Backend</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#references">References</a></li>
+    <li><a href="#similar-software">Similar software</a></li>
+  </ol>
+</details>
+
+
+## Installation
 
 ### Frontend
 
