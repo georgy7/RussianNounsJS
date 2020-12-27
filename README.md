@@ -41,7 +41,7 @@
       <ul>
         <li><a href="#the-basics">The basics</a></li>
         <li><a href="#stress-dictionary-tuning">Stress dictionary tuning</a></li>
-        <li><a href="#complex-example">Complex example</a></li>
+        <li><a href="#a-complex-example">A complex example</a></li>
       </ul>
     </li>
     <li><a href="#references">References</a></li>
@@ -239,7 +239,7 @@ rne.sd.put(кринж, 'SEESeSE-EEEEEE');
 rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом", "кринжем" ]
 ```
 
-### Complex example
+### A complex example
 
 ```js
 const rne = new RussianNouns.Engine();
