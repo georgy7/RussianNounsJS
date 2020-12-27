@@ -36,7 +36,14 @@
         <li><a href="#backend">Backend</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
+    <li>
+      <a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#the-basics">The basics</a></li>
+        <li><a href="#stress-dictionary-tuning">Stress dictionary tuning</a></li>
+        <li><a href="#complex-example">Complex example</a></li>
+      </ul>
+    </li>
     <li><a href="#references">References</a></li>
     <li><a href="#similar-software">Similar software</a></li>
   </ol>
@@ -79,6 +86,8 @@ const RussianNouns = require('russian-nouns-js');
 ```
 
 ## Usage
+
+### The basics
 
 ```js
 RussianNouns.CASES;
@@ -124,10 +133,10 @@ rne.decline(coat, Case.GENITIVE);
 RussianNouns.getDeclension(coat);
 // -1
 
-let mountain = {
+let mountain = RussianNouns.createLemma({
     text: 'гора',
     gender: Gender.FEMININE
-};
+});
 
 RussianNouns.CASES.map(c => {
     return rne.decline(mountain, c);
@@ -165,18 +174,18 @@ RussianNouns.getDeclension(mountain);
 RussianNouns.getSchoolDeclension(mountain);
 // 1
 
-let way = {
+let way = RussianNouns.createLemma({
     text: 'путь',
     gender: Gender.MASCULINE
-};
+});
 
 RussianNouns.getDeclension(way);
 // 0
 
-let scissors = {
+let scissors = RussianNouns.createLemma({
     text: 'ножницы',
     pluraliaTantum: true
-};
+});
 
 rne.pluralize(scissors);
 // [ 'ножницы' ]
@@ -193,11 +202,17 @@ RussianNouns.CASES.map(c => {
 //     [ 'ножницах' ]
 //     [ 'ножницах' ] 
 // ]
+```
 
-let кринж = {
+### Stress dictionary tuning
+
+```js
+let кринж = RussianNouns.createLemma({
     text: 'кринж',
     gender: Gender.MASCULINE
-};
+});
+
+const rne = new RussianNouns.Engine();
 
 rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем" ]
 
@@ -223,6 +238,8 @@ rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем", "кринж�
 rne.sd.put(кринж, 'SEESeSE-EEEEEE');
 rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом", "кринжем" ]
 ```
+
+### Complex example
 
 ```js
 const rne = new RussianNouns.Engine();

@@ -48,10 +48,10 @@ const RussianNouns = require('./RussianNouns.js');
     result = RussianNouns.getDeclension(coat);
     assertEquals(result, -1);
 
-    let mountain = {
+    let mountain = RussianNouns.createLemma({
         text: 'гора',
         gender: Gender.FEMININE
-    };
+    });
 
     result = RussianNouns.CASES.map(c => {
         return rne.decline(mountain, c);
@@ -134,19 +134,19 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 5 ----------------');
 
-    let way = {
+    let way = RussianNouns.createLemma({
         text: 'путь',
         gender: Gender.MASCULINE
-    };
+    });
 
     assertEquals(RussianNouns.getDeclension(way), 0);
 
     console.log('--------------- 6 ----------------');
 
-    let scissors = {
+    let scissors = RussianNouns.createLemma({
         text: 'ножницы',
         pluraliaTantum: true
-    };
+    });
 
     result = rne.pluralize(scissors);
     assertIsArray(result);
@@ -189,10 +189,10 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 8 ----------------');
 
-    let cringe = {
+    let cringe = RussianNouns.createLemma({
         text: 'кринж',
         gender: Gender.MASCULINE
-    };
+    });
 
     result = rne.decline(cringe, Case.INSTRUMENTAL);
     assertIsArray(result);
