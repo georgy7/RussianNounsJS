@@ -45,7 +45,6 @@
       </ul>
     </li>
     <li><a href="#references">References</a></li>
-    <li><a href="#similar-software">Similar software</a></li>
   </ol>
 </details>
 
