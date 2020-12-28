@@ -335,15 +335,6 @@ to make the library better.
 - [OpenCorpora (Russian text corpus)](http://opencorpora.org/)
 - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
-## Similar software
-
-- [russian_inflect](https://github.com/estum/russian_inflect) (Ruby, MIT)
-- [Morphos](https://github.com/wapmorgan/Morphos) (PHP, MIT)
-
-For anthroponyms only:
-
-- [Petrovich](https://github.com/petrovich) — (JS, Java, Python and more, MIT)
-- [sklonenie](https://github.com/danakt/sklonenie) (JS, MIT)
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
