@@ -50,10 +50,13 @@
                       if (RussianNouns.Case.NOMINATIVE === c) {
                         $scope.plural[c] = rne.pluralize(lemma);
                       } else if ($scope.plural[RussianNouns.Case.NOMINATIVE] && (c !== RussianNouns.Case.LOCATIVE)) {
+
                         // У слова может быть несколько форм во множественном числе.
-                        for (let p of $scope.plural[RussianNouns.Case.NOMINATIVE]) {
-                          $scope.plural[c] = rne.decline(lemma, c, p);
-                        }
+
+                        $scope.plural[c] = $scope.plural[RussianNouns.Case.NOMINATIVE]
+                                .map(p => rne.decline(lemma, c, p))
+                                .reduce((a, b) => a.concat(b));
+
                       }
                   }
 
