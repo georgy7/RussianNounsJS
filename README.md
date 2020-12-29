@@ -10,7 +10,7 @@
   <h3 align="center">RussianNounsJS</h3>
 
   <p align="center">
-    A JavaScript library that inflects words.
+    A JavaScript library that declines nouns.
     <br />
     <br />
     <a href="https://georgy7.github.io/RussianNounsJS/">View Demo</a>
@@ -325,15 +325,14 @@ ${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`);
 // Снега неведомых высот.
 ```
 
-Please [take the survey](https://docs.google.com/forms/d/e/1FAIpQLSeZgtDuRFQhl7bX-i_6E5hJRhyzdxhPmf3ZVBNJh3tUD6cBVg/viewform?usp=sf_link)
-to make the library better.
-
 ## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
 - [Russian grammar (English Wikipedia)](http://en.wikipedia.org/wiki/Russian_grammar)
 - [OpenCorpora (Russian text corpus)](http://opencorpora.org/)
 - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
+Please [take the survey](https://docs.google.com/forms/d/e/1FAIpQLSeZgtDuRFQhl7bX-i_6E5hJRhyzdxhPmf3ZVBNJh3tUD6cBVg/viewform?usp=sf_link)
+to make this library better.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
