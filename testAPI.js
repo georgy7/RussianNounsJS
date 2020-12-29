@@ -34,11 +34,11 @@ const RussianNouns = require('./RussianNouns.js');
     const Gender = RussianNouns.Gender;
     const Case = RussianNouns.Case;
 
-    let coat = {
+    let coat = RussianNouns.createLemma({
         text: 'пальто',
         gender: Gender.NEUTER,
         indeclinable: true
-    };
+    });
 
     result = rne.decline(coat, Case.GENITIVE);
     assertIsArray(result);

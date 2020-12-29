@@ -120,11 +120,11 @@ rne.decline({text: 'имя', gender: 'средний'}, 'творительны�
 const Gender = RussianNouns.Gender;
 const Case = RussianNouns.Case;
 
-let coat = {
+let coat = RussianNouns.createLemma({
     text: 'пальто',
     gender: Gender.NEUTER,
     indeclinable: true
-};
+});
 
 rne.decline(coat, Case.GENITIVE);
 // [ "пальто" ]
