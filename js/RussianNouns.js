@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.1.4.SNAPSHOT
+  RussianNounsJS v1.1.5.SNAPSHOT
 
   Copyright (c) 2011-2020 Устинов Георгий Михайлович
 
@@ -1487,7 +1487,7 @@
         }
 
         const yaD1 = [
-            'зять', 'князь',
+            'зять', 'деверь', 'князь',
             'друг',
             'брат', 'собрат',
             'лист', 'стул',
@@ -1832,11 +1832,12 @@
             }
 
             if (Gender.FEMININE !== gender) {
-                if (endsWithAny(lcPlural, ['жи', 'ши', 'ля', 'ли', 'чи', 'ри'])) {
+                if (endsWithAny(lcPlural, ['жи', 'ши', 'ля', 'ли', 'чи', 'ри'])
+                    || (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), ['зять', 'деверь']))) {
                     return init(plural) + 'ей';
                 } else if (endsWithAny(lcPlural, ['звенья', 'крылья'])) {
                     return init(plural) + 'ев';
-                } else if (endsWithAny(lcPlural, ['зятья'])) {
+                } else if (endsWithAny(lcPlural, ['зятья', 'деверья'])) {
                     return init(plural) + 'ёв';
                 } else if (endsWithAny(lcPlural, ['ья', 'ия'])) {
                     if (Gender.MASCULINE === gender) {
