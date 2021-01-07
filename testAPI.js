@@ -500,27 +500,27 @@ const RussianNouns = require('./RussianNouns.js');
 
         // TODO
         assertEquals(result[1].length, 1);
-        // assertEquals(адаптировавшийResult[1][0], 'адаптировавшего');
+        // assertEquals(result[1][0], 'адаптировавшего');
 
         // TODO
         assertEquals(result[2].length, 1);
-        // assertEquals(адаптировавшийResult[2][0], 'адаптировавшему');
+        // assertEquals(result[2][0], 'адаптировавшему');
 
         // TODO
         assertEquals(result[3].length, 1);
-        // assertEquals(адаптировавшийResult[3][0], 'адаптировавшего');
+        // assertEquals(result[3][0], 'адаптировавшего');
 
         // TODO
         assertEquals(result[4].length, 1);
-        // assertEquals(адаптировавшийResult[4][0], 'адаптировавшим');
+        // assertEquals(result[4][0], 'адаптировавшим');
 
         // TODO
         assertEquals(result[5].length, 1);
-        // assertEquals(адаптировавшийResult[5][0], 'адаптировавшем');
+        // assertEquals(result[5][0], 'адаптировавшем');
 
         // TODO
         assertEquals(result[6].length, 1);
-        // assertEquals(адаптировавшийResult[6][0], 'адаптировавшем');
+        // assertEquals(result[6][0], 'адаптировавшем');
 
         console.log('--------------- 2 ----------------');
     })();
@@ -582,27 +582,27 @@ const RussianNouns = require('./RussianNouns.js');
 
         // TODO
         assertEquals(result[1].length, 1);
-        // assertEquals(адаптировавшаяResult[1][0], 'адаптировавшей');
+        // assertEquals(result[1][0], 'адаптировавшей');
 
         // TODO
         assertEquals(result[2].length, 1);
-        // assertEquals(адаптировавшаяResult[2][0], 'адаптировавшей');
+        // assertEquals(result[2][0], 'адаптировавшей');
 
         assertEquals(result[3].length, 1);
         assertEquals(result[3][0], 'адаптировавшую');
 
         // TODO
-        // assertEquals(адаптировавшаяResult[4].length, 2);
-        // assertEquals(адаптировавшаяResult[4][0], 'адаптировавшей');
-        // assertEquals(адаптировавшаяResult[4][1], 'адаптировавшею');
+        // assertEquals(result[4].length, 2);
+        // assertEquals(result[4][0], 'адаптировавшей');
+        // assertEquals(result[4][1], 'адаптировавшею');
 
         // TODO
         assertEquals(result[5].length, 1);
-        // assertEquals(адаптировавшаяResult[5][0], 'адаптировавшей');
+        // assertEquals(result[5][0], 'адаптировавшей');
 
         // TODO
         assertEquals(result[6].length, 1);
-        // assertEquals(адаптировавшаяResult[6][0], 'адаптировавшей');
+        // assertEquals(result[6][0], 'адаптировавшей');
 
         console.log('--------------- 4 ----------------');
     })();

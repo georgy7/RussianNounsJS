@@ -19,7 +19,7 @@
     ·
     <a href="https://github.com/georgy7/RussianNounsJS/issues">Report Bug</a>
     ·
-    <a href="https://github.com/georgy7/RussianNounsJS/issues">Request Feature</a>
+    <a href="https://github.com/georgy7/RussianNounsJS/wiki">Wiki</a>
   </p>
 </p>
 
