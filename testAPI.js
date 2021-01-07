@@ -456,4 +456,204 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('----------------------------------');
 
+    console.log('Experimental: adjectives, participles.');
+
+    const лихой = L({text: 'лихой', gender: Gender.MASCULINE, animate: true});
+
+    assertEquals(
+        `${cap(ⰃⰃ(лихой, 1))} ${ⰃⰃ(конь, 1)} ${Ⰳ(жар, 5)} полны.`,
+        'Лихие кони жаром полны.'
+    );
+
+    const неподвижное = L({text: 'неподвижное', gender: Gender.NEUTER});
+
+    assertEquals(
+        `И ${ⰃⰃ(неподвижное, 5)} ${ⰃⰃ(око, 5)}`,
+        'И неподвижными очами'
+    );
+
+    const чистая = L({text: 'чистая', gender: Gender.FEMININE});
+
+    assertEquals(
+        `И ${Ⰳ(чистая, 5)}, как ты сам, одело`,
+        'И чистой, как ты сам, одело' // тебя стихией Божество.
+    );
+
+    console.log('--------------- 1 ----------------');
+
+    const адаптировавший = L({text: 'адаптировавший', gender: Gender.MASCULINE, animate: true});
+
+    (() => {
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(адаптировавший, c);
+        });
+
+        assertIsArray(result);
+        assertEquals(result.length, 7);
+
+        for (let i = 0; i < 7; i++) {
+            assertIsArray(result[i]);
+        }
+
+        assertEquals(result[0].length, 1);
+        assertEquals(result[0][0], 'адаптировавший');
+
+        // TODO
+        assertEquals(result[1].length, 1);
+        // assertEquals(адаптировавшийResult[1][0], 'адаптировавшего');
+
+        // TODO
+        assertEquals(result[2].length, 1);
+        // assertEquals(адаптировавшийResult[2][0], 'адаптировавшему');
+
+        // TODO
+        assertEquals(result[3].length, 1);
+        // assertEquals(адаптировавшийResult[3][0], 'адаптировавшего');
+
+        // TODO
+        assertEquals(result[4].length, 1);
+        // assertEquals(адаптировавшийResult[4][0], 'адаптировавшим');
+
+        // TODO
+        assertEquals(result[5].length, 1);
+        // assertEquals(адаптировавшийResult[5][0], 'адаптировавшем');
+
+        // TODO
+        assertEquals(result[6].length, 1);
+        // assertEquals(адаптировавшийResult[6][0], 'адаптировавшем');
+
+        console.log('--------------- 2 ----------------');
+    })();
+
+    const адаптировавшее = L({text: 'адаптировавшее', gender: Gender.NEUTER});
+
+    (() => {
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(адаптировавшее, c);
+        });
+
+        assertIsArray(result);
+        assertEquals(result.length, 7);
+
+        for (let i = 0; i < 7; i++) {
+            assertIsArray(result[i]);
+        }
+
+        assertEquals(result[0].length, 1);
+        assertEquals(result[0][0], 'адаптировавшее');
+
+        assertEquals(result[1].length, 1);
+        assertEquals(result[1][0], 'адаптировавшего');
+
+        assertEquals(result[2].length, 1);
+        assertEquals(result[2][0], 'адаптировавшему');
+
+        assertEquals(result[3].length, 1);
+        assertEquals(result[3][0], 'адаптировавшее');
+
+        assertEquals(result[4].length, 1);
+        assertEquals(result[4][0], 'адаптировавшим');
+
+        assertEquals(result[5].length, 1);
+        assertEquals(result[5][0], 'адаптировавшем');
+
+        assertEquals(result[6].length, 1);
+        assertEquals(result[6][0], 'адаптировавшем');
+
+        console.log('--------------- 3 ----------------');
+    })();
+
+    const адаптировавшая = L({text: 'адаптировавшая', gender: Gender.FEMININE});
+
+    (() => {
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(адаптировавшая, c);
+        });
+
+        assertIsArray(result);
+        assertEquals(result.length, 7);
+
+        for (let i = 0; i < 7; i++) {
+            assertIsArray(result[i]);
+        }
+
+        assertEquals(result[0].length, 1);
+        assertEquals(result[0][0], 'адаптировавшая');
+
+        // TODO
+        assertEquals(result[1].length, 1);
+        // assertEquals(адаптировавшаяResult[1][0], 'адаптировавшей');
+
+        // TODO
+        assertEquals(result[2].length, 1);
+        // assertEquals(адаптировавшаяResult[2][0], 'адаптировавшей');
+
+        assertEquals(result[3].length, 1);
+        assertEquals(result[3][0], 'адаптировавшую');
+
+        // TODO
+        // assertEquals(адаптировавшаяResult[4].length, 2);
+        // assertEquals(адаптировавшаяResult[4][0], 'адаптировавшей');
+        // assertEquals(адаптировавшаяResult[4][1], 'адаптировавшею');
+
+        // TODO
+        assertEquals(result[5].length, 1);
+        // assertEquals(адаптировавшаяResult[5][0], 'адаптировавшей');
+
+        // TODO
+        assertEquals(result[6].length, 1);
+        // assertEquals(адаптировавшаяResult[6][0], 'адаптировавшей');
+
+        console.log('--------------- 4 ----------------');
+    })();
+
+    (() => {
+        const k = rne.pluralize(адаптировавший);
+        const m = rne.pluralize(адаптировавшая);
+        const n = rne.pluralize(адаптировавшее);
+        const expectedPlural = 'адаптировавшие';
+
+        assertIsArray(k);
+        assertIsArray(m);
+        assertIsArray(n);
+
+        assertEquals(k.length, 1);
+        assertEquals(m.length, 1);
+        assertEquals(n.length, 1);
+
+        // assertEquals(k[0], expectedPlural);  // TODO
+        assertEquals(m[0], expectedPlural);
+        assertEquals(n[0], expectedPlural);
+
+        function checkCases(lemma) {
+            const result = RussianNouns.CASES.map(c => {
+                return rne.decline(lemma, c, expectedPlural);
+            });
+
+            for (let i = 0; i < 7; i++) {
+                assertIsArray(result[i]);
+                assertEquals(result[i].length, 1);
+            }
+
+            assertEquals(result[0][0], expectedPlural);
+            assertEquals(result[1][0], 'адаптировавших');
+            assertEquals(result[2][0], 'адаптировавшим');
+
+            if (lemma.isAnimate()) {
+                assertEquals(result[3][0], 'адаптировавших');
+            } else {
+                assertEquals(result[3][0], 'адаптировавшие');
+            }
+
+            assertEquals(result[4][0], 'адаптировавшими');
+            assertEquals(result[5][0], 'адаптировавших');
+            assertEquals(result[6][0], 'адаптировавших');
+        }
+
+        checkCases(адаптировавший);
+        checkCases(адаптировавшая);
+        checkCases(адаптировавшее);
+    })();
+
+    console.log('----------------------------------');
 })();
