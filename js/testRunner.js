@@ -21,6 +21,7 @@
         $scope.genders = Object.values(RussianNouns.Gender).sort();
 
         $scope.filter = {
+            frequentOnly: false,
             gender: null
         };
 
@@ -248,6 +249,10 @@
 
                 if ($scope.filter.gender) {
                     result = result.filter(item => ($scope.filter.gender === item.gender));
+                }
+
+                if ($scope.filter.frequentOnly) {
+                    result = result.filter(item => item.frequent);
                 }
             }
 

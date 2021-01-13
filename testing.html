@@ -116,6 +116,12 @@
     #summary td {
         padding-right: 1rem;
     }
+
+    input[type="checkbox"] {
+        margin-top: 0px;
+        width: 16px;
+        height: 16px;
+    }
 </style>
 
 <div class="container-fluid" ng-controller="TestRunnerController">
@@ -235,6 +241,11 @@
                             <option value="">любой род</option>
                         </select>
                     </div>
+
+                    <label class="checkbox-inline" style="margin-left: 1rem;"><input
+                            type="checkbox"
+                            ng-model="filter.frequentOnly"
+                            ng-change="updateFilter();">Часто употребляемые</label>
 
                 </div>
             </div>

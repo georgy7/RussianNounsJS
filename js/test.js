@@ -1,6 +1,7 @@
 ﻿var window = self;
 importScripts('third-party/underscore.js');
 importScripts('RussianNouns.min.js');
+importScripts('freq.js');
 
 let inputLemmaCount;
 let dataM, dataF, dataN, dataC;
@@ -358,6 +359,7 @@ let main = function () {
                 "pluralForms": resultPluralForms,
                 "gender": gender,
                 "declension": declension,
+                "frequent": (mostFrequentNouns.includes(lemma.text())),
                 "status": wordStatus
             });
         }

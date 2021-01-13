@@ -1,7 +1,7 @@
 /*!
-  RussianNounsJS v1.1.5.SNAPSHOT
+  RussianNounsJS v1.2.0.SNAPSHOT
 
-  Copyright (c) 2011-2020 Устинов Георгий Михайлович
+  Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -1656,9 +1656,22 @@
 
                     } else if (endsWithAny(lcWord, ['ье', 'ьё'])) {
 
-                        let w = nInit(word, 2);
+                        const w = nInit(word, 2);
 
-                        if (last(lcWord) === 'е') {
+                        const softSignOnly = [
+                            'безделье', 'варенье', 'воскресенье',
+                            'жалованье',    // ИМХО, спорно
+                            'запястье', 'застолье', 'затишье', 'здоровье', 'зелье',
+                            'изголовье', 'новоселье', 'одночасье',
+                            // Я бы добавил сюда "ожерелье",
+                            // хотя форма "ожерелия" в гугле встречается.
+                            'печенье', 'платье', 'побережье', 'поголовье', 'подворье',
+                            'подземелье', 'подполье', 'поместье', 'предплечье', 'раздумье',
+                            'сиденье',  // место для сидения
+                            'средневековье', 'увечье', 'угодье', 'устье'
+                        ].includes(lcWord);
+
+                        if ((last(lcWord) === 'е') && !softSignOnly) {
                             result.push(w + 'ия');
                         }
 
@@ -1812,10 +1825,13 @@
 
             const genitiveStem = () => {
                 const lcStem = stem.toLowerCase();
-                if (endsWithAny(lcStem, ['кн', 'кл'])) {
+                if (endsWithAny(lcStem, ['кн', 'кл', 'нк', 'пк', 'рк', 'тк', 'вк', 'лк'])) {
                     const end = last(stem);
                     return init(stem) + upperLike('о', end) + end;
-                } else if (endsWithAny(lcStem, ['льц', 'сьм', 'деньг'])) {
+                } else if (endsWithAny(lcPlural, ['дра'])) {
+                    const end = lastOfNInitial(plural, 1);
+                    return nInit(plural, 2) + upperLike('е', end) + end;
+                } else if (endsWithAny(lcStem, ['льц', 'сьм', 'деньг', 'ьк', 'йк'])) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
                 } else if (endsWithAny(lcStem, ['сл'])) {
@@ -1832,7 +1848,84 @@
             }
 
             if (Gender.FEMININE !== gender) {
-                if (endsWithAny(lcPlural, ['жи', 'ши', 'ля', 'ли', 'чи', 'ри'])
+
+                // Много исключений. Наверно, это можно как-то отрефакторить.
+
+                const explicitOv = [
+                    'адреса', 'адресы', 'аланы', 'беглецы', 'берега', 'близнецы', 'бойцы', 'бока', 'борцы',
+                    'века', 'венцы', 'веса', 'весы', 'вечера', 'глупцы', 'гонцы', 'города', 'дворцы', 'дельцы',
+                    'детдома', 'детдомы', 'дома', 'жеребцы', 'жильцы', 'жрецы', 'зубцы', 'истцы', 'катера',
+                    'концы', 'кузнецы', 'купцы', 'леса', 'мертвецы', 'мудрецы',
+                    'облака', 'образцы', 'огурцы', 'отцы', 'певцы', 'песцы', 'пловцы', 'подлецы',
+                    'продавцы', 'птенцы', 'резцы', 'рубцы', 'самцы',
+                    'свинцы', // есть такое слово?
+                    'спецы', 'столбцы', 'стрельцы', 'суда', 'творцы', 'тельцы', 'торцы', 'юнцы'
+                ];
+
+                const explicitZeroEndingAndOv = [
+                    'аршины', 'баклажаны', 'буквы', 'гольфы', 'граммы', 'гусары',
+                    'дела', 'кадеты', 'килограммы', 'омы', 'помидоры', 'рентгены',
+                    'ботинки', 'чулки'
+                ];
+
+                const explicitOvAndZeroEnding = [
+                    'гектары', 'рельсы'
+                ];
+
+                const explicitZeroEnding = [
+                    'бедняги', 'бедолаги', 'болгары', 'бродяги', 'будды',
+                    'веки', 'верзилы', 'владыки', 'воеводы', 'волосы', 'вояки', 'главы',
+                    'грузины', 'детины', 'дубины',
+                    'железы', // желёз
+                    'жилы', 'зануды', 'зеваки', 'калеки', 'коллеги', 'курицы', 'куры',
+                    'ламы', 'мужчины', 'непоседы', 'папы', 'папаши', 'таты', 'партизаны', 'погоны',
+                    'предтечи', 'работяги', 'разы', 'румыны', 'самоубийцы', 'убийцы',
+                    'сапоги', 'сироты', 'слуги', 'солдаты',
+                    'старейшины', 'старины', 'старосты', 'старшины',
+                    'яблоки',
+                    // См. код функции genitiveStem.
+                    'дядьки', 'дяденьки', 'зайки', 'кроссовки', 'малютки', 'малолетки',
+                    'попки', 'турки'
+                ];
+
+                const mShki = [
+                    'братишки', 'мальчишки', 'парнишки',
+                    'сынишки', 'папочки', 'дедушки', 'дядюшки', 'батюшки',
+                    'городишки', 'домишки'
+                ];
+
+                // малышки
+
+
+                // рожки
+
+                // листья
+                // молодцы
+                // оттенки
+                // поводья
+                // прутья
+                // суки (мужской род) - суков, сучья - сучьев
+                // люди, человеки
+
+                // лада - лад (женский род, но в корпусе почему-то общий)
+
+                // татары - татар
+
+                if (explicitOv.includes(lcPlural)) {
+                    return init(plural) + 'ов';
+                } else if (explicitZeroEndingAndOv.includes(lcPlural)) {
+                    return [
+                        genitiveStem(),
+                        init(plural) + 'ов'
+                    ];
+                } else if (explicitOvAndZeroEnding.includes(lcPlural)) {
+                    return [
+                        init(plural) + 'ов',
+                        genitiveStem()
+                    ];
+                } else if (explicitZeroEnding.includes(lcPlural) || (lemma.lower() === 'барин')) {
+                    return genitiveStem();
+                } else if (endsWithAny(lcPlural, ['жи', 'ши', 'ля', 'ли', 'чи', 'ри'])
                     || (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), ['зять', 'деверь']))) {
                     return init(plural) + 'ей';
                 } else if (endsWithAny(lcPlural, ['звенья', 'крылья'])) {
@@ -1853,10 +1946,13 @@
                     return genitiveStem();
                 } else if (endsWithAny(lcPlural, ['ницы', 'лицы', 'пицы', 'бицы'])) {
                     return init(plural);
-                } else if ((lcPlural.endsWith('цы') && !(['отцы'].includes(lcPlural)))
+                } else if ((lcPlural.endsWith('цы'))
                     || (lcPlural.endsWith('и') && isVowel(lastOfNInitial(lcPlural, 1)))
                 ) {
                     return init(plural) + 'ев';
+                } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки'])
+                    && ((Gender.MASCULINE !== gender) || endsWithAny(lcPlural, mShki))) {
+                    return nInit(plural, 2) + 'ек';
                 } else if (endsWithAny(lcPlural, ['ы', 'и', 'а'])) {
                     return init(plural) + 'ов';
                 }
