@@ -27,3 +27,5 @@ unexpand -t 4 RussianNouns.min.js > RussianNouns.min.temp.js
 mv RussianNouns.min.temp.js RussianNouns.min.js
 
 ls -l RussianNouns.min.js
+
+node testAPI.js
