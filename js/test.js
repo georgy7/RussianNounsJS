@@ -107,6 +107,7 @@ let main = function () {
             }
 
             const pluraliaTantum = (data[i].g.indexOf('Pltm') >= 0);
+            const abbr = (data[i].g.indexOf('Abbr') >= 0);
 
             const word = pluraliaTantum ? (data[i].casesPlural[0][0]) : (data[i].cases[0][0]); // Именительный падеж
             const expResults = data[i].cases;
@@ -359,7 +360,7 @@ let main = function () {
                 "pluralForms": resultPluralForms,
                 "gender": gender,
                 "declension": declension,
-                "frequent": (mostFrequentNouns.includes(lemma.text())),
+                "frequent": (mostFrequentNouns.includes(lemma.text()) && !abbr),
                 "status": wordStatus
             });
         }
