@@ -762,6 +762,13 @@
             'EEEEEEE-eEeeee'
         );
 
+        for (let w of ['ладья', 'статья']) {
+            d.put(
+                {text: w, gender: Gender.FEMININE},
+                API.FIXED_ENDING_STRESS
+            );
+        }
+
         return d;
     }
 
@@ -1130,7 +1137,7 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ого';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
                 return stem + 'его';
             } else if (iyWord()) {
                 let r = [head + 'я'];
@@ -1157,7 +1164,7 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ому';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
                 return stem + 'ему';
             } else if (iyWord()) {
                 return head + 'ю';
@@ -1198,7 +1205,7 @@
 
             } else if (iyoy() || endsWithAny(lcWord, ['евой', 'овой'])) {
                 return stem + 'ым';
-            } else if (endsWithAny(lcWord, ['кожий'])) {
+            } else if (endsWithAny(lcWord, ['кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
                 return init(head) + 'им';
             } else if (iyWord()) {
                 return head + 'ем';
@@ -1230,7 +1237,7 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ом';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
                 return stem + 'ем';
             } else if (endsWithAny(lcWord, ['воробей'])) {
                 const i = init(head);
@@ -1567,6 +1574,8 @@
                     'князь': ['князи', 'князья'],
                     'кол': ['колы', 'колья'],   // TODO: можно разделить на омонимы
                     'месяц': ['месяцы'],
+                    'татарин': ['татары'],
+                    'хозяин': ['хозяева'],
                     'цветок': ['цветки', 'цветы']
                     // И я решил зашить сюда даже случаи, когда итак слово норм обрабатывается,
                     // но в корпусе там буква Ё. И почему бы не выдавать так же букву Ё.
@@ -1580,8 +1589,7 @@
                 {
                     'кондуктор': ['кондуктора', 'кондукторы'],
                     'кум': ['кумовья'],
-                    'муж': ['мужья', 'мужи'],
-                    'татарин': ['татары']
+                    'муж': ['мужья', 'мужи']
                 }
             ],
             [
@@ -1599,6 +1607,7 @@
                     'жена': ['жёны'],
                     'звезда': ['звёзды'],
                     'кинозвезда': ['кинозвёзды'],
+                    'стая': ['стаи'],
                     'щека': ['щёки']
                 }
             ],
@@ -1832,7 +1841,7 @@
                     } else if ((lcWord.endsWith('вой') && vowelCount(nInit(word, 3)) >= 2)
                         || (endsWithAny(lcWord, ['ной', 'мой']) && word.length >= 6)) {
                         result.push(nInit(word, 2) + 'ые');
-                    } else if (lcWord.endsWith('хой')) {
+                    } else if (endsWithAny(lcWord, ['хой', 'ший'])) {
                         result.push(nInit(word, 2) + 'ие');
                     } else if (lcWord.endsWith('его')) {
                         result.push(nInit(word, 3) + 'ие');
@@ -1977,7 +1986,7 @@
 
         const explicitZeroEndingCommonGenderSurnameLike = [
             'головы', 'детины', 'дубины',
-            'старейшины', 'старины', 'старшины'
+            'скотины', 'старейшины', 'старины', 'старшины'
         ];
 
         const surnameType1 = () => endsWithAny(lcPlural, ['овы', 'евы', 'ёвы', 'ины', 'ыны'])
@@ -2181,7 +2190,8 @@
                 } else if (endsWithAny(lcPlural,
                     ['жи', 'ши', 'чи',
                         'ля', 'ли', 'чи', 'ри', 'ти', 'ди',
-                        'клещи', 'хрящи'])
+                        'борщи', 'клещи', 'товарищи',
+                        'плащи', 'прыщи', 'хрящи'])
                     || (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), [
                         'зять', 'деверь'
                     ]))) {
