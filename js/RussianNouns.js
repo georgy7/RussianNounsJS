@@ -986,7 +986,7 @@
     }
 
     const softD1 = w => (last(w) === 'ь' && !w.endsWith('господь'))
-        || ('её'.includes(last(w)) && !w.endsWith('це'));
+        || ('её'.includes(last(w)) && !endsWithAny(w, ['це', 'же']));
 
     function halfSomething(word) {
         if (word.startsWith('пол')
@@ -996,7 +996,7 @@
             let subWord = word.substring(3);
 
             // На случай дефисов.
-            let offset = subWord.search(/[а-яА-Я]/);
+            let offset = subWord.search(/[а-яА-ЯёЁ]/);
 
             // Сюда не должны попадать как минимум
             // мягкий и твердый знаки помимо гласных.
@@ -2011,8 +2011,11 @@
                 ? unYo(text) : text;
 
         const explicitZeroEndingCommonGenderSurnameLike = [
-            'головы', 'детины', 'дубины',
-            'скотины', 'старейшины', 'старины', 'старшины'
+            'головы', 'громадины', 'детины', 'деревенщины', 'дохлятины', 'дубины',
+            'ехидины', 'жадины', 'зверины', 'идиотины', 'кислятины', 'молодчины',
+            'орясины', 'остолопины',
+            'сиротины', 'скотины', 'старейшины', 'старины', 'старшины',
+            'уродины'
         ];
 
         const surnameType1 = () => endsWithAny(lcPlural, ['овы', 'евы', 'ёвы', 'ины', 'ыны'])
