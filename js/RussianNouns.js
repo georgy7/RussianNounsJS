@@ -142,7 +142,6 @@
                     this.surname = o.surname;
                     this.name = o.name;
                     this.transport = o.transport;
-                    this.watercraft = o.watercraft;
 
                     this.internalText = o.internalText;
                     this.lowerCaseText = o.lowerCaseText;
@@ -165,13 +164,11 @@
                     checkBoolOrNull(o.surname);
                     checkBoolOrNull(o.name);
                     checkBoolOrNull(o.transport);
-                    checkBoolOrNull(o.watercraft);
 
                     this.animate = !!(o.animate);
                     this.surname = !!(o.surname);
                     this.name = !!(o.name);
                     this.transport = !!(o.transport);
-                    this.watercraft = !!(o.watercraft);
 
                     // TODO
                     if (o.text == null) {
@@ -218,8 +215,7 @@
                     && (this.isAnimate() === o.isAnimate())
                     && (this.isASurname() === o.isASurname())
                     && (this.isAName() === o.isAName())
-                    && (this.isATransport() === o.isATransport())
-                    && (this.isAWatercraft() === o.isAWatercraft());
+                    && (this.isATransport() === o.isATransport());
             }
 
             fuzzyEquals(o) {
@@ -263,11 +259,7 @@
             }
 
             isATransport() {
-                return this.transport || this.watercraft;
-            }
-
-            isAWatercraft() {
-                return this.watercraft;
+                return this.transport;
             }
         },
 
@@ -1935,11 +1927,8 @@
                         result.push(stem + 'ья');
                     } else if (endsWithAny(lcWord, ['ле', 'ре'])) {
                         result.push(stem + 'я');
-                    } else if (('судно' === lcWord) && lemma.isATransport()) {
-                        result.push('суда');
-                        if (!lemma.isAWatercraft()) {
-                            result.push('судна'); // "воздушные судна" употребляется, но реже.
-                        }
+                    } else if (lcWord.endsWith('судно') && lemma.isATransport()) {
+                        result.push(nInit(word, 2) + 'а');
                     } else {
                         Array.prototype.push.apply(result, yoStem(s => s + 'а'));
 
@@ -2097,7 +2086,7 @@
                 if (endsWithAny(lcStem, ['кн', 'кл', 'нк', 'пк', 'рк', 'тк', 'вк', 'лк'])) {
                     const end = last(stem);
                     return init(stem) + upperLike('о', end) + end;
-                } else if (endsWithAny(lcPlural, ['дра'])) {
+                } else if (endsWithAny(lcPlural, ['дра', 'судна'])) {
                     const end = lastOfNInitial(plural, 1);
                     return nInit(plural, 2) + upperLike('е', end) + end;
                 } else if (endsWithAny(lcStem, ['льц', 'сьм', 'деньг', 'ьк', 'йк'])) {
