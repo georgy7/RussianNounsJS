@@ -932,7 +932,7 @@
         const lcHead = init(lemma.lower());
         if ('а' === last(lcHead)) {
             return head;
-        } else if ((['зне', 'жне', 'гре', 'спе'].includes(nLast(lcHead, 3)))
+        } else if (endsWithAny(lcHead, ['зне', 'жне', 'гре', 'спе', 'мудре'])
             || nLast(init(lcHead), 3).split('')
                 .every(l => consonantsExceptJ.includes(l))
             || lemma.isAName()
@@ -1091,6 +1091,18 @@
         const iyWord = () => last(lcWord) === 'й'
             || ['ий', 'ие', 'иё'].includes(nLast(lcWord, 2));
 
+        const eiWord = () => endsWithAny(lcWord, [
+            'воробей', 'муравей', 'ручей', 'соловей', 'улей'
+        ]);
+
+        const eiStem = () => {
+            if (eiWord()) {
+                return init(head) + upperLike('ь', last(head));
+            } else {
+                return head;
+            }
+        };
+
         const schWord = () => 'чщ'.includes(last(lcStem));
 
         const surnameType1 = () => lemma.isASurname()
@@ -1137,10 +1149,10 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ого';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
                 return stem + 'его';
             } else if (iyWord()) {
-                let r = [head + 'я'];
+                let r = [eiStem() + 'я'];
                 return addUForm(r);
             } else if (soft && !schWord()) {
                 return stem + 'я';
@@ -1164,10 +1176,10 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ому';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
                 return stem + 'ему';
             } else if (iyWord()) {
-                return head + 'ю';
+                return eiStem() + 'ю';
             } else if (soft && !schWord()) {
                 return stem + 'ю';
             } else if (tsWord(lcWord)) {
@@ -1205,10 +1217,10 @@
 
             } else if (iyoy() || endsWithAny(lcWord, ['евой', 'овой'])) {
                 return stem + 'ым';
-            } else if (endsWithAny(lcWord, ['кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
                 return init(head) + 'им';
             } else if (iyWord()) {
-                return head + 'ем';
+                return eiStem() + 'ем';
             } else if (soft || ('жчш'.includes(last(lcStem)))) {
 
                 return eStem(stem, (s, stressedEnding) => stressedEnding
@@ -1237,7 +1249,7 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ом';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'всевышний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
                 return stem + 'ем';
             } else if (endsWithAny(lcWord, ['воробей'])) {
                 const i = init(head);
@@ -1251,7 +1263,7 @@
             ])) {
                 return head + 'и';
             } else if ((last(lcWord) === 'й') || ('иё' === nLast(lcWord, 2))) {
-                return head + 'е';
+                return eiStem() + 'е';
             } else if (tsWord(lcWord)) {
                 return tsStem(word, lemma) + 'це';
             } else if (okWord(lcWord)) {
@@ -1275,7 +1287,7 @@
                 'лад,лёд,лед,лоб,мох,угол,' +
                 'лес,луг,мёд,мел,мех,мозг,низ,нос,плен,пол,' +
                 'полк,артполк,порт,аэропорт,пух,' +
-                'рай,род,сад,свет,слух,снег,сок,строй,счёт,счет,сук,' +
+                'рай,род,сад,свет,слух,снег,сок,спирт,строй,счёт,счет,сук,' +
                 'тыл,ход,хуй,час,шаг,шкаф,яр'
             ).split(',');
 
@@ -1719,6 +1731,8 @@
                         'катер', 'колокол', 'корм', 'кузов', 'купол',
                         'лес', 'мастер', 'номер',
                         'сахар', 'снег', 'сорт', 'счет', 'счёт',
+                        'терем',
+                        'том',  // TODO неодушевленное (не имя).
                         'холод', 'цвет', 'череп'
                     ];
 
@@ -1738,6 +1752,8 @@
                         'директор',
                         'инспектор', 'инструктор',
                         'орден', 'ордер',
+                        'тенор', 'тон', 'трактор',
+                        'тормоз', // TODO наверно, ы только в одушевленной форме
                         'ветер',
                         'верх',
                         'китель',
@@ -1751,6 +1767,7 @@
                         'вымпел',
                         'образ', // Разделить на омонимы?
                         'омут',
+                        'токарь', 'тополь',
                         'шторм', 'штуцер'
                     ];
 
@@ -1846,11 +1863,10 @@
                     } else if (lcWord.endsWith('его')) {
                         result.push(nInit(word, 3) + 'ие');
                     } else if ([
-                        'воробей', 'муравей',
+                        'воробей', 'муравей', 'ручей', 'соловей', 'улей',
                         'жеребей', // — жребий; доля поместья.
                         'ирей', // Довольно бессмысленно в мн. ч.
-                        'репей', 'чирей', // Я бы сказал "-еи", но в словарях так.
-                        'ручей', 'соловей', 'улей'
+                        'репей', 'чирей' // Я бы сказал "-еи", но в словарях так.
                     ].includes(lcWord)) {
                         result.push(nInit(word, 2) + 'ьи');
                     } else {
@@ -2089,6 +2105,8 @@
                 }
             }
 
+            const lastOf2Initial = lastOfNInitial(lcPlural, 2);
+
             if (Gender.FEMININE !== gender) {
 
                 // Очень много исключений. Наверно, это можно как-то отрефакторить.
@@ -2105,7 +2123,7 @@
                     'директора', 'договора', 'доктора', 'жемчуга',
                     'инспектора', 'инструктора',
                     'колокола', 'кондуктора', 'кузова', 'леса', 'мастера', 'номера',
-                    'острова', 'отпуска', 'сахара',
+                    'острова', 'отпуска', 'сахара', 'трактора', 'тормоза',
                     'холода', 'цвета', 'черепа', 'шторма', 'штуцера',
                     'юнкера', 'ястреба',
                     'суда', 'корм'
@@ -2123,7 +2141,7 @@
                     'продавцы', 'птенцы', 'резцы', 'рубцы', 'самцы',
                     'свинцы', // есть такое слово?
                     'сорта', 'соуса', 'спецы', 'столбцы', 'стрельцы',
-                    'творцы', 'тельцы', 'торцы', 'юнцы'
+                    'творцы', 'тельцы', 'тенора', 'терема', 'тома', 'тона', 'торцы', 'юнцы'
                 ]);
 
                 const explicitZeroEndingAndOv = [
@@ -2161,17 +2179,14 @@
 
                 // малышки
 
-
                 // рожки
 
                 // листья
                 // молодцы
-                // оттенки
-                // суки (мужской род) - суков, сучья - сучьев
 
-                // лада - лад (женский род, но в корпусе почему-то общий)
-
-                if (((gender === Gender.COMMON) && !endsWithAny(lcPlural, ['чукчи']))
+                if (((gender === Gender.COMMON)
+                    && !endsWithAny(lcPlural, ['чукчи'])
+                    && !(['ж', 'ш', 'ч'].includes(lastOf2Initial)))
                     || explicitZeroEnding.includes(lcPlural)
                     || (lemma.lower() === 'барин')) {
                     return genitiveStem();
@@ -2206,7 +2221,9 @@
                     'стулья', 'сучья', 'шилья'
                 ])) {
                     return init(plural) + 'ев';
-                } else if (endsWithAny(lcPlural, ['зятья', 'деверья', 'края', 'клеи', 'холуи'])
+                } else if (endsWithAny(lcPlural, [
+                    'зятья', 'кумовья', 'деверья', 'края', 'клеи', 'холуи'
+                    ])
                     || ['хуи', 'чаи'].includes(lcPlural)) {
                     return init(plural) + 'ёв';
                 } else if (endsWithAny(lcPlural, ['ья', 'ия'])) {
@@ -2247,18 +2264,34 @@
             if (lcPlural.endsWith('йки')) {
                 return nInit(plural, 3) + 'ек';
             } else if (lcPlural.endsWith('ки')) {
-                const c = lastOfNInitial(lcPlural, 2);
-                if (c === 'ь') {
+                if (lastOf2Initial === 'ь') {
                     const end = last(init(plural));
                     return nInit(plural, 3) + upperLike('е', end) + end;
-                } else if (['ж', 'ш', 'ч'].includes(c)) {
+                } else if (['ж', 'ш', 'ч'].includes(lastOf2Initial)) {
                     return nInit(plural, 2) + 'ек';
-                } else if (consonantsExceptJ.includes(c)) {
+                } else if (consonantsExceptJ.includes(lastOf2Initial)) {
                     return nInit(plural, 2) + 'ок';
                 }
             }
 
-            if (['сакли', 'распри'].includes(lcPlural)) {
+            if ([
+                'беготни',
+                'болтовни',
+                'вожжи',
+                'возни',
+                'доли',
+                'лапши',
+                'левши',
+                'марли',
+                'ноздри',
+                'пени',
+                'пятерни',
+                'распри',
+                'родни',
+                'сакли',
+                'ступни',
+                'фигни'
+            ].includes(lcPlural)) {
                 return init(plural) + 'ей';
             } else if (endsWithAny(lcPlural, ['еи', 'эи', 'уи'])) {
                 return init(plural) + 'й';
