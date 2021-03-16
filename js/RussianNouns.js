@@ -605,6 +605,11 @@
             'EEEbEEE-SSESEE'
         );
 
+        d.put(
+            {text: 'слеза', gender: Gender.FEMININE, animate: false},
+            'EEEEEEE-SSESEE'
+        );
+
         // У меня нет ответа, почему у следующих слов на ж/ш/ч/ц
         // ударения в основном на окончания.
         // Возможно, это коррелирует с количеством слогов в корне.
@@ -1218,7 +1223,7 @@
         if (Case.INSTRUMENTAL === grCase) {
             if ((iyWord() && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский'])) {
 
-                if (!endsWithAny(lcWord, ['мороженое', 'целое'])) {
+                if (!endsWithAny(lcWord, ['ное', 'мое', 'целое'])) {
                     return stem + 'им';
                 } else {
                     return stem + 'ым';
@@ -1290,11 +1295,11 @@
                 'ад,' +
                 'баз,' + // скотный двор
                 'бал,бег,берег,бережок,бой,бок,бочок,бор,борт,бред,быт,' +
-                'век,верх,вес,ветер,ветр,вид,воз,' +
+                'вал,век,верх,вес,ветер,ветр,вид,воз,' +
                 'газ,глаз,год,горб,гроб,день,долг,дух,дым,жир,зад,' +
                 'клей,кол,кон,корень,край,круг,' +
                 'лад,лёд,лед,лоб,мох,угол,' +
-                'лес,луг,мёд,мел,мех,мозг,низ,нос,плен,пол,' +
+                'лес,луг,мёд,мел,мех,мозг,мост,низ,нос,плен,пол,' +
                 'полк,артполк,порт,аэропорт,пух,' +
                 'рай,род,сад,свет,слух,снег,сок,спирт,стог,строй,счёт,счет,сук,' +
                 rkComma('фти,') +
@@ -1630,7 +1635,8 @@
                     'кинозвезда': ['кинозвёзды'],
                     'медсестра': ['медсёстры'],
                     'метла': ['мётлы'],
-                    'сестра': ['сёстры']
+                    'сестра': ['сёстры'],
+                    'слеза': ['слёзы']
                 }
             ],
             [
@@ -1655,6 +1661,7 @@
                     'зерно': ['зёрна'],
                     'знамя': ['знамёна'],
                     'колесо': ['колёса'],
+                    'облачко': ['облачка'],
                     'седло': ['сёдла'],
                     'село': ['сёла']
                 }
@@ -2078,7 +2085,7 @@
                 return init(plural) + 'ей';
             }
 
-            if (lcPlural.endsWith('вны')) {
+            if (lcPlural.endsWith('вны') && (lcPlural !== 'овны')) {
                 return nInit(plural, 2) + 'ен';
             }
 
@@ -2112,9 +2119,9 @@
                     return init(stem) + upperLike('о', end) + end;
                 } else if ((
                     endsWithAny(lcPlural, [
-                        'вна', 'вца', 'пла', 'дца', 'дра', 'судна',
-                        'рки', 'рцы', 'тлы',
-                        'десны', 'дёсны'
+                        'вна', 'вца', 'вцы', 'пла', 'дца', 'дра', 'судна',
+                        'рки', 'рцы', 'тлы', 'рна',
+                        'десны', 'дёсны', 'сосны'
                     ])
                     && !endsWithAny(lcPlural, ['недра'])
                 ) || (
@@ -2124,15 +2131,18 @@
                     return nInit(plural, 2) + upperLike('е', end) + end;
                 } else if (
                     endsWithAny(lcPlural, [
-                        'сестры', 'сёстры'
+                        'сестры', 'сёстры', 'серьги'
                     ])
                 ) {
                     const end = lastOfNInitial(plural, 1);
-                    return unYo(nInit(plural, 2)) + upperLike('ё', end) + end;
+                    const h = (lastOfNInitial(lcPlural, 2) === 'ь')
+                        ? unYo(nInit(plural, 3))
+                        : unYo(nInit(plural, 2));
+                    return h + upperLike('ё', end) + end;
                 } else if (endsWithAny(lcStem, ['льц', 'сьм', 'деньг', 'ьк', 'йк', 'дьб'])) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
-                } else if (endsWithAny(lcStem, ['сл'])) {
+                } else if (endsWithAny(lcPlural, ['сла', 'слы'])) {
                     return init(stem) + 'ел';
                 } else {
                     return stem;
@@ -2391,6 +2401,8 @@
                 if (['ь', 'й'].includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
+                } else if (endsWithAny(lcPlural, ['земли'])) {
+                    return init(stem) + 'ель';
                 } else {
                     return stem + 'ь';
                 }
