@@ -12,6 +12,12 @@ function assertIsArray(a) {
     }
 }
 
+function assertEqualsSingleValue(array, value) {
+    assertIsArray(array);
+    assertEquals(array.length, 1);
+    assertEquals(array[0], value);
+}
+
 const RussianNouns = require('./RussianNouns.min.js');
 
 (() => {
@@ -20,14 +26,10 @@ const RussianNouns = require('./RussianNouns.min.js');
     let result;
 
     result = rne.decline({text: 'имя', gender: 'средний'}, 'родительный');
-    assertIsArray(result);
-    assertEquals(result.length, 1);
-    assertEquals(result[0], "имени");
+    assertEqualsSingleValue(result, "имени");
 
     result = rne.decline({text: 'имя', gender: 'средний'}, 'творительный');
-    assertIsArray(result);
-    assertEquals(result.length, 1);
-    assertEquals(result[0], "именем");
+    assertEqualsSingleValue(result, "именем");
 
     console.log('--------------- 1 ----------------');
 
@@ -41,9 +43,7 @@ const RussianNouns = require('./RussianNouns.min.js');
     });
 
     result = rne.decline(coat, Case.GENITIVE);
-    assertIsArray(result);
-    assertEquals(result.length, 1);
-    assertEquals(result[0], "пальто");
+    assertEqualsSingleValue(result, "пальто");
 
     result = RussianNouns.getDeclension(coat);
     assertEquals(result, -1);
@@ -59,38 +59,22 @@ const RussianNouns = require('./RussianNouns.min.js');
     assertIsArray(result);
     assertEquals(result.length, 7);
 
-    for (let i = 0; i < 7; i++) {
-        assertIsArray(result[i]);
-    }
-
-    assertEquals(result[0].length, 1);
-    assertEquals(result[0][0], "гора");
-
-    assertEquals(result[1].length, 1);
-    assertEquals(result[1][0], "горы");
-
-    assertEquals(result[2].length, 1);
-    assertEquals(result[2][0], "горе");
-
-    assertEquals(result[3].length, 1);
-    assertEquals(result[3][0], "гору");
+    assertEqualsSingleValue(result[0], "гора");
+    assertEqualsSingleValue(result[1], "горы");
+    assertEqualsSingleValue(result[2], "горе");
+    assertEqualsSingleValue(result[3], "гору");
 
     assertEquals(result[4].length, 2);
     assertEquals(result[4][0], "горой");
     assertEquals(result[4][1], "горою");
 
-    assertEquals(result[5].length, 1);
-    assertEquals(result[5][0], "горе");
-
-    assertEquals(result[6].length, 1);
-    assertEquals(result[6][0], "горе");
+    assertEqualsSingleValue(result[5], "горе");
+    assertEqualsSingleValue(result[6], "горе");
 
     console.log('--------------- 2 ----------------');
 
     result = rne.pluralize(mountain);
-    assertIsArray(result);
-    assertEquals(result.length, 1);
-    assertEquals(result[0], "горы");
+    assertEqualsSingleValue(result, "горы");
     const pluralMountain = result[0];
 
     console.log('--------------- 3 ----------------');
@@ -102,30 +86,13 @@ const RussianNouns = require('./RussianNouns.min.js');
     assertIsArray(result);
     assertEquals(result.length, 7);
 
-    for (let i = 0; i < 7; i++) {
-        assertIsArray(result[i]);
-    }
-
-    assertEquals(result[0].length, 1);
-    assertEquals(result[0][0], 'горы');
-
-    assertEquals(result[1].length, 1);
-    assertEquals(result[1][0], 'гор');
-
-    assertEquals(result[2].length, 1);
-    assertEquals(result[2][0], 'горам');
-
-    assertEquals(result[3].length, 1);
-    assertEquals(result[3][0], 'горы');
-
-    assertEquals(result[4].length, 1);
-    assertEquals(result[4][0], 'горами');
-
-    assertEquals(result[5].length, 1);
-    assertEquals(result[5][0], 'горах');
-
-    assertEquals(result[6].length, 1);
-    assertEquals(result[6][0], 'горах');
+    assertEqualsSingleValue(result[0], 'горы');
+    assertEqualsSingleValue(result[1], 'гор');
+    assertEqualsSingleValue(result[2], 'горам');
+    assertEqualsSingleValue(result[3], 'горы');
+    assertEqualsSingleValue(result[4], 'горами');
+    assertEqualsSingleValue(result[5], 'горах');
+    assertEqualsSingleValue(result[6], 'горах');
 
     console.log('--------------- 4 ----------------');
 
@@ -150,8 +117,7 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     result = rne.pluralize(scissors);
     assertIsArray(result);
-    assertEquals(result.length, 1);
-    assertEquals(result[0], 'ножницы');
+    assertEqualsSingleValue(result, 'ножницы');
 
     console.log('--------------- 7 ----------------');
 
@@ -162,30 +128,13 @@ const RussianNouns = require('./RussianNouns.min.js');
     assertIsArray(result);
     assertEquals(result.length, 7);
 
-    for (let i = 0; i < 7; i++) {
-        assertIsArray(result[i]);
-    }
-
-    assertEquals(result[0].length, 1);
-    assertEquals(result[0][0], 'ножницы');
-
-    assertEquals(result[1].length, 1);
-    assertEquals(result[1][0], 'ножниц');
-
-    assertEquals(result[2].length, 1);
-    assertEquals(result[2][0], 'ножницам');
-
-    assertEquals(result[3].length, 1);
-    assertEquals(result[3][0], 'ножницы');
-
-    assertEquals(result[4].length, 1);
-    assertEquals(result[4][0], 'ножницами');
-
-    assertEquals(result[5].length, 1);
-    assertEquals(result[5][0], 'ножницах');
-
-    assertEquals(result[6].length, 1);
-    assertEquals(result[6][0], 'ножницах');
+    assertEqualsSingleValue(result[0], 'ножницы');
+    assertEqualsSingleValue(result[1], 'ножниц');
+    assertEqualsSingleValue(result[2], 'ножницам');
+    assertEqualsSingleValue(result[3], 'ножницы');
+    assertEqualsSingleValue(result[4], 'ножницами');
+    assertEqualsSingleValue(result[5], 'ножницах');
+    assertEqualsSingleValue(result[6], 'ножницах');
 
     console.log('--------------- 8 ----------------');
 
@@ -195,15 +144,11 @@ const RussianNouns = require('./RussianNouns.min.js');
     });
 
     result = rne.decline(cringe, Case.INSTRUMENTAL);
-    assertIsArray(result);
-    assertEquals(result.length, 1);
-    assertEquals(result[0], "кринжем");
+    assertEqualsSingleValue(result, "кринжем");
 
     rne.sd.put(cringe, 'SEESESE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
-    assertIsArray(result);
-    assertEquals(result.length, 1);
-    assertEquals(result[0], "кринжом");
+    assertEqualsSingleValue(result, "кринжом");
 
     rne.sd.put(cringe, 'SEESbSE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
@@ -456,6 +401,49 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     console.log('----------------------------------');
 
+    console.log('Testing dev branch index.html words...');
+
+    (() => {
+        const lemma = L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true});
+
+        const singular = RussianNouns.CASES.map(c => {
+            return rne.decline(lemma, c);
+        });
+
+        assertIsArray(singular);
+        assertEquals(singular.length, 7);
+
+        assertEqualsSingleValue(singular[0], 'нелюдь');
+        assertEqualsSingleValue(singular[1], 'нелюдя');
+        assertEqualsSingleValue(singular[2], 'нелюдю');
+        assertEqualsSingleValue(singular[3], 'нелюдя');
+        assertEqualsSingleValue(singular[4], 'нелюдем');
+        assertEqualsSingleValue(singular[5], 'нелюде');
+        assertEqualsSingleValue(singular[6], 'нелюде');
+
+        const p = rne.pluralize(lemma);
+        assertEqualsSingleValue(p, 'нелюди');
+
+        const plural = RussianNouns.CASES.map(c => {
+            return rne.decline(lemma, c, p[0]);
+        });
+
+        assertIsArray(plural);
+        assertEquals(plural.length, 7);
+
+        assertEqualsSingleValue(plural[0], 'нелюди');
+        assertEqualsSingleValue(plural[1], 'нелюдей');
+        assertEqualsSingleValue(plural[2], 'нелюдям');
+        assertEqualsSingleValue(plural[3], 'нелюдей');
+        assertEqualsSingleValue(plural[4], 'нелюдями');
+        assertEqualsSingleValue(plural[5], 'нелюдях');
+        assertEqualsSingleValue(plural[6], 'нелюдях');
+    })();
+
+    // TODO more words
+
+    console.log('----------------------------------');
+
     console.log('Experimental: adjectives, participles.');
 
     const лихой = L({text: 'лихой', gender: Gender.MASCULINE, animate: true});
@@ -495,32 +483,13 @@ const RussianNouns = require('./RussianNouns.min.js');
             assertIsArray(result[i]);
         }
 
-        assertEquals(result[0].length, 1);
-        assertEquals(result[0][0], 'адаптировавший');
-
-        // TODO
-        assertEquals(result[1].length, 1);
-        // assertEquals(result[1][0], 'адаптировавшего');
-
-        // TODO
-        assertEquals(result[2].length, 1);
-        // assertEquals(result[2][0], 'адаптировавшему');
-
-        // TODO
-        assertEquals(result[3].length, 1);
-        // assertEquals(result[3][0], 'адаптировавшего');
-
-        // TODO
-        assertEquals(result[4].length, 1);
-        // assertEquals(result[4][0], 'адаптировавшим');
-
-        // TODO
-        assertEquals(result[5].length, 1);
-        // assertEquals(result[5][0], 'адаптировавшем');
-
-        // TODO
-        assertEquals(result[6].length, 1);
-        // assertEquals(result[6][0], 'адаптировавшем');
+        assertEqualsSingleValue(result[0], 'адаптировавший');
+        assertEqualsSingleValue(result[1], 'адаптировавшего');
+        assertEqualsSingleValue(result[2], 'адаптировавшему');
+        assertEqualsSingleValue(result[3], 'адаптировавшего');
+        assertEqualsSingleValue(result[4], 'адаптировавшим');
+        assertEqualsSingleValue(result[5], 'адаптировавшем');
+        assertEqualsSingleValue(result[6], 'адаптировавшем');
 
         console.log('--------------- 2 ----------------');
     })();
@@ -539,26 +508,13 @@ const RussianNouns = require('./RussianNouns.min.js');
             assertIsArray(result[i]);
         }
 
-        assertEquals(result[0].length, 1);
-        assertEquals(result[0][0], 'адаптировавшее');
-
-        assertEquals(result[1].length, 1);
-        assertEquals(result[1][0], 'адаптировавшего');
-
-        assertEquals(result[2].length, 1);
-        assertEquals(result[2][0], 'адаптировавшему');
-
-        assertEquals(result[3].length, 1);
-        assertEquals(result[3][0], 'адаптировавшее');
-
-        assertEquals(result[4].length, 1);
-        assertEquals(result[4][0], 'адаптировавшим');
-
-        assertEquals(result[5].length, 1);
-        assertEquals(result[5][0], 'адаптировавшем');
-
-        assertEquals(result[6].length, 1);
-        assertEquals(result[6][0], 'адаптировавшем');
+        assertEqualsSingleValue(result[0], 'адаптировавшее');
+        assertEqualsSingleValue(result[1], 'адаптировавшего');
+        assertEqualsSingleValue(result[2], 'адаптировавшему');
+        assertEqualsSingleValue(result[3], 'адаптировавшее');
+        assertEqualsSingleValue(result[4], 'адаптировавшим');
+        assertEqualsSingleValue(result[5], 'адаптировавшем');
+        assertEqualsSingleValue(result[6], 'адаптировавшем');
 
         console.log('--------------- 3 ----------------');
     })();
@@ -577,32 +533,19 @@ const RussianNouns = require('./RussianNouns.min.js');
             assertIsArray(result[i]);
         }
 
-        assertEquals(result[0].length, 1);
-        assertEquals(result[0][0], 'адаптировавшая');
-
-        // TODO
-        assertEquals(result[1].length, 1);
-        // assertEquals(result[1][0], 'адаптировавшей');
-
-        // TODO
-        assertEquals(result[2].length, 1);
-        // assertEquals(result[2][0], 'адаптировавшей');
-
-        assertEquals(result[3].length, 1);
-        assertEquals(result[3][0], 'адаптировавшую');
+        assertEqualsSingleValue(result[0], 'адаптировавшая');
+        assertEqualsSingleValue(result[1], 'адаптировавшей');
+        assertEqualsSingleValue(result[2], 'адаптировавшей');
+        assertEqualsSingleValue(result[3], 'адаптировавшую');
 
         // TODO
         // assertEquals(result[4].length, 2);
         // assertEquals(result[4][0], 'адаптировавшей');
         // assertEquals(result[4][1], 'адаптировавшею');
+        assertEquals(result[4][0], 'адаптировавшею');
 
-        // TODO
-        assertEquals(result[5].length, 1);
-        // assertEquals(result[5][0], 'адаптировавшей');
-
-        // TODO
-        assertEquals(result[6].length, 1);
-        // assertEquals(result[6][0], 'адаптировавшей');
+        assertEqualsSingleValue(result[5], 'адаптировавшей');
+        assertEqualsSingleValue(result[6], 'адаптировавшей');
 
         console.log('--------------- 4 ----------------');
     })();
@@ -613,41 +556,28 @@ const RussianNouns = require('./RussianNouns.min.js');
         const n = rne.pluralize(адаптировавшее);
         const expectedPlural = 'адаптировавшие';
 
-        assertIsArray(k);
-        assertIsArray(m);
-        assertIsArray(n);
-
-        assertEquals(k.length, 1);
-        assertEquals(m.length, 1);
-        assertEquals(n.length, 1);
-
-        // assertEquals(k[0], expectedPlural);  // TODO
-        assertEquals(m[0], expectedPlural);
-        assertEquals(n[0], expectedPlural);
+        assertEqualsSingleValue(k, expectedPlural);
+        assertEqualsSingleValue(m, expectedPlural);
+        assertEqualsSingleValue(n, expectedPlural);
 
         function checkCases(lemma) {
             const result = RussianNouns.CASES.map(c => {
                 return rne.decline(lemma, c, expectedPlural);
             });
 
-            for (let i = 0; i < 7; i++) {
-                assertIsArray(result[i]);
-                assertEquals(result[i].length, 1);
-            }
-
-            assertEquals(result[0][0], expectedPlural);
-            assertEquals(result[1][0], 'адаптировавших');
-            assertEquals(result[2][0], 'адаптировавшим');
+            assertEqualsSingleValue(result[0], expectedPlural);
+            assertEqualsSingleValue(result[1], 'адаптировавших');
+            assertEqualsSingleValue(result[2], 'адаптировавшим');
 
             if (lemma.isAnimate()) {
-                assertEquals(result[3][0], 'адаптировавших');
+                assertEqualsSingleValue(result[3], 'адаптировавших');
             } else {
-                assertEquals(result[3][0], 'адаптировавшие');
+                assertEqualsSingleValue(result[3], 'адаптировавшие');
             }
 
-            assertEquals(result[4][0], 'адаптировавшими');
-            assertEquals(result[5][0], 'адаптировавших');
-            assertEquals(result[6][0], 'адаптировавших');
+            assertEqualsSingleValue(result[4], 'адаптировавшими');
+            assertEqualsSingleValue(result[5], 'адаптировавших');
+            assertEqualsSingleValue(result[6], 'адаптировавших');
         }
 
         checkCases(адаптировавший);

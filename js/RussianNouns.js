@@ -645,7 +645,7 @@
             // Встречаются в законах, условиях/правилах для пасажиров.
             'грузобагаж,товаробагаж,' +
             'багрец,барыш,беляш,бердыш,бич,' +
-            'бандаж,блиндаж,бубенец,буж,' +
+            'бандаж,блиндаж,борщ,бубенец,буж,' +
             'валец,варенец,венец,вираж,витраж,волосенец,волчец,вольтаж,' +
             'воронец,галдёж,гамма-луч,гнилец,' +
             'гараж,автогараж,' +
@@ -664,18 +664,18 @@
             'клинец,' + // щебень
             'ковш,корец,козелец,конец,кострец,' +
             'копач,' + // орудие
-            'крепёж,крестец,круглыш,кругляш,крыж,крылач,' +
+            'корж,крепёж,крестец,круглыш,кругляш,крыж,крылач,' +
             'кулеш,кулич,кумач,контуш,кунтуш,купаж,кураж,кутёж,' +
             'леденец,листаж,литраж,луч,' +
-            'метраж,меч,мираж,монтаж,муляж,мятеж,' +
+            'метраж,меч,мираж,монтаж,муляж,мятеж,мяч,' +
             'мокрец,' + // лишай, растение
             'москвич,' + // автомобиль
-            'неплатёж,нож,нутрец,овсец,огурец,' +
+            'неплатёж,нож,нутрец,образец,овсец,огурец,' +
             'орлец,' + // камень, коврик
             'острец,' + // растение
             'падеж,падёж,паж,палаш,паралич,первач,пернач,песец,' +
             rkComma('озжгдх,фтдх,') +
-            'пихтач,платёж,погребец,подэтаж,поставец,поташ,правёж,путец,пыж,' +
+            'пихтач,платёж,плащ,погребец,подэтаж,поставец,поташ,правёж,прыщ,путец,пыж,' +
             'пугач,' + // игрушечный пистолет
             'резец,ржанец,рубеж,рубец,' +
             'рогач,' + // ухват
@@ -688,7 +688,7 @@
             'тирлич,' + // горечавка (растение)
             'тупец,тупыш,' + // тупой скорняжный нож
             'целкач,чабрец,чепец,' +
-            'фураж,хвостец,хлопунец,холодец,' +
+            'фураж,хвостец,хлопунец,холодец,хрящ,' +
             'чертёж,чистец,шалаш,шантаж,шиш,щипец,' +
             'электронож,этаж,ясенец');
 
@@ -708,9 +708,9 @@
             'ёж,ёрш,' +
             'елец,' + // рыба
             'жеребец,живец,жилец,жнец,жрец,' +
-            'избач,ингуш,' +
+            'избач,ингуш,истец,' +
             'камыш,' + // камышинский голубь
-            'корж,морж,' +
+            'клещ,морж,' +
             'кольчец,' + // кольчатый червь
             'копач,' + // рабочий землекоп
             'кормач,коротыш,косач,косец,космач,крепыш,' +
@@ -743,6 +743,10 @@
             'удалец,уж,усач,хитрец,хохмач,храбрец,хромец,хрыч,' +
             rkComma('фЯц,') +
             'циркач,червец,чернец,черныш,швец,шельмец,чтец,чиж,юнец');
+
+        putAll({gender: Gender.NEUTER, animate: false},
+            'EEEEEEE-SsESEE',
+            'плечо');
 
         // Следующие слова важны из-за р.п. мн.ч.,
         // который зависит от ударения в им.п. ед.ч.
@@ -845,7 +849,7 @@
                 'кашель', 'коготь',
                 'лапоть', 'лоб', 'локоть', 'ломоть', 'молебен', 'мох', 'ноготь', 'овен',
                 'пепел', 'пес', 'пёс', 'петушок', 'помысел', 'порошок',
-                'промысел', 'псалом', 'пушок', 'ров', 'рот',
+                'промысел', 'псалом', 'пушок', 'ров', 'рожь', 'рот',
                 'сон', 'стебель', 'стишок',
                 'угол', 'умысел', 'хребет', 'церковь', 'шов'
             ].includes(lcWord)
@@ -1123,7 +1127,7 @@
             );
 
         const iyoy = () => (nLast(lcWord, 2) === 'ый')
-            || (lcWord.endsWith('ной') && vowelCount(word) >= 2);
+            || (endsWithAny(lcWord, ['ной', 'понятой']) && vowelCount(word) >= 2);
 
         if (Case.NOMINATIVE === grCase) {
             return word;
@@ -1160,7 +1164,7 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ого';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
                 return stem + 'его';
             } else if (iyWord()) {
                 let r = [eiStem() + 'я'];
@@ -1190,7 +1194,7 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ому';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
                 return stem + 'ему';
             } else if (iyWord()) {
                 return eiStem() + 'ю';
@@ -1223,19 +1227,19 @@
         if (Case.INSTRUMENTAL === grCase) {
             if ((iyWord() && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский'])) {
 
-                if (!endsWithAny(lcWord, ['ное', 'мое', 'целое'])) {
-                    return stem + 'им';
-                } else {
+                if (endsWithAny(lcWord, ['вое', 'лое', 'мое', 'ное', 'рое', 'тое'])) {
                     return stem + 'ым';
+                } else {
+                    return stem + 'им';
                 }
 
             } else if (iyoy() || endsWithAny(lcWord, ['евой', 'овой'])) {
                 return stem + 'ым';
-            } else if (endsWithAny(lcWord, ['кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
                 return init(head) + 'им';
             } else if (iyWord()) {
                 return eiStem() + 'ем';
-            } else if (soft || ('жчш'.includes(last(lcStem)))) {
+            } else if (soft || ('жчшщ'.includes(last(lcStem)))) {
 
                 return eStem(stem, (s, stressedEnding) => stressedEnding
                     ? (s + 'ом') : (s + 'ем'));
@@ -1263,7 +1267,7 @@
                 || iyoy()
                 || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
                 return stem + 'ом';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'чий'])) {
+            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
                 return stem + 'ем';
             } else if (endsWithAny(lcWord, ['воробей'])) {
                 const i = init(head);
@@ -1273,7 +1277,8 @@
                 'енье', 'жалованье',
                 'ружье', 'божье', 'верье', 'мужье'
             ]) && !endsWithAny(lcWord, [
-                'запястье', 'здоровье', 'изголовье'
+                'запястье', 'здоровье', 'изголовье',
+                'платье'
             ])) {
                 return head + 'и';
             } else if ((last(lcWord) === 'й') || ('иё' === nLast(lcWord, 2))) {
@@ -1299,11 +1304,11 @@
                 'газ,глаз,год,горб,гроб,день,долг,дух,дым,жир,зад,' +
                 'клей,кол,кон,корень,край,круг,' +
                 'лад,лёд,лед,лоб,мох,угол,' +
-                'лес,луг,мёд,мел,мех,мозг,мост,низ,нос,плен,пол,' +
-                'полк,артполк,порт,аэропорт,пух,' +
+                'лес,луг,мёд,мел,мех,мозг,мост,низ,нос,плен,плот,пол,' +
+                'полк,артполк,порт,аэропорт,пруд,пух,пушок,пыл,' +
                 'рай,род,сад,свет,слух,снег,сок,спирт,стог,строй,счёт,счет,сук,' +
                 rkComma('фти,') +
-                'тыл,ход,час,шаг,шкаф,яр'
+                'таз,тыл,хлев,ход,час,шаг,шкаф,яр'
             ).split(',');
 
             const u = ('вор').split(',');
@@ -1340,14 +1345,24 @@
         const ayaWord = () => {
             return lcWord.endsWith('ая') && !((vowelCount(word) === 2) || isVowel(last(stem)));
         };
+        const yayaWord = () => {
+            return lcWord.endsWith('яя') && !((vowelCount(word) === 2) || isVowel(last(stem)));
+        };
+        const ayaExceptions = [
+            'жая', 'шая'
+        ];
         switch (grCase) {
             case Case.NOMINATIVE:
                 return word;
             case Case.GENITIVE:
-                if (ayaWord()) {
+                if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
+                    return stem + 'ей';
+                } else if (ayaWord()) {
                     return stem + 'ой';
                 } else if (lemma.isASurname()) {
                     return head + 'ой';
+                } else if (lcWord.endsWith('ничья')) {
+                    return head + 'ей';
                 } else if (
                     soft() || 'гжкхчшщ'.includes(last(lcStem))  // soft, sibilant or velar
                 ) {
@@ -1356,25 +1371,33 @@
                     return head + 'ы';
                 }
             case Case.DATIVE:
-                if (ayaWord()) {
+                if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
+                    return stem + 'ей';
+                } else if (ayaWord()) {
                     return stem + 'ой';
                 } else if (lemma.isASurname()) {
                     return head + 'ой';
                 } else if (nLast(lcWord, 2) === 'ия') {
                     return head + 'и';
+                } else if (lcWord.endsWith('ничья')) {
+                    return head + 'ей';
                 } else {
                     return head + 'е';
                 }
             case Case.ACCUSATIVE:
                 if (ayaWord()) {
                     return stem + 'ую';
+                } else if (yayaWord()) {
+                    return stem + 'юю';
                 } else if (soft()) {
                     return head + 'ю';
                 } else {
                     return head + 'у';
                 }
             case Case.INSTRUMENTAL:
-                if (ayaWord()) {
+                if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
+                    return stem + 'ею';
+                } else if (ayaWord()) {
                     return stem + 'ой';
                 } else if (soft() || 'жцчшщ'.includes(last(lcStem))) {
                     if ('и' === last(lcHead)) {
@@ -1386,12 +1409,16 @@
                     return [head + 'ой', head + 'ою'];
                 }
             case Case.PREPOSITIONAL:
-                if (ayaWord()) {
+                if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
+                    return stem + 'ей';
+                } else if (ayaWord()) {
                     return stem + 'ой';
                 } else if (lemma.isASurname()) {
                     return head + 'ой';
                 } else if (nLast(lcWord, 2) === 'ия') {
                     return head + 'и';
+                } else if (lcWord.endsWith('ничья')) {
+                    return head + 'ей';
                 } else {
                     return head + 'е';
                 }
@@ -1446,7 +1473,7 @@
                 case Case.ACCUSATIVE:
                     return word;
                 case Case.INSTRUMENTAL:
-                    if (endsWithAny(lcWord, ['вошь', 'церковь'])) {
+                    if (endsWithAny(lcWord, ['вошь', 'рожь', 'церковь'])) {
                         return word + 'ю';
                     } else {
                         return stem + 'ью';
@@ -1504,6 +1531,11 @@
 
         const stem = getNounStem(lemma);
         const lcStem = stem.toLowerCase();
+
+        if (lcWord.endsWith('яя')) {
+            result.push(nInit(word, 2) + 'ие');
+            return unique(result);
+        }
 
         const stressedEnding = engine.sd
             .hasStressedEndingPlural(lemma, Case.NOMINATIVE);
@@ -1602,8 +1634,6 @@
                     'татарин': ['татары'],
                     'хозяин': ['хозяева'],
                     'цветок': ['цветки', 'цветы']
-                    // И я решил зашить сюда даже случаи, когда итак слово норм обрабатывается,
-                    // но в корпусе там буква Ё. И почему бы не выдавать так же букву Ё.
                 }
             ],
             [
@@ -1626,6 +1656,9 @@
                     'гроздь': ['грозди', 'гроздья'],
                     'курица': ['курицы', "куры"],
                     'стая': ['стаи'],
+                    // И я решил зашить сюда даже случаи, когда итак слово норм обрабатывается,
+                    // но в корпусе там буква Ё. И почему бы не выдавать так же букву Ё.
+                    // В будущем это наверно надо отрефакторить.
                     'щека': ['щёки'],
                     'береста': ['берёсты'],
                     'верста': ['вёрсты'],
@@ -1635,6 +1668,7 @@
                     'кинозвезда': ['кинозвёзды'],
                     'медсестра': ['медсёстры'],
                     'метла': ['мётлы'],
+                    'пчела': ['пчёлы'],
                     'сестра': ['сёстры'],
                     'слеза': ['слёзы']
                 }
@@ -1653,6 +1687,7 @@
                     'дно': ['донья'],
                     'чудо': ['чудеса', 'чуда'],
                     'небо': ['небеса'],
+                    // Буква Ё:
                     'бревно': ['брёвна'],
                     'ведро': ['вёдра'],
                     'веретено': ['веретёна'],
@@ -1662,6 +1697,9 @@
                     'знамя': ['знамёна'],
                     'колесо': ['колёса'],
                     'облачко': ['облачка'],
+                    'озеро': ['озёра'],
+                    'ребро': ['рёбра'],
+                    'ремесло': ['ремёсла'],
                     'седло': ['сёдла'],
                     'село': ['сёла']
                 }
@@ -1773,7 +1811,8 @@
                         'инспектор', 'инструктор',
                         'корпус',   // TODO омонимы
                         'крейсер',
-                        'орден', 'ордер', 'род',
+                        'орден', 'ордер', 'прожектор', 'род',
+                        'свитер', 'сервер',
                         'тенор', 'тон', 'трактор',
                         'тормоз', // TODO наверно, ы только в одушевленной форме
                         'ветер',
@@ -1864,10 +1903,7 @@
                         result.push(nInit(word, 2) + 'ки');
                         result.push(nInit(word, 2) + 'ята');
                     } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
-                        && !endsWithAny(lcWord, [
-                            'коленок', 'стенок', 'венок', 'ценок',
-                            'валенок', 'оттенок', 'черенок'
-                        ])) {
+                        && lemma.isAnimate()) {
                         result.push(nInit(word, 4) + 'ята');
                     } else if (lcWord.endsWith('ёночек')) {
                         result.push(nInit(word, 6) + 'ятки');
@@ -1882,7 +1918,7 @@
                     } else if ((lcWord.endsWith('вой') && vowelCount(nInit(word, 3)) >= 2)
                         || (endsWithAny(lcWord, ['ной', 'мой']) && word.length >= 6)) {
                         result.push(nInit(word, 2) + 'ые');
-                    } else if (endsWithAny(lcWord, ['хой', 'ший'])) {
+                    } else if (endsWithAny(lcWord, ['хой', 'ший', 'жий'])) {
                         result.push(nInit(word, 2) + 'ие');
                     } else if (lcWord.endsWith('его')) {
                         result.push(nInit(word, 3) + 'ие');
@@ -2033,9 +2069,11 @@
             && !endsWithAny(lcPlural, explicitZeroEndingCommonGenderSurnameLike)
             && (lemma.isASurname() || (gender === Gender.COMMON));
 
+        const surnameType1E = () => surnameType1() || lcPlural.endsWith('ничьи');
+
         if (Case.DATIVE === grCase) {
 
-            if (surnameType1()) {
+            if (surnameType1E()) {
                 return plural + 'м';
             } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ым';
@@ -2049,13 +2087,14 @@
 
         } else if (Case.INSTRUMENTAL === grCase) {
 
-            if (surnameType1()) {
+            if (surnameType1E()) {
                 return plural + 'ми';
             } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ыми';
             } else if (softAdjectiveLike()) {
                 return nInit(plural, 2) + 'ими';
-            } else if (endsWithAny(lcPlural, ['люди'])) {
+            } else if (endsWithAny(lcPlural, ['люди'])
+                && !endsWithAny(lcPlural, ['нелюди'])) {
                 return init(plural) + 'ьми';
             } else if (endsWithAny(lcPlural, softEndings)) {
                 return init(plural) + 'ями';
@@ -2065,7 +2104,7 @@
 
         } else if ([Case.PREPOSITIONAL, Case.LOCATIVE].includes(grCase)) {
 
-            if (surnameType1()) {
+            if (surnameType1E()) {
                 return plural + 'х';
             } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ых';
@@ -2093,7 +2132,7 @@
 
         if ((Case.GENITIVE === grCase) || ((Case.ACCUSATIVE === grCase) && lemma.isAnimate())) {
 
-            if (surnameType1()) {
+            if (surnameType1E()) {
                 return plural + 'х';
             } else if (hardAdjectiveLike()) {
                 return nInit(plural, 2) + 'ых';
@@ -2107,7 +2146,7 @@
                 const lcStem = stem.toLowerCase();
                 const dependsOnStress = ['жки', 'шки', 'чки', 'ножны'];
                 if ((
-                    endsWithAny(lcStem, ['кн', 'кл', 'дк', 'нк', 'пк', 'рк', 'тк', 'вк', 'лк'])
+                    endsWithAny(lcStem, ['кн', 'кл', 'дк', 'нк', 'пк', 'рк', 'тк', 'вк', 'лк', 'мк'])
                     && !endsWithAny(lcPlural, ['сумерки'])
                 ) || (
                     lcStem === 'зл'
@@ -2120,8 +2159,10 @@
                 } else if ((
                     endsWithAny(lcPlural, [
                         'вна', 'вца', 'вцы', 'пла', 'дца', 'дра', 'судна',
-                        'рки', 'рцы', 'тлы', 'рна',
-                        'десны', 'дёсны', 'сосны'
+                        'рки', 'рцы', 'тлы', 'рна', 'тна', 'енца',
+                        'десны', 'дёсны',
+                        'рёбра', 'ребра',
+                        'сосны'
                     ])
                     && !endsWithAny(lcPlural, ['недра'])
                 ) || (
@@ -2168,7 +2209,9 @@
                 'доли',
                 'лапши',
                 'левши',
+                'люди',
                 'марли',
+                'моря',
                 'мощи',
                 'ноздри',
                 'пени',
@@ -2179,6 +2222,7 @@
                 'сани',
                 'сени',
                 'ступни',
+                'судьи',
                 'фигни',
                 'чукчи'
             ];
@@ -2200,8 +2244,9 @@
                     'инспектора', 'инструктора',
                     'колокола', 'кондуктора', 'короба', 'корпуса', 'крейсера', 'кузова',
                     'леса', 'мастера', 'номера',
-                    'острова', 'отпуска', 'паруса', 'повара', 'погреба', 'рукава',
-                    'сахара', 'трактора', 'тормоза',
+                    'облачка', 'острова', 'отпуска',
+                    'паруса', 'повара', 'погреба', 'прожектора', 'рукава',
+                    'сахара', 'свитера', 'сервера', 'трактора', 'тормоза',
                     'холода', 'цвета', 'черепа', 'шторма', 'штуцера',
                     'юнкера', 'ястреба',
                     'суда', 'корм'
@@ -2324,6 +2369,8 @@
                     return nInit(plural, 3) + 'ён';
                 } else if (lemma.lower().endsWith('яйцо')) {
                     return upperLike('яиц', init(plural))
+                } else if (lcPlural.endsWith('нца')) {
+                    return [genitiveStem(), init(plural) + 'ев'];
                 } else if (endsWithAny(lcPlural, ['а', 'не', 'ищи'])
                     && !endsWithAny(lcPlural, explicitOv1)
                 ) {
@@ -2401,7 +2448,7 @@
                 if (['ь', 'й'].includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
-                } else if (endsWithAny(lcPlural, ['земли'])) {
+                } else if (endsWithAny(lcPlural, ['земли', 'петли'])) {
                     return init(stem) + 'ель';
                 } else {
                     return stem + 'ь';
