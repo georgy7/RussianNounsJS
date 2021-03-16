@@ -22,6 +22,7 @@
 
         $scope.filter = {
             frequentOnly: false,
+            pluraliaTantumOnly: false,
             gender: null
         };
 
@@ -163,6 +164,35 @@
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 item.id = i;
+
+                // if (item.frequent) {
+                //     const w = $scope.wordComparableView(item);
+                //
+                //     let g = item.pluraliaTantum ? 'P' : null;
+                //
+                //     if (!g) {
+                //         switch (item.gender) {
+                //             case RussianNouns.Gender.MASCULINE:
+                //                 g = 'M';
+                //                 break;
+                //             case RussianNouns.Gender.FEMININE:
+                //                 g = 'F';
+                //                 break;
+                //             case RussianNouns.Gender.COMMON:
+                //                 g = 'C';
+                //                 break;
+                //             case RussianNouns.Gender.NEUTER:
+                //                 g = 'N';
+                //         }
+                //     }
+                //
+                //     const f = !!item.indeclinable;
+                //     const a = !!item.animate;
+                //
+                //     if (w && (!w.toLowerCase().endsWith('и')) && (!w.toLowerCase().endsWith('ы')) && ('P' === g)) {
+                //         console.log('FREQUENT:' + w + '|' + g + '|' + f + '|' + a)
+                //     }
+                // }
             }
 
             $scope.items = items;
@@ -247,7 +277,9 @@
                     result = $scope.items.filter(a => ['wrong'].includes(a.status));
                 }
 
-                if ($scope.filter.gender) {
+                if ($scope.filter.pluraliaTantumOnly) {
+                    result = result.filter(item => (!!item.pluraliaTantum));
+                } else if ($scope.filter.gender) {
                     result = result.filter(item => ($scope.filter.gender === item.gender));
                 }
 
@@ -304,6 +336,9 @@
         }
 
         $scope.genderColor = (item) => {
+            if (!item.gender) {
+                return "#fff";
+            }
             const g = item.gender.toLowerCase();
             if (g.startsWith('м')) {
                 return "#df5";

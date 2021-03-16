@@ -4,7 +4,7 @@ importScripts('RussianNouns.min.js');
 importScripts('freq.js');
 
 let inputLemmaCount;
-let dataM, dataF, dataN, dataC;
+let dataM, dataF, dataN, dataC, dataP;
 let workerIndex, letterIndex;
 
 let main = function () {
@@ -17,7 +17,7 @@ let main = function () {
     let totalCases = 0;
     let totalWords = 0;
     let totalWordsSingular = 0;
-    const totalLoadingSteps = 5;
+    const totalLoadingSteps = 6;
     const result = [];
 
     let pluralizeTotal = 0;
@@ -359,6 +359,9 @@ let main = function () {
                 "wordForms": resultWordForms,
                 "pluralForms": resultPluralForms,
                 "gender": gender,
+                "pluraliaTantum": pluraliaTantum,
+                "indeclinable": fixed,
+                "animate": animate,
                 "declension": declension,
                 "frequent": (mostFrequentNouns.includes(lemma.text()) && !abbr),
                 "status": wordStatus
@@ -372,6 +375,7 @@ let main = function () {
     test(rne, dataF, RussianNouns.Gender.FEMININE, 2);
     test(rne, dataN, RussianNouns.Gender.NEUTER, 3);
     test(rne, dataC, RussianNouns.Gender.COMMON, 4);
+    test(rne, dataP, null, 5);
 
     postMessage({
         type: 'testResult',
@@ -403,11 +407,14 @@ onmessage = function (e) {
         dataF = [];
         dataN = [];
         dataC = [];
+        dataP = [];
         inputLemmaCount = 0;
         for (let lemmaList of wordList) {
             inputLemmaCount += lemmaList.length;
             for (let lemma of lemmaList) {
-                if (lemma.g.indexOf('masc') >= 0) {
+                if (lemma.g.indexOf('Pltm') >= 0) {
+                    dataP.push(lemma);
+                } else if (lemma.g.indexOf('masc') >= 0) {
                     dataM.push(lemma);
                 } else if (lemma.g.indexOf('femn') >= 0) {
                     dataF.push(lemma);

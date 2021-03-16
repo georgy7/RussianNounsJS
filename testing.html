@@ -244,6 +244,11 @@
 
                     <label class="checkbox-inline" style="margin-left: 1rem;"><input
                             type="checkbox"
+                            ng-model="filter.pluraliaTantumOnly"
+                            ng-change="updateFilter();">Только pl.</label>
+
+                    <label class="checkbox-inline" style="margin-left: 1rem;"><input
+                            type="checkbox"
                             ng-model="filter.frequentOnly"
                             ng-change="updateFilter();">Часто употребляемые</label>
 
