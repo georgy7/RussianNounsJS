@@ -1218,7 +1218,7 @@
         if (Case.INSTRUMENTAL === grCase) {
             if ((iyWord() && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский'])) {
 
-                if (lcWord !== 'целое') {
+                if (!endsWithAny(lcWord, ['мороженое', 'целое'])) {
                     return stem + 'им';
                 } else {
                     return stem + 'ым';
