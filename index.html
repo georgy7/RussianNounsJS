@@ -26,14 +26,13 @@
 
           const rne = new RussianNouns.Engine();
 
-          $scope.fillForm = (gender, word, surname, animate, indeclinable, watercraft) => {
+          $scope.fillForm = (gender, word, surname, animate, indeclinable, transport) => {
               $scope.input.text = word;
               $scope.input.gender = gender;
               $scope.input.surname = surname;
               $scope.input.animate = animate;
               $scope.input.indeclinable = indeclinable;
-              $scope.input.transport = watercraft;
-              $scope.input.watercraft = watercraft;
+              $scope.input.transport = transport;
               $scope.changed();
           };
 
@@ -277,20 +276,6 @@
           <input type="checkbox" class="form-check-input" id="transportCheckBox" ng-model="input.transport" ng-change="changed()">
           <label class="form-check-label" for="transportCheckBox">
             Транспорт
-          </label>
-          <span class="text-info" ng-if="input.watercraft && !input.transport">
-            ignored
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="offset-lg-4 col-lg-4">
-        <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="watercraftCheckBox" ng-model="input.watercraft" ng-change="changed()">
-          <label class="form-check-label" for="watercraftCheckBox">
-            Водный транспорт
           </label>
         </div>
       </div>
