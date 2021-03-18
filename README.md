@@ -87,7 +87,7 @@ const RussianNouns = require('russian-nouns-js');
 
 ### Android
 
-First of all, there is **[my app](https://play.google.com/store/apps/details?id=ru.todomachines.rnjs.app)** on Google Play. 
+First of all, here is **[my app](https://play.google.com/store/apps/details?id=ru.todomachines.rnjs.app)**. 
 
 You may use this library in your apps too. With an invisible WebView. 
 
