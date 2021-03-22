@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.0
+  RussianNounsJS v1.2.1
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -1905,11 +1905,12 @@
                     } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
                         && lemma.isAnimate()) {
                         result.push(nInit(word, 4) + 'ята');
-                    } else if (lcWord.endsWith('ёночек')) {
+                    } else if (lcWord.endsWith('ёночек')
+                        && lemma.isAnimate()) {
                         result.push(nInit(word, 6) + 'ятки');
                     } else if (lcWord.endsWith('онок')
                         && 'жчш'.includes(lastOfNInitial(lcWord, 4))
-                        && !lcWord.endsWith('бочонок')) {
+                        && lemma.isAnimate()) {
                         result.push(nInit(word, 4) + 'ата');
                     } else if (okWord(lcWord)) {
                         result.push(nInit(word, 2) + 'ки')
