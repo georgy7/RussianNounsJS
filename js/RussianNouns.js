@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.1
+  RussianNounsJS v1.2.2.SNAPSHOT
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -1902,6 +1902,10 @@
                     } else if ('щенок' == lcWord) {
                         result.push(nInit(word, 2) + 'ки');
                         result.push(nInit(word, 2) + 'ята');
+                    } else if ((lcWord.endsWith('ребёнок') || lcWord.endsWith('ребенок'))
+                        && !(lcWord.endsWith('жеребёнок') || lcWord.endsWith('жеребенок'))
+                        && !(lcWord.endsWith('ястребёнок') || lcWord.endsWith('ястребенок'))) {
+                        result.push(nInit(word, 7) + 'дети');
                     } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
                         && lemma.isAnimate()) {
                         result.push(nInit(word, 4) + 'ята');
