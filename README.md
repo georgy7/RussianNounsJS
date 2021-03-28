@@ -5,7 +5,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <img src="octopus-5835160-logo.png" alt="Logo" width="128" height="122">
+  <img src="logo.png" alt="Logo" width="128" height="122">
 
   <h3 align="center">RussianNounsJS</h3>
 
