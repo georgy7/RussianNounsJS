@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.2
+  RussianNounsJS v1.2.3
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -135,7 +135,7 @@
 
                 if (o instanceof API.Lemma) {
 
-                    this.pluraliaTantum = o.pluraliaTantum;
+                    this.pluraleTantum = o.pluraleTantum;
                     this.indeclinable = o.indeclinable;
 
                     this.animate = o.animate;
@@ -154,10 +154,11 @@
 
                 } else {
 
+                    checkBoolOrNull(o.pluraleTantum);
                     checkBoolOrNull(o.pluraliaTantum);
                     checkBoolOrNull(o.indeclinable);
 
-                    this.pluraliaTantum = !!(o.pluraliaTantum);
+                    this.pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
                     this.indeclinable = !!(o.indeclinable);
 
                     checkBoolOrNull(o.animate);
@@ -178,7 +179,7 @@
                     this.internalText = o.text;
                     this.lowerCaseText = this.internalText.toLowerCase();
 
-                    if (!(o.pluraliaTantum)) {  // Это слова т. н. парного рода.
+                    if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
                         if (o.gender == null) {
                             throw new API.LemmaException('A grammatical gender required.');
                         }
@@ -209,8 +210,8 @@
             equals(o) {
                 return (o instanceof API.Lemma)
                     && (this.lower() === o.lower())
-                    && (this.isPluraliaTantum() === o.isPluraliaTantum())
-                    && (this.isPluraliaTantum() || (this.getGender() === o.getGender()))
+                    && (this.isPluraleTantum() === o.isPluraleTantum())
+                    && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
                     && (this.isIndeclinable() === o.isIndeclinable())
                     && (this.isAnimate() === o.isAnimate())
                     && (this.isASurname() === o.isASurname())
@@ -221,8 +222,8 @@
             fuzzyEquals(o) {
                 return (o instanceof API.Lemma)
                     && (unYo(this.lower()) === unYo(o.lower()))
-                    && (this.isPluraliaTantum() === o.isPluraliaTantum())
-                    && (this.isPluraliaTantum() || (this.getGender() === o.getGender()))
+                    && (this.isPluraleTantum() === o.isPluraleTantum())
+                    && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
                     && (this.isIndeclinable() === o.isIndeclinable());
             }
 
@@ -234,6 +235,14 @@
                 return this.lowerCaseText;
             }
 
+            isPluraleTantum() {
+                return this.pluraleTantum;
+            }
+
+            /**
+             * @deprecated Используйте isPluraleTantum(), т.к. речь об одной лемме, а pluralia — во мн.ч. на латыни.
+             * @returns {boolean}
+             */
             isPluraliaTantum() {
                 return this.pluraliaTantum;
             }
@@ -534,7 +543,7 @@
             pluralize(lemma) {
                 const o = API.createLemma(lemma);
 
-                if (o.isPluraliaTantum()) {
+                if (o.isPluraleTantum()) {
                     return [o.text()];
                 } else {
                     return pluralize(this, o);
@@ -567,7 +576,7 @@
             API.FIXED_STEM_STRESS,
             'брёх,дёрн,идиш,имидж,мед');
 
-        putAll({pluraliaTantum: true},
+        putAll({pluraleTantum: true},
             API.FIXED_STEM_STRESS,
             'ножны');
 
@@ -904,7 +913,7 @@
         const lcWord = lemma.lower();
         const gender = lemma.getGender();
 
-        if (lemma.isPluraliaTantum()) {
+        if (lemma.isPluraleTantum()) {
             return undefined;
         }
 
@@ -1501,7 +1510,7 @@
             return word;
         }
 
-        if (lemma.isPluraliaTantum()) {
+        if (lemma.isPluraleTantum()) {
             return declinePlural(engine, lemma, grCase, word);
         } else if (pluralForm) {
             return declinePlural(engine, lemma, grCase, pluralForm);
