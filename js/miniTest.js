@@ -174,7 +174,7 @@ ${cap(ⰃⰃ(вихрь, 4))} снежные крутя;
 // Николай Степанович Гумилев
 // Рассказ девушки (фрагмент)
 
-    const ворота = L({text: 'ворота', pluraliaTantum: true});
+    const ворота = L({text: 'ворота', pluraleTantum: true});
     const тень = L({text: 'тень', gender: Gender.FEMININE});
     const ель = L({text: 'ель', gender: Gender.FEMININE});
     const снег = L({text: 'снег', gender: Gender.MASCULINE});

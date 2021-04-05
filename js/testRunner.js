@@ -168,7 +168,7 @@
                 // if (item.frequent) {
                 //     const w = $scope.wordComparableView(item);
                 //
-                //     let g = item.pluraliaTantum ? 'P' : null;
+                //     let g = item.pluraleTantum ? 'P' : null;
                 //
                 //     if (!g) {
                 //         switch (item.gender) {
@@ -278,7 +278,7 @@
                 }
 
                 if ($scope.filter.pluraliaTantumOnly) {
-                    result = result.filter(item => (!!item.pluraliaTantum));
+                    result = result.filter(item => (!!item.pluraleTantum));
                 } else if ($scope.filter.gender) {
                     result = result.filter(item => ($scope.filter.gender === item.gender));
                 }

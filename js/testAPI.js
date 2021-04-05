@@ -112,7 +112,7 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     let scissors = RussianNouns.createLemma({
         text: 'ножницы',
-        pluraliaTantum: true
+        pluraleTantum: true
     });
 
     result = rne.pluralize(scissors);
@@ -259,7 +259,7 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     console.log('A girl\'s story (fragment) by Nikolay Stepanovich Gumilyov');
 
-    const ворота = L({text: 'ворота', pluraliaTantum: true});
+    const ворота = L({text: 'ворота', pluraleTantum: true});
     const тень = L({text: 'тень', gender: Gender.FEMININE});
     const ель = L({text: 'ель', gender: Gender.FEMININE});
     const снег = L({text: 'снег', gender: Gender.MASCULINE});

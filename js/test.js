@@ -106,10 +106,10 @@ let main = function () {
                 });
             }
 
-            const pluraliaTantum = (data[i].g.indexOf('Pltm') >= 0);
+            const pluraleTantum = (data[i].g.indexOf('Pltm') >= 0);
             const abbr = (data[i].g.indexOf('Abbr') >= 0);
 
-            const word = pluraliaTantum ? (data[i].casesPlural[0][0]) : (data[i].cases[0][0]); // Именительный падеж
+            const word = pluraleTantum ? (data[i].casesPlural[0][0]) : (data[i].cases[0][0]); // Именительный падеж
             const expResults = data[i].cases;
 
             const animate = (data[i].g.indexOf('anim') >= 0);
@@ -124,7 +124,7 @@ let main = function () {
                 surname: surname,
                 name: name,
                 indeclinable: fixed,
-                pluraliaTantum: pluraliaTantum
+                pluraleTantum: pluraleTantum
             });
 
             const lemmaUpperCase = lemma.newText(o => o.text().toUpperCase());
@@ -136,7 +136,7 @@ let main = function () {
 
             totalWords++;
 
-            if (!pluraliaTantum) {
+            if (!pluraleTantum) {
 
                 totalWordsSingular++;
                 totalCases += 6;
@@ -272,7 +272,7 @@ let main = function () {
 
                         if (0 === j) {
 
-                            if (!pluraliaTantum) {
+                            if (!pluraleTantum) {
                                 pluralizeTotal++;
                             }
 
@@ -319,7 +319,7 @@ let main = function () {
                         if (r.failure) {
 
                             if (0 === j) {
-                                if (!pluraliaTantum) {
+                                if (!pluraleTantum) {
                                     pluralizeWrong++;
                                 } else {
                                     throw `Pluralia tantum word pluralization error: ${lemma.text()} != ${aString}`;
@@ -359,7 +359,7 @@ let main = function () {
                 "wordForms": resultWordForms,
                 "pluralForms": resultPluralForms,
                 "gender": gender,
-                "pluraliaTantum": pluraliaTantum,
+                "pluraleTantum": pluraleTantum,
                 "indeclinable": fixed,
                 "animate": animate,
                 "declension": declension,
