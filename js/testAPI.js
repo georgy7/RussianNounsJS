@@ -265,6 +265,9 @@ const RussianNouns = require('./RussianNouns.min.js');
     const снег = L({text: 'снег', gender: Gender.MASCULINE});
     const высота = L({text: 'высота', gender: Gender.FEMININE});
 
+    assertEquals(true, ворота.isPluraleTantum());
+    assertEquals(true, ворота.isPluraliaTantum());  // deprecated
+
     assertEquals(
         `Я отдыхала у ${ⰃⰃ(ворота, 2)}`,
         'Я отдыхала у ворот'

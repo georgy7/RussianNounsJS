@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.3
+  RussianNounsJS v1.2.4
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -244,7 +244,7 @@
              * @returns {boolean}
              */
             isPluraliaTantum() {
-                return this.pluraliaTantum;
+                return this.pluraleTantum;
             }
 
             getGender() {
