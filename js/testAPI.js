@@ -531,6 +531,53 @@ const RussianNouns = require('./RussianNouns.min.js');
         ['нелюди', 'нелюдей', 'нелюдям', 'нелюдей', 'нелюдями', 'нелюдях', 'нелюдях']
     );
 
+    checkSingularAndPlural(
+        L({text: 'паровоз', gender: Gender.MASCULINE}),
+        ['паровоз', 'паровоза', 'паровозу', 'паровоз', 'паровозом', 'паровозе', 'паровозе'],
+        ['паровозы', 'паровозов', 'паровозам', 'паровозы', 'паровозами', 'паровозах', 'паровозах']
+    );
+
+    checkSingular(
+        L({text: 'Ад', gender: Gender.MASCULINE}),
+        ['Ад', 'Ада', 'Аду', 'Ад', 'Адом', 'Аде', 'Аду']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'вид', gender: Gender.MASCULINE}),
+        ['вид', 'вида', 'виду', 'вид', 'видом', 'виде', 'виду'],
+        ['виды', 'видов', 'видам', 'виды', 'видами', 'видах', 'видах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'снег', gender: Gender.MASCULINE}),
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'мать', gender: Gender.FEMININE, animate: true}),
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'отец', gender: Gender.MASCULINE, animate: true}),
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'дочь', gender: Gender.FEMININE, animate: true}),
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'зять', gender: Gender.MASCULINE, animate: true}),
+        ['', '', '', '', '', '', ''],
+        ['', '', '', '', '', '', '']
+    );
+
     // TODO more words
 
     // checkSingularAndPlural(
