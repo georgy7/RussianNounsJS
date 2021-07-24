@@ -407,25 +407,31 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     console.log('Testing dev branch index.html words...');
 
-    (() => {
-        const lemma = L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true});
-
+    const checkSingularAndPlural = (lemma, expectedSingular, expectedPlural) => {
         const singular = RussianNouns.CASES.map(c => {
             return rne.decline(lemma, c);
         });
 
-        assertAllCases(singular, ['нелюдь', 'нелюдя', 'нелюдю', 'нелюдя', 'нелюдем', 'нелюде', 'нелюде']);
+        assertAllCases(singular, expectedSingular);
 
         const p = rne.pluralize(lemma);
-        assertEqualsSingleValue(p, 'нелюди');
+        assertEqualsSingleValue(p, expectedPlural[0]);
 
         const plural = RussianNouns.CASES.map(c => {
             return rne.decline(lemma, c, p[0]);
         });
 
-        assertAllCases(plural, ['нелюди', 'нелюдей', 'нелюдям', 'нелюдей', 'нелюдями', 'нелюдях', 'нелюдях']);
+        assertAllCases(plural, expectedPlural);
 
-    })();
+        console.log(lemma.text());
+
+    };
+
+    checkSingularAndPlural(
+        L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true}),
+        ['нелюдь', 'нелюдя', 'нелюдю', 'нелюдя', 'нелюдем', 'нелюде', 'нелюде'],
+        ['нелюди', 'нелюдей', 'нелюдям', 'нелюдей', 'нелюдями', 'нелюдях', 'нелюдях']
+    );
 
     // TODO more words
 
