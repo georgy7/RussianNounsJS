@@ -2377,7 +2377,7 @@
                     } else {
                         return nInit(plural, 2) + 'ий';
                     }
-                } else if (lcPlural.endsWith('семена')) {
+                } else if (endsWithAny(lcPlural, ['семена', 'стремена'])) {
                     return nInit(plural, 3) + 'ян';
                 } else if (lcPlural.endsWith('мена')) {
                     return nInit(plural, 3) + 'ён';

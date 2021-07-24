@@ -424,7 +424,14 @@ const RussianNouns = require('./RussianNouns.min.js');
         assertAllCases(plural, expectedPlural);
 
         console.log(lemma.text());
+    };
 
+    const checkSingular = (lemma, expectedSingular) => {
+        const singular = RussianNouns.CASES.map(c => {
+            return rne.decline(lemma, c);
+        });
+        assertAllCases(singular, expectedSingular);
+        console.log(lemma.text());
     };
 
     checkSingularAndPlural(
@@ -437,12 +444,6 @@ const RussianNouns = require('./RussianNouns.min.js');
         L({text: 'окно', gender: Gender.NEUTER}),
         ['окно', 'окна', 'окну', 'окно', 'окном', 'окне', 'окне'],
         ['окна', 'окон', 'окнам', 'окна', 'окнами', 'окнах', 'окнах']
-    );
-
-    checkSingularAndPlural(
-        L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true}),
-        ['нелюдь', 'нелюдя', 'нелюдю', 'нелюдя', 'нелюдем', 'нелюде', 'нелюде'],
-        ['нелюди', 'нелюдей', 'нелюдям', 'нелюдей', 'нелюдями', 'нелюдях', 'нелюдях']
     );
 
     checkSingularAndPlural(
@@ -463,10 +464,71 @@ const RussianNouns = require('./RussianNouns.min.js');
         ['дети', 'детей', 'детям', 'детей', 'детьми', 'детях', 'детях']
     );
 
+    // Дательный падеж ед.ч. у слов на -мя звучит странновато, но это правда нормативная форма.
+    // Уместный глагол здесь, например, «радуюсь». Чему? Этому времени.
+    // Или можно задать вопрос «благодаря чему».
+
     checkSingularAndPlural(
         L({text: 'знамя', gender: Gender.NEUTER}),
         ['знамя', 'знамени', 'знамени', 'знамя', 'знаменем', 'знамени', 'знамени'],
         ['знамёна', 'знамён', 'знамёнам', 'знамёна', 'знамёнами', 'знамёнах', 'знамёнах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'время', gender: Gender.NEUTER}),
+        ['время', 'времени', 'времени', 'время', 'временем', 'времени', 'времени'],
+        ['времена', 'времён', 'временам', 'времена', 'временами', 'временах', 'временах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'семя', gender: Gender.NEUTER}),
+        ['семя', 'семени', 'семени', 'семя', 'семенем', 'семени', 'семени'],
+        ['семена', 'семян', 'семенам', 'семена', 'семенами', 'семенах', 'семенах']
+    );
+
+    checkSingular(
+        L({text: 'вымя', gender: Gender.NEUTER}),
+        ['вымя', 'вымени', 'вымени', 'вымя', 'выменем', 'вымени', 'вымени']
+    );
+
+    checkSingular(
+        L({text: 'темя', gender: Gender.NEUTER}),
+        ['темя', 'темени', 'темени', 'темя', 'теменем', 'темени', 'темени']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'имя', gender: Gender.NEUTER}),
+        ['имя', 'имени', 'имени', 'имя', 'именем', 'имени', 'имени'],
+        ['имена', 'имён', 'именам', 'имена', 'именами', 'именах', 'именах']
+    );
+
+    checkSingular(
+        L({text: 'пламя', gender: Gender.NEUTER}),
+        ['пламя', 'пламени', 'пламени', 'пламя', 'пламенем', 'пламени', 'пламени']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'стремя', gender: Gender.NEUTER}),
+        ['стремя', 'стремени', 'стремени', 'стремя', 'стременем', 'стремени', 'стремени'],
+        ['стремена', 'стремян', 'стременам', 'стремена', 'стременами', 'стременах', 'стременах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'задира', gender: Gender.COMMON, animate: true}),
+        ['задира', 'задиры', 'задире', 'задиру', ['задирой', 'задирою'], 'задире', 'задире'],
+        ['задиры', 'задир', 'задирам', 'задир', 'задирами', 'задирах', 'задирах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'хитрюга', gender: Gender.COMMON, animate: true}),
+        ['хитрюга', 'хитрюги', 'хитрюге', 'хитрюгу', ['хитрюгой', 'хитрюгою'], 'хитрюге', 'хитрюге'],
+        ['хитрюги', 'хитрюг', 'хитрюгам', 'хитрюг', 'хитрюгами', 'хитрюгах', 'хитрюгах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true}),
+        ['нелюдь', 'нелюдя', 'нелюдю', 'нелюдя', 'нелюдем', 'нелюде', 'нелюде'],
+        ['нелюди', 'нелюдей', 'нелюдям', 'нелюдей', 'нелюдями', 'нелюдях', 'нелюдях']
     );
 
     // TODO more words
