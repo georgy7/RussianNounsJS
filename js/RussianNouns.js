@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.4
+  RussianNounsJS v1.2.5.SNAPSHOT
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -2107,7 +2107,7 @@
                 return nInit(plural, 2) + 'ыми';
             } else if (softAdjectiveLike()) {
                 return nInit(plural, 2) + 'ими';
-            } else if (endsWithAny(lcPlural, ['люди'])
+            } else if (endsWithAny(lcPlural, ['дети', 'люди'])
                 && !endsWithAny(lcPlural, ['нелюди'])) {
                 return init(plural) + 'ьми';
             } else if (endsWithAny(lcPlural, softEndings)) {
