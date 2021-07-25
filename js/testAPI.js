@@ -1,6 +1,11 @@
-function assertEquals(a, b) {
+function assertEquals(a, b, msg) {
     if (a !== b) {
         console.log(`${a} !== ${b}`);
+
+        if (msg) {
+            console.log(msg);
+        }
+
         process.exit(1);
     }
 }
@@ -14,7 +19,7 @@ function assertIsArray(a) {
 
 function assertEqualsSingleValue(array, value) {
     assertIsArray(array);
-    assertEquals(array.length, 1);
+    assertEquals(array.length, 1, [array, value]);
     assertEquals(array[0], value);
 }
 
@@ -38,7 +43,7 @@ function assertAllCases(results, values) {
         if (typeof value === 'string') {
             assertEqualsSingleValue(result, value);
         } else if (value instanceof Array) {
-            assertEquals(result.length, value.length);
+            assertEquals(result.length, value.length, [result, value]);
             for (let j = 0; j < value.length; j++) {
                 assertEquals(result[j], value[j]);
             }
@@ -423,15 +428,17 @@ const RussianNouns = require('./RussianNouns.min.js');
 
         assertAllCases(plural, expectedPlural);
 
-        console.log(lemma.text());
+        // console.log(lemma.text());
     };
 
     const checkSingular = (lemma, expectedSingular) => {
         const singular = RussianNouns.CASES.map(c => {
             return rne.decline(lemma, c);
         });
+
         assertAllCases(singular, expectedSingular);
-        console.log(lemma.text());
+
+        // console.log(lemma.text());
     };
 
     checkSingularAndPlural(
@@ -550,32 +557,34 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     checkSingularAndPlural(
         L({text: 'снег', gender: Gender.MASCULINE}),
-        ['', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '']
+        ['снег', ['снега', 'снегу'], 'снегу', 'снег', 'снегом', 'снеге', 'снегу'],
+        ['снега', 'снегов', 'снегам', 'снега', 'снегами', 'снегах', 'снегах']
     );
 
     checkSingularAndPlural(
         L({text: 'мать', gender: Gender.FEMININE, animate: true}),
-        ['', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '']
+        ['мать', 'матери', 'матери', 'мать', 'матерью', 'матери', 'матери'],
+        ['матери', 'матерей', 'матерям', 'матерей', 'матерями', 'матерях', 'матерях']
     );
 
     checkSingularAndPlural(
         L({text: 'отец', gender: Gender.MASCULINE, animate: true}),
-        ['', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '']
+        ['отец', 'отца', 'отцу', 'отца', 'отцом', 'отце', 'отце'],
+        ['отцы', 'отцов', 'отцам', 'отцов', 'отцами', 'отцах', 'отцах']
     );
 
+    // Есть еще форма творительного падежа мн. ч. "дочерьми".
+    // Можно добавить.
     checkSingularAndPlural(
         L({text: 'дочь', gender: Gender.FEMININE, animate: true}),
-        ['', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '']
+        ['дочь', 'дочери', 'дочери', 'дочь', 'дочерью', 'дочери', 'дочери'],
+        ['дочери', 'дочерей', 'дочерям', 'дочерей', 'дочерями', 'дочерях', 'дочерях']
     );
 
     checkSingularAndPlural(
         L({text: 'зять', gender: Gender.MASCULINE, animate: true}),
-        ['', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '']
+        ['зять', 'зятя', 'зятю', 'зятя', 'зятем', 'зяте', 'зяте'],
+        ['зятья', 'зятьёв', 'зятьям', 'зятьёв', 'зятьями', 'зятьях', 'зятьях']
     );
 
     // TODO more words
