@@ -17,6 +17,20 @@ function assertIsArray(a) {
     }
 }
 
+function itShouldThrow(exceptionClass, f) {
+    let raised = false;
+    try {
+        f();
+    } catch (e) {
+        if (e instanceof exceptionClass) {
+            raised = true;
+        } else {
+            throw e;
+        }
+    }
+    assertEquals(raised, true, `It should throw a ${exceptionClass.name}.`);
+}
+
 function assertEqualsSingleValue(array, value) {
     assertIsArray(array);
     assertEquals(array.length, 1, [array, value]);
@@ -178,6 +192,59 @@ const RussianNouns = require('./RussianNouns.min.js');
     assertEquals(result[1], "кринжем");
 
     console.log('--------------- 9 ----------------');
+})();
+
+(() => {
+    const rne = new RussianNouns.Engine();
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma(123);
+    });
+    console.log('createLemma: number');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma('гора');
+    });
+    console.log('createLemma: string');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma(null);
+    });
+    console.log('createLemma: null');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma(undefined);
+    });
+    console.log('createLemma: undefined');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({});
+    });
+    console.log('createLemma: {}');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'гора'
+        });
+    });
+    console.log('createLemma: gender undefined');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'гора',
+            gender: 'fgsfds'
+        });
+    });
+    console.log('createLemma: gender fgsfds');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            gender: RussianNouns.Gender.MASCULINE
+        });
+    });
+    console.log('createLemma: text undefined');
+
+    // console.log('------- createLemmaNoThrow -------');
 })();
 
 (() => {

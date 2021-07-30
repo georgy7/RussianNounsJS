@@ -28,4 +28,4 @@ mv RussianNouns.min.temp.js RussianNouns.min.js
 
 ls -l RussianNouns.min.js
 
-node testAPI.js
+node --trace-uncaught testAPI.js
