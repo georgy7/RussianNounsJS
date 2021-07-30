@@ -1,6 +1,11 @@
-function assertEquals(a, b) {
+function assertEquals(a, b, msg) {
     if (a !== b) {
         console.log(`${a} !== ${b}`);
+
+        if (msg) {
+            console.log(msg);
+        }
+
         process.exit(1);
     }
 }
@@ -12,10 +17,55 @@ function assertIsArray(a) {
     }
 }
 
+function itShouldThrow(exceptionClass, f) {
+    let raised = false;
+    try {
+        f();
+    } catch (e) {
+        if (e instanceof exceptionClass) {
+            raised = true;
+        } else {
+            throw e;
+        }
+    }
+    assertEquals(raised, true, `It should throw a ${exceptionClass.name}.`);
+}
+
 function assertEqualsSingleValue(array, value) {
     assertIsArray(array);
-    assertEquals(array.length, 1);
+    assertEquals(array.length, 1, [array, value]);
     assertEquals(array[0], value);
+}
+
+/**
+ * @param results Массив массивов результатов.
+ * @param values Массив ожидаемых значений. Разрешено использовать как строки, так и массивы.
+ */
+function assertAllCases(results, values) {
+    assertIsArray(results);
+    assertIsArray(values);
+
+    assertEquals(results.length, 7);
+    assertEquals(values.length, 7);
+
+    for (let i = 0; i < 7; i++) {
+        const result = results[i];
+        const value = values[i];
+
+        assertIsArray(result);
+
+        if (typeof value === 'string') {
+            assertEqualsSingleValue(result, value);
+        } else if (value instanceof Array) {
+            assertEquals(result.length, value.length, [result, value]);
+            for (let j = 0; j < value.length; j++) {
+                assertEquals(result[j], value[j]);
+            }
+        } else {
+            console.log(`${value} is neither an array nor a string.`);
+            process.exit(1);
+        }
+    }
 }
 
 const RussianNouns = require('./RussianNouns.js');
@@ -56,20 +106,8 @@ const RussianNouns = require('./RussianNouns.js');
     result = RussianNouns.CASES.map(c => {
         return rne.decline(mountain, c);
     });
-    assertIsArray(result);
-    assertEquals(result.length, 7);
 
-    assertEqualsSingleValue(result[0], "гора");
-    assertEqualsSingleValue(result[1], "горы");
-    assertEqualsSingleValue(result[2], "горе");
-    assertEqualsSingleValue(result[3], "гору");
-
-    assertEquals(result[4].length, 2);
-    assertEquals(result[4][0], "горой");
-    assertEquals(result[4][1], "горою");
-
-    assertEqualsSingleValue(result[5], "горе");
-    assertEqualsSingleValue(result[6], "горе");
+    assertAllCases(result, ['гора', 'горы', 'горе', 'гору', ['горой', 'горою'], 'горе', 'горе']);
 
     console.log('--------------- 2 ----------------');
 
@@ -83,16 +121,7 @@ const RussianNouns = require('./RussianNouns.js');
         return rne.decline(mountain, c, pluralMountain);
     });
 
-    assertIsArray(result);
-    assertEquals(result.length, 7);
-
-    assertEqualsSingleValue(result[0], 'горы');
-    assertEqualsSingleValue(result[1], 'гор');
-    assertEqualsSingleValue(result[2], 'горам');
-    assertEqualsSingleValue(result[3], 'горы');
-    assertEqualsSingleValue(result[4], 'горами');
-    assertEqualsSingleValue(result[5], 'горах');
-    assertEqualsSingleValue(result[6], 'горах');
+    assertAllCases(result, ['горы', 'гор', 'горам', 'горы', 'горами', 'горах', 'горах']);
 
     console.log('--------------- 4 ----------------');
 
@@ -110,7 +139,7 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 6 ----------------');
 
-    let scissors = RussianNouns.createLemma({
+    const scissors = RussianNouns.createLemma({
         text: 'ножницы',
         pluraleTantum: true
     });
@@ -125,16 +154,7 @@ const RussianNouns = require('./RussianNouns.js');
         return rne.decline(scissors, c);
     });
 
-    assertIsArray(result);
-    assertEquals(result.length, 7);
-
-    assertEqualsSingleValue(result[0], 'ножницы');
-    assertEqualsSingleValue(result[1], 'ножниц');
-    assertEqualsSingleValue(result[2], 'ножницам');
-    assertEqualsSingleValue(result[3], 'ножницы');
-    assertEqualsSingleValue(result[4], 'ножницами');
-    assertEqualsSingleValue(result[5], 'ножницах');
-    assertEqualsSingleValue(result[6], 'ножницах');
+    assertAllCases(result, ['ножницы', 'ножниц', 'ножницам', 'ножницы', 'ножницами', 'ножницах', 'ножницах']);
 
     console.log('--------------- 8 ----------------');
 
@@ -172,6 +192,205 @@ const RussianNouns = require('./RussianNouns.js');
     assertEquals(result[1], "кринжем");
 
     console.log('--------------- 9 ----------------');
+})();
+
+(() => {
+    const rne = new RussianNouns.Engine();
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma(123);
+    });
+    console.log('createLemma: number');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma('гора');
+    });
+    console.log('createLemma: string');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma(null);
+    });
+    console.log('createLemma: null');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma(undefined);
+    });
+    console.log('createLemma: undefined');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({});
+    });
+    console.log('createLemma: {}');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'гора'
+        });
+    });
+    console.log('createLemma: gender undefined');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'гора',
+            gender: 'fgsfds'
+        });
+    });
+    console.log('createLemma: gender fgsfds');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'ножницы',
+            pluraleTantum: 123
+        });
+    });
+    console.log('createLemma: pluraleTantum 123');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'пальто',
+            gender: RussianNouns.Gender.NEUTER,
+            indeclinable: 'fgsfds'
+        });
+    });
+    console.log('createLemma: indeclinable fgsfds');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'трактор',
+            gender: RussianNouns.Gender.MASCULINE,
+            transport: 'наземный'
+        });
+    });
+    console.log('createLemma: transport fgsfds');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            gender: RussianNouns.Gender.MASCULINE
+        });
+    });
+    console.log('createLemma: text undefined');
+
+    (() => {
+        const k = RussianNouns.createLemma({
+            text: 'гора',
+            gender: RussianNouns.Gender.FEMININE
+        });
+        assertEquals(k.text(), 'гора');
+        assertEquals(k.getGender(), RussianNouns.Gender.FEMININE);
+        assertEquals(k.isPluraleTantum(), false);
+        assertEquals(k.isIndeclinable(), false);
+        console.log('createLemma: valid (1)');
+    })();
+
+    (() => {
+        const k = RussianNouns.createLemma({
+            text: 'ножницы',
+            pluraleTantum: true
+        });
+        assertEquals(k.text(), 'ножницы');
+        assertEquals(k.isPluraleTantum(), true);
+        assertEquals(k.getGender(), undefined);
+        assertEquals(k.isIndeclinable(), false);
+        console.log('createLemma: valid (2)');
+
+        const l = RussianNouns.createLemma(k);
+        assertEquals(l, k);
+        console.log('createLemma: the same object');
+    })();
+
+    // ----------------------
+
+    const assertHasError = a => {
+        assertIsArray(a);
+        assertEquals(a.length, 2);
+        assertEquals(a[0], null);
+        assertEquals(typeof a[1], 'string');
+    };
+
+    assertHasError(RussianNouns.createLemmaNoThrow(123));
+    console.log('createLemmaNoThrow: number');
+
+    assertHasError(RussianNouns.createLemmaNoThrow('гора'));
+    console.log('createLemmaNoThrow: string');
+
+    assertHasError(RussianNouns.createLemmaNoThrow(null));
+    console.log('createLemmaNoThrow: null');
+
+    assertHasError(RussianNouns.createLemmaNoThrow(undefined));
+    console.log('createLemmaNoThrow: undefined');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({}));
+    console.log('createLemmaNoThrow: {}');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'гора'
+    }));
+    console.log('createLemmaNoThrow: gender undefined');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'гора',
+        gender: 'fgsfds'
+    }));
+    console.log('createLemmaNoThrow: gender fgsfds');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'ножницы',
+        pluraleTantum: 123
+    }));
+    console.log('createLemmaNoThrow: pluraleTantum 123');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'пальто',
+        gender: RussianNouns.Gender.NEUTER,
+        indeclinable: 'fgsfds'
+    }));
+    console.log('createLemmaNoThrow: indeclinable fgsfds');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'трактор',
+        gender: RussianNouns.Gender.MASCULINE,
+        transport: 'наземный'
+    }));
+    console.log('createLemmaNoThrow: transport fgsfds');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        gender: RussianNouns.Gender.MASCULINE
+    }));
+    console.log('createLemmaNoThrow: text undefined');
+
+    let x;
+
+    x = RussianNouns.createLemmaNoThrow({
+        text: 'гора',
+        gender: RussianNouns.Gender.FEMININE
+    });
+    assertIsArray(x);
+    assertEquals(x.length, 2);
+    assertEquals(x[1], null);
+    assertEquals(x[0] instanceof RussianNouns.Lemma, true);
+    assertEquals(x[0].text(), 'гора');
+    assertEquals(x[0].getGender(), RussianNouns.Gender.FEMININE);
+    assertEquals(x[0].isPluraleTantum(), false);
+    assertEquals(x[0].isIndeclinable(), false);
+    console.log('createLemmaNoThrow: valid (1)');
+
+    x = RussianNouns.createLemmaNoThrow({
+        text: 'ножницы',
+        pluraleTantum: true
+    });
+    assertIsArray(x);
+    assertEquals(x.length, 2);
+    assertEquals(x[1], null);
+    assertEquals(x[0] instanceof RussianNouns.Lemma, true);
+    assertEquals(x[0].text(), 'ножницы');
+    assertEquals(x[0].isPluraleTantum(), true);
+    assertEquals(x[0].getGender(), undefined);
+    assertEquals(x[0].isIndeclinable(), false);
+    console.log('createLemmaNoThrow: valid (2)');
+
+    let y = RussianNouns.createLemmaNoThrow(x[0]);
+    assertEquals(y[0], x[0]);
+    console.log('createLemmaNoThrow: the same object');
 })();
 
 (() => {
@@ -406,44 +625,262 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('Testing dev branch index.html words...');
 
-    (() => {
-        const lemma = L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true});
-
+    const checkSingularAndPlural = (lemma, expectedSingular, expectedPlural) => {
         const singular = RussianNouns.CASES.map(c => {
             return rne.decline(lemma, c);
         });
 
-        assertIsArray(singular);
-        assertEquals(singular.length, 7);
-
-        assertEqualsSingleValue(singular[0], 'нелюдь');
-        assertEqualsSingleValue(singular[1], 'нелюдя');
-        assertEqualsSingleValue(singular[2], 'нелюдю');
-        assertEqualsSingleValue(singular[3], 'нелюдя');
-        assertEqualsSingleValue(singular[4], 'нелюдем');
-        assertEqualsSingleValue(singular[5], 'нелюде');
-        assertEqualsSingleValue(singular[6], 'нелюде');
+        assertAllCases(singular, expectedSingular);
 
         const p = rne.pluralize(lemma);
-        assertEqualsSingleValue(p, 'нелюди');
+        assertEqualsSingleValue(p, expectedPlural[0]);
 
         const plural = RussianNouns.CASES.map(c => {
             return rne.decline(lemma, c, p[0]);
         });
 
-        assertIsArray(plural);
-        assertEquals(plural.length, 7);
+        assertAllCases(plural, expectedPlural);
 
-        assertEqualsSingleValue(plural[0], 'нелюди');
-        assertEqualsSingleValue(plural[1], 'нелюдей');
-        assertEqualsSingleValue(plural[2], 'нелюдям');
-        assertEqualsSingleValue(plural[3], 'нелюдей');
-        assertEqualsSingleValue(plural[4], 'нелюдями');
-        assertEqualsSingleValue(plural[5], 'нелюдях');
-        assertEqualsSingleValue(plural[6], 'нелюдях');
-    })();
+        // console.log(lemma.text());
+    };
 
-    // TODO more words
+    const checkSingular = (lemma, expectedSingular) => {
+        const singular = RussianNouns.CASES.map(c => {
+            return rne.decline(lemma, c);
+        });
+
+        assertAllCases(singular, expectedSingular);
+
+        // console.log(lemma.text());
+    };
+
+    checkSingularAndPlural(
+        L({text: 'арбуз', gender: Gender.MASCULINE}),
+        ['арбуз', 'арбуза', 'арбузу', 'арбуз', 'арбузом', 'арбузе', 'арбузе'],
+        ['арбузы', 'арбузов', 'арбузам', 'арбузы', 'арбузами', 'арбузах', 'арбузах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'окно', gender: Gender.NEUTER}),
+        ['окно', 'окна', 'окну', 'окно', 'окном', 'окне', 'окне'],
+        ['окна', 'окон', 'окнам', 'окна', 'окнами', 'окнах', 'окнах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'кот', gender: Gender.MASCULINE, animate: true}),
+        ['кот', 'кота', 'коту', 'кота', 'котом', 'коте', 'коте'],
+        ['коты', 'котов', 'котам', 'котов', 'котами', 'котах', 'котах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'кошка', gender: Gender.FEMININE, animate: true}),
+        ['кошка', 'кошки', 'кошке', 'кошку', ['кошкой', 'кошкою'], 'кошке', 'кошке'],
+        ['кошки', 'кошек', 'кошкам', 'кошек', 'кошками', 'кошках', 'кошках']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'дитя', gender: Gender.NEUTER, animate: true}),
+        ['дитя', 'дитяти', 'дитяти', 'дитя', ['дитятей', 'дитятею'], 'дитяти', 'дитяти'],
+        ['дети', 'детей', 'детям', 'детей', 'детьми', 'детях', 'детях']
+    );
+
+    // Дательный падеж ед.ч. у слов на -мя звучит странновато, но это правда нормативная форма.
+    // Уместный глагол здесь, например, «радуюсь». Чему? Этому времени.
+    // Или можно задать вопрос «благодаря чему».
+
+    checkSingularAndPlural(
+        L({text: 'знамя', gender: Gender.NEUTER}),
+        ['знамя', 'знамени', 'знамени', 'знамя', 'знаменем', 'знамени', 'знамени'],
+        ['знамёна', 'знамён', 'знамёнам', 'знамёна', 'знамёнами', 'знамёнах', 'знамёнах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'время', gender: Gender.NEUTER}),
+        ['время', 'времени', 'времени', 'время', 'временем', 'времени', 'времени'],
+        ['времена', 'времён', 'временам', 'времена', 'временами', 'временах', 'временах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'семя', gender: Gender.NEUTER}),
+        ['семя', 'семени', 'семени', 'семя', 'семенем', 'семени', 'семени'],
+        ['семена', 'семян', 'семенам', 'семена', 'семенами', 'семенах', 'семенах']
+    );
+
+    checkSingular(
+        L({text: 'вымя', gender: Gender.NEUTER}),
+        ['вымя', 'вымени', 'вымени', 'вымя', 'выменем', 'вымени', 'вымени']
+    );
+
+    checkSingular(
+        L({text: 'темя', gender: Gender.NEUTER}),
+        ['темя', 'темени', 'темени', 'темя', 'теменем', 'темени', 'темени']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'имя', gender: Gender.NEUTER}),
+        ['имя', 'имени', 'имени', 'имя', 'именем', 'имени', 'имени'],
+        ['имена', 'имён', 'именам', 'имена', 'именами', 'именах', 'именах']
+    );
+
+    checkSingular(
+        L({text: 'пламя', gender: Gender.NEUTER}),
+        ['пламя', 'пламени', 'пламени', 'пламя', 'пламенем', 'пламени', 'пламени']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'стремя', gender: Gender.NEUTER}),
+        ['стремя', 'стремени', 'стремени', 'стремя', 'стременем', 'стремени', 'стремени'],
+        ['стремена', 'стремян', 'стременам', 'стремена', 'стременами', 'стременах', 'стременах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'задира', gender: Gender.COMMON, animate: true}),
+        ['задира', 'задиры', 'задире', 'задиру', ['задирой', 'задирою'], 'задире', 'задире'],
+        ['задиры', 'задир', 'задирам', 'задир', 'задирами', 'задирах', 'задирах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'хитрюга', gender: Gender.COMMON, animate: true}),
+        ['хитрюга', 'хитрюги', 'хитрюге', 'хитрюгу', ['хитрюгой', 'хитрюгою'], 'хитрюге', 'хитрюге'],
+        ['хитрюги', 'хитрюг', 'хитрюгам', 'хитрюг', 'хитрюгами', 'хитрюгах', 'хитрюгах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true}),
+        ['нелюдь', 'нелюдя', 'нелюдю', 'нелюдя', 'нелюдем', 'нелюде', 'нелюде'],
+        ['нелюди', 'нелюдей', 'нелюдям', 'нелюдей', 'нелюдями', 'нелюдях', 'нелюдях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'паровоз', gender: Gender.MASCULINE}),
+        ['паровоз', 'паровоза', 'паровозу', 'паровоз', 'паровозом', 'паровозе', 'паровозе'],
+        ['паровозы', 'паровозов', 'паровозам', 'паровозы', 'паровозами', 'паровозах', 'паровозах']
+    );
+
+    checkSingular(
+        L({text: 'Ад', gender: Gender.MASCULINE}),
+        ['Ад', 'Ада', 'Аду', 'Ад', 'Адом', 'Аде', 'Аду']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'вид', gender: Gender.MASCULINE}),
+        ['вид', 'вида', 'виду', 'вид', 'видом', 'виде', 'виду'],
+        ['виды', 'видов', 'видам', 'виды', 'видами', 'видах', 'видах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'снег', gender: Gender.MASCULINE}),
+        ['снег', ['снега', 'снегу'], 'снегу', 'снег', 'снегом', 'снеге', 'снегу'],
+        ['снега', 'снегов', 'снегам', 'снега', 'снегами', 'снегах', 'снегах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'мать', gender: Gender.FEMININE, animate: true}),
+        ['мать', 'матери', 'матери', 'мать', 'матерью', 'матери', 'матери'],
+        ['матери', 'матерей', 'матерям', 'матерей', 'матерями', 'матерях', 'матерях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'отец', gender: Gender.MASCULINE, animate: true}),
+        ['отец', 'отца', 'отцу', 'отца', 'отцом', 'отце', 'отце'],
+        ['отцы', 'отцов', 'отцам', 'отцов', 'отцами', 'отцах', 'отцах']
+    );
+
+    // Есть еще форму творительного падежа мн. ч.
+    // "дочерьми" можно добавить.
+    checkSingularAndPlural(
+        L({text: 'дочь', gender: Gender.FEMININE, animate: true}),
+        ['дочь', 'дочери', 'дочери', 'дочь', 'дочерью', 'дочери', 'дочери'],
+        ['дочери', 'дочерей', 'дочерям', 'дочерей', 'дочерями', 'дочерях', 'дочерях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'зять', gender: Gender.MASCULINE, animate: true}),
+        ['зять', 'зятя', 'зятю', 'зятя', 'зятем', 'зяте', 'зяте'],
+        ['зятья', 'зятьёв', 'зятьям', 'зятьёв', 'зятьями', 'зятьях', 'зятьях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'ирония', gender: Gender.FEMININE}),
+        ['ирония', 'иронии', 'иронии', 'иронию', 'иронией', 'иронии', 'иронии'],
+        ['иронии', 'ироний', 'ирониям', 'иронии', 'ирониями', 'ирониях', 'ирониях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'пальто', gender: Gender.NEUTER, indeclinable: true}),
+        ['пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто'],
+        ['пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'путь', gender: Gender.MASCULINE}),
+        ['путь', 'пути', 'пути', 'путь', 'путём', 'пути', 'пути'],
+        ['пути', 'путей', 'путям', 'пути', 'путями', 'путях', 'путях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'муть', gender: Gender.FEMININE}),
+        ['муть', 'мути', 'мути', 'муть', 'мутью', 'мути', 'мути'],
+        ['мути', 'мутей', 'мутям', 'мути', 'мутями', 'мутях', 'мутях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'λ-выражение', gender: Gender.NEUTER}),
+        ['λ-выражение', 'λ-выражения', 'λ-выражению', 'λ-выражение', 'λ-выражением', 'λ-выражении', 'λ-выражении'],
+        ['λ-выражения', 'λ-выражений', 'λ-выражениям', 'λ-выражения', 'λ-выражениями', 'λ-выражениях', 'λ-выражениях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'α-частица', gender: Gender.FEMININE}),
+        ['α-частица', 'α-частицы', 'α-частице', 'α-частицу', ['α-частицей', 'α-частицею'], 'α-частице', 'α-частице'],
+        ['α-частицы', 'α-частиц', 'α-частицам', 'α-частицы', 'α-частицами', 'α-частицах', 'α-частицах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'рок-н-ролл', gender: Gender.MASCULINE}),
+        ['рок-н-ролл', 'рок-н-ролла', 'рок-н-роллу', 'рок-н-ролл', 'рок-н-роллом', 'рок-н-ролле', 'рок-н-ролле'],
+        ['рок-н-роллы', 'рок-н-роллов', 'рок-н-роллам', 'рок-н-роллы', 'рок-н-роллами', 'рок-н-роллах', 'рок-н-роллах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'теле-пресс-конференция', gender: Gender.FEMININE}),
+        [
+            'теле-пресс-конференция',
+            'теле-пресс-конференции',
+            'теле-пресс-конференции',
+            'теле-пресс-конференцию',
+            'теле-пресс-конференцией',
+            'теле-пресс-конференции',
+            'теле-пресс-конференции'],
+        [
+            'теле-пресс-конференции',
+            'теле-пресс-конференций',
+            'теле-пресс-конференциям',
+            'теле-пресс-конференции',
+            'теле-пресс-конференциями',
+            'теле-пресс-конференциях',
+            'теле-пресс-конференциях']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'судно', gender: Gender.NEUTER}),
+        ['судно', 'судна', 'судну', 'судно', 'судном', 'судне', 'судне'],
+        ['судна', 'суден', 'суднам', 'судна', 'суднами', 'суднах', 'суднах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'судно', gender: Gender.NEUTER, transport: true}),
+        ['судно', 'судна', 'судну', 'судно', 'судном', 'судне', 'судне'],
+        ['суда', 'судов', 'судам', 'суда', 'судами', 'судах', 'судах']
+    );
+
+    // TODO имена собственные какие-нибудь
+
+    // checkSingularAndPlural(
+    //     L({text: 'окно', gender: Gender.NEUTER}),
+    //     ['', '', '', '', '', '', ''],
+    //     ['', '', '', '', '', '', '']
+    // );
 
     console.log('----------------------------------');
 
@@ -479,20 +916,15 @@ const RussianNouns = require('./RussianNouns.js');
             return rne.decline(адаптировавший, c);
         });
 
-        assertIsArray(result);
-        assertEquals(result.length, 7);
-
-        for (let i = 0; i < 7; i++) {
-            assertIsArray(result[i]);
-        }
-
-        assertEqualsSingleValue(result[0], 'адаптировавший');
-        assertEqualsSingleValue(result[1], 'адаптировавшего');
-        assertEqualsSingleValue(result[2], 'адаптировавшему');
-        assertEqualsSingleValue(result[3], 'адаптировавшего');
-        assertEqualsSingleValue(result[4], 'адаптировавшим');
-        assertEqualsSingleValue(result[5], 'адаптировавшем');
-        assertEqualsSingleValue(result[6], 'адаптировавшем');
+        assertAllCases(result, [
+            'адаптировавший',
+            'адаптировавшего',
+            'адаптировавшему',
+            'адаптировавшего',
+            'адаптировавшим',
+            'адаптировавшем',
+            'адаптировавшем'
+        ]);
 
         console.log('--------------- 2 ----------------');
     })();
@@ -504,20 +936,15 @@ const RussianNouns = require('./RussianNouns.js');
             return rne.decline(адаптировавшее, c);
         });
 
-        assertIsArray(result);
-        assertEquals(result.length, 7);
-
-        for (let i = 0; i < 7; i++) {
-            assertIsArray(result[i]);
-        }
-
-        assertEqualsSingleValue(result[0], 'адаптировавшее');
-        assertEqualsSingleValue(result[1], 'адаптировавшего');
-        assertEqualsSingleValue(result[2], 'адаптировавшему');
-        assertEqualsSingleValue(result[3], 'адаптировавшее');
-        assertEqualsSingleValue(result[4], 'адаптировавшим');
-        assertEqualsSingleValue(result[5], 'адаптировавшем');
-        assertEqualsSingleValue(result[6], 'адаптировавшем');
+        assertAllCases(result, [
+            'адаптировавшее',
+            'адаптировавшего',
+            'адаптировавшему',
+            'адаптировавшее',
+            'адаптировавшим',
+            'адаптировавшем',
+            'адаптировавшем'
+        ]);
 
         console.log('--------------- 3 ----------------');
     })();
