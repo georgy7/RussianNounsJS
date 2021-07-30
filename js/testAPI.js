@@ -239,12 +239,158 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     itShouldThrow(RussianNouns.LemmaException, () => {
         RussianNouns.createLemma({
+            text: 'ножницы',
+            pluraleTantum: 123
+        });
+    });
+    console.log('createLemma: pluraleTantum 123');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'пальто',
+            gender: RussianNouns.Gender.NEUTER,
+            indeclinable: 'fgsfds'
+        });
+    });
+    console.log('createLemma: indeclinable fgsfds');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
+            text: 'трактор',
+            gender: RussianNouns.Gender.MASCULINE,
+            transport: 'наземный'
+        });
+    });
+    console.log('createLemma: transport fgsfds');
+
+    itShouldThrow(RussianNouns.LemmaException, () => {
+        RussianNouns.createLemma({
             gender: RussianNouns.Gender.MASCULINE
         });
     });
     console.log('createLemma: text undefined');
 
-    // console.log('------- createLemmaNoThrow -------');
+    (() => {
+        const k = RussianNouns.createLemma({
+            text: 'гора',
+            gender: RussianNouns.Gender.FEMININE
+        });
+        assertEquals(k.text(), 'гора');
+        assertEquals(k.getGender(), RussianNouns.Gender.FEMININE);
+        assertEquals(k.isPluraleTantum(), false);
+        assertEquals(k.isIndeclinable(), false);
+        console.log('createLemma: valid (1)');
+    })();
+
+    (() => {
+        const k = RussianNouns.createLemma({
+            text: 'ножницы',
+            pluraleTantum: true
+        });
+        assertEquals(k.text(), 'ножницы');
+        assertEquals(k.isPluraleTantum(), true);
+        assertEquals(k.getGender(), undefined);
+        assertEquals(k.isIndeclinable(), false);
+        console.log('createLemma: valid (2)');
+
+        const l = RussianNouns.createLemma(k);
+        assertEquals(l, k);
+        console.log('createLemma: the same object');
+    })();
+
+    // ----------------------
+
+    const assertHasError = a => {
+        assertIsArray(a);
+        assertEquals(a.length, 2);
+        assertEquals(a[0], null);
+        assertEquals(typeof a[1], 'string');
+    };
+
+    assertHasError(RussianNouns.createLemmaNoThrow(123));
+    console.log('createLemmaNoThrow: number');
+
+    assertHasError(RussianNouns.createLemmaNoThrow('гора'));
+    console.log('createLemmaNoThrow: string');
+
+    assertHasError(RussianNouns.createLemmaNoThrow(null));
+    console.log('createLemmaNoThrow: null');
+
+    assertHasError(RussianNouns.createLemmaNoThrow(undefined));
+    console.log('createLemmaNoThrow: undefined');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({}));
+    console.log('createLemmaNoThrow: {}');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'гора'
+    }));
+    console.log('createLemmaNoThrow: gender undefined');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'гора',
+        gender: 'fgsfds'
+    }));
+    console.log('createLemmaNoThrow: gender fgsfds');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'ножницы',
+        pluraleTantum: 123
+    }));
+    console.log('createLemmaNoThrow: pluraleTantum 123');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'пальто',
+        gender: RussianNouns.Gender.NEUTER,
+        indeclinable: 'fgsfds'
+    }));
+    console.log('createLemmaNoThrow: indeclinable fgsfds');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        text: 'трактор',
+        gender: RussianNouns.Gender.MASCULINE,
+        transport: 'наземный'
+    }));
+    console.log('createLemmaNoThrow: transport fgsfds');
+
+    assertHasError(RussianNouns.createLemmaNoThrow({
+        gender: RussianNouns.Gender.MASCULINE
+    }));
+    console.log('createLemmaNoThrow: text undefined');
+
+    let x;
+
+    x = RussianNouns.createLemmaNoThrow({
+        text: 'гора',
+        gender: RussianNouns.Gender.FEMININE
+    });
+    assertIsArray(x);
+    assertEquals(x.length, 2);
+    assertEquals(x[1], null);
+    assertEquals(x[0] instanceof RussianNouns.Lemma, true);
+    assertEquals(x[0].text(), 'гора');
+    assertEquals(x[0].getGender(), RussianNouns.Gender.FEMININE);
+    assertEquals(x[0].isPluraleTantum(), false);
+    assertEquals(x[0].isIndeclinable(), false);
+    console.log('createLemmaNoThrow: valid (1)');
+
+    x = RussianNouns.createLemmaNoThrow({
+        text: 'ножницы',
+        pluraleTantum: true
+    });
+    assertIsArray(x);
+    assertEquals(x.length, 2);
+    assertEquals(x[1], null);
+    assertEquals(x[0] instanceof RussianNouns.Lemma, true);
+    assertEquals(x[0].text(), 'ножницы');
+    assertEquals(x[0].isPluraleTantum(), true);
+    assertEquals(x[0].getGender(), undefined);
+    assertEquals(x[0].isIndeclinable(), false);
+    console.log('createLemmaNoThrow: valid (2)');
+
+    let y = RussianNouns.createLemmaNoThrow(x[0]);
+    assertEquals(y[0], x[0]);
+    console.log('createLemmaNoThrow: the same object');
 })();
 
 (() => {

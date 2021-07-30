@@ -100,6 +100,66 @@
 
     const rkComma = s => s.split(',').map(rk).join(',');
 
+    /**
+     * @param o A plain old JavaScript object.
+     * @returns {string|null} Описание ошибки на английском или null.
+     */
+    function validateCreateLemma(o) {
+        if (null == o) {
+            return 'No parameters specified.';
+        }
+
+        const checkBoolOrNull = x => (null != x) && (typeof x != 'boolean');
+        const mustBeBoolean = ' must be boolean.';
+
+        if (checkBoolOrNull(o.pluraleTantum)) {
+            return 'pluraleTantum' + mustBeBoolean;
+        }
+
+        if (checkBoolOrNull(o.pluraliaTantum)) {
+            return 'pluraliaTantum (deprecated)' + mustBeBoolean;
+        }
+
+        const pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
+
+        if (checkBoolOrNull(o.indeclinable)) {
+            return 'indeclinable' + mustBeBoolean;
+        }
+
+        if (checkBoolOrNull(o.animate)) {
+            return 'animate' + mustBeBoolean;
+        }
+
+        if (checkBoolOrNull(o.surname)) {
+            return 'surname' + mustBeBoolean;
+        }
+
+        if (checkBoolOrNull(o.name)) {
+            return 'name' + mustBeBoolean;
+        }
+
+        if (checkBoolOrNull(o.transport)) {
+            return 'transport' + mustBeBoolean;
+        }
+
+        // TODO
+        if (o.text == null) {
+            return 'A cyrillic word required.';
+        }
+
+        if (!pluraleTantum) {   // Это слова т. н. парного рода.
+            if (o.gender == null) {
+                return 'A grammatical gender required.';
+            }
+
+            if (!Object.values(Gender).includes(o.gender)) {
+                return 'Bad grammatical gender.';
+            }
+        }
+
+        return null;
+    }
+
     const API = {
         Case: Case,
         Gender: Gender,
@@ -116,7 +176,9 @@
          * Нормальная форма слова.
          * Объекты этого класса содержат также грамматическую и семантическую информацию,
          * позволяющую выбирать стратегии словоизменения и различать омонимы.
-         * Пожалуйста, используйте {@link RussianNouns.createLemma} вместо конструктора.
+         *
+         * Пожалуйста, используйте {@link RussianNouns.createLemma}
+         * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
          */
         Lemma: class Lemma {
 
@@ -126,13 +188,6 @@
              * @param {RussianNouns.Lemma|Object} o
              */
             constructor(o) {
-
-                function checkBoolOrNull(x) {
-                    if ((null != x) && (typeof x != 'boolean')) {
-                        throw new API.LemmaException('Must be boolean.');
-                    }
-                }
-
                 if (o instanceof API.Lemma) {
 
                     this.pluraleTantum = o.pluraleTantum;
@@ -148,46 +203,20 @@
 
                     this.internalGender = o.internalGender;
 
-                } else if (null == o) {
-
-                    throw new API.LemmaException('No parameters specified.');
-
                 } else {
-
-                    checkBoolOrNull(o.pluraleTantum);
-                    checkBoolOrNull(o.pluraliaTantum);
-                    checkBoolOrNull(o.indeclinable);
 
                     this.pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
                     this.indeclinable = !!(o.indeclinable);
-
-                    checkBoolOrNull(o.animate);
-                    checkBoolOrNull(o.surname);
-                    checkBoolOrNull(o.name);
-                    checkBoolOrNull(o.transport);
 
                     this.animate = !!(o.animate);
                     this.surname = !!(o.surname);
                     this.name = !!(o.name);
                     this.transport = !!(o.transport);
 
-                    // TODO
-                    if (o.text == null) {
-                        throw new API.LemmaException('A cyrillic word required.');
-                    }
-
                     this.internalText = o.text;
                     this.lowerCaseText = this.internalText.toLowerCase();
 
                     if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
-                        if (o.gender == null) {
-                            throw new API.LemmaException('A grammatical gender required.');
-                        }
-
-                        if (!Object.values(Gender).includes(o.gender)) {
-                            throw new API.LemmaException('Bad grammatical gender.');
-                        }
-
                         this.internalGender = o.gender;
                     }
 
@@ -277,8 +306,8 @@
          * Если параметр — уже лемма, вернет тот же объект, а не копию.
          *
          * Леммы, которые в коде используются много раз, следует
-         * конструировать через эту функцию, иначе они будут
-         * неявно конструироваться на каждый вызов любой функции
+         * конструировать через эту функцию или {@link RussianNouns.createLemmaNoThrow},
+         * иначе они будут неявно конструироваться на каждый вызов любой функции
          * или метода в этой библиотеке.
          *
          * @param {RussianNouns.Lemma|Object} o
@@ -286,11 +315,41 @@
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
         createLemma: o => {
+            const r = API.createLemmaNoThrow(o);
+
+            if (r[0]) {
+                return r[0];
+            } else {
+                throw new API.LemmaException(r[1]);
+            }
+        },
+
+        /**
+         * Интерфейс с именованными параметрами для создания лемм.
+         * Если параметр — уже лемма, вернет в массиве тот же объект, а не копию.
+         *
+         * Леммы, которые в коде используются много раз, следует
+         * конструировать через эту функцию или {@link RussianNouns.createLemma},
+         * иначе они будут неявно конструироваться на каждый вызов любой функции
+         * или метода в этой библиотеке.
+         *
+         * @param {RussianNouns.Lemma|Object} o
+         * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
+         */
+        createLemmaNoThrow: o => {
+            let result = [null, null];
+
             if (o instanceof API.Lemma) {
-                return o;
+                result[0] = o;
+                return result;
             }
 
-            return Object.freeze(new API.Lemma(o));
+            result[1] = validateCreateLemma(o);
+            if (null == result[1]) {
+                result[0] = Object.freeze(new API.Lemma(o));
+            }
+
+            return Object.freeze(result);
         },
 
         /**
