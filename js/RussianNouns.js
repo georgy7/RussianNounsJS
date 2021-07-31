@@ -184,7 +184,8 @@
 
             /**
              * *Не для внешнего использования!*
-             * Пожалуйста, используйте {@link RussianNouns.createLemma} вместо конструктора.
+             * Пожалуйста, используйте {@link RussianNouns.createLemma}
+             * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
              * @param {RussianNouns.Lemma|Object} o
              */
             constructor(o) {
