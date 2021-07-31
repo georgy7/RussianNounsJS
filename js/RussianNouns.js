@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.5.SNAPSHOT
+  RussianNounsJS v1.2.6.SNAPSHOT
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -337,16 +337,15 @@
          * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
          */
         createLemmaNoThrow: o => {
-            let result = [null, null];
+            let result;
 
             if (o instanceof API.Lemma) {
-                result[0] = o;
-                return result;
-            }
-
-            result[1] = validateCreateLemma(o);
-            if (null == result[1]) {
-                result[0] = Object.freeze(new API.Lemma(o));
+                result = [o, null];
+            } else {
+                result = [null, validateCreateLemma(o)];
+                if (null === result[1]) {
+                    result[0] = Object.freeze(new API.Lemma(o));
+                }
             }
 
             return Object.freeze(result);
