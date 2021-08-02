@@ -369,6 +369,10 @@ ${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`);
 // Снега неведомых высот.
 ```
 
+## Limitations
+
+This library does not prevent you from misusing the [singularia tantum](https://en.wikipedia.org/wiki/Plurale_tantum#Singulare_tantum).
+
 ## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
 - [Russian grammar (English Wikipedia)](http://en.wikipedia.org/wiki/Russian_grammar)
