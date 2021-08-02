@@ -45,6 +45,7 @@
         <li><a href="#a-complex-example">A complex example</a></li>
       </ul>
     </li>
+    <li><a href="#limitations">Limitations</a></li>
     <li><a href="#references">References</a></li>
   </ol>
 </details>
