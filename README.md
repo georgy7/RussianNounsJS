@@ -34,7 +34,6 @@
       <ul>
         <li><a href="#frontend">Frontend</a></li>
         <li><a href="#backend">Backend</a></li>
-        <li><a href="#android">Android</a></li>
       </ul>
     </li>
     <li>
