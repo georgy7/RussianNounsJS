@@ -86,49 +86,6 @@ npm i --save russian-nouns-js
 const RussianNouns = require('russian-nouns-js');
 ```
 
-### Android
-
-First of all, here is **[my app](https://play.google.com/store/apps/details?id=ru.todomachines.rnjs.app)**. 
-
-You may use this library in your apps too. With an invisible WebView. 
-
-```
-private WebView jsEngine;
-
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    this.jsEngine = findViewById(R.id.webView);
-    this.jsEngine.getSettings().setJavaScriptEnabled(true);
-    this.jsEngine.loadUrl("file:///android_asset/yourWrapper.html");
-}
-```
-
-```
-jsEngine.evaluateJavascript(jsCommand, value -> {
-    // Result callback.
-});
-```
-
-```
-<!doctype html>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-    <script src="file:///android_asset/RussianNouns.min.js"></script>
-    <!-- your code -->
-</head>
-<body>
-
-</body>
-</html>
-```
-
-I cannot guarantee high performance with this approach. Use it wisely.
-For instance, you should not instantiate `RussianNouns.Engine`
-every time you run a command.
-
 ## Usage
 
 ### The basics
