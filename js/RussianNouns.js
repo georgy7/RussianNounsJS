@@ -1441,7 +1441,7 @@
                     return stem + 'ею';
                 } else if (ayaWord()) {
                     return stem + 'ой';
-                } else if (soft() || 'жцчшщ'.includes(last(lcStem))) {
+                } else if (soft() || ('жцчшщ'.includes(last(lcStem)) && !lcWord.endsWith('овца'))) {
                     if ('и' === last(lcHead)) {
                         return head + 'ей';
                     } else {
