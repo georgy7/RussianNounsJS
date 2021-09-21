@@ -87,7 +87,7 @@ const RussianNouns = require('russian-nouns-js');
 
 For TypeScript, there are
 [type definitions](https://www.npmjs.com/package/@types/russian-nouns-js)
-[written by RusAnonym](https://github.com/RusAnonym/DefinitelyTyped/tree/master/types/russian-nouns-js).
+[written by Alexander Semin](https://github.com/RusAnonym/DefinitelyTyped/tree/master/types/russian-nouns-js).
 
 ## Usage
 
