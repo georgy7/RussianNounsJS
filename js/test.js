@@ -363,7 +363,7 @@ let main = function () {
                 "indeclinable": fixed,
                 "animate": animate,
                 "declension": declension,
-                "frequent": (mostFrequentNouns.includes(lemma.text()) && !abbr),
+                "frequent": (mostFrequent.includes(lemma.text()) && !abbr),
                 "status": wordStatus
             });
         }
