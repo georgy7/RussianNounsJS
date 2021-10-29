@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.5
+  RussianNounsJS v1.2.6.SNAPSHOT
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -109,38 +109,18 @@
             return 'No parameters specified.';
         }
 
-        const checkBoolOrNull = x => (null != x) && (typeof x != 'boolean');
-        const mustBeBoolean = ' must be boolean.';
-
-        if (checkBoolOrNull(o.pluraleTantum)) {
-            return 'pluraleTantum' + mustBeBoolean;
-        }
-
-        if (checkBoolOrNull(o.pluraliaTantum)) {
-            return 'pluraliaTantum (deprecated)' + mustBeBoolean;
+        for (let fieldName of [
+            'pluraleTantum', 'pluraliaTantum',
+            'indeclinable', 'animate',
+            'surname', 'name', 'transport'
+        ]) {
+            const check = x => (null != x) && (typeof x != 'boolean');
+            if (check(o[fieldName])) {
+                return '' + fieldName + ' must be boolean.';
+            }
         }
 
         const pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
-
-        if (checkBoolOrNull(o.indeclinable)) {
-            return 'indeclinable' + mustBeBoolean;
-        }
-
-        if (checkBoolOrNull(o.animate)) {
-            return 'animate' + mustBeBoolean;
-        }
-
-        if (checkBoolOrNull(o.surname)) {
-            return 'surname' + mustBeBoolean;
-        }
-
-        if (checkBoolOrNull(o.name)) {
-            return 'name' + mustBeBoolean;
-        }
-
-        if (checkBoolOrNull(o.transport)) {
-            return 'transport' + mustBeBoolean;
-        }
 
         // TODO
         if (o.text == null) {
@@ -184,7 +164,8 @@
 
             /**
              * *Не для внешнего использования!*
-             * Пожалуйста, используйте {@link RussianNouns.createLemma} вместо конструктора.
+             * Пожалуйста, используйте {@link RussianNouns.createLemma}
+             * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
              * @param {RussianNouns.Lemma|Object} o
              */
             constructor(o) {
@@ -337,16 +318,15 @@
          * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
          */
         createLemmaNoThrow: o => {
-            let result = [null, null];
+            let result;
 
             if (o instanceof API.Lemma) {
-                result[0] = o;
-                return result;
-            }
-
-            result[1] = validateCreateLemma(o);
-            if (null == result[1]) {
-                result[0] = Object.freeze(new API.Lemma(o));
+                result = [o, null];
+            } else {
+                result = [null, validateCreateLemma(o)];
+                if (null === result[1]) {
+                    result[0] = Object.freeze(new API.Lemma(o));
+                }
             }
 
             return Object.freeze(result);
@@ -412,10 +392,7 @@
          * и это будет влиять на поведение экземпляра движка, который
          * владеет этим словарём.
          */
-        StressDictionary: class StressDictionary {
-            constructor() {
-                this.data = {};
-            }
+        StressDictionary: class StressDictionary extends Dictionary {
 
             /**
              * @param {RussianNouns.Lemma|Object} lemma
@@ -438,62 +415,7 @@
                     throw new API.StressDictionaryException('Bad settings format.');
                 }
 
-                const lemmaObject = API.createLemma(lemma);
-                const hash = unYo(lemmaObject.lower());
-
-                let homonyms = this.data[hash];
-
-                if (!(homonyms instanceof Array)) {
-                    homonyms = [];
-                    this.data[hash] = homonyms;
-                }
-
-                const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-                if (found) {
-                    found[1] = settings;
-                } else {
-                    homonyms.push([lemmaObject, settings]);
-                }
-            }
-
-            /**
-             * @param {RussianNouns.Lemma|Object} lemma
-             * @param {boolean} fuzzy Если не найдено, игнорировать букву Ё и второстепенные поля у леммы.
-             * @returns {*} Строка настроек или undefined.
-             */
-            get(lemma, fuzzy) {
-                const lemmaObject = API.createLemma(lemma);
-                const hash = unYo(lemmaObject.lower());
-
-                const homonyms = this.data[hash];
-
-                if (homonyms instanceof Array) {
-                    let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-                    if (!found && fuzzy) {
-                        found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
-                    }
-
-                    if (found) {
-                        return found[1];
-                    }
-                }
-            }
-
-            remove(lemma) {
-                const lemmaObject = API.createLemma(lemma);
-                const hash = unYo(lemmaObject.lower());
-
-                const homonyms = this.data[hash];
-
-                if (homonyms instanceof Array) {
-                    this.data[hash] = homonyms.filter(ls => !lemmaObject.equals(ls[0]));
-
-                    if (this.data[hash].length === 0) {
-                        delete this.data[hash];
-                    }
-                }
+                super.put(lemma, settings);
             }
 
             hasStressedEndingSingular(lemma, grCase) {
@@ -547,26 +469,6 @@
 
                 return []; // вместо undefined
             }
-
-            /**
-             * Благодаря этому методу, словарь можно использовать для других целей.
-             * Например, если там есть слово, можно посмотреть его род и признаки.
-             *
-             * @param word Слово, по которому производится поиск.
-             * Буква Ё и регистр игнорируются.
-             * @returns {Array} Список лемм.
-             */
-            find(word) {
-                const hash = unYo(word).toLowerCase();
-
-                const homonyms = this.data[hash];
-
-                if (homonyms instanceof Array) {
-                    return homonyms.map(pair => pair[0]);
-                } else {
-                    return [];
-                }
-            }
         },
         Engine: class Engine {
 
@@ -614,44 +516,32 @@
 
     function makeDefaultStressDictionary() {
         const d = new API.StressDictionary();
+        const m = Object.freeze({gender: Gender.MASCULINE});
+        const ma = Object.freeze({gender: Gender.MASCULINE, animate: true});
+        const f = Object.freeze({gender: Gender.FEMININE});
+        const putM = (settings, word) => d.putAll(m, settings, word);
 
-        function putAll(prototype, settings, joinedList) {
-            const list = joinedList.split(',');
-            for (let word of list) {
-                const lemma = Object.assign({}, prototype);
-                lemma.text = word;
-                d.put(lemma, settings);
-            }
-        }
-
-        function putM(settings, word) {
-            d.put(
-                {text: word, gender: Gender.MASCULINE},
-                settings
-            );
-        }
-
-        putAll({gender: Gender.MASCULINE},
+        d.putAll(m,
             API.FIXED_STEM_STRESS,
             'брёх,дёрн,идиш,имидж,мед');
 
-        putAll({pluraleTantum: true},
+        d.putAll({pluraleTantum: true},
             API.FIXED_STEM_STRESS,
             'ножны');
 
-        putAll({gender: Gender.MASCULINE},
+        d.putAll(m,
             'SSSSSSS-EEEEEE',
             'адрес,век,вечер,город,детдом,поезд');
 
-        putAll({gender: Gender.MASCULINE},
+        d.putAll(m,
             'SSSSSSE-EEEEEE',
             'берег,бок,вес,лес,снег,дом,катер,счёт,мёд');
 
-        putAll({gender: Gender.MASCULINE, animate: true},
+        d.putAll(ma,
             API.FIXED_STEM_STRESS,
             'балансёр,шофёр');
 
-        putAll({gender: Gender.MASCULINE},
+        d.putAll(m,
             'SSSSSSS-bbbbbb',
             'вексель,ветер');
 
@@ -661,22 +551,15 @@
 
         putM('SSSSSSE-EEEEEE', 'счёт'); // не путать со счётами (p.t.)
 
-        putAll({gender: Gender.NEUTER},
+        d.putAll({gender: Gender.NEUTER},
             'EEEEEEE-SSSSSS',
             'тесло,' +
             'стекло,автостекло,бронестекло,оргстекло,' +
             'пеностекло,смарт-стекло,спецстекло,' +
             'бедро,берцо,блесна,чело,стегно,стебло');
 
-        d.put(
-            {text: 'щека', gender: Gender.FEMININE, animate: false},
-            'EEEbEEE-SSESEE'
-        );
-
-        d.put(
-            {text: 'слеза', gender: Gender.FEMININE, animate: false},
-            'EEEEEEE-SSESEE'
-        );
+        d.putAll(f, 'EEEbEEE-SSESEE', 'щека');
+        d.putAll(f, 'EEEEEEE-SSESEE', 'слеза');
 
         // У меня нет ответа, почему у следующих слов на ж/ш/ч/ц
         // ударения в основном на окончания.
@@ -690,24 +573,24 @@
         // В этот список не вошли топонимы, имена, фамилии, отчества
         // и некоторые названия жителей населенных пунктов.
 
-        putAll({gender: Gender.MASCULINE},
+        d.putAll(m,
             'SbbSbbb-bbbbbb',
             'грош,шприц');
 
-        putAll({gender: Gender.MASCULINE},
+        d.putAll(m,
             'SssSsss-ssssss',
             'кишмиш,' +
             'кряж,' +  // обрубок бревна; гряда холмов
             'слеш,слэш');
 
-        putAll({gender: Gender.MASCULINE, animate: true},
+        d.putAll(ma,
             'Sssssss-ssssss',
             'паныч');
 
         putM('SEESeEE-EEEEEE', 'стеллаж');
         putM('SeeSeee-eeeeee', 'шиномонтаж');
 
-        putAll({gender: Gender.MASCULINE},
+        d.putAll(m,
             'SEESEEE-EEEEEE',
             'багаж,' +
             // Встречаются в законах, условиях/правилах для пасажиров.
@@ -760,7 +643,7 @@
             'чертёж,чистец,шалаш,шантаж,шиш,щипец,' +
             'электронож,этаж,ясенец');
 
-        putAll({gender: Gender.MASCULINE, animate: true},
+        d.putAll(ma,
             'SEEEEEE-EEEEEE',
             'алкаш,' +
             'басмач,беглец,белец,бирюч,бич,' +
@@ -812,7 +695,7 @@
             rkComma('фЯц,') +
             'циркач,червец,чернец,черныш,швец,шельмец,чтец,чиж,юнец');
 
-        putAll({gender: Gender.NEUTER, animate: false},
+        d.putAll({gender: Gender.NEUTER},
             'EEEEEEE-SsESEE',
             'плечо');
 
@@ -824,24 +707,16 @@
             'EEEEEEE-SSSSSS'
         );
 
-        for (let w of ['семья', 'макросемья']) {
-            d.put(
-                {text: w, gender: Gender.FEMININE},
-                'EEEEEEE-SESSSS'
-            );
-        }
+        d.putAll(f, 'EEEEEEE-SESSSS', 'семья,макросемья');
 
         d.put(
             {text: 'свинья', gender: Gender.FEMININE, animate: true},
             'EEEEEEE-SESESS'
         );
 
-        d.put(
-            {text: 'скамья', gender: Gender.FEMININE},
-            'EEEEEEE-eEeeee'
-        );
+        d.putAll(f, 'EEEEEEE-eEeeee', 'скамья');
 
-        putAll({gender: Gender.FEMININE},
+        d.putAll(f,
             API.FIXED_ENDING_STRESS,
             'ладья,статья,башка');
 
@@ -881,6 +756,105 @@
     const unique = a => a.filter((item, index) => a.indexOf(item) === index);
 
     const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
+
+    /**
+     * Нечто среднее между Map и Multimap.
+     * Одной лемме соответствует одно значение,
+     * но можно также искать неточное совпадение.
+     */
+    class Dictionary {
+        constructor() {
+            this.data = {};
+        }
+
+        put(lemma, value) {
+            const lemmaObject = API.createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            let homonyms = this.data[hash];
+
+            if (!(homonyms instanceof Array)) {
+                homonyms = [];
+                this.data[hash] = homonyms;
+            }
+
+            const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+            if (found) {
+                found[1] = value;
+            } else {
+                homonyms.push([lemmaObject, value]);
+            }
+        }
+
+        putAll(lemmaPrototype, value, joinedWordList) {
+            const list = joinedWordList.split(',');
+            for (let word of list) {
+                const lemma = Object.assign({}, lemmaPrototype);
+                lemma.text = word;
+                this.put(lemma, value);
+            }
+        }
+
+        /**
+         * @param {RussianNouns.Lemma|Object} lemma
+         * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
+         * @returns {*} Значение или undefined.
+         */
+        get(lemma, fuzzy) {
+            const lemmaObject = API.createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+                if (!found && fuzzy) {
+                    found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
+                }
+
+                if (found) {
+                    return found[1];
+                }
+            }
+        }
+
+        remove(lemma) {
+            const lemmaObject = API.createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                this.data[hash] = homonyms.filter(ls => !lemmaObject.equals(ls[0]));
+
+                if (this.data[hash].length === 0) {
+                    delete this.data[hash];
+                }
+            }
+        }
+
+        /**
+         * Благодаря этому методу, словарь можно использовать для других целей.
+         * Например, если там есть слово, можно посмотреть его род и признаки.
+         *
+         * @param word Слово, по которому производится поиск.
+         * Буква Ё и регистр игнорируются.
+         * @returns {Array} Список лемм.
+         */
+        find(word) {
+            const hash = unYo(word).toLowerCase();
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                return homonyms.map(pair => pair[0]);
+            } else {
+                return [];
+            }
+        }
+    }
 
     const reYo = s => {
         const index = Math.max(
@@ -1467,7 +1441,7 @@
                     return stem + 'ею';
                 } else if (ayaWord()) {
                     return stem + 'ой';
-                } else if (soft() || 'жцчшщ'.includes(last(lcStem))) {
+                } else if (soft() || ('жцчшщ'.includes(last(lcStem)) && !lcWord.endsWith('овца'))) {
                     if ('и' === last(lcHead)) {
                         return head + 'ей';
                     } else {
