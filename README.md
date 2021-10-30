@@ -5,7 +5,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <img src="logo.png" alt="Logo" width="128" height="108">
+  <img src="logo.svg" alt="Logo" width="101" height="128">
 
   <h3 align="center">RussianNounsJS</h3>
 
