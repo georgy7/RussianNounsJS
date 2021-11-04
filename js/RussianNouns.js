@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.6.SNAPSHOT
+  RussianNounsJS v1.3.0.SNAPSHOT
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -140,17 +140,301 @@
         return null;
     }
 
+    class Lemma {
+
+        /**
+         * *Не для внешнего использования!*
+         * Пожалуйста, используйте {@link RussianNouns.createLemma}
+         * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
+         * @param {RussianNouns.Lemma|Object} o
+         */
+        constructor(o) {
+            if (o instanceof API.Lemma) {
+
+                this.pluraleTantum = o.pluraleTantum;
+                this.indeclinable = o.indeclinable;
+
+                this.animate = o.animate;
+                this.surname = o.surname;
+                this.name = o.name;
+                this.transport = o.transport;
+
+                this.internalText = o.internalText;
+                this.lowerCaseText = o.lowerCaseText;
+
+                this.internalGender = o.internalGender;
+
+            } else {
+
+                this.pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
+                this.indeclinable = !!(o.indeclinable);
+
+                this.animate = !!(o.animate);
+                this.surname = !!(o.surname);
+                this.name = !!(o.name);
+                this.transport = !!(o.transport);
+
+                this.internalText = o.text;
+                this.lowerCaseText = this.internalText.toLowerCase();
+
+                if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
+                    this.internalGender = o.gender;
+                }
+
+            }
+        }
+
+        newText(f) {
+            const lemmaCopy = new API.Lemma(this);
+            lemmaCopy.internalText = f(lemmaCopy);
+            lemmaCopy.lowerCaseText = lemmaCopy.internalText.toLowerCase();
+            return Object.freeze(lemmaCopy);
+        }
+
+        newGender(f) {
+            const lemmaCopy = new API.Lemma(this);
+            lemmaCopy.internalGender = f(lemmaCopy);
+            return Object.freeze(lemmaCopy);
+        }
+
+        equals(o) {
+            return (o instanceof API.Lemma)
+                && (this.lower() === o.lower())
+                && (this.isPluraleTantum() === o.isPluraleTantum())
+                && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
+                && (this.isIndeclinable() === o.isIndeclinable())
+                && (this.isAnimate() === o.isAnimate())
+                && (this.isASurname() === o.isASurname())
+                && (this.isAName() === o.isAName())
+                && (this.isATransport() === o.isATransport());
+        }
+
+        fuzzyEquals(o) {
+            return (o instanceof API.Lemma)
+                && (unYo(this.lower()) === unYo(o.lower()))
+                && (this.isPluraleTantum() === o.isPluraleTantum())
+                && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
+                && (this.isIndeclinable() === o.isIndeclinable());
+        }
+
+        text() {
+            return this.internalText;
+        }
+
+        lower() {
+            return this.lowerCaseText;
+        }
+
+        isPluraleTantum() {
+            return this.pluraleTantum;
+        }
+
+        /**
+         * @deprecated Используйте isPluraleTantum(), т.к. речь об одной лемме, а pluralia — во мн.ч. на латыни.
+         * @returns {boolean}
+         */
+        isPluraliaTantum() {
+            return this.pluraleTantum;
+        }
+
+        getGender() {
+            return this.internalGender;
+        }
+
+        isIndeclinable() {
+            return this.indeclinable;
+        }
+
+        isAnimate() {
+            return this.animate || this.surname || this.name;
+        }
+
+        isASurname() {
+            return this.surname;
+        }
+
+        isAName() {
+            return this.name;
+        }
+
+        isATransport() {
+            return this.transport;
+        }
+    }
+
+    class LemmaException extends Error {
+    }
+
+    class StressDictionaryException extends Error {
+    }
+
+    function createLemmaNoThrow(o) {
+        let result;
+
+        if (o instanceof Lemma) {
+            result = [o, null];
+        } else {
+            result = [null, validateCreateLemma(o)];
+            if (null === result[1]) {
+                result[0] = Object.freeze(new Lemma(o));
+            }
+        }
+
+        return Object.freeze(result);
+    }
+
+    function createLemma(o) {
+        const r = createLemmaNoThrow(o);
+
+        if (r[0]) {
+            return r[0];
+        } else {
+            throw new LemmaException(r[1]);
+        }
+    }
+
+    const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
+    const consonants = consonantsExceptJ + 'й';
+    const vowels = 'аоуэыяёюеи';
+
+    const isVowel = character => vowels.includes(character.toLowerCase());
+
+    const isUpper = s => s === s.toUpperCase();
+
+    const upperLike = (lowerCase, pattern) => isUpper(pattern) ? lowerCase.toUpperCase() : lowerCase;
+
+    const vowelCount = s => s.split('').filter(isVowel).length;
+
+    const last = str => {
+        if (str && str.length) {
+            return str[str.length - 1];
+        } else {
+            return '';
+        }
+    };
+
+    const nLast = (str, n) => str.substring(str.length - n);
+
+    const init = s => s.substring(0, s.length - 1);
+
+    const nInit = (s, n) => s.substring(0, s.length - n);
+
+    const lastOfNInitial = (str, n) => last(nInit(str, n));
+
+    const endsWithAny = (w, arr) => arr.filter(a => w.endsWith(a)).length > 0;
+
+    const unique = a => a.filter((item, index) => a.indexOf(item) === index);
+
+    const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
+
+    /**
+     * Нечто среднее между Map и Multimap.
+     * Одной лемме соответствует одно значение,
+     * но можно также искать неточное совпадение.
+     */
+    class Dictionary {
+        constructor() {
+            this.data = {};
+        }
+
+        put(lemma, value) {
+            const lemmaObject = API.createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            let homonyms = this.data[hash];
+
+            if (!(homonyms instanceof Array)) {
+                homonyms = [];
+                this.data[hash] = homonyms;
+            }
+
+            const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+            if (found) {
+                found[1] = value;
+            } else {
+                homonyms.push([lemmaObject, value]);
+            }
+        }
+
+        putAll(lemmaPrototype, value, joinedWordList) {
+            const list = joinedWordList.split(',');
+            for (let word of list) {
+                const lemma = Object.assign({}, lemmaPrototype);
+                lemma.text = word;
+                this.put(lemma, value);
+            }
+        }
+
+        /**
+         * @param {RussianNouns.Lemma|Object} lemma
+         * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
+         * @returns {*} Значение или undefined.
+         */
+        get(lemma, fuzzy) {
+            const lemmaObject = API.createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+                if (!found && fuzzy) {
+                    found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
+                }
+
+                if (found) {
+                    return found[1];
+                }
+            }
+        }
+
+        remove(lemma) {
+            const lemmaObject = API.createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                this.data[hash] = homonyms.filter(ls => !lemmaObject.equals(ls[0]));
+
+                if (this.data[hash].length === 0) {
+                    delete this.data[hash];
+                }
+            }
+        }
+
+        /**
+         * Благодаря этому методу, словарь можно использовать для других целей.
+         * Например, если там есть слово, можно посмотреть его род и признаки.
+         *
+         * @param word Слово, по которому производится поиск.
+         * Буква Ё и регистр игнорируются.
+         * @returns {Array} Список лемм.
+         */
+        find(word) {
+            const hash = unYo(word).toLowerCase();
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                return homonyms.map(pair => pair[0]);
+            } else {
+                return [];
+            }
+        }
+    }
+
     const API = {
         Case: Case,
         Gender: Gender,
 
         CASES: CASES,
 
-        LemmaException: class LemmaException extends Error {
-        },
+        LemmaException: LemmaException,
 
-        StressDictionaryException: class StressDictionaryException extends Error {
-        },
+        StressDictionaryException: StressDictionaryException,
 
         /**
          * Нормальная форма слова.
@@ -160,127 +444,7 @@
          * Пожалуйста, используйте {@link RussianNouns.createLemma}
          * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
          */
-        Lemma: class Lemma {
-
-            /**
-             * *Не для внешнего использования!*
-             * Пожалуйста, используйте {@link RussianNouns.createLemma}
-             * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
-             * @param {RussianNouns.Lemma|Object} o
-             */
-            constructor(o) {
-                if (o instanceof API.Lemma) {
-
-                    this.pluraleTantum = o.pluraleTantum;
-                    this.indeclinable = o.indeclinable;
-
-                    this.animate = o.animate;
-                    this.surname = o.surname;
-                    this.name = o.name;
-                    this.transport = o.transport;
-
-                    this.internalText = o.internalText;
-                    this.lowerCaseText = o.lowerCaseText;
-
-                    this.internalGender = o.internalGender;
-
-                } else {
-
-                    this.pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
-                    this.indeclinable = !!(o.indeclinable);
-
-                    this.animate = !!(o.animate);
-                    this.surname = !!(o.surname);
-                    this.name = !!(o.name);
-                    this.transport = !!(o.transport);
-
-                    this.internalText = o.text;
-                    this.lowerCaseText = this.internalText.toLowerCase();
-
-                    if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
-                        this.internalGender = o.gender;
-                    }
-
-                }
-            }
-
-            newText(f) {
-                const lemmaCopy = new API.Lemma(this);
-                lemmaCopy.internalText = f(lemmaCopy);
-                lemmaCopy.lowerCaseText = lemmaCopy.internalText.toLowerCase();
-                return Object.freeze(lemmaCopy);
-            }
-
-            newGender(f) {
-                const lemmaCopy = new API.Lemma(this);
-                lemmaCopy.internalGender = f(lemmaCopy);
-                return Object.freeze(lemmaCopy);
-            }
-
-            equals(o) {
-                return (o instanceof API.Lemma)
-                    && (this.lower() === o.lower())
-                    && (this.isPluraleTantum() === o.isPluraleTantum())
-                    && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
-                    && (this.isIndeclinable() === o.isIndeclinable())
-                    && (this.isAnimate() === o.isAnimate())
-                    && (this.isASurname() === o.isASurname())
-                    && (this.isAName() === o.isAName())
-                    && (this.isATransport() === o.isATransport());
-            }
-
-            fuzzyEquals(o) {
-                return (o instanceof API.Lemma)
-                    && (unYo(this.lower()) === unYo(o.lower()))
-                    && (this.isPluraleTantum() === o.isPluraleTantum())
-                    && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
-                    && (this.isIndeclinable() === o.isIndeclinable());
-            }
-
-            text() {
-                return this.internalText;
-            }
-
-            lower() {
-                return this.lowerCaseText;
-            }
-
-            isPluraleTantum() {
-                return this.pluraleTantum;
-            }
-
-            /**
-             * @deprecated Используйте isPluraleTantum(), т.к. речь об одной лемме, а pluralia — во мн.ч. на латыни.
-             * @returns {boolean}
-             */
-            isPluraliaTantum() {
-                return this.pluraleTantum;
-            }
-
-            getGender() {
-                return this.internalGender;
-            }
-
-            isIndeclinable() {
-                return this.indeclinable;
-            }
-
-            isAnimate() {
-                return this.animate || this.surname || this.name;
-            }
-
-            isASurname() {
-                return this.surname;
-            }
-
-            isAName() {
-                return this.name;
-            }
-
-            isATransport() {
-                return this.transport;
-            }
-        },
+        Lemma: Lemma,
 
         /**
          * Интерфейс с именованными параметрами для создания лемм.
@@ -295,15 +459,7 @@
          * @throws {RussianNouns.LemmaException} Ошибки из конструктора леммы.
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
-        createLemma: o => {
-            const r = API.createLemmaNoThrow(o);
-
-            if (r[0]) {
-                return r[0];
-            } else {
-                throw new API.LemmaException(r[1]);
-            }
-        },
+        createLemma: createLemma,
 
         /**
          * Интерфейс с именованными параметрами для создания лемм.
@@ -317,20 +473,7 @@
          * @param {RussianNouns.Lemma|Object} o
          * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
          */
-        createLemmaNoThrow: o => {
-            let result;
-
-            if (o instanceof API.Lemma) {
-                result = [o, null];
-            } else {
-                result = [null, validateCreateLemma(o)];
-                if (null === result[1]) {
-                    result[0] = Object.freeze(new API.Lemma(o));
-                }
-            }
-
-            return Object.freeze(result);
-        },
+        createLemmaNoThrow: createLemmaNoThrow,
 
         /**
          * Склонение существительного.
@@ -721,139 +864,6 @@
             'ладья,статья,башка');
 
         return d;
-    }
-
-    const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
-    const consonants = consonantsExceptJ + 'й';
-    const vowels = 'аоуэыяёюеи';
-
-    const isVowel = character => vowels.includes(character.toLowerCase());
-
-    const isUpper = s => s === s.toUpperCase();
-
-    const upperLike = (lowerCase, pattern) => isUpper(pattern) ? lowerCase.toUpperCase() : lowerCase;
-
-    const vowelCount = s => s.split('').filter(isVowel).length;
-
-    const last = str => {
-        if (str && str.length) {
-            return str[str.length - 1];
-        } else {
-            return '';
-        }
-    };
-
-    const nLast = (str, n) => str.substring(str.length - n);
-
-    const init = s => s.substring(0, s.length - 1);
-
-    const nInit = (s, n) => s.substring(0, s.length - n);
-
-    const lastOfNInitial = (str, n) => last(nInit(str, n));
-
-    const endsWithAny = (w, arr) => arr.filter(a => w.endsWith(a)).length > 0;
-
-    const unique = a => a.filter((item, index) => a.indexOf(item) === index);
-
-    const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
-
-    /**
-     * Нечто среднее между Map и Multimap.
-     * Одной лемме соответствует одно значение,
-     * но можно также искать неточное совпадение.
-     */
-    class Dictionary {
-        constructor() {
-            this.data = {};
-        }
-
-        put(lemma, value) {
-            const lemmaObject = API.createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
-
-            let homonyms = this.data[hash];
-
-            if (!(homonyms instanceof Array)) {
-                homonyms = [];
-                this.data[hash] = homonyms;
-            }
-
-            const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-            if (found) {
-                found[1] = value;
-            } else {
-                homonyms.push([lemmaObject, value]);
-            }
-        }
-
-        putAll(lemmaPrototype, value, joinedWordList) {
-            const list = joinedWordList.split(',');
-            for (let word of list) {
-                const lemma = Object.assign({}, lemmaPrototype);
-                lemma.text = word;
-                this.put(lemma, value);
-            }
-        }
-
-        /**
-         * @param {RussianNouns.Lemma|Object} lemma
-         * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
-         * @returns {*} Значение или undefined.
-         */
-        get(lemma, fuzzy) {
-            const lemmaObject = API.createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
-
-            const homonyms = this.data[hash];
-
-            if (homonyms instanceof Array) {
-                let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-                if (!found && fuzzy) {
-                    found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
-                }
-
-                if (found) {
-                    return found[1];
-                }
-            }
-        }
-
-        remove(lemma) {
-            const lemmaObject = API.createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
-
-            const homonyms = this.data[hash];
-
-            if (homonyms instanceof Array) {
-                this.data[hash] = homonyms.filter(ls => !lemmaObject.equals(ls[0]));
-
-                if (this.data[hash].length === 0) {
-                    delete this.data[hash];
-                }
-            }
-        }
-
-        /**
-         * Благодаря этому методу, словарь можно использовать для других целей.
-         * Например, если там есть слово, можно посмотреть его род и признаки.
-         *
-         * @param word Слово, по которому производится поиск.
-         * Буква Ё и регистр игнорируются.
-         * @returns {Array} Список лемм.
-         */
-        find(word) {
-            const hash = unYo(word).toLowerCase();
-
-            const homonyms = this.data[hash];
-
-            if (homonyms instanceof Array) {
-                return homonyms.map(pair => pair[0]);
-            } else {
-                return [];
-            }
-        }
     }
 
     const reYo = s => {

@@ -1,8 +1,10 @@
 #!/bin/bash
 set -e
 
+# Before you run it first time !!!!!!!!!
 # npm i es-check
 # npm i uglify-es
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #   To run in on ES6 engine,
 #   you will need at least polyfills for:
@@ -10,7 +12,7 @@ set -e
 #       • Array.prototype.includes
 #       • Object.values
 
-npx es-check --module es6 RussianNouns.js
+npx es-check es6 RussianNouns.js --module
 
 ls -l RussianNouns.js
 
