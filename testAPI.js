@@ -68,7 +68,7 @@ function assertAllCases(results, values) {
     }
 }
 
-const RussianNouns = require('./RussianNouns.js');
+const RussianNouns = require('./RussianNouns.min.js');
 
 (() => {
     const rne = new RussianNouns.Engine();
@@ -192,11 +192,92 @@ const RussianNouns = require('./RussianNouns.js');
     assertEquals(result[1], "кринжем");
 
     console.log('--------------- 9 ----------------');
+
+    const LocativeFormAttribute = RussianNouns.LocativeFormAttribute;
+
+    (() => {
+        const uniqueLocativeFormAttributes = new Set();
+        for (let sc of Object.values(LocativeFormAttribute)) {
+            uniqueLocativeFormAttributes.add(sc);
+        }
+
+        assertEquals(
+            Object.keys(LocativeFormAttribute).length,
+            uniqueLocativeFormAttributes.size,
+            'Enum values must be unique.'
+        );
+    })();
+
+    let row = RussianNouns.createLemma({
+        text: 'ряд',
+        gender: Gender.MASCULINE
+    });
+
+    result = RussianNouns.CASES.map(c => {
+        return rne.decline(row, c);
+    });
+
+    assertAllCases(result, ['ряд', 'ряда', 'ряду', 'ряд', 'рядом', 'ряде', 'ряду']);
+    assertIsArray(rne.getLocativeForms(row), 'getLocativeForms(x) type');
+    assertEquals(rne.getLocativeForms(row).length, 1, 'locative forms count');
+    assertEquals(rne.getLocativeForms(row)[0].preposition, 'в', 'lf.preposition');
+    assertEquals(rne.getLocativeForms(row)[0].word, 'ряду', 'lf.word');
+    assertEqualsSingleValue(
+        rne.getLocativeForms(row)[0].attributes,
+        LocativeFormAttribute.STRUCTURE,
+        'lf.semantics'
+    );
+
+    assertIsArray(rne.getLocativeForms(mountain), 'getLocativeForms(x) type (a mountain)');
+    assertEquals(rne.getLocativeForms(mountain).length, 0, 'locative forms count (a mountain)');
+
+    assertIsArray(rne.getLocativeForms(way), 'getLocativeForms(x) type (a way)');
+    assertEquals(rne.getLocativeForms(way).length, 0, 'locative forms count (a way)');
+
+    const ball = RussianNouns.createLemma({
+        text: 'мяч',
+        gender: Gender.MASCULINE
+    });
+    assertIsArray(rne.getLocativeForms(ball), 'getLocativeForms(x) type (a ball)');
+    assertEquals(rne.getLocativeForms(ball).length, 0, 'locative forms count (a ball)');
+
+    const steam = RussianNouns.createLemma({
+        text: 'пар',
+        gender: Gender.MASCULINE
+    });
+
+    result = RussianNouns.CASES.map(c => {
+        return rne.decline(steam, c);
+    });
+
+    assertIsArray(result);
+    assertEqualsSingleValue(result[5], 'паре');
+    assertEqualsSingleValue(result[6], 'пару');
+    const steamLocativeForms = rne.getLocativeForms(steam);
+    assertIsArray(steamLocativeForms, 'getLocativeForms(x) type (steam)');
+
+    function findFormWithSingleAttribute(locativeForms, attribute) {
+        return locativeForms.filter(f => ((f.attributes.length === 1)
+            && ((f.attributes[0] === attribute))));
+    }
+
+    const steamSubstance = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SUBSTANCE);
+    const steamResource = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.RESOURCE);
+
+    assertEquals(steamSubstance.length, 1, 'Steam as a substance must have a locative form.');
+    assertEquals(steamResource.length, 1, 'Steam as a resource must have a locative form.');
+
+    assertEquals(steamSubstance[0].preposition, 'в', 'Steam as a substance has incorrect preposition.');
+    assertEquals(steamResource[0].preposition, 'на', 'Steam as a resource has incorrect preposition.');
+
+    assertEquals(steamSubstance[0].word, 'пару', 'Steam as a substance has incorrect word form.');
+    assertEquals(steamResource[0].word, 'пару', 'Steam as a resource has incorrect word form.');
+
+    console.log('--------------- 10 ---------------');
+
 })();
 
 (() => {
-    const rne = new RussianNouns.Engine();
-
     itShouldThrow(RussianNouns.LemmaException, () => {
         RussianNouns.createLemma(123);
     });
@@ -834,6 +915,12 @@ const RussianNouns = require('./RussianNouns.js');
         L({text: 'α-частица', gender: Gender.FEMININE}),
         ['α-частица', 'α-частицы', 'α-частице', 'α-частицу', ['α-частицей', 'α-частицею'], 'α-частице', 'α-частице'],
         ['α-частицы', 'α-частиц', 'α-частицам', 'α-частицы', 'α-частицами', 'α-частицах', 'α-частицах']
+    );
+
+    checkSingularAndPlural(
+        L({text: 'овца', gender: Gender.FEMININE, animate: true}),
+        ['овца', 'овцы', 'овце', 'овцу', ['овцой', 'овцою'], 'овце', 'овце'],
+        ['овцы', 'овец', 'овцам', 'овец', 'овцами', 'овцах', 'овцах']
     );
 
     checkSingularAndPlural(

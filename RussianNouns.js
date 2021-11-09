@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.2.6.SNAPSHOT
+  RussianNounsJS v1.3.0
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -47,35 +47,6 @@
         ACCUSATIVE: 'винительный',
         INSTRUMENTAL: 'творительный',
         PREPOSITIONAL: 'предложный',
-
-        /**
-         * Важно понимать, что отличающийся от предложного падежа локатив иногда используется
-         * только с одним предлогом (только «в» или только «на»), а с другим или вообще
-         * не употребляется, или склоняется иначе.
-         *
-         * Например, мы говорим «на ветру», «в тылу (врага)». Но мы не говорим «в ветру», «на тылу».
-         * Обычно говорят «на тыльной стороне чего-либо» и, возможно, «в ветре» (скорее «в воздухе»).
-         *
-         * Мы говорим «на бегу», но также «в беге».
-         *
-         * Есть существительные, которые одинаково используются с предлогами «в» и «на».
-         * Например: в снегу — на снегу, во льду — на льду, в пуху — на пуху.
-         *
-         * В. А. Плунгян выделяет у слов мужского рода с особыми формами локатива
-         * семь семантических классов:
-         *  1. вместилища («в»);
-         *  2. пространства («в»);
-         *  3. конфигурации объектов, образующих устойчивые структуры (например, «ряд», «строй» — «в»);
-         *  4. поверхности («на»);
-         *  5. объекты с функциональной поверхностью («на»);
-         *  6. вещества («в» и «на»);
-         *  7. ситуации («в» и «на»).
-         *
-         * А также, у слов женского рода третьего склонения с особыми формами локатива
-         * пять семантических классов.
-         * Однако, у локатива в словах женского рода третьего склонения отличается от предложного падежа
-         * только ударение — смещается на последний слог, на письме они не отличаются.
-         */
         LOCATIVE: 'местный'
     });
 
@@ -140,17 +111,410 @@
         return null;
     }
 
+    class Lemma {
+
+        /**
+         * *Не для внешнего использования!*
+         * Пожалуйста, используйте {@link RussianNouns.createLemma}
+         * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
+         * @param {RussianNouns.Lemma|Object} o
+         */
+        constructor(o) {
+            if (o instanceof Lemma) {
+
+                this.pluraleTantum = o.pluraleTantum;
+                this.indeclinable = o.indeclinable;
+
+                this.animate = o.animate;
+                this.surname = o.surname;
+                this.name = o.name;
+                this.transport = o.transport;
+
+                this.internalText = o.internalText;
+                this.lowerCaseText = o.lowerCaseText;
+
+                this.internalGender = o.internalGender;
+
+            } else {
+
+                this.pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
+                this.indeclinable = !!(o.indeclinable);
+
+                this.animate = !!(o.animate);
+                this.surname = !!(o.surname);
+                this.name = !!(o.name);
+                this.transport = !!(o.transport);
+
+                this.internalText = o.text;
+                this.lowerCaseText = this.internalText.toLowerCase();
+
+                if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
+                    this.internalGender = o.gender;
+                }
+
+            }
+        }
+
+        newText(f) {
+            const lemmaCopy = new Lemma(this);
+            lemmaCopy.internalText = f(lemmaCopy);
+            lemmaCopy.lowerCaseText = lemmaCopy.internalText.toLowerCase();
+            return Object.freeze(lemmaCopy);
+        }
+
+        newGender(f) {
+            const lemmaCopy = new Lemma(this);
+            lemmaCopy.internalGender = f(lemmaCopy);
+            return Object.freeze(lemmaCopy);
+        }
+
+        equals(o) {
+            return (o instanceof Lemma)
+                && (this.lower() === o.lower())
+                && (this.isPluraleTantum() === o.isPluraleTantum())
+                && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
+                && (this.isIndeclinable() === o.isIndeclinable())
+                && (this.isAnimate() === o.isAnimate())
+                && (this.isASurname() === o.isASurname())
+                && (this.isAName() === o.isAName())
+                && (this.isATransport() === o.isATransport());
+        }
+
+        fuzzyEquals(o) {
+            return (o instanceof Lemma)
+                && (unYo(this.lower()) === unYo(o.lower()))
+                && (this.isPluraleTantum() === o.isPluraleTantum())
+                && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
+                && (this.isIndeclinable() === o.isIndeclinable());
+        }
+
+        text() {
+            return this.internalText;
+        }
+
+        lower() {
+            return this.lowerCaseText;
+        }
+
+        isPluraleTantum() {
+            return this.pluraleTantum;
+        }
+
+        /**
+         * @deprecated Используйте isPluraleTantum(), т.к. речь об одной лемме, а pluralia — во мн.ч. на латыни.
+         * @returns {boolean}
+         */
+        isPluraliaTantum() {
+            return this.pluraleTantum;
+        }
+
+        getGender() {
+            return this.internalGender;
+        }
+
+        isIndeclinable() {
+            return this.indeclinable;
+        }
+
+        isAnimate() {
+            return this.animate || this.surname || this.name;
+        }
+
+        isASurname() {
+            return this.surname;
+        }
+
+        isAName() {
+            return this.name;
+        }
+
+        isATransport() {
+            return this.transport;
+        }
+    }
+
+    class LemmaException extends Error {
+    }
+
+    class StressDictionaryException extends Error {
+    }
+
+    function createLemmaNoThrow(o) {
+        let result;
+
+        if (o instanceof Lemma) {
+            result = [o, null];
+        } else {
+            result = [null, validateCreateLemma(o)];
+            if (null === result[1]) {
+                result[0] = Object.freeze(new Lemma(o));
+            }
+        }
+
+        return Object.freeze(result);
+    }
+
+    function createLemma(o) {
+        const r = createLemmaNoThrow(o);
+
+        if (r[0]) {
+            return r[0];
+        } else {
+            throw new LemmaException(r[1]);
+        }
+    }
+
+    const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
+    const consonants = consonantsExceptJ + 'й';
+    const vowels = 'аоуэыяёюеи';
+
+    const isVowel = character => vowels.includes(character.toLowerCase());
+
+    const isUpper = s => s === s.toUpperCase();
+
+    const upperLike = (lowerCase, pattern) => isUpper(pattern) ? lowerCase.toUpperCase() : lowerCase;
+
+    const vowelCount = s => s.split('').filter(isVowel).length;
+
+    const last = str => {
+        if (str && str.length) {
+            return str[str.length - 1];
+        } else {
+            return '';
+        }
+    };
+
+    const nLast = (str, n) => str.substring(str.length - n);
+
+    const init = s => s.substring(0, s.length - 1);
+
+    const nInit = (s, n) => s.substring(0, s.length - n);
+
+    const lastOfNInitial = (str, n) => last(nInit(str, n));
+
+    const endsWithAny = (w, arr) => arr.filter(a => w.endsWith(a)).length > 0;
+
+    const unique = a => a.filter((item, index) => a.indexOf(item) === index);
+
+    const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
+
+    /**
+     * Нечто среднее между Map и Multimap.
+     * Одной лемме соответствует одно значение,
+     * но можно также искать неточное совпадение.
+     */
+    class Dictionary {
+        constructor() {
+            this.data = {};
+        }
+
+        put(lemma, value) {
+            const lemmaObject = createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            let homonyms = this.data[hash];
+
+            if (!(homonyms instanceof Array)) {
+                homonyms = [];
+                this.data[hash] = homonyms;
+            }
+
+            const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+            if (found) {
+                found[1] = value;
+            } else {
+                homonyms.push([lemmaObject, value]);
+            }
+        }
+
+        putAll(lemmaPrototype, value, joinedWordList) {
+            const list = joinedWordList.split(',');
+            for (let word of list) {
+                const lemma = Object.assign({}, lemmaPrototype);
+                lemma.text = word;
+                this.put(lemma, value);
+            }
+        }
+
+        /**
+         * @param {RussianNouns.Lemma|Object} lemma
+         * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
+         * @returns {*} Значение или undefined.
+         */
+        get(lemma, fuzzy) {
+            const lemmaObject = createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+                if (!found && fuzzy) {
+                    found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
+                }
+
+                if (found) {
+                    return found[1];
+                }
+            }
+        }
+
+        remove(lemma) {
+            const lemmaObject = createLemma(lemma);
+            const hash = unYo(lemmaObject.lower());
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                this.data[hash] = homonyms.filter(ls => !lemmaObject.equals(ls[0]));
+
+                if (this.data[hash].length === 0) {
+                    delete this.data[hash];
+                }
+            }
+        }
+
+        /**
+         * Благодаря этому методу, словарь можно использовать для других целей.
+         * Например, если там есть слово, можно посмотреть его род и признаки.
+         *
+         * @param word Слово, по которому производится поиск.
+         * Буква Ё и регистр игнорируются.
+         * @returns {Array} Список лемм.
+         */
+        find(word) {
+            const hash = unYo(word).toLowerCase();
+
+            const homonyms = this.data[hash];
+
+            if (homonyms instanceof Array) {
+                return homonyms.map(pair => pair[0]);
+            } else {
+                return [];
+            }
+        }
+    }
+
+    const LocativeFormAttribute = Object.freeze({
+        // Вместилище.
+        CONTAINER: 1,
+
+        // Пространство, помещение, участок суши.
+        LOCATION: 2,
+
+        /**
+         * Конфигурация объектов, образующая устойчивую структуру.
+         * Т.е. структура здесь — в том смысле, что это всегда порядок
+         * каких-то объектов: людей, вещей и т. п.
+         */
+        STRUCTURE: 3,
+
+        // Поверхность.
+        SURFACE: 4,
+        // Метафорический путь. Луч времени, на (или в) котором лежат события.
+        WAY: 5,
+
+        // Объект с функциональной (не обязательно плоской) поверхностью.
+        OBJECT_WITH_FUNCTIONAL_SURFACE: 6,
+
+        // Вещество (обволакивающее или покрывающее).
+        SUBSTANCE: 7,
+        // Материал, средство изготовления, приготовления (еды), ремонта.
+        RESOURCE: 8,
+
+        // Состояние, свойство, положение дел.
+        CONDITION: 9,
+        // Испытываемое воздействие (стихии или внимания/отношения человека).
+        EXPOSURE: 10,
+        // Перемещение или кратковременное пространственное положение.
+        MOTION: 11,
+        // Мероприятие.
+        EVENT: 12,
+
+        WITH_ADJECTIVE: 13,
+        WITHOUT_ADJECTIVE: 14,
+
+        /**
+         * Употребляется только в религиозном контексте, причём скорее всего
+         * только в определённой религии или даже в определённой конфессии.
+         * Т.е. использовать такие выражения следует с большой осторожностью,
+         * иначе можно сказануть что-то очень странное.
+         */
+        RELIGIOUS: 15
+    });
+
+    class LocativeForm {
+        /**
+         * @param {string} preposition Предлог.
+         * @param {string} word Форма слова.
+         * @param {array} attributes Предикаты, которые все должны быть истинными.
+         */
+        constructor(preposition, word, attributes) {
+            this.preposition = preposition;
+            this.word = word;
+            this.attributes = attributes;
+        }
+    }
+
+    /**
+     * Для внутреннего использования.
+     */
+    const LocativeDeclensionType = Object.freeze({
+        /**
+         * Для очень особых случаев, когда форма предложного падежа
+         * в локативе является исключением из правил.
+         * Т.е. вот есть какие-то атрибуты у особой формы локатива с предлогом,
+         * но если добавить еще определённый атрибут или несколько,
+         * форма должна снова переключиться в обычную.
+         */
+        PREPOSITIONAL: 1,
+
+        // Окончания -у/-ю.
+        U_SUFFIX: 2
+    });
+
+    /**
+     * Для внутреннего использования.
+     * Правило, по которому мы получаем локатив, с учетом семантики и предлогов.
+     * Атрибуты — это предикаты, которые все должны быть истинными.
+     */
+    class LocativeConfig {
+        constructor(preposition, declensionType, attributes) {
+            this.preposition = preposition;
+            this.declensionType = declensionType;
+            this.attributes = attributes;
+        }
+    }
+
+    const locativeDictionary = Object.freeze(makeDefaultLocativeDictionary())
+
     const API = {
         Case: Case,
         Gender: Gender,
 
         CASES: CASES,
 
-        LemmaException: class LemmaException extends Error {
-        },
+        LemmaException: LemmaException,
+        StressDictionaryException: StressDictionaryException,
 
-        StressDictionaryException: class StressDictionaryException extends Error {
-        },
+        /**
+         * Предикаты, по которым можно узнать, уместно ли
+         * в данном случае употреблять ту или иную форму локатива.
+         * Тут взяты семантические классы (с небольшими изменениями)
+         * из публикации «К семантике русского локатива».
+         * Затем к ним еще добавлены синтаксические особенности употребления.
+         */
+        LocativeFormAttribute: LocativeFormAttribute,
+
+        /**
+         * Форма слова в местном падеже (ед. ч.) с предлогом
+         * и списком условий применения, которые складываются через логическое И.
+         * Т.е. если хотя бы один атрибут как предикат ложен,
+         * то эта комбинация формы слова и предлога не может быть использована.
+         */
+        LocativeForm: LocativeForm,
 
         /**
          * Нормальная форма слова.
@@ -160,127 +524,7 @@
          * Пожалуйста, используйте {@link RussianNouns.createLemma}
          * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
          */
-        Lemma: class Lemma {
-
-            /**
-             * *Не для внешнего использования!*
-             * Пожалуйста, используйте {@link RussianNouns.createLemma}
-             * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
-             * @param {RussianNouns.Lemma|Object} o
-             */
-            constructor(o) {
-                if (o instanceof API.Lemma) {
-
-                    this.pluraleTantum = o.pluraleTantum;
-                    this.indeclinable = o.indeclinable;
-
-                    this.animate = o.animate;
-                    this.surname = o.surname;
-                    this.name = o.name;
-                    this.transport = o.transport;
-
-                    this.internalText = o.internalText;
-                    this.lowerCaseText = o.lowerCaseText;
-
-                    this.internalGender = o.internalGender;
-
-                } else {
-
-                    this.pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
-                    this.indeclinable = !!(o.indeclinable);
-
-                    this.animate = !!(o.animate);
-                    this.surname = !!(o.surname);
-                    this.name = !!(o.name);
-                    this.transport = !!(o.transport);
-
-                    this.internalText = o.text;
-                    this.lowerCaseText = this.internalText.toLowerCase();
-
-                    if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
-                        this.internalGender = o.gender;
-                    }
-
-                }
-            }
-
-            newText(f) {
-                const lemmaCopy = new API.Lemma(this);
-                lemmaCopy.internalText = f(lemmaCopy);
-                lemmaCopy.lowerCaseText = lemmaCopy.internalText.toLowerCase();
-                return Object.freeze(lemmaCopy);
-            }
-
-            newGender(f) {
-                const lemmaCopy = new API.Lemma(this);
-                lemmaCopy.internalGender = f(lemmaCopy);
-                return Object.freeze(lemmaCopy);
-            }
-
-            equals(o) {
-                return (o instanceof API.Lemma)
-                    && (this.lower() === o.lower())
-                    && (this.isPluraleTantum() === o.isPluraleTantum())
-                    && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
-                    && (this.isIndeclinable() === o.isIndeclinable())
-                    && (this.isAnimate() === o.isAnimate())
-                    && (this.isASurname() === o.isASurname())
-                    && (this.isAName() === o.isAName())
-                    && (this.isATransport() === o.isATransport());
-            }
-
-            fuzzyEquals(o) {
-                return (o instanceof API.Lemma)
-                    && (unYo(this.lower()) === unYo(o.lower()))
-                    && (this.isPluraleTantum() === o.isPluraleTantum())
-                    && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
-                    && (this.isIndeclinable() === o.isIndeclinable());
-            }
-
-            text() {
-                return this.internalText;
-            }
-
-            lower() {
-                return this.lowerCaseText;
-            }
-
-            isPluraleTantum() {
-                return this.pluraleTantum;
-            }
-
-            /**
-             * @deprecated Используйте isPluraleTantum(), т.к. речь об одной лемме, а pluralia — во мн.ч. на латыни.
-             * @returns {boolean}
-             */
-            isPluraliaTantum() {
-                return this.pluraleTantum;
-            }
-
-            getGender() {
-                return this.internalGender;
-            }
-
-            isIndeclinable() {
-                return this.indeclinable;
-            }
-
-            isAnimate() {
-                return this.animate || this.surname || this.name;
-            }
-
-            isASurname() {
-                return this.surname;
-            }
-
-            isAName() {
-                return this.name;
-            }
-
-            isATransport() {
-                return this.transport;
-            }
-        },
+        Lemma: Lemma,
 
         /**
          * Интерфейс с именованными параметрами для создания лемм.
@@ -295,15 +539,7 @@
          * @throws {RussianNouns.LemmaException} Ошибки из конструктора леммы.
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
-        createLemma: o => {
-            const r = API.createLemmaNoThrow(o);
-
-            if (r[0]) {
-                return r[0];
-            } else {
-                throw new API.LemmaException(r[1]);
-            }
-        },
+        createLemma: createLemma,
 
         /**
          * Интерфейс с именованными параметрами для создания лемм.
@@ -317,20 +553,7 @@
          * @param {RussianNouns.Lemma|Object} o
          * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
          */
-        createLemmaNoThrow: o => {
-            let result;
-
-            if (o instanceof API.Lemma) {
-                result = [o, null];
-            } else {
-                result = [null, validateCreateLemma(o)];
-                if (null === result[1]) {
-                    result[0] = Object.freeze(new API.Lemma(o));
-                }
-            }
-
-            return Object.freeze(result);
-        },
+        createLemmaNoThrow: createLemmaNoThrow,
 
         /**
          * Склонение существительного.
@@ -511,6 +734,44 @@
                 }
             }
 
+            /**
+             * Экспериментальная возможность!
+             * Заточено под ед. число.
+             *
+             * Возвращает формы слов с условиями их использования (там смешаны
+             * семантические классы и некоторые синтаксические обстоятельства).
+             *
+             * Эти так называемые атрибуты в объектах API.LocativeForm конъюнктивны.
+             * Т.е. чтобы форма слова с предлогом могла применяться, должны быть истинными
+             * все перечисленные предикаты (атрибуты, условия применения).
+             * И напротив, если хотя бы один из предикатов ложен, не следует использовать это выражение.
+             * Однако, если они все истинны, это еще недостаточное условие для применения.
+             * Еще в полученном списке не должно быть более конкретного условия,
+             * т.е. содержащего все те же предикаты с еще дополнительными, тоже истинными.
+             * В последнем случае это уточнённое правило переопределит то, которое мы рассматриваем.
+             *
+             * @param {RussianNouns.Lemma|Object} lemma
+             * @returns {Array} Массив объектов типа API.LocativeForm.
+             * Может быть пустым, если местный падеж в ед. ч. совпадает с предложным или не имеет смысла.
+             */
+            getLocativeForms(lemma) {
+                const engine = this;
+                const o = API.createLemma(lemma);
+                const declension = getDeclension(o);
+
+                if (declension && (declension >= 0)) {
+                    const configs = locativeDictionary.get(o, false);
+                    if (configs instanceof Array) {
+                        return configs.map(c => (new LocativeForm(
+                            c.preposition,
+                            toLocativeSingular(engine, declension, o, c.declensionType),
+                            c.attributes
+                        )));
+                    }
+                }
+
+                return [];
+            }
         }
     };
 
@@ -723,137 +984,148 @@
         return d;
     }
 
-    const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
-    const consonants = consonantsExceptJ + 'й';
-    const vowels = 'аоуэыяёюеи';
+    function makeDefaultLocativeDictionary() {
+        const dictionary = new Dictionary();
+        const m = Object.freeze({gender: Gender.MASCULINE});
+        const mAnimate = Object.freeze({gender: Gender.MASCULINE, animate: true});
 
-    const isVowel = character => vowels.includes(character.toLowerCase());
+        function addConfig(lemmaPrototype, condition, ps, ws, dTypes) {
+            const andConditions = (condition instanceof Array) ? condition : [condition];
+            const prepositions = ps.split(',');
+            const words = ws.split(',');
 
-    const isUpper = s => s === s.toUpperCase();
+            // Тут если номер, то это LocativeDeclensionType,
+            // а если строка, то можно будет, наверно, здесь же предусмотреть
+            // особую форму слова, если она не совпадает с предложным падежом.
+            // Но пока что это не потребовалось.
+            const declensionTypes = (dTypes instanceof Array) ? dTypes : [LocativeDeclensionType.U_SUFFIX];
 
-    const upperLike = (lowerCase, pattern) => isUpper(pattern) ? lowerCase.toUpperCase() : lowerCase;
-
-    const vowelCount = s => s.split('').filter(isVowel).length;
-
-    const last = str => {
-        if (str && str.length) {
-            return str[str.length - 1];
-        } else {
-            return '';
-        }
-    };
-
-    const nLast = (str, n) => str.substring(str.length - n);
-
-    const init = s => s.substring(0, s.length - 1);
-
-    const nInit = (s, n) => s.substring(0, s.length - n);
-
-    const lastOfNInitial = (str, n) => last(nInit(str, n));
-
-    const endsWithAny = (w, arr) => arr.filter(a => w.endsWith(a)).length > 0;
-
-    const unique = a => a.filter((item, index) => a.indexOf(item) === index);
-
-    const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
-
-    /**
-     * Нечто среднее между Map и Multimap.
-     * Одной лемме соответствует одно значение,
-     * но можно также искать неточное совпадение.
-     */
-    class Dictionary {
-        constructor() {
-            this.data = {};
-        }
-
-        put(lemma, value) {
-            const lemmaObject = API.createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
-
-            let homonyms = this.data[hash];
-
-            if (!(homonyms instanceof Array)) {
-                homonyms = [];
-                this.data[hash] = homonyms;
-            }
-
-            const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-            if (found) {
-                found[1] = value;
-            } else {
-                homonyms.push([lemmaObject, value]);
-            }
-        }
-
-        putAll(lemmaPrototype, value, joinedWordList) {
-            const list = joinedWordList.split(',');
-            for (let word of list) {
+            for (let word of words) {
                 const lemma = Object.assign({}, lemmaPrototype);
                 lemma.text = word;
-                this.put(lemma, value);
-            }
-        }
 
-        /**
-         * @param {RussianNouns.Lemma|Object} lemma
-         * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
-         * @returns {*} Значение или undefined.
-         */
-        get(lemma, fuzzy) {
-            const lemmaObject = API.createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
-
-            const homonyms = this.data[hash];
-
-            if (homonyms instanceof Array) {
-                let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-                if (!found && fuzzy) {
-                    found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
+                let configArray = dictionary.get(lemma, false);
+                if (!configArray) {
+                    configArray = [];
+                    dictionary.put(lemma, configArray);
                 }
 
-                if (found) {
-                    return found[1];
+                for (let p of prepositions) {
+                    for (let d of declensionTypes) {
+                        configArray.push(new LocativeConfig(p, d, andConditions));
+                    }
                 }
             }
         }
 
-        remove(lemma) {
-            const lemmaObject = API.createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
+        // В. А. Плунгян выделяет у слов мужского рода
+        // с особыми формами локатива семь семантических классов:
 
-            const homonyms = this.data[hash];
+        // 1. вместилища, сосуды («в»)
+        addConfig(m, LocativeFormAttribute.CONTAINER, 'в', 'мозг,пруд,стог,таз,год');
+        addConfig(m, LocativeFormAttribute.CONTAINER, 'во', 'рот');
+        // Год может быть тем, в чём содержатся дни, например,
+        // и может быть тем, на чём лежат события.
+        // Это два разных случая. Их нельзя в один конфиг помещать,
+        // т.к. у них условия через конъюнкцию проверяются.
+        addConfig(m, LocativeFormAttribute.WAY, 'в', 'год');
+        addConfig(m, LocativeFormAttribute.CONTAINER, 'в', 'гроб');
+        // Не уверен, что семантика "во гробе" тут правильная.
+        // Не исключено, что это имеет совершенно другой религиозный смысл, чем вместилище,
+        // поэтому и склонение отличается.
+        addConfig(m, [LocativeFormAttribute.CONTAINER, LocativeFormAttribute.RELIGIOUS],
+            'во', 'гроб', [LocativeDeclensionType.PREPOSITIONAL]);
 
-            if (homonyms instanceof Array) {
-                this.data[hash] = homonyms.filter(ls => !lemmaObject.equals(ls[0]));
+        // 2. пространства («в»)
+        addConfig(m, LocativeFormAttribute.LOCATION, 'в',
+            'ад,бор,лес,порт,аэропорт,рай,сад,тыл,' +
+            'низ,' +
+            'хлев'  // по классификации Плунгяна, это вместилище (как и "цех")
+        );
 
-                if (this.data[hash].length === 0) {
-                    delete this.data[hash];
-                }
-            }
-        }
+        // 3. конфигурации объектов, образующих устойчивые структуры («в»)
+        addConfig(m, LocativeFormAttribute.STRUCTURE, 'в',
+            'круг,полк,артполк,ряд,род,строй,лад');
 
-        /**
-         * Благодаря этому методу, словарь можно использовать для других целей.
-         * Например, если там есть слово, можно посмотреть его род и признаки.
-         *
-         * @param word Слово, по которому производится поиск.
-         * Буква Ё и регистр игнорируются.
-         * @returns {Array} Список лемм.
-         */
-        find(word) {
-            const hash = unYo(word).toLowerCase();
+        // 4. поверхности («на»)
+        addConfig(m, LocativeFormAttribute.SURFACE, 'на', '' +
+            'баз,' +    // скотный двор
+            'берег,' +
+            'бережок,' +    // (спорно)
+            'вал,кон,круг,луг,пол,яр'
+        );
+        // На своём веку, столько-то раз на дню.
+        // При этом, в веке — 100 лет, в дне — 24 часа.
+        addConfig(m, LocativeFormAttribute.WAY, 'на', 'век,день');
+        // Это читерство небольшое, но тут аналогичная ситуация.
+        addConfig(m, LocativeFormAttribute.WAY, 'в', 'час');
+        // "на корню" — устойчивое выражение (наречие), означающее "в процессе формирования".
+        // "зарубить на корню" — "уничтожить в самом начале".
+        addConfig(m, LocativeFormAttribute.WAY, 'на', 'корень');
 
-            const homonyms = this.data[hash];
+        // 5. объекты с функциональной (не обязательно плоской) поверхностью («на»)
+        addConfig(mAnimate, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', 'вор');
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', '' +
+            'бочок,' +  // лежать на бочку, т.е. лежать боком вниз (почти не употребляется)
+            'борт,воз,горб,кол,мост,плот,сук,' +
+            rkComma('фти,')
+        );
 
-            if (homonyms instanceof Array) {
-                return homonyms.map(pair => pair[0]);
-            } else {
-                return [];
-            }
-        }
+        // 6. вещества и материалы («в» и «на»)
+        const substance_or_resource = ',мёд,мех,пар,пух';
+        addConfig(m, LocativeFormAttribute.SUBSTANCE, 'в', 'дым,жир,мел,пушок' + substance_or_resource);
+        addConfig(m, LocativeFormAttribute.RESOURCE, 'на', 'газ,клей,спирт' + substance_or_resource);
+
+        // 7. ситуации и состояния («в» и «на»)
+        addConfig(m, LocativeFormAttribute.CONDITION, 'в',
+            'бой,бред,быт,долг,плен,пыл,сок,ход,лад');
+        // Тут я имею в виду смысл, употреблённый в текущем предложении.
+        // Кое-где пишут, что есть еще употребление "в виду гор" в значении "там, откуда видны горы".
+        // Никогда не слышал, чтобы так говорили. Если в эту классификацию это вписывать,
+        // я не уверен, EXPOSURE это, CONDITION или что-то третье.
+        addConfig(m, LocativeFormAttribute.EXPOSURE, 'в,на', 'вид');
+        addConfig(m, LocativeFormAttribute.EXPOSURE, 'на', 'слух,счёт,ветер,ветр,свет');
+        addConfig(m, LocativeFormAttribute.MOTION, 'на', 'ход,бег,вес,шаг');
+        addConfig(m, LocativeFormAttribute.EVENT, 'на', 'бал,пир');
+        // Может быть "дух" когда-то и значило "исповедь",
+        // сейчас это только всех запутает.
+        addConfig(m, LocativeFormAttribute.CONDITION, 'на', 'дух');
+        // На полном газу. Не уверен, как это сюда записать. Вроде, устойчивое выражение.
+        addConfig(m, [LocativeFormAttribute.MOTION, LocativeFormAttribute.WITH_ADJECTIVE], 'на', 'газ');
+
+        // 1 и 5.
+        addConfig(m, LocativeFormAttribute.CONTAINER, 'в', 'глаз,нос,шкаф');
+        addConfig(m, LocativeFormAttribute.CONTAINER, 'во', 'лоб');
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', 'глаз,лоб,нос,шкаф');
+
+        let two_and_five = 'бок,верх,зад,угол';
+        addConfig(m, LocativeFormAttribute.LOCATION, 'в', two_and_five);
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', two_and_five);
+        // Есть сомнения, в каких случаях используется форма предложного падежа.
+        // Является ли решающим наличие любого определения (в *Красноярском* крае, на *внешнем* крае)
+        // или подобные выражения являются исключениями и их нельзя обобщать.
+        // Я пока что склоняюсь к первому варианту.
+        addConfig(m, [
+            LocativeFormAttribute.LOCATION,
+            LocativeFormAttribute.WITHOUT_ADJECTIVE
+        ], 'в', 'край');
+        addConfig(m, [
+            LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE,
+            LocativeFormAttribute.WITHOUT_ADJECTIVE
+        ], 'на', 'край');
+
+        // 4 и 6
+        addConfig(m, LocativeFormAttribute.SURFACE, 'на', 'лёд,мох,снег');
+        addConfig(m, LocativeFormAttribute.SUBSTANCE, 'во', 'лёд,мох');
+        addConfig(m, LocativeFormAttribute.SUBSTANCE, 'в', 'снег');
+
+        // А также, у слов женского рода третьего склонения с особыми формами
+        // локатива пять семантических классов.
+        // Однако, у локатива в словах женского рода третьего склонения отличается
+        // от предложного падежа только ударение — смещается на последний слог,
+        // на письме они не отличаются.
+
+        return dictionary;
     }
 
     const reYo = s => {
@@ -957,14 +1229,14 @@
         const t = last(lcWord);
         switch (gender) {
             case Gender.FEMININE:
-                return t == "а" || t == "я" ? 2 :
+                return t === "а" || t === "я" ? 2 :
                     consonants.includes(t) ? -1 : 3;
             case Gender.MASCULINE:
-                return t == "а" || t == "я" ? 2 :
-                    lcWord == "путь" ? 0 : 1;
+                return t === "а" || t === "я" ? 2 :
+                    lcWord === "путь" ? 0 : 1;
             case Gender.NEUTER:
                 return ['дитя', 'полудитя'].includes(lcWord) ? 0 :
-                    nLast(lcWord, 2) == "мя" ? 3 : 1;
+                    nLast(lcWord, 2) === "мя" ? 3 : 1;
             case Gender.COMMON:
                 if (t === 'а' || t === 'я') {
                     return 2;
@@ -1338,33 +1610,10 @@
 
         if (Case.LOCATIVE === grCase) {
 
-            const uInanimate = (
-                'ад,' +
-                'баз,' + // скотный двор
-                'бал,бег,берег,бережок,бой,бок,бочок,бор,борт,бред,быт,' +
-                'вал,век,верх,вес,ветер,ветр,вид,воз,' +
-                'газ,глаз,год,горб,гроб,день,долг,дух,дым,жир,зад,' +
-                'клей,кол,кон,корень,край,круг,' +
-                'лад,лёд,лед,лоб,мох,угол,' +
-                'лес,луг,мёд,мел,мех,мозг,мост,низ,нос,плен,плот,пол,' +
-                'полк,артполк,порт,аэропорт,пруд,пух,пушок,пыл,' +
-                'рай,род,рот,сад,свет,слух,снег,сок,спирт,стог,строй,счёт,счет,сук,' +
-                rkComma('фти,') +
-                'таз,тыл,хлев,ход,час,шаг,шкаф,яр'
-            ).split(',');
-
-            const u = ('вор').split(',');
-
-            if ((uInanimate.includes(lcWord) && !lemma.isAnimate()) || u.includes(lcWord)) {
-                if (last(lcWord) === 'й') {
-                    return unYo(head) + 'ю';
-                } else if (soft) {
-                    return unYo(stem) + 'ю';
-                } else if (okWord(lcWord)) {
-                    return unYo(init(head)) + 'ку'
-                } else {
-                    return unYo(stem) + 'у';
-                }
+            const locativeConfigs = locativeDictionary.get(lemma, false);
+            if (locativeConfigs) {
+                const declensionTypes = unique(locativeConfigs.map(x => x.declensionType));
+                return declensionTypes.map(dType => toLocativeSingular1(engine, lemma, dType));
             }
 
             return decline1(engine, lemma, Case.PREPOSITIONAL);
@@ -1565,6 +1814,42 @@
         }
     }
 
+    function toLocativeSingular1(engine, lemma, declensionType) {
+        if (LocativeDeclensionType.U_SUFFIX === declensionType) {
+            const word = lemma.text();
+            const lcWord = lemma.lower();
+            let stem = getNounStem(lemma);
+            let head = init(word);
+
+            const half = halfSomething(lcWord);
+            const soft = (half && lcWord.endsWith('я')) || softD1(lcWord);
+
+            if (last(lcWord) === 'й') {
+                return unYo(head) + 'ю';
+            } else if (soft) {
+                return unYo(stem) + 'ю';
+            } else if (okWord(lcWord)) {
+                return unYo(init(head)) + 'ку';
+            } else {
+                return unYo(stem) + 'у';
+            }
+        } else if (LocativeDeclensionType.PREPOSITIONAL === declensionType) {
+            return decline1(engine, lemma, Case.PREPOSITIONAL);
+        }
+    }
+
+    function toLocativeSingular(engine, declension, lemma, declensionType) {
+        if (0 === declension) {
+            return decline0(engine, lemma, Case.PREPOSITIONAL);
+        } else if (1 === declension) {
+            return toLocativeSingular1(engine, lemma, declensionType);
+        } else if (2 === declension) {
+            return decline2(engine, lemma, Case.PREPOSITIONAL);
+        } else if (3 === declension) {
+            return decline3(engine, lemma, Case.PREPOSITIONAL);
+        }
+    }
+
     function pluralize(engine, lemma) {
         const result = [];
 
@@ -1611,7 +1896,7 @@
         const gender = lemma.getGender();
         const declension = getDeclension(lemma);
 
-        const simpleFirstPart = (('й' == last(lcWord) || isVowel(last(word))) && isVowel(last(init(word))))
+        const simpleFirstPart = (('й' === last(lcWord) || isVowel(last(word))) && isVowel(last(init(word))))
             ? init(word)
             : stem;
 
@@ -1941,7 +2226,7 @@
 
                     } else if (['цыган'].includes(lcWord)) {
                         result.push(word + 'е');
-                    } else if ('щенок' == lcWord) {
+                    } else if ('щенок' === lcWord) {
                         result.push(nInit(word, 2) + 'ки');
                         result.push(nInit(word, 2) + 'ята');
                     } else if ((lcWord.endsWith('ребёнок') || lcWord.endsWith('ребенок'))
@@ -2359,8 +2644,8 @@
                 // молодцы
 
                 if (((gender === Gender.COMMON)
-                    && !endsWithAny(lcPlural, iEy)
-                    && !(['ж', 'ш', 'ч'].includes(lastOf2Initial)))
+                        && !endsWithAny(lcPlural, iEy)
+                        && !(['ж', 'ш', 'ч'].includes(lastOf2Initial)))
                     || explicitZeroEnding.includes(lcPlural)
                     || (lemma.lower() === 'барин')) {
                     return genitiveStem();
@@ -2377,10 +2662,10 @@
                         genitiveStem()
                     ];
                 } else if (endsWithAny(lcPlural,
-                    ['жи', 'ши', 'чи',
-                        'ля', 'ли', 'чи', 'ри', 'ти', 'ди',
-                        'борщи', 'клещи', 'товарищи',
-                        'плащи', 'прыщи', 'хрящи'])
+                        ['жи', 'ши', 'чи',
+                            'ля', 'ли', 'чи', 'ри', 'ти', 'ди',
+                            'борщи', 'клещи', 'товарищи',
+                            'плащи', 'прыщи', 'хрящи'])
                     || iEy.includes(lcPlural)
                     || (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), [
                         'зять', 'деверь'
@@ -2398,7 +2683,7 @@
                 ])) {
                     return init(plural) + 'ев';
                 } else if (endsWithAny(lcPlural, [
-                    'зятья', 'кумовья', 'деверья', 'края', 'клеи', 'холуи'
+                        'зятья', 'кумовья', 'деверья', 'края', 'клеи', 'холуи'
                     ])
                     || [rk('фтз'), 'чаи'].includes(lcPlural)) {
                     return init(plural) + 'ёв';
