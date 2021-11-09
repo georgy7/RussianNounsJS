@@ -228,6 +228,51 @@ const RussianNouns = require('./RussianNouns.min.js');
         'lf.semantics'
     );
 
+    assertIsArray(rne.getLocativeForms(mountain), 'getLocativeForms(x) type (a mountain)');
+    assertEquals(rne.getLocativeForms(mountain).length, 0, 'locative forms count (a mountain)');
+
+    assertIsArray(rne.getLocativeForms(way), 'getLocativeForms(x) type (a way)');
+    assertEquals(rne.getLocativeForms(way).length, 0, 'locative forms count (a way)');
+
+    const ball = RussianNouns.createLemma({
+        text: 'мяч',
+        gender: Gender.MASCULINE
+    });
+    assertIsArray(rne.getLocativeForms(ball), 'getLocativeForms(x) type (a ball)');
+    assertEquals(rne.getLocativeForms(ball).length, 0, 'locative forms count (a ball)');
+
+    const steam = RussianNouns.createLemma({
+        text: 'пар',
+        gender: Gender.MASCULINE
+    });
+
+    result = RussianNouns.CASES.map(c => {
+        return rne.decline(steam, c);
+    });
+
+    assertIsArray(result);
+    assertEqualsSingleValue(result[5], 'паре');
+    assertEqualsSingleValue(result[6], 'пару');
+    const steamLocativeForms = rne.getLocativeForms(steam);
+    assertIsArray(steamLocativeForms, 'getLocativeForms(x) type (steam)');
+
+    function findFormWithSingleAttribute(locativeForms, attribute) {
+        return locativeForms.filter(f => ((f.attributes.length === 1)
+            && ((f.attributes[0] === attribute))));
+    }
+
+    const steamSubstance = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SUBSTANCE);
+    const steamResource = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.RESOURCE);
+
+    assertEquals(steamSubstance.length, 1, 'Steam as a substance must have a locative form.');
+    assertEquals(steamResource.length, 1, 'Steam as a resource must have a locative form.');
+
+    assertEquals(steamSubstance[0].preposition, 'в', 'Steam as a substance has incorrect preposition.');
+    assertEquals(steamResource[0].preposition, 'на', 'Steam as a resource has incorrect preposition.');
+
+    assertEquals(steamSubstance[0].word, 'пару', 'Steam as a substance has incorrect word form.');
+    assertEquals(steamResource[0].word, 'пару', 'Steam as a resource has incorrect word form.');
+
     console.log('--------------- 10 ---------------');
 
 })();

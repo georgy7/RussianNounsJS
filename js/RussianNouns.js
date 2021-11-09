@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.3.0.SNAPSHOT
+  RussianNounsJS v1.3.0
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -433,7 +433,7 @@
         // Мероприятие.
         EVENT: 12,
 
-        // WITH_ADJECTIVE: 13,
+        WITH_ADJECTIVE: 13,
         WITHOUT_ADJECTIVE: 14,
 
         /**
@@ -1072,9 +1072,9 @@
         );
 
         // 6. вещества и материалы («в» и «на»)
-        const substance_or_resource = ',мёд,мех,пух';
+        const substance_or_resource = ',мёд,мех,пар,пух';
         addConfig(m, LocativeFormAttribute.SUBSTANCE, 'в', 'дым,жир,мел,пушок' + substance_or_resource);
-        addConfig(m, LocativeFormAttribute.RESOURCE, 'на', 'газ,клей,пар,спирт' + substance_or_resource);
+        addConfig(m, LocativeFormAttribute.RESOURCE, 'на', 'газ,клей,спирт' + substance_or_resource);
 
         // 7. ситуации и состояния («в» и «на»)
         addConfig(m, LocativeFormAttribute.CONDITION, 'в',
@@ -1090,6 +1090,8 @@
         // Может быть "дух" когда-то и значило "исповедь",
         // сейчас это только всех запутает.
         addConfig(m, LocativeFormAttribute.CONDITION, 'на', 'дух');
+        // На полном газу. Не уверен, как это сюда записать. Вроде, устойчивое выражение.
+        addConfig(m, [LocativeFormAttribute.MOTION, LocativeFormAttribute.WITH_ADJECTIVE], 'на', 'газ');
 
         // 1 и 5.
         addConfig(m, LocativeFormAttribute.CONTAINER, 'в', 'глаз,нос,шкаф');
