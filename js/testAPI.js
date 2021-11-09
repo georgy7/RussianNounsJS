@@ -192,11 +192,47 @@ const RussianNouns = require('./RussianNouns.min.js');
     assertEquals(result[1], "кринжем");
 
     console.log('--------------- 9 ----------------');
+
+    const LocativeFormAttribute = RussianNouns.LocativeFormAttribute;
+
+    (() => {
+        const uniqueLocativeFormAttributes = new Set();
+        for (let sc of Object.values(LocativeFormAttribute)) {
+            uniqueLocativeFormAttributes.add(sc);
+        }
+
+        assertEquals(
+            Object.keys(LocativeFormAttribute).length,
+            uniqueLocativeFormAttributes.size,
+            'Enum values must be unique.'
+        );
+    })();
+
+    let row = RussianNouns.createLemma({
+        text: 'ряд',
+        gender: Gender.MASCULINE
+    });
+
+    result = RussianNouns.CASES.map(c => {
+        return rne.decline(row, c);
+    });
+
+    assertAllCases(result, ['ряд', 'ряда', 'ряду', 'ряд', 'рядом', 'ряде', 'ряду']);
+    assertIsArray(rne.getLocativeForms(row), 'getLocativeForms(x) type');
+    assertEquals(rne.getLocativeForms(row).length, 1, 'locative forms count');
+    assertEquals(rne.getLocativeForms(row)[0].preposition, 'в', 'lf.preposition');
+    assertEquals(rne.getLocativeForms(row)[0].word, 'ряду', 'lf.word');
+    assertEqualsSingleValue(
+        rne.getLocativeForms(row)[0].attributes,
+        LocativeFormAttribute.STRUCTURE,
+        'lf.semantics'
+    );
+
+    console.log('--------------- 10 ---------------');
+
 })();
 
 (() => {
-    const rne = new RussianNouns.Engine();
-
     itShouldThrow(RussianNouns.LemmaException, () => {
         RussianNouns.createLemma(123);
     });
