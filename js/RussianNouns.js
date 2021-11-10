@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.3.0
+  RussianNounsJS v1.3.1
 
   Copyright (c) 2011-2021 Устинов Георгий Михайлович
 
@@ -500,6 +500,8 @@
         StressDictionaryException: StressDictionaryException,
 
         /**
+         * Это еще не стабилизированная часть API.
+         *
          * Предикаты, по которым можно узнать, уместно ли
          * в данном случае употреблять ту или иную форму локатива.
          * Тут взяты семантические классы (с небольшими изменениями)
@@ -985,6 +987,8 @@
     }
 
     function makeDefaultLocativeDictionary() {
+        // Dictionary используется вместо Map, т.к. он проверяет совпадения через equals.
+        // И возможно редактирование будет в дальнейшем открыто наружу.
         const dictionary = new Dictionary();
         const m = Object.freeze({gender: Gender.MASCULINE});
         const mAnimate = Object.freeze({gender: Gender.MASCULINE, animate: true});
@@ -1085,7 +1089,9 @@
         // я не уверен, EXPOSURE это, CONDITION или что-то третье.
         addConfig(m, LocativeFormAttribute.EXPOSURE, 'в,на', 'вид');
         addConfig(m, LocativeFormAttribute.EXPOSURE, 'на', 'слух,счёт,ветер,ветр,свет');
-        addConfig(m, LocativeFormAttribute.MOTION, 'на', 'ход,бег,вес,шаг');
+        addConfig(m, LocativeFormAttribute.MOTION, 'на', 'ход,бег,вес');
+        // Пока непонятно, как разграничить "на каждом шагу" и "на первом шаге".
+        addConfig(m, [LocativeFormAttribute.MOTION, LocativeFormAttribute.WITH_ADJECTIVE], 'на', 'шаг');
         addConfig(m, LocativeFormAttribute.EVENT, 'на', 'бал,пир');
         // Может быть "дух" когда-то и значило "исповедь",
         // сейчас это только всех запутает.
