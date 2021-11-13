@@ -68,7 +68,7 @@ function assertAllCases(results, values) {
     }
 }
 
-const RussianNouns = require('./RussianNouns.min.js');
+const RussianNouns = require('./RussianNouns.js');
 
 (() => {
     const rne = new RussianNouns.Engine();
@@ -263,9 +263,11 @@ const RussianNouns = require('./RussianNouns.min.js');
 
     const steamSubstance = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SUBSTANCE);
     const steamResource = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.RESOURCE);
+    const steamSurface = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SURFACE);
 
     assertEquals(steamSubstance.length, 1, 'Steam as a substance must have a locative form.');
     assertEquals(steamResource.length, 1, 'Steam as a resource must have a locative form.');
+    assertEquals(steamSurface.length, 0, 'Steam as a surface must not have a locative form.');
 
     assertEquals(steamSubstance[0].preposition, 'в', 'Steam as a substance has incorrect preposition.');
     assertEquals(steamResource[0].preposition, 'на', 'Steam as a resource has incorrect preposition.');
