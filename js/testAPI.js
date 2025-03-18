@@ -68,7 +68,7 @@ function assertAllCases(results, values) {
     }
 }
 
-const RussianNouns = require('./RussianNouns.min.js');
+const RussianNouns = require('./RussianNouns.js');
 
 (() => {
     const rne = new RussianNouns.Engine();

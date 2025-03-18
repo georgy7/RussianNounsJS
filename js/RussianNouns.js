@@ -298,6 +298,18 @@
 
     const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
 
+    function djb2Hash32(str) {
+        let hash = 5381;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash * 33 + str.charCodeAt(i)) % 0x100000000;
+        }
+        return hash;
+    }
+
+    function getHash(unicodeString) {
+        return djb2Hash32(encodeURI(unicodeString));
+    }
+
     /**
      * Нечто среднее между Map и Multimap.
      * Одной лемме соответствует одно значение,
