@@ -75,7 +75,6 @@
 
         const pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
 
-        // TODO
         if (o.text == null) {
             return 'A cyrillic word required.';
         }
@@ -248,17 +247,28 @@
         }
     }
 
+    // Without ё, the Russian alphabet consists of 32 letters.
+    // A coincidence? I don't think so.
+    function lcBit(lcChar) {
+        const x = lcChar.charCodeAt(0) - 1072;
+        return (x === 33) ? 0b100000 : ((x === (0x1F & x)) ? (1 << x) : 0)
+    }
+
+    function bincludes(mask, lcChar) {
+        return (mask & lcBit(lcChar)) !== 0;
+    }
+
     function isVowel(ch) {
-        const x = ch.toLowerCase().charCodeAt(0) - 1072;
-        return (x === 33) || ((x === (0x1F & x)) && (((1 << x) & 0b11101000000010000100000100100001) !== 0));
+        return bincludes(0b11101000000010000100000100100001, ch.toLowerCase());
     }
 
-    function isConsonantLc(lowerCaseCharacter) {
-        const x = lowerCaseCharacter.charCodeAt(0) - 1072;
-        return (x === (0x1F & x)) && !isVowel(lowerCaseCharacter) && (x !== 26) && (x !== 28);
+    function isConsonantLc(lcChar) {
+        return bincludes(0b00000011111101111011111011011110, lcChar);
     }
 
-    const isConsonantNotJ = lcChar => isConsonantLc(lcChar) && (lcChar != 'й');
+    function isConsonantNotJ(lcChar) {
+        return bincludes(0b00000011111101111011110011011110, lcChar);
+    }
 
     const isUpper = s => s === s.toUpperCase();
 
@@ -1165,7 +1175,7 @@
             return init(word);
         }
 
-        if ('о' === last(lcWord) && 'влмнстх'.includes(last(init(lcWord)))) {
+        if ('о' === last(lcWord) && bincludes(0b1001100011100000000100, last(init(lcWord)))) {
             return init(word);
         }
 
@@ -1270,7 +1280,7 @@
 
     function halfSomething(word) {
         if (word.startsWith('пол')
-            && ['и', 'ы', 'а', 'я', 'ь'].includes(last(word))
+            && bincludes(0b10011000000000000000000100000001, last(word))
             && (vowelCount(word) >= 2)) {
 
             let subWord = word.substring(3);
@@ -1511,7 +1521,7 @@
                 return init(head) + 'им';
             } else if (iyWord()) {
                 return eiStem() + 'ем';
-            } else if (soft || ('жчшщ'.includes(last(lcStem)))) {
+            } else if (soft || ('жшчщ'.includes(last(lcStem)))) {
 
                 return eStem(stem, (s, stressedEnding) => stressedEnding
                     ? (s + 'ом') : (s + 'ем'));
@@ -1613,7 +1623,7 @@
                 } else if (lcWord.endsWith('ничья')) {
                     return head + 'ей';
                 } else if (
-                    soft() || 'гжкхчшщ'.includes(last(lcStem))  // soft, sibilant or velar
+                    soft() || bincludes(0b11101000000000010001001000, last(lcStem))  // soft, sibilant or velar
                 ) {
                     return head + 'и';
                 } else {
@@ -1648,7 +1658,7 @@
                     return stem + 'ею';
                 } else if (ayaWord()) {
                     return stem + 'ой';
-                } else if (soft() || ('жцчшщ'.includes(last(lcStem)) && !lcWord.endsWith('овца'))) {
+                } else if (soft() || ('жшчщц'.includes(last(lcStem)) && !lcWord.endsWith('овца'))) {
                     if ('и' === last(lcHead)) {
                         return head + 'ей';
                     } else {
@@ -1869,7 +1879,7 @@
         }
 
         function yeruOrI(doNotUnYo) {
-            if ('гжкхчшщ'.includes(last(lcStem))
+            if (bincludes(0b11101000000000010001001000, last(lcStem))  // sibilant or velar
                 || 'яйь'.includes(last(lcWord))
                 || endsWithAny(lcWord, ['сосед'])) {
 
@@ -2198,7 +2208,7 @@
                         && lemma.isAnimate()) {
                         result.push(nInit(word, 6) + 'ятки');
                     } else if (lcWord.endsWith('онок')
-                        && 'жчш'.includes(lastOfNInitial(lcWord, 4))
+                        && 'жшч'.includes(lastOfNInitial(lcWord, 4))
                         && lemma.isAnimate()) {
                         result.push(nInit(word, 4) + 'ата');
                     } else if (okWord(lcWord)) {
@@ -2600,7 +2610,7 @@
 
                 if (((gender === Gender.COMMON)
                         && !endsWithAny(lcPlural, iEy)
-                        && !(['ж', 'ш', 'ч'].includes(lastOf2Initial)))
+                        && !('жшч'.includes(lastOf2Initial)))
                     || explicitZeroEnding.includes(lcPlural)
                     || (lemma.lower() === 'барин')) {
                     return genitiveStem();
@@ -2689,7 +2699,7 @@
                 if (lastOf2Initial === 'ь') {
                     const end = last(init(plural));
                     return nInit(plural, 3) + upperLike('е', end) + end;
-                } else if (['ж', 'ш', 'ч'].includes(lastOf2Initial)) {
+                } else if ('жшч'.includes(lastOf2Initial)) {
                     return genitiveStem();
                 } else if (isConsonantNotJ(lastOf2Initial)) {
                     return nInit(plural, 2) + 'ок';
@@ -2732,7 +2742,7 @@
 
             if ((stem.length === lcPlural.length - 1) && endsWithAny(lcPlural, softEndings)) {
 
-                if (['ь', 'й'].includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
+                if ('ьй'.includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
                 } else if (endsWithAny(lcPlural, ['земли', 'петли'])) {
