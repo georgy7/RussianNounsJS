@@ -298,16 +298,26 @@
 
     const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
 
-    function djb2Hash32(str) {
+    // Daniel J. Bernstein's hash function
+    // http://www.cse.yorku.ca/~oz/hash.html
+    // https://theartincode.stanis.me/008-djb2/
+    // The result is the same as if the hash were of type uint32_t.
+    function djb2Hash32(ansiString) {
         let hash = 5381;
-        for (let i = 0; i < str.length; i++) {
-            hash = (hash * 33 + str.charCodeAt(i)) % 0x100000000;
+        for (let i = 0; i < ansiString.length; i++) {
+            hash = (hash * 33 + ansiString.charCodeAt(i)) % 0x100000000;
         }
         return hash;
     }
 
     function getHash(unicodeString) {
         return djb2Hash32(encodeURI(unicodeString));
+    }
+
+    function inBloom(a, b, c, d, hash) {
+        const index = hash % 128;
+        const part = [d,c,b,a][Math.floor(index / 32)];
+        return (part & (1 << (index%32))) !== 0;
     }
 
     /**
