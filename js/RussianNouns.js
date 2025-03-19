@@ -114,6 +114,7 @@
 
                 this.internalText = o.internalText;
                 this.lowerCaseText = o.lowerCaseText;
+                this._hash = o._hash;
 
                 this.internalGender = o.internalGender;
 
@@ -129,6 +130,7 @@
 
                 this.internalText = o.text;
                 this.lowerCaseText = this.internalText.toLowerCase();
+                this._hash = getFuzzyHash(this.lowerCaseText);
 
                 if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
                     this.internalGender = o.gender;
@@ -246,11 +248,17 @@
         }
     }
 
-    const consonantsExceptJ = 'бвгджзклмнпрстфхцчшщ';
-    const consonants = consonantsExceptJ + 'й';
-    const vowels = 'аоуэыяёюеи';
+    function isVowel(ch) {
+        const x = ch.toLowerCase().charCodeAt(0) - 1072;
+        return (x === 33) || ((x === (0x1F & x)) && (((1 << x) & 0b11101000000010000100000100100001) !== 0));
+    }
 
-    const isVowel = character => vowels.includes(character.toLowerCase());
+    function isConsonantLc(lowerCaseCharacter) {
+        const x = lowerCaseCharacter.charCodeAt(0) - 1072;
+        return (x === (0x1F & x)) && !isVowel(lowerCaseCharacter) && (x !== 26) && (x !== 28);
+    }
+
+    const isConsonantNotJ = lcChar => isConsonantLc(lcChar) && (lcChar != 'й');
 
     const isUpper = s => s === s.toUpperCase();
 
@@ -274,7 +282,7 @@
 
     const lastOfNInitial = (str, n) => last(nInit(str, n));
 
-    const endsWithAny = (w, arr) => arr.filter(a => w.endsWith(a)).length > 0;
+    const endsWithAny = (w, arr) => arr.some(a => w.endsWith(a));
 
     const unique = a => a.filter((item, index) => a.indexOf(item) === index);
 
@@ -351,7 +359,7 @@
 
         put(lemma, value) {
             const lemmaObject = createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
+            const hash = lemmaObject._hash;
 
             let homonyms = this.data[hash];
 
@@ -385,7 +393,7 @@
          */
         get(lemma, fuzzy) {
             const lemmaObject = createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
+            const hash = lemmaObject._hash;
 
             const homonyms = this.data[hash];
 
@@ -404,7 +412,7 @@
 
         remove(lemma) {
             const lemmaObject = createLemma(lemma);
-            const hash = unYo(lemmaObject.lower());
+            const hash = lemmaObject._hash;
 
             const homonyms = this.data[hash];
 
@@ -426,7 +434,7 @@
          * @returns {Array} Список лемм.
          */
         find(word) {
-            const hash = unYo(word).toLowerCase();
+            const hash = getFuzzyHash(word.toLowerCase());
 
             const homonyms = this.data[hash];
 
@@ -690,11 +698,10 @@
                 if (caseIndex >= 0) {
                     let v = this.get(lemma, true);
                     if (!v) {
-                        const hash = getFuzzyHash(lemma.lower());
                         if (lemma.getGender() === Gender.MASCULINE) {
-                            if (stressGroupAHashes.includes(hash)) {
+                            if (stressGroupAHashes.includes(lemma._hash)) {
                                 v = 'SEESEEE-';
-                            } else if (stressGroupBHashes.includes(hash)) {
+                            } else if (stressGroupBHashes.includes(lemma._hash)) {
                                 v = 'SEEEEEE-';
                             }
                         }
@@ -726,10 +733,9 @@
                 if (caseIndex >= 0 && caseIndex < 6) {
                     let v = this.get(lemma, true);
                     if (!v) {
-                        const hash = getFuzzyHash(lemma.lower());
                         if (lemma.getGender() === Gender.MASCULINE) {
-                            if (stressGroupAHashes.includes(hash) ||
-                                    (lemma.isAnimate() && stressGroupBHashes.includes(hash))) {
+                            if (stressGroupAHashes.includes(lemma._hash) ||
+                                    (lemma.isAnimate() && stressGroupBHashes.includes(lemma._hash))) {
                                 v = '-EEEEEE';
                             }
                         }
@@ -1136,7 +1142,7 @@
             return nInit(word, 2) + 'йк';
         }
 
-        if (consonantsExceptJ.includes(last(lcWord))) {
+        if (isConsonantNotJ(last(lcWord))) {
             return word;
         }
 
@@ -1182,7 +1188,7 @@
         switch (gender) {
             case Gender.FEMININE:
                 return t === "а" || t === "я" ? 2 :
-                    consonants.includes(t) ? -1 : 3;
+                    isConsonantLc(t) ? -1 : 3;
             case Gender.MASCULINE:
                 return t === "а" || t === "я" ? 2 :
                     lcWord === "путь" ? 0 : 1;
@@ -1211,7 +1217,7 @@
             return head;
         } else if (endsWithAny(lcHead, ['зне', 'жне', 'гре', 'спе', 'мудре'])
             || nLast(init(lcHead), 3).split('')
-                .every(l => consonantsExceptJ.includes(l))
+                .every(l => isConsonantNotJ(l))
             || lemma.isAName()
         ) {
             return head;
@@ -1275,7 +1281,7 @@
             // Сюда не должны попадать как минимум
             // мягкий и твердый знаки помимо гласных.
 
-            return (offset >= 0) && consonants.includes(subWord[offset].toLowerCase());
+            return (offset >= 0) && isConsonantLc(subWord[offset].toLowerCase());
 
         } else {
             return false;
@@ -2326,12 +2332,9 @@
         const stem = lcPlural.endsWith('цы') ? init(plural) : getNounStem0(plural);
         const softEndings = [
             'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
-            'ьи', 'ья', 'ия', 'ря', 'ля', 'ая'
+            'ьи', 'ья', 'ия', 'ря', 'ля', 'ая',
+            'аи', 'ои', 'уи', 'эи', 'ыи', 'яи', 'ёи', 'юи', 'еи', 'ии'
         ];
-
-        for (let c of vowels) {
-            softEndings.push(c + 'и')
-        }
 
         // так называемые субстантивированные прилагательные
         const hardAdjectiveLike = () => lcPlural.endsWith('ые');
@@ -2688,7 +2691,7 @@
                     return nInit(plural, 3) + upperLike('е', end) + end;
                 } else if (['ж', 'ш', 'ч'].includes(lastOf2Initial)) {
                     return genitiveStem();
-                } else if (consonantsExceptJ.includes(lastOf2Initial)) {
+                } else if (isConsonantNotJ(lastOf2Initial)) {
                     return nInit(plural, 2) + 'ок';
                 }
             }
@@ -2713,7 +2716,7 @@
                 }
             }
 
-            if (lcPlural.endsWith('ни') && consonantsExceptJ.includes(lastOfNInitial(lcPlural, 2))) {
+            if (lcPlural.endsWith('ни') && isConsonantNotJ(lastOfNInitial(lcPlural, 2))) {
                 if (['барышни', 'боярышни', 'деревни'].includes(lcPlural)) {
                     return nInit(plural, 2) + 'ень';
                 } else if (lcPlural.endsWith('кухни')) {
