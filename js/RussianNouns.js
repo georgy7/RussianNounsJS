@@ -314,12 +314,6 @@
         return djb2Hash32(encodeURI(unYo(lowerCaseUnicodeString)));
     }
 
-    function inBloom(theFilter, hash) {
-        const index = hash % 128;
-        const part = theFilter[theFilter.length - 1 - Math.floor(index / 32)];
-        return (part & (1 << (index%32))) !== 0;
-    }
-
     function extractHashes(base64Bytes) {
         const result = [];
         const bytesOfHashes = atob(base64Bytes);
@@ -337,7 +331,6 @@
         return Object.freeze(result);
     }
 
-    const stressGroupABloomFilter = Object.freeze([-67124618, -1216357638, -1073783054, 2094885795]);
     const stressGroupAHashes = extractHashes("5MUsXx6CK3/5cdubAcRFYuVsBnVmlL45+MnDDld3MFzBKpVEva6nLrI9vJJmAQBMoAu11rhSyMtr6qVJy1TbEuVGenx2sgblpMlwpnTtJI5xuxgnRbYULnnimAlHZl+lWnQluAqLm3U0TUql5lV/IU4k69SYgtVHMqrwM3f6kcSJclxcx6tLCz7JyNjWNRKQL56LOYTG4vvcqKLmdokaXMu+6EM0O8z+9pmwsFswc9kcNcVppnwDxEzcdhYiTf/yz0wFged2YmTTZBFxWoIW9JLPw1HTxO9GkGBZzHauQ7Tr7M2b7mgcMRw1XkUMQv9vv+OViPF+bnOFkMF1rZx11OGFaNhiYvkcp1tP5llzU3ZAYgm4J+8tMXjStLEKXd62Fgu+nP+T0x0fNRXkaaDICzDir7ZC/wL15Vvifwt62bMFNyUrUuP9jWH00oCXubeHl5tSuetNblMxi0eXKO597tho0iokOW+krDO+ZcP5V8tWOQJmfpH0UPdFbLUgx+gk0wY0utMGNLpycIbRqVYVHPbEg1rzIDT3h87gCRTgiCpz3sGwzTr6XSdgEtZzzXtxfJLDDR175rJwLi5u+bpsxfECxfhJpb/f1qeDe3uvQAClgQy6jng0JhaRuZrlOIK4Ucaj0lHHLull2Mfi3j4dt5zkQD9Jmc1MA/3zBePJrNxFm3N4uunoP6/JHTyIbzh9vL6LeVt9O+Ev4GOH2HcD8JYjSvO8TfmpiA22Jt13R07G/1vPk/RtRuqL0fum/2YSkId6k5SJ45QMgma86AhO/GGwJ0En4yDumEfmVSzDnIDe8PKmBhfyiK8ozL1xzY0w7ZicJxnfoDvwcZQugyjCM8U0JwVyqghDJ83ynutCiyW5/Yt3PsNYe9yNZfVZobMsWcQzz0EtvaU=");
 
     /**
@@ -693,7 +686,6 @@
                     if (!v) {
                         const bloomHash = getFuzzyHash(lemma.lower());
                         if ((lemma.getGender() === Gender.MASCULINE) &&
-                                inBloom(stressGroupABloomFilter, bloomHash) &&
                                 stressGroupAHashes.includes(bloomHash)) {
                             v = 'SEESEEE-';
                         }
@@ -727,7 +719,6 @@
                     if (!v) {
                         const bloomHash = getFuzzyHash(lemma.lower());
                         if ((lemma.getGender() === Gender.MASCULINE) &&
-                                inBloom(stressGroupABloomFilter, bloomHash) &&
                                 stressGroupAHashes.includes(bloomHash)) {
                             v = '-EEEEEE';
                         }
