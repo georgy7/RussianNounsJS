@@ -313,9 +313,31 @@
         return Object.freeze(result);
     }
 
-    const stressGroupAHashes = extractHashes("5MUsXx6CK3/5cdubAcRFYuVsBnVmlL45+MnDDld3MFzBKpVEva6nLrI9vJJmAQBMoAu11rhSyMtr6qVJy1TbEuVGenx2sgblpMlwpnTtJI5xuxgnRbYULnnimAlHZl+lWnQluAqLm3U0TUql5lV/IU4k69SYgtVHMqrwM3f6kcSJclxcx6tLCz7JyNjWNRKQL56LOYTG4vvcqKLmdokaXMu+6EM0O8z+9pmwsFswc9kcNcVppnwDxEzcdhYiTf/yz0wFged2YmTTZBFxWoIW9JLPw1HTxO9GkGBZzHauQ7Tr7M2b7mgcMRw1XkUMQv9vv+OViPF+bnOFkMF1rZx11OGFaNhiYvkcp1tP5llzU3ZAYgm4J+8tMXjStLEKXd62Fgu+nP+T0x0fNRXkaaDICzDir7ZC/wL15Vvifwt62bMFNyUrUuP9jWH00oCXubeHl5tSuetNblMxi0eXKO597tho0iokOW+krDO+ZcP5V8tWOQJmfpH0UPdFbLUgx+gk0wY0utMGNLpycIbRqVYVHPbEg1rzIDT3h87gCRTgiCpz3sGwzTr6XSdgEtZzzXtxfJLDDR175rJwLi5u+bpsxfECxfhJpb/f1qeDe3uvQAClgQy6jng0JhaRuZrlOIK4Ucaj0lHHLull2Mfi3j4dt5zkQD9Jmc1MA/3zBePJrNxFm3N4uunoP6/JHTyIbzh9vL6LeVt9O+Ev4GOH2HcD8JYjSvO8TfmpiA22Jt13R07G/1vPk/RtRuqL0fum/2YSkId6k5SJ45QMgma86AhO/GGwJ0En4yDumEfmVSzDnIDe8PKmBhfyiK8ozL1xzY0w7ZicJxnfoDvwcZQugyjCM8U0JwVyqghDJ83ynutCiyW5/Yt3PsNYe9yNZfVZobMsWcQzz0EtvaU=");
+    const stressGroupAHashes = extractHashes("5MUsXx6CK3/5cdubAcRFYuVsBnVmlL45+MnDDld3MF" +
+        "zBKpVEva6nLrI9vJJmAQBMoAu11rhSyMtr6qVJy1TbEuVGenx2sgblpMlwpnTtJI5xuxgnRbYULnnimA" +
+        "lHZl+lWnQluAqLm3U0TUql5lV/IU4k69SYgtVHMqrwM3f6kcSJclxcx6tLCz7JyNjWNRKQL56LOYTG4v" +
+        "vcqKLmdokaXMu+6EM0O8z+9pmwsFswc9kcNcVppnwDxEzcdhYiTf/yz0wFged2YmTTZBFxWoIW9JLPw1" +
+        "HTxO9GkGBZzHauQ7Tr7M2b7mgcMRw1XkUMQv9vv+OViPF+bnOFkMF1rZx11OGFaNhiYvkcp1tP5llzU3" +
+        "ZAYgm4J+8tMXjStLEKXd62Fgu+nP+T0x0fNRXkaaDICzDir7ZC/wL15Vvifwt62bMFNyUrUuP9jWH00o" +
+        "CXubeHl5tSuetNblMxi0eXKO597tho0iokOW+krDO+ZcP5V8tWOQJmfpH0UPdFbLUgx+gk0wY0utMGNL" +
+        "pycIbRqVYVHPbEg1rzIDT3h87gCRTgiCpz3sGwzTr6XSdgEtZzzXtxfJLDDR175rJwLi5u+bpsxfECxf" +
+        "hJpb/f1qeDe3uvQAClgQy6jng0JhaRuZrlOIK4Ucaj0lHHLull2Mfi3j4dt5zkQD9Jmc1MA/3zBePJrN" +
+        "xFm3N4uunoP6/JHTyIbzh9vL6LeVt9O+Ev4GOH2HcD8JYjSvO8TfmpiA22Jt13R07G/1vPk/RtRuqL0f" +
+        "um/2YSkId6k5SJ45QMgma86AhO/GGwJ0En4yDumEfmVSzDnIDe8PKmBhfyiK8ozL1xzY0w7ZicJxnfoD" +
+        "vwcZQugyjCM8U0JwVyqghDJ83ynutCiyW5/Yt3PsNYe9yNZfVZobMsWcQzz0EtvaU=");
 
-    const stressGroupBHashes = extractHashes("/zsaF8Crku83OanigH51D1Mt7r9XdzBcOWvIzZ9Xc3RmsBrMaair/bUpE6QfVm/ZoXzwo9FQvyQK7Otp0ocAfMZ3AZO4xx8MLI8CrFgy7KYuIuRYRKAhTPbNd3LmVX8hTiTr1JiC1UeFE5IjMqrwM6GrPHqDYWa9O+/VZ4THbhLcqKLmMSvlJDnmkI40O8z+pGbD8PaZsLA+9Sh+ReRxf/mWrsfvh0bXjo2hwRbTyUTQqrVDGubwLbCl6XDPTAWBiTHzjSGYYgrIq+4XDEL/b/oc99NoGZBoRSodccYNTTWq914Uo6xPsJZL7CAUi+n3uL6sDZbveXjxx5yIxqc5zoGX578zp2UpBdHEIBC0Bj07JcbZJfBL3NgdogLl8vWhhU6/ke0VCMcxi0eXKO597sf/QE9XxQQ4SXMWdE3Eb4aC6UxTEl3aFe698zJycIbRKEHhLqlWFRuqRP3GqIysFBTgiConb7rtUPbqv3W+SwhXxQrxOgWERnBYSp6zX5xvUbYuJrJMXuMHy4c9tNFACqrJm0/L9Foqjng0Js0B3DyptQNQZdjH4jXU43yukyy4WVXGigbaf2KQrQaLNc7dFr1reCXdDLrrTpegrjexWds8JYUxQXqkIFt9O+HWI0jMiFCe8uMTC2N3u7APreMM+zF6ZyDRD2J9b2yFgTIsMFWMNDKFcBonpq/xpTZwMpC4oEci68mQZ9/eaLXU369r8WYfZo3YkWEO19fIJ9VIN00zR/aWRyCozEgz+Y6tf8IwjgWJfrOQEs40c0KSLMOcgN7w8qZfWXIiVJg499PqisVL5OsVoGCmWxejr2OM8Rkiukr5YpFLM//o1FXvFCo10Lb3rcNLpljV/dOu+9S4PgiDgJiK35C9Xu9jw+Fkfhpn");
+    const stressGroupBHashes = extractHashes("/zsaF8Crku83OanigH51D1Mt7r9XdzBcOWvIzZ9Xc3" +
+        "RmsBrMaair/bUpE6QfVm/ZoXzwo9FQvyQK7Otp0ocAfMZ3AZO4xx8MLI8CrFgy7KYuIuRYRKAhTPbNd3" +
+        "LmVX8hTiTr1JiC1UeFE5IjMqrwM6GrPHqDYWa9O+/VZ4THbhLcqKLmMSvlJDnmkI40O8z+pGbD8PaZsL" +
+        "A+9Sh+ReRxf/mWrsfvh0bXjo2hwRbTyUTQqrVDGubwLbCl6XDPTAWBiTHzjSGYYgrIq+4XDEL/b/oc99" +
+        "NoGZBoRSodccYNTTWq914Uo6xPsJZL7CAUi+n3uL6sDZbveXjxx5yIxqc5zoGX578zp2UpBdHEIBC0Bj" +
+        "07JcbZJfBL3NgdogLl8vWhhU6/ke0VCMcxi0eXKO597sf/QE9XxQQ4SXMWdE3Eb4aC6UxTEl3aFe698z" +
+        "JycIbRKEHhLqlWFRuqRP3GqIysFBTgiConb7rtUPbqv3W+SwhXxQrxOgWERnBYSp6zX5xvUbYuJrJMXu" +
+        "MHy4c9tNFACqrJm0/L9Foqjng0Js0B3DyptQNQZdjH4jXU43yukyy4WVXGigbaf2KQrQaLNc7dFr1reC" +
+        "XdDLrrTpegrjexWds8JYUxQXqkIFt9O+HWI0jMiFCe8uMTC2N3u7APreMM+zF6ZyDRD2J9b2yFgTIsMF" +
+        "WMNDKFcBonpq/xpTZwMpC4oEci68mQZ9/eaLXU369r8WYfZo3YkWEO19fIJ9VIN00zR/aWRyCozEgz+Y" +
+        "6tf8IwjgWJfrOQEs40c0KSLMOcgN7w8qZfWXIiVJg499PqisVL5OsVoGCmWxejr2OM8Rkiukr5YpFLM/" +
+        "/o1FXvFCo10Lb3rcNLpljV/dOu+9S4PgiDgJiK35C9Xu9jw+Fkfhpn");
 
     /**
      * Нечто среднее между Map и Multimap.
