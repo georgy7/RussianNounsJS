@@ -310,15 +310,35 @@
         return hash;
     }
 
-    function getHash(unicodeString) {
-        return djb2Hash32(encodeURI(unicodeString));
+    function getFuzzyHash(lowerCaseUnicodeString) {
+        return djb2Hash32(encodeURI(unYo(lowerCaseUnicodeString)));
     }
 
-    function inBloom(a, b, c, d, hash) {
+    function inBloom(theFilter, hash) {
         const index = hash % 128;
-        const part = [d,c,b,a][Math.floor(index / 32)];
+        const part = theFilter[theFilter.length - 1 - Math.floor(index / 32)];
         return (part & (1 << (index%32))) !== 0;
     }
+
+    function extractHashes(base64Bytes) {
+        const result = [];
+        const bytesOfHashes = atob(base64Bytes);
+
+        const bytesPerItem = 4;
+        const hashCount = Math.floor(bytesOfHashes.length / bytesPerItem);
+
+        for (let i = 0; i < hashCount; i++) {
+            const ib = bytesPerItem * i;
+            const mostSignificant = (bytesOfHashes.charCodeAt(ib) << 8) | bytesOfHashes.charCodeAt(ib+1);
+            const leastSignificant = (bytesOfHashes.charCodeAt(ib+2) << 8) | bytesOfHashes.charCodeAt(ib+3);
+            result.push(mostSignificant * 0x10000 + leastSignificant);
+        }
+
+        return Object.freeze(result);
+    }
+
+    const stressGroupABloomFilter = Object.freeze([-67124618, -1216357638, -1073783054, 2094885795]);
+    const stressGroupAHashes = extractHashes("5MUsXx6CK3/5cdubAcRFYuVsBnVmlL45+MnDDld3MFzBKpVEva6nLrI9vJJmAQBMoAu11rhSyMtr6qVJy1TbEuVGenx2sgblpMlwpnTtJI5xuxgnRbYULnnimAlHZl+lWnQluAqLm3U0TUql5lV/IU4k69SYgtVHMqrwM3f6kcSJclxcx6tLCz7JyNjWNRKQL56LOYTG4vvcqKLmdokaXMu+6EM0O8z+9pmwsFswc9kcNcVppnwDxEzcdhYiTf/yz0wFged2YmTTZBFxWoIW9JLPw1HTxO9GkGBZzHauQ7Tr7M2b7mgcMRw1XkUMQv9vv+OViPF+bnOFkMF1rZx11OGFaNhiYvkcp1tP5llzU3ZAYgm4J+8tMXjStLEKXd62Fgu+nP+T0x0fNRXkaaDICzDir7ZC/wL15Vvifwt62bMFNyUrUuP9jWH00oCXubeHl5tSuetNblMxi0eXKO597tho0iokOW+krDO+ZcP5V8tWOQJmfpH0UPdFbLUgx+gk0wY0utMGNLpycIbRqVYVHPbEg1rzIDT3h87gCRTgiCpz3sGwzTr6XSdgEtZzzXtxfJLDDR175rJwLi5u+bpsxfECxfhJpb/f1qeDe3uvQAClgQy6jng0JhaRuZrlOIK4Ucaj0lHHLull2Mfi3j4dt5zkQD9Jmc1MA/3zBePJrNxFm3N4uunoP6/JHTyIbzh9vL6LeVt9O+Ev4GOH2HcD8JYjSvO8TfmpiA22Jt13R07G/1vPk/RtRuqL0fum/2YSkId6k5SJ45QMgma86AhO/GGwJ0En4yDumEfmVSzDnIDe8PKmBhfyiK8ozL1xzY0w7ZicJxnfoDvwcZQugyjCM8U0JwVyqghDJ83ynutCiyW5/Yt3PsNYe9yNZfVZobMsWcQzz0EtvaU=");
 
     /**
      * Нечто среднее между Map и Multimap.
@@ -669,7 +689,15 @@
                 const caseIndex = CASES.indexOf(grCase);
 
                 if (caseIndex >= 0) {
-                    const v = this.get(lemma, true);
+                    let v = this.get(lemma, true);
+                    if (!v) {
+                        const bloomHash = getFuzzyHash(lemma.lower());
+                        if ((lemma.getGender() === Gender.MASCULINE) &&
+                                inBloom(stressGroupABloomFilter, bloomHash) &&
+                                stressGroupAHashes.includes(bloomHash)) {
+                            v = 'SEESEEE-';
+                        }
+                    }
 
                     if (v) {
                         const singular = v.split('-')[0];
@@ -695,7 +723,15 @@
                 const caseIndex = CASES.indexOf(grCase);
 
                 if (caseIndex >= 0 && caseIndex < 6) {
-                    const v = this.get(lemma, true);
+                    let v = this.get(lemma, true);
+                    if (!v) {
+                        const bloomHash = getFuzzyHash(lemma.lower());
+                        if ((lemma.getGender() === Gender.MASCULINE) &&
+                                inBloom(stressGroupABloomFilter, bloomHash) &&
+                                stressGroupAHashes.includes(bloomHash)) {
+                            v = '-EEEEEE';
+                        }
+                    }
 
                     if (v) {
                         const plural = v.split('-')[1];
@@ -874,59 +910,6 @@
 
         putM('SEESeEE-EEEEEE', 'стеллаж');
         putM('SeeSeee-eeeeee', 'шиномонтаж');
-
-        d.putAll(m,
-            'SEESEEE-EEEEEE',
-            'багаж,' +
-            // Встречаются в законах, условиях/правилах для пасажиров.
-            'грузобагаж,товаробагаж,' +
-            'багрец,барыш,беляш,бердыш,бич,' +
-            'бандаж,блиндаж,борщ,бубенец,буж,' +
-            'валец,варенец,венец,вираж,витраж,волосенец,волчец,вольтаж,' +
-            'воронец,галдёж,гамма-луч,гнилец,' +
-            'гараж,автогараж,' +
-            'голец,' + // горная вершина
-            'головач,' + // гриб
-            'голыш,' + // камень
-            'горбач,' + // рубанок
-            'горлач,' + // кринка/крынка/глечик
-            'голубец,грабёж,' +
-            'гуж,гуляш,дворец,делёж,дергач,долбёж,долгунец,' +
-            'драч,' + // плотницкий инструмент
-            'ёрш,зубец,зубрёж,' +
-            'изразец,калач,ключ,' +
-            'камыш,' + // растение
-            'карандаш,картёж,кедрач,кирпич,' +
-            'клинец,' + // щебень
-            'ковш,корец,козелец,конец,кострец,' +
-            'копач,' + // орудие
-            'корж,крепёж,крестец,круглыш,кругляш,крыж,крылач,' +
-            'кулеш,кулич,кумач,контуш,кунтуш,купаж,кураж,кутёж,' +
-            'леденец,листаж,литраж,луч,' +
-            'метраж,меч,мираж,монтаж,муляж,мятеж,мяч,' +
-            'мокрец,' + // лишай, растение
-            'москвич,' + // автомобиль
-            'неплатёж,нож,нутрец,образец,овсец,огурец,' +
-            'орлец,' + // камень, коврик
-            'острец,' + // растение
-            'падеж,падёж,паж,палаш,паралич,первач,пернач,песец,' +
-            rkComma('озжгдх,фтдх,') +
-            'пихтач,платёж,плащ,погребец,подэтаж,поставец,поташ,правёж,прыщ,путец,пыж,' +
-            'пугач,' + // игрушечный пистолет
-            'резец,ржанец,рубеж,рубец,' +
-            'рогач,' + // ухват
-            'свербёж,светец,сенаж,скулёж,слопец,сныч,солонец,сосец,' +
-            'свинец,тетраэтилсвинец,' +
-            'секач,' + // инструмент
-            'спорыш,столбец,строгач,сургуч,сутаж,сыпец,сырец,сыровец,' +
-            'терпёж,типаж,тираж,толкач,торец,тягач,тяж,' +
-            'типец,' + // кормовой злак
-            'тирлич,' + // горечавка (растение)
-            'тупец,тупыш,' + // тупой скорняжный нож
-            'целкач,чабрец,чепец,' +
-            'фураж,хвостец,хлопунец,холодец,хрящ,' +
-            'чертёж,чистец,шалаш,шантаж,шиш,щипец,' +
-            'электронож,этаж,ясенец');
 
         d.putAll(ma,
             'SEEEEEE-EEEEEE',
