@@ -333,6 +333,8 @@
 
     const stressGroupAHashes = extractHashes("5MUsXx6CK3/5cdubAcRFYuVsBnVmlL45+MnDDld3MFzBKpVEva6nLrI9vJJmAQBMoAu11rhSyMtr6qVJy1TbEuVGenx2sgblpMlwpnTtJI5xuxgnRbYULnnimAlHZl+lWnQluAqLm3U0TUql5lV/IU4k69SYgtVHMqrwM3f6kcSJclxcx6tLCz7JyNjWNRKQL56LOYTG4vvcqKLmdokaXMu+6EM0O8z+9pmwsFswc9kcNcVppnwDxEzcdhYiTf/yz0wFged2YmTTZBFxWoIW9JLPw1HTxO9GkGBZzHauQ7Tr7M2b7mgcMRw1XkUMQv9vv+OViPF+bnOFkMF1rZx11OGFaNhiYvkcp1tP5llzU3ZAYgm4J+8tMXjStLEKXd62Fgu+nP+T0x0fNRXkaaDICzDir7ZC/wL15Vvifwt62bMFNyUrUuP9jWH00oCXubeHl5tSuetNblMxi0eXKO597tho0iokOW+krDO+ZcP5V8tWOQJmfpH0UPdFbLUgx+gk0wY0utMGNLpycIbRqVYVHPbEg1rzIDT3h87gCRTgiCpz3sGwzTr6XSdgEtZzzXtxfJLDDR175rJwLi5u+bpsxfECxfhJpb/f1qeDe3uvQAClgQy6jng0JhaRuZrlOIK4Ucaj0lHHLull2Mfi3j4dt5zkQD9Jmc1MA/3zBePJrNxFm3N4uunoP6/JHTyIbzh9vL6LeVt9O+Ev4GOH2HcD8JYjSvO8TfmpiA22Jt13R07G/1vPk/RtRuqL0fum/2YSkId6k5SJ45QMgma86AhO/GGwJ0En4yDumEfmVSzDnIDe8PKmBhfyiK8ozL1xzY0w7ZicJxnfoDvwcZQugyjCM8U0JwVyqghDJ83ynutCiyW5/Yt3PsNYe9yNZfVZobMsWcQzz0EtvaU=");
 
+    const stressGroupBHashes = extractHashes("/zsaF8Crku83OanigH51D1Mt7r9XdzBcOWvIzZ9Xc3RmsBrMaair/bUpE6QfVm/ZoXzwo9FQvyQK7Otp0ocAfMZ3AZO4xx8MLI8CrFgy7KYuIuRYRKAhTPbNd3LmVX8hTiTr1JiC1UeFE5IjMqrwM6GrPHqDYWa9O+/VZ4THbhLcqKLmMSvlJDnmkI40O8z+pGbD8PaZsLA+9Sh+ReRxf/mWrsfvh0bXjo2hwRbTyUTQqrVDGubwLbCl6XDPTAWBiTHzjSGYYgrIq+4XDEL/b/oc99NoGZBoRSodccYNTTWq914Uo6xPsJZL7CAUi+n3uL6sDZbveXjxx5yIxqc5zoGX578zp2UpBdHEIBC0Bj07JcbZJfBL3NgdogLl8vWhhU6/ke0VCMcxi0eXKO597sf/QE9XxQQ4SXMWdE3Eb4aC6UxTEl3aFe698zJycIbRKEHhLqlWFRuqRP3GqIysFBTgiConb7rtUPbqv3W+SwhXxQrxOgWERnBYSp6zX5xvUbYuJrJMXuMHy4c9tNFACqrJm0/L9Foqjng0Js0B3DyptQNQZdjH4jXU43yukyy4WVXGigbaf2KQrQaLNc7dFr1reCXdDLrrTpegrjexWds8JYUxQXqkIFt9O+HWI0jMiFCe8uMTC2N3u7APreMM+zF6ZyDRD2J9b2yFgTIsMFWMNDKFcBonpq/xpTZwMpC4oEci68mQZ9/eaLXU369r8WYfZo3YkWEO19fIJ9VIN00zR/aWRyCozEgz+Y6tf8IwjgWJfrOQEs40c0KSLMOcgN7w8qZfWXIiVJg499PqisVL5OsVoGCmWxejr2OM8Rkiukr5YpFLM//o1FXvFCo10Lb3rcNLpljV/dOu+9S4PgiDgJiK35C9Xu9jw+Fkfhpn");
+
     /**
      * Нечто среднее между Map и Multimap.
      * Одной лемме соответствует одно значение,
@@ -684,10 +686,13 @@
                 if (caseIndex >= 0) {
                     let v = this.get(lemma, true);
                     if (!v) {
-                        const bloomHash = getFuzzyHash(lemma.lower());
-                        if ((lemma.getGender() === Gender.MASCULINE) &&
-                                stressGroupAHashes.includes(bloomHash)) {
-                            v = 'SEESEEE-';
+                        const hash = getFuzzyHash(lemma.lower());
+                        if (lemma.getGender() === Gender.MASCULINE) {
+                            if (stressGroupAHashes.includes(hash)) {
+                                v = 'SEESEEE-';
+                            } else if (stressGroupBHashes.includes(hash)) {
+                                v = 'SEEEEEE-';
+                            }
                         }
                     }
 
@@ -717,10 +722,12 @@
                 if (caseIndex >= 0 && caseIndex < 6) {
                     let v = this.get(lemma, true);
                     if (!v) {
-                        const bloomHash = getFuzzyHash(lemma.lower());
-                        if ((lemma.getGender() === Gender.MASCULINE) &&
-                                stressGroupAHashes.includes(bloomHash)) {
-                            v = '-EEEEEE';
+                        const hash = getFuzzyHash(lemma.lower());
+                        if (lemma.getGender() === Gender.MASCULINE) {
+                            if (stressGroupAHashes.includes(hash) ||
+                                    (lemma.isAnimate() && stressGroupBHashes.includes(hash))) {
+                                v = '-EEEEEE';
+                            }
                         }
                     }
 
@@ -873,17 +880,8 @@
         d.putAll(f, 'EEEbEEE-SSESEE', 'щека');
         d.putAll(f, 'EEEEEEE-SSESEE', 'слеза');
 
-        // У меня нет ответа, почему у следующих слов на ж/ш/ч/ц
-        // ударения в основном на окончания.
-        // Возможно, это коррелирует с количеством слогов в корне.
-        // Вообще, почти во всех словах на ж/ш/ч/ц в русском языке
-        // в творительном падеже ударение на основу слова.
-
-        // Где-то половина этих слов очень широко используется,
-        // другая половина — устаревшие, специальные, просторечные, грубые и т.п.
-
-        // В этот список не вошли топонимы, имена, фамилии, отчества
-        // и некоторые названия жителей населенных пунктов.
+        // Почти все слова на ж/ш/ч/ц с ударением на окончание
+        // захешированы (см. функцию extractHashes).
 
         d.putAll(m,
             'SbbSbbb-bbbbbb',
@@ -901,58 +899,6 @@
 
         putM('SEESeEE-EEEEEE', 'стеллаж');
         putM('SeeSeee-eeeeee', 'шиномонтаж');
-
-        d.putAll(ma,
-            'SEEEEEE-EEEEEE',
-            'алкаш,' +
-            'басмач,беглец,белец,бирюч,бич,' +
-            'близнец,бомж,богач,' +
-            'боец,борец,бородач,брюхач,' +
-            'вдовец,волосач,' +
-            'врач,главврач,ветврач,военврач,диетврач,санврач,' +
-            'глупец,глупыш,голец,' +
-            'головач,' + // птица, жук
-            'голыш,гонец,горбач,гордец,грач,' +
-            'гребец,делец,дергач,донец,дохлец,' +
-            'драч,' + // тот, кто снимает шкуры
-            'ёж,ёрш,' +
-            'елец,' + // рыба
-            'жеребец,живец,жилец,жнец,жрец,' +
-            'избач,ингуш,истец,' +
-            'камыш,' + // камышинский голубь
-            'клещ,морж,' +
-            'кольчец,' + // кольчатый червь
-            'копач,' + // рабочий землекоп
-            'кормач,коротыш,косач,косец,космач,крепыш,' +
-            'кряж,' + // коренастый, (перен.) упорный и прижимистый человек
-            'кудряш,кузнец,купец,' +
-            'латыш,легаш,лжец,лихач,ловец,ловкач,лохмач,' +
-            'малец,малыш,мертвец,мигач,мордаш,' +
-            'мокрец,' + // насекомое
-            'москвич,' + // житель Москвы
-            'мудрец,мураш,носач,оголец,омич,' +
-            'отец,праотец,' +
-            'паж,камер-паж,палач,' +
-            'пантач,певец,песец,писец,плавунец,подлец,племяш,пловец,портач,' +
-            'продавец,перепродавец,' +
-            'пошлец,пришлец,простец,птенец,пузач,' +
-            'пугач,' + // филин
-            'рвач,рифмач,рогач,рунец,рыбец,' +
-            'ремнец,' + // паразитический плоский червь
-            'самец,сарыч,севец,силач,синец,скворец,скопец,скрипач,скупец,' +
-            'секач,' + // взрослый самец кабана или морского котика
-            'слепец,слепыш,слухач,смехач,сморкач,снохач,соистец,сорванец,' +
-            'спец,военспец,' +
-            'стервец,стрелец,стригунец,стриж,стукач,сыч,' +
-            'стрекач,' + // дать стрекача - убежать
-            'струнец,' + // паразитический круглый червь
-            'творец,телец,ткач,толмач,торгаш,трубач,трюкач,тунец,' +
-            'трепач,трепец,' + // трепальщик льна
-            'тупец,тупыш,' + // глупый человек
-            'тяглец,' + // тяглый крестьянин
-            'удалец,уж,усач,хитрец,хохмач,храбрец,хромец,хрыч,' +
-            rkComma('фЯц,') +
-            'циркач,червец,чернец,черныш,швец,шельмец,чтец,чиж,юнец');
 
         d.putAll({gender: Gender.NEUTER},
             'EEEEEEE-SsESEE',
