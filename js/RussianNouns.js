@@ -102,85 +102,70 @@
          */
         constructor(o) {
             if (o instanceof Lemma) {
-
-                this.pluraleTantum = o.pluraleTantum;
-                this.indeclinable = o.indeclinable;
-
-                this.animate = o.animate;
-                this.surname = o.surname;
-                this.name = o.name;
-                this.transport = o.transport;
-
-                this.internalText = o.internalText;
-                this.lowerCaseText = o.lowerCaseText;
+                this._txt = o._txt;
+                this._lc = o._lc;
                 this._hash = o._hash;
-
-                this.internalGender = o.internalGender;
+                this._flags = o._flags;
 
             } else {
-
-                this.pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
-                this.indeclinable = !!(o.indeclinable);
-
-                this.animate = !!(o.animate);
-                this.surname = !!(o.surname);
-                this.name = !!(o.name);
-                this.transport = !!(o.transport);
-
-                this.internalText = o.text;
-                this.lowerCaseText = this.internalText.toLowerCase();
-                this._hash = getFuzzyHash(this.lowerCaseText);
-
-                if (!(this.pluraleTantum)) {  // Это слова т. н. парного рода.
-                    this.internalGender = o.gender;
+                if (o.pluraleTantum || o.pluraliaTantum) {
+                    this._flags = 5;
+                } else {
+                    this._flags = 1 + Object.values(Gender).indexOf(o.gender);
                 }
 
+                this._flags |= (1 << 3) * (o.indeclinable&1);
+                this._flags |= (1 << 4) * (o.animate&1);
+                this._flags |= (1 << 5) * (o.surname&1);
+                this._flags |= (1 << 6) * (o.name&1);
+                this._flags |= (1 << 7) * (o.transport&1);
+
+                this._txt = o.text;
+                this._lc = this._txt.toLowerCase();
+                this._hash = getFuzzyHash(this._lc);
             }
         }
 
-        newText(f) {
+        newText(provider) {
             const lemmaCopy = new Lemma(this);
-            lemmaCopy.internalText = f(lemmaCopy);
-            lemmaCopy.lowerCaseText = lemmaCopy.internalText.toLowerCase();
+            lemmaCopy._txt = provider(lemmaCopy);
+            lemmaCopy._lc = lemmaCopy._txt.toLowerCase();
+            lemmaCopy._hash = getFuzzyHash(lemmaCopy._lc);
             return Object.freeze(lemmaCopy);
         }
 
-        newGender(f) {
-            const lemmaCopy = new Lemma(this);
-            lemmaCopy.internalGender = f(lemmaCopy);
-            return Object.freeze(lemmaCopy);
+        newGender(provider) {
+            const g = provider(lemmaCopy);
+            if (Object.values(Gender).includes(g)) {
+                const lemmaCopy = new Lemma(this);
+                lemmaCopy._flags &= 0xFFFFFFF8;
+                lemmaCopy._flags |= 1 + Object.values(Gender).indexOf(o.gender);
+                return Object.freeze(lemmaCopy);
+            }
         }
 
         equals(o) {
             return (o instanceof Lemma)
-                && (this.lower() === o.lower())
-                && (this.isPluraleTantum() === o.isPluraleTantum())
-                && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
-                && (this.isIndeclinable() === o.isIndeclinable())
-                && (this.isAnimate() === o.isAnimate())
-                && (this.isASurname() === o.isASurname())
-                && (this.isAName() === o.isAName())
-                && (this.isATransport() === o.isATransport());
+                && (this._flags === o._flags)
+                && (this.lower() === o.lower());
         }
 
         fuzzyEquals(o) {
             return (o instanceof Lemma)
-                && (unYo(this.lower()) === unYo(o.lower()))
-                && (this.isPluraleTantum() === o.isPluraleTantum())
-                && (this.isPluraleTantum() || (this.getGender() === o.getGender()))
-                && (this.isIndeclinable() === o.isIndeclinable());
+                && ((this._flags & 0xF) === (o._flags & 0xF))
+                && (unYo(this.lower()) === unYo(o.lower()));
         }
 
         text() {
-            return this.internalText;
+            return this._txt;
         }
 
         lower() {
-            return this.lowerCaseText;
+            return this._lc;
         }
 
         isPluraleTantum() {
-            return this.pluraleTantum;
+            return 5 === (0b111 & this._flags);
         }
 
         /**
@@ -188,31 +173,34 @@
          * @returns {boolean}
          */
         isPluraliaTantum() {
-            return this.pluraleTantum;
+            return this.isPluraleTantum();
         }
 
         getGender() {
-            return this.internalGender;
+            const i = (0b111 & this._flags);
+            if ((i >= 1) && (i <= 4)) {
+                return Object.values(Gender)[i-1];
+            }
         }
 
         isIndeclinable() {
-            return this.indeclinable;
+            return ((1 << 3) & this._flags) !== 0;
         }
 
         isAnimate() {
-            return this.animate || this.surname || this.name;
+            return (((1 << 4) & this._flags) !== 0) || this.isASurname() || this.isAName();
         }
 
         isASurname() {
-            return this.surname;
+            return ((1 << 5) & this._flags) !== 0;
         }
 
         isAName() {
-            return this.name;
+            return ((1 << 6) & this._flags) !== 0;
         }
 
         isATransport() {
-            return this.transport;
+            return ((1 << 7) & this._flags) !== 0;
         }
     }
 
@@ -311,7 +299,7 @@
         return djb2Hash32(lowerCaseUnicodeString.replaceAll('ё', 'е').split('').map(toByte));
     }
 
-    const builtinStress = (() => {
+    const stressHashes = (() => {
         const obj = {};
 
         function extract(input) {
@@ -716,9 +704,9 @@
                     let v = this.get(lemma, true);
                     if (!v) {
                         if (lemma.getGender() === Gender.MASCULINE) {
-                            if (builtinStress.a.has(lemma._hash)) {
+                            if (stressHashes.a.has(lemma._hash)) {
                                 v = 'SEESEEE-';
-                            } else if (builtinStress.b.has(lemma._hash)) {
+                            } else if (stressHashes.b.has(lemma._hash)) {
                                 v = 'SEEEEEE-';
                             }
                         }
@@ -751,8 +739,8 @@
                     let v = this.get(lemma, true);
                     if (!v) {
                         if (lemma.getGender() === Gender.MASCULINE) {
-                            if (builtinStress.a.has(lemma._hash) ||
-                                    (lemma.isAnimate() && builtinStress.b.has(lemma._hash))) {
+                            if (stressHashes.a.has(lemma._hash) ||
+                                    (lemma.isAnimate() && stressHashes.b.has(lemma._hash))) {
                                 v = '-EEEEEE';
                             }
                         }
