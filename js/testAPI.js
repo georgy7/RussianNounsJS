@@ -1105,4 +1105,58 @@ const RussianNouns = require('./RussianNouns.js');
     })();
 
     console.log('----------------------------------');
+
+    console.log('Rarely used parts of API.');
+
+    (() => {
+        let x = RussianNouns.createLemma({
+            text: 'абв',
+            gender: Gender.FEMININE
+        });
+
+        assertEquals(x.text(), 'абв');
+        assertEquals(x.lower(), 'абв');
+        assertEquals(x.isPluraleTantum(), false);
+        assertEquals(x.getGender(), Gender.FEMININE);
+
+        let y = x.newText(o => o.text() + 'г');
+        assertEquals(x.text(), 'абв');
+        assertEquals(x.lower(), 'абв');
+        assertEquals(y.text(), 'абвг');
+        assertEquals(y.lower(), 'абвг');
+        // Пожалуйста, не используйте поле _hash в пользовательском коде.
+        // Тест просто проверяет, что внутренний хэш пересчитывается.
+        assertEquals(true, x._hash != y._hash);
+        assertEquals(y.getGender(), Gender.FEMININE);
+
+        y = x.newText(() => 'Александр');
+        assertEquals(x.text(), 'абв');
+        assertEquals(x.lower(), 'абв');
+        assertEquals(y.text(), 'Александр');
+        assertEquals(y.lower(), 'александр');
+        // Пожалуйста, не используйте поле _hash в пользовательском коде.
+        assertEquals(true, x._hash != y._hash);
+        assertEquals(y.getGender(), Gender.FEMININE);
+
+        y = x.newGender(() => Gender.MASCULINE);
+        assertEquals(x.isPluraleTantum(), false);
+        assertEquals(x.getGender(), Gender.FEMININE);
+        assertEquals(y.isPluraleTantum(), false);
+        assertEquals(y.getGender(), Gender.MASCULINE);
+        assertEquals(x.text(), y.text());
+        assertEquals(x.lower(), y.lower());
+
+        y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
+        assertEquals(y.getGender(), Gender.MASCULINE);
+
+        x = x.newText(o => o.text() + 'о');
+        y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
+        assertEquals(y.getGender(), Gender.NEUTER);
+
+        x = x.newText(o => o.text().toUpperCase());
+        assertEquals(x.text(), 'АБВО');
+        assertEquals(x.lower(), 'абво');
+        assertEquals(x.getGender(), Gender.FEMININE);
+    })();
+
 })();

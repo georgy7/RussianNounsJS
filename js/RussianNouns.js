@@ -39,6 +39,8 @@
         "COMMON": "общий"
     });
 
+    const GenderValues = Object.freeze(Object.values(Gender));
+
     const CASES = Object.freeze([
         Case.NOMINATIVE,
         Case.GENITIVE,
@@ -84,7 +86,7 @@
                 return 'A grammatical gender required.';
             }
 
-            if (!Object.values(Gender).includes(o.gender)) {
+            if (!GenderValues.includes(o.gender)) {
                 return 'Bad grammatical gender.';
             }
         }
@@ -111,7 +113,7 @@
                 if (o.pluraleTantum || o.pluraliaTantum) {
                     this._flags = 5;
                 } else {
-                    this._flags = 1 + Object.values(Gender).indexOf(o.gender);
+                    this._flags = 1 + GenderValues.indexOf(o.gender);
                 }
 
                 this._flags |= (1 << 3) * (o.indeclinable&1);
@@ -135,11 +137,11 @@
         }
 
         newGender(provider) {
+            const lemmaCopy = new Lemma(this);
             const g = provider(lemmaCopy);
-            if (Object.values(Gender).includes(g)) {
-                const lemmaCopy = new Lemma(this);
+            if (GenderValues.includes(g)) {
                 lemmaCopy._flags &= 0xFFFFFFF8;
-                lemmaCopy._flags |= 1 + Object.values(Gender).indexOf(o.gender);
+                lemmaCopy._flags |= 1 + GenderValues.indexOf(g);
                 return Object.freeze(lemmaCopy);
             }
         }
@@ -179,7 +181,7 @@
         getGender() {
             const i = (0b111 & this._flags);
             if ((i >= 1) && (i <= 4)) {
-                return Object.values(Gender)[i-1];
+                return GenderValues[i-1];
             }
         }
 
@@ -1145,7 +1147,7 @@
 
         if (stemData.mobileVowelA.has(lcWord)
             || endsWithAny(lcWord, stemData.mobileVowelB)
-            || (lemma.isAnimate() && endsWithAny(lcWord, ['посол']))
+            || (lemma.isAnimate() && lcWord.endsWith('посол'))
         ) {
             const w = (lcLastChar === 'ь') ? init(word) : word;
             return nInit(w, 2) + last(w);
@@ -1161,11 +1163,11 @@
             return nInit(word, 2) + 'йк';
         }
 
-        if (isConsonantNotJ(last(lcWord))) {
+        if (isConsonantNotJ(lcLastChar)) {
             return word;
         }
 
-        if ('ь' === last(lcWord)) {
+        if ('ь' === lcLastChar) {
             if (lcWord.endsWith('ень') && (gender === Gender.MASCULINE) && !endsWithAny(lcWord, stemData.en2a2b)) {
                 return nInit(word, 3) + 'н';
             } else {
@@ -1173,11 +1175,13 @@
             }
         }
 
-        if ('ь' === last(init(lcWord))) {
+        const lcLastInit = last(init(lcWord));
+
+        if ('ь' === lcLastInit) {
             return init(word);
         }
 
-        if ('о' === last(lcWord) && bincludes(0b1001100011100000000100, last(init(lcWord)))) {
+        if ('о' === lcLastChar && bincludes(0b1001100011100000000100, lcLastInit)) {
             return init(word);
         }
 
@@ -1280,12 +1284,12 @@
     const softD1 = w => (last(w) === 'ь' && !w.endsWith('господь'))
         || ('её'.includes(last(w)) && !endsWithAny(w, ['це', 'же']));
 
-    function halfSomething(word) {
-        if (word.startsWith('пол')
-            && bincludes(0b10011000000000000000000100000001, last(word))
-            && (vowelCount(word) >= 2)) {
+    function halfSomething(lcWord) {
+        if (lcWord.startsWith('пол')
+            && bincludes(0b10011000000000000000000100000001, last(lcWord))
+            && (vowelCount(lcWord) >= 2)) {
 
-            let subWord = word.substring(3);
+            let subWord = lcWord.substring(3);
 
             // На случай дефисов.
             let offset = subWord.search(/[а-яА-ЯёЁ]/);

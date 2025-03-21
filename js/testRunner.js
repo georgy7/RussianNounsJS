@@ -21,7 +21,7 @@
         $scope.genders = Object.values(RussianNouns.Gender).sort();
 
         $scope.filter = {
-            frequentOnly: false,
+            frequentOnly: true,
             pluraliaTantumOnly: false,
             gender: null
         };
@@ -29,11 +29,14 @@
         const abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
         const parts = [];
 
-        for (let i = 0; i < 7; i++) {
-            parts.push(abc.slice(3 * i, 3 * i + 3));
+        const partCount = 4;
+        const chunkSize = Math.floor(abc.length / partCount);
+
+        for (let i = 0; i < (partCount-1); i++) {
+            parts.push(abc.slice(i * chunkSize, (i+1) * chunkSize));
         }
 
-        parts.push(abc.slice(3 * 7, abc.length));
+        parts.push(abc.slice((partCount-1) * chunkSize, abc.length));
 
         $scope.loadingStatuses = [];
         $scope.results = [];

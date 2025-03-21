@@ -4,7 +4,7 @@
 
     // http://dict.ruslang.ru/freq.php
 
-    root.mostFrequent = [
+    root.mostFrequent = new Set([
         'год',
         'человек',
         'время',
@@ -12740,6 +12740,6 @@
         'светловолосый',
         'скептический',
         'словарный'
-    ];
+    ]);
 
 })();
