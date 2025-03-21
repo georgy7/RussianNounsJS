@@ -248,7 +248,6 @@
     }
 
     // Without ё, the Russian alphabet consists of 32 letters.
-    // A coincidence? I don't think so.
     function lcBit(lcChar) {
         const x = lcChar.charCodeAt(0) - 1072;
         return (x === 33) ? 0b100000 : ((x === (0x1F & x)) ? (1 << x) : 0)
@@ -290,66 +289,80 @@
 
     const unique = a => a.filter((item, index) => a.indexOf(item) === index);
 
-    const unYo = s => s.replace('ё', 'е').replace('Ё', 'Е');
+    const unYo = s => s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');
 
     // Daniel J. Bernstein's hash function
     // http://www.cse.yorku.ca/~oz/hash.html
     // https://theartincode.stanis.me/008-djb2/
     // The result is the same as if the hash were of type uint32_t.
-    function djb2Hash32(ansiString) {
+    function djb2Hash32(byteArray) {
         let hash = 5381;
-        for (let i = 0; i < ansiString.length; i++) {
-            hash = (hash * 33 + ansiString.charCodeAt(i)) % 0x100000000;
+        for (let i = 0; i < byteArray.length; i++) {
+            hash = (hash * 33 + byteArray[i]) % 0x100000000;
         }
         return hash;
     }
 
     function getFuzzyHash(lowerCaseUnicodeString) {
-        return djb2Hash32(encodeURI(unYo(lowerCaseUnicodeString)));
+        function toByte(ch) {
+            const chCode = ch.charCodeAt(0);
+            return (chCode <= 127) ? (0x80 + chCode) : (0x7F & (chCode-1072));
+        }
+        return djb2Hash32(lowerCaseUnicodeString.replaceAll('ё', 'е').split('').map(toByte));
     }
 
-    function extractHashes(base64Bytes) {
-        const result = new Set();
-        const bytesOfHashes = atob(base64Bytes);
+    const builtinStress = (() => {
+        const obj = {};
 
-        const bytesPerItem = 4;
-        const hashCount = Math.floor(bytesOfHashes.length / bytesPerItem);
-
-        for (let i = 0; i < hashCount; i++) {
-            const ib = bytesPerItem * i;
-            const mostSignificant = (bytesOfHashes.charCodeAt(ib) << 8) | bytesOfHashes.charCodeAt(ib+1);
-            const leastSignificant = (bytesOfHashes.charCodeAt(ib+2) << 8) | bytesOfHashes.charCodeAt(ib+3);
-            result.add(mostSignificant * 0x10000 + leastSignificant);
+        function extract(input) {
+            const result = new Set();
+            let last = 0;
+            for (let delta of input) {
+                last += delta;
+                result.add(last);
+            }
+            return result;
         }
 
-        return Object.freeze(result);
-    }
+        obj.a = extract([
+            5860080, 122700338, 6781005, 15066, 174372, 1005376, 181863, 110897, 898425, 497854, 728, 179817,
+            681927, 4050007, 2885686, 1981, 503479, 2014, 1253, 174242, 98, 825, 3250, 1089, 2343, 1974192,
+            390885, 438009, 1328596, 496584, 603290, 7476, 186382, 324359, 163349, 16499, 670824, 318913,
+            177655, 16, 692440, 3250, 327970, 180593, 284410, 1089, 501848, 181, 908, 215803, 178596, 728,
+            417284, 1954738, 3053737, 1001717, 1477936, 7212804, 346121, 6038325, 15676851, 346, 2178, 2097,
+            6632, 627, 858, 511, 1716, 891, 3399, 5793, 10368459, 178760, 16528071, 6871771, 22511792,
+            15316801, 1462363, 10890, 1786108, 23051968, 3615316, 10491574, 122992749, 95414913, 5496035,
+            2325039, 1663143, 3267989, 3743357, 2080599, 786110, 3062896, 26233365, 33759, 35577630,
+            10385974, 109808, 9014293, 21270966, 12331836, 2625591, 20196594, 16566957, 24616833, 200224,
+            11979, 3224693, 518200, 2803234, 5912181, 3422370, 132, 23865676, 34576839, 102366, 9880481,
+            1010608, 4745501, 4801136, 22545088, 3553523, 6934488, 74388123, 71480160, 22318906, 10534210,
+            6470822, 3593716, 29504096, 32673923, 159978456, 2481667, 35185821, 7130733, 56365048, 61979038,
+            81830120, 65118503, 10213975, 7164765, 27229609, 175661380, 180555664, 11623981, 98868979,
+            671197, 109459, 211167, 2344, 444, 2541, 173368, 6336, 68605, 147149, 2406, 286226, 10093388,
+            1680929, 174716967, 165082600, 225884750, 143746615, 180457383, 218593714, 5421223, 30808096,
+            440631725
+        ]);
 
-    const stressGroupA = extractHashes("5MUsXx6CK3/5cdubAcRFYuVsBnVmlL45+MnDDld3MF" +
-        "zBKpVEva6nLrI9vJJmAQBMoAu11rhSyMtr6qVJy1TbEuVGenx2sgblpMlwpnTtJI5xuxgnRbYULnnimA" +
-        "lHZl+lWnQluAqLm3U0TUql5lV/IU4k69SYgtVHMqrwM3f6kcSJclxcx6tLCz7JyNjWNRKQL56LOYTG4v" +
-        "vcqKLmdokaXMu+6EM0O8z+9pmwsFswc9kcNcVppnwDxEzcdhYiTf/yz0wFged2YmTTZBFxWoIW9JLPw1" +
-        "HTxO9GkGBZzHauQ7Tr7M2b7mgcMRw1XkUMQv9vv+OViPF+bnOFkMF1rZx11OGFaNhiYvkcp1tP5llzU3" +
-        "ZAYgm4J+8tMXjStLEKXd62Fgu+nP+T0x0fNRXkaaDICzDir7ZC/wL15Vvifwt62bMFNyUrUuP9jWH00o" +
-        "CXubeHl5tSuetNblMxi0eXKO597tho0iokOW+krDO+ZcP5V8tWOQJmfpH0UPdFbLUgx+gk0wY0utMGNL" +
-        "pycIbRqVYVHPbEg1rzIDT3h87gCRTgiCpz3sGwzTr6XSdgEtZzzXtxfJLDDR175rJwLi5u+bpsxfECxf" +
-        "hJpb/f1qeDe3uvQAClgQy6jng0JhaRuZrlOIK4Ucaj0lHHLull2Mfi3j4dt5zkQD9Jmc1MA/3zBePJrN" +
-        "xFm3N4uunoP6/JHTyIbzh9vL6LeVt9O+Ev4GOH2HcD8JYjSvO8TfmpiA22Jt13R07G/1vPk/RtRuqL0f" +
-        "um/2YSkId6k5SJ45QMgma86AhO/GGwJ0En4yDumEfmVSzDnIDe8PKmBhfyiK8ozL1xzY0w7ZicJxnfoD" +
-        "vwcZQugyjCM8U0JwVyqghDJ83ynutCiyW5/Yt3PsNYe9yNZfVZobMsWcQzz0EtvaU=");
+        obj.b = extract([
+            5860080, 462, 128697908, 971551, 114082, 200475, 14321, 2366397, 728, 1450, 860310, 325611,
+            2144241, 9801, 2324851, 218428, 159619, 1755107, 505493, 2178, 164, 177507, 507113, 162459,
+            127412, 195095, 692604, 728, 277892, 409465, 1007324, 1862190, 170048, 16335, 107811, 379897,
+            4356, 1001880, 190739, 274428, 227601, 5083, 163712, 8548, 108900, 2342, 362720, 713212, 505296,
+            2178, 728, 15616814, 5425562, 14026156, 2110981, 4621, 10344, 3086, 3465, 2425, 10369566,
+            11804334, 47630682, 728, 3433814, 3431, 1973268, 26487583, 10861850, 234633598, 35937, 1944757,
+            3523047, 103684, 11369611, 936400, 20716661, 684981, 38744606, 202391, 5511592, 30264387,
+            5421770, 8815378, 15148440, 35549152, 12752125, 311683, 3208194, 438703, 280037, 4063059,
+            23718955, 251024, 3844006, 41295044, 179685, 682803, 728, 508760, 682803, 1509354, 6097311,
+            19987670, 14118721, 169885, 1989602, 164, 487708, 405108, 16819769, 7007715, 56870233, 16386019,
+            10410529, 7218817, 2120447, 29717557, 26713645, 8855437, 11979, 728, 62331929, 42135689,
+            59933501, 50861258, 12658372, 1253, 505296, 527482613, 127135141, 118397705, 46392249, 215,
+            37736, 35937, 35937, 30656, 38115, 3267, 138306, 6284, 24205, 44996, 69449, 6434, 54286, 50258,
+            30328, 43560, 71676, 73325, 18513, 227601, 181073843, 136724544, 119388690, 538130, 184058287,
+            16830219, 136758347, 18790744, 9175126, 663989, 6871590, 308847974, 36733509, 487541446
+        ]);
 
-    const stressGroupB = extractHashes("/zsaF8Crku83OanigH51D1Mt7r9XdzBcOWvIzZ9Xc3" +
-        "RmsBrMaair/bUpE6QfVm/ZoXzwo9FQvyQK7Otp0ocAfMZ3AZO4xx8MLI8CrFgy7KYuIuRYRKAhTPbNd3" +
-        "LmVX8hTiTr1JiC1UeFE5IjMqrwM6GrPHqDYWa9O+/VZ4THbhLcqKLmMSvlJDnmkI40O8z+pGbD8PaZsL" +
-        "A+9Sh+ReRxf/mWrsfvh0bXjo2hwRbTyUTQqrVDGubwLbCl6XDPTAWBiTHzjSGYYgrIq+4XDEL/b/oc99" +
-        "NoGZBoRSodccYNTTWq914Uo6xPsJZL7CAUi+n3uL6sDZbveXjxx5yIxqc5zoGX578zp2UpBdHEIBC0Bj" +
-        "07JcbZJfBL3NgdogLl8vWhhU6/ke0VCMcxi0eXKO597sf/QE9XxQQ4SXMWdE3Eb4aC6UxTEl3aFe698z" +
-        "JycIbRKEHhLqlWFRuqRP3GqIysFBTgiConb7rtUPbqv3W+SwhXxQrxOgWERnBYSp6zX5xvUbYuJrJMXu" +
-        "MHy4c9tNFACqrJm0/L9Foqjng0Js0B3DyptQNQZdjH4jXU43yukyy4WVXGigbaf2KQrQaLNc7dFr1reC" +
-        "XdDLrrTpegrjexWds8JYUxQXqkIFt9O+HWI0jMiFCe8uMTC2N3u7APreMM+zF6ZyDRD2J9b2yFgTIsMF" +
-        "WMNDKFcBonpq/xpTZwMpC4oEci68mQZ9/eaLXU369r8WYfZo3YkWEO19fIJ9VIN00zR/aWRyCozEgz+Y" +
-        "6tf8IwjgWJfrOQEs40c0KSLMOcgN7w8qZfWXIiVJg499PqisVL5OsVoGCmWxejr2OM8Rkiukr5YpFLM/" +
-        "/o1FXvFCo10Lb3rcNLpljV/dOu+9S4PgiDgJiK35C9Xu9jw+Fkfhpn");
+        return Object.freeze(obj);
+    })();
 
     /**
      * Нечто среднее между Map и Multimap.
@@ -396,7 +409,7 @@
          * @returns {*} Значение или undefined.
          */
         get(lemma, fuzzy) {
-            const lemmaObject = createLemma(lemma);
+            const lemmaObject = (lemma instanceof Lemma) ? lemma : createLemma(lemma);
             const hash = lemmaObject._hash;
 
             const homonyms = this.data[hash];
@@ -703,9 +716,9 @@
                     let v = this.get(lemma, true);
                     if (!v) {
                         if (lemma.getGender() === Gender.MASCULINE) {
-                            if (stressGroupA.has(lemma._hash)) {
+                            if (builtinStress.a.has(lemma._hash)) {
                                 v = 'SEESEEE-';
-                            } else if (stressGroupB.has(lemma._hash)) {
+                            } else if (builtinStress.b.has(lemma._hash)) {
                                 v = 'SEEEEEE-';
                             }
                         }
@@ -738,8 +751,8 @@
                     let v = this.get(lemma, true);
                     if (!v) {
                         if (lemma.getGender() === Gender.MASCULINE) {
-                            if (stressGroupA.has(lemma._hash) ||
-                                    (lemma.isAnimate() && stressGroupB.has(lemma._hash))) {
+                            if (builtinStress.a.has(lemma._hash) ||
+                                    (lemma.isAnimate() && builtinStress.b.has(lemma._hash))) {
                                 v = '-EEEEEE';
                             }
                         }
@@ -789,7 +802,8 @@
              * Второй предложный падеж (местный падеж, локатив) не включен в предложный.
              */
             decline(lemma, grammaticalCase, pluralForm) {
-                return declineAsList(this, API.createLemma(lemma), grammaticalCase, pluralForm);
+                const lemmaObject = (lemma instanceof API.Lemma) ? lemma : API.createLemma(lemma);
+                return declineAsList(this, lemmaObject, grammaticalCase, pluralForm);
             }
 
             /**
