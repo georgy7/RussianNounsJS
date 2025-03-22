@@ -130,16 +130,16 @@
 
         newText(provider) {
             const lemmaCopy = new Lemma(this);
-            lemmaCopy._txt = provider(lemmaCopy);
+            lemmaCopy._txt = provider(this);
             lemmaCopy._lc = lemmaCopy._txt.toLowerCase();
             lemmaCopy._hash = getFuzzyHash(lemmaCopy._lc);
             return Object.freeze(lemmaCopy);
         }
 
         newGender(provider) {
-            const lemmaCopy = new Lemma(this);
-            const g = provider(lemmaCopy);
+            const g = provider(this);
             if (GenderValues.includes(g)) {
+                const lemmaCopy = new Lemma(this);
                 lemmaCopy._flags &= 0xFFFFFFF8;
                 lemmaCopy._flags |= 1 + GenderValues.indexOf(g);
                 return Object.freeze(lemmaCopy);
@@ -1331,6 +1331,24 @@
         }
     }
 
+    const decline1Data = (() => {
+        const obj = {};
+        obj.uForm = new Set((
+                    'клей,чай,' +
+                    'дом,дух,дым,дымок,газ,год,горошек,' +
+                    'жар,жир,квас,' +
+                    'пар,пыл,род,рост,' +
+                    'сахар,свет,сироп,смех,снег,снежок,сок,сор,спор,срок,соус,спирт,страх,суп,сыр,' +
+                    'табак,творог,толк,торф,туман,' +
+                    'убыток,укроп,уксус,ход,' +
+                    'цемент,чеснок,' +
+                    'шаг,шик,' +
+                    'шиповник,' + // про отвар/сироп
+                    'шоколад,шорох,шум,яд'
+                ).split(','));
+        return Object.freeze(obj);
+    })();
+
     /**
      * @param {RussianNouns.Engine} engine
      * @param {RussianNouns.Lemma} lemma
@@ -1423,30 +1441,16 @@
 
         if (Case.GENITIVE === grCase) {
 
-            const addUForm = r => {
-                if (!lemma.isAnimate() && (
-                    'клей,чай,' +
-                    'дом,дух,дым,дымок,газ,год,горошек,' +
-                    'жар,жир,квас,' +
-                    'пар,пыл,род,рост,' +
-                    'сахар,свет,сироп,смех,снег,снежок,сок,сор,спор,срок,соус,спирт,страх,суп,сыр,' +
-                    'табак,творог,толк,торф,туман,' +
-                    'убыток,укроп,уксус,ход,' +
-                    'цемент,чеснок,' +
-                    'шаг,шик,' +
-                    'шиповник,' + // про отвар/сироп
-                    'шоколад,шорох,шум,яд'
-                ).split(',').includes(lcWord)) {
-
+            function addUForm(r) {
+                if (!lemma.isAnimate() && decline1Data.uForm.has(lcWord)) {
                     if (last(lcWord) === 'й') {
                         r.push(init(word) + upperLike('ю', last(word)));
                     } else {
                         r = r.concat(eStem(stem, s => s + upperLike('у', last(s))));
                     }
                 }
-
                 return r;
-            };
+            }
 
             if ((iyWord && lemma.isASurname())
                 || iyoy()
