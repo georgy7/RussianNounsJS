@@ -1,5 +1,4 @@
 ﻿var window = self;
-importScripts('third-party/underscore.js');
 importScripts('RussianNouns.js');
 importScripts('freq.js');
 
@@ -8,6 +7,22 @@ let dataM, dataF, dataN, dataC, dataP;
 let workerIndex, letterIndex;
 
 let main = function () {
+
+    const uniq = a => a.filter((item, index) => a.indexOf(item) === index);
+
+    function arraysEqual(a, b) {
+        if (a.length !== b.length) {
+            return false;
+        }
+
+        for (var i = 0; i < a.length; i++) {
+            if (a[i] !== b[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     let cases = RussianNouns.CASES;
 
@@ -37,8 +52,8 @@ let main = function () {
             'ою', 'ею'		// This is a literary norm of the 19th century.
         ];
 
-        const suExpected = _.uniq(expected).sort();
-        const suActual = _.uniq(actual).sort();
+        const suExpected = uniq(expected).sort();
+        const suActual = uniq(actual).sort();
 
 
         // --------- Utility functions --------------
@@ -69,11 +84,11 @@ let main = function () {
             return;
         }
 
-        let uniqExpStems = _.uniq(suExpected.map(getStem));
-        let uniqActualStems = _.uniq(suActual.map(getStem));
+        let uniqExpStems = uniq(suExpected.map(getStem));
+        let uniqActualStems = uniq(suActual.map(getStem));
 
-        let expectedVowels = _.uniq(suExpected.map(getEnding).map(_.first)).sort();
-        let actualVowels = _.uniq(suActual.map(getEnding).map(_.first)).sort();
+        let expectedVowels = uniq(suExpected.map(getEnding).map(x => x[0])).sort();
+        let actualVowels = uniq(suActual.map(getEnding).map(x => x[0])).sort();
 
         if ((uniqExpStems.length === 1)
             && (uniqActualStems.length === 1)
@@ -82,7 +97,7 @@ let main = function () {
             && (actualVowels.length === 1)
             && (expectedVowels[0] === actualVowels[0])) {
 
-            if (_.isEqual(suExpected, suActual)
+            if (arraysEqual(suExpected, suActual)
                 || ((uniqExpStems[0].length >= 3) && suExpected.every(w => suActual.includes(w)))) {
                 return 'valid';
             } else {
@@ -168,7 +183,7 @@ let main = function () {
                         }
                     }
 
-                    const sameCount = (_.uniq(actual).length == _.uniq(expected).length);
+                    const sameCount = (uniq(actual).length == uniq(expected).length);
                     const everyExpectedIsInActual = expected.every(function (e) {
                         return actual.indexOf(e) >= 0;
                     });
@@ -294,13 +309,13 @@ let main = function () {
                                 ) {
                                     const pluralized1 = currentLemmaActualPluralNominativeArray[pluralizedIndex];
                                     const pluralized2 = currentLemmaActualPluralNominativeUpperCaseArray[pluralizedIndex];
-                                    pluralSimple.push(rne.decline(lemma, c, pluralized1));
-                                    pluralUpperCase.push(rne.decline(lemmaUpperCase, c, pluralized2));
+                                    pluralSimple.push.apply(pluralSimple, rne.decline(lemma, c, pluralized1));
+                                    pluralUpperCase.push.apply(pluralUpperCase, rne.decline(lemmaUpperCase, c, pluralized2));
                                 }
                             }
 
-                            pluralSimple = _.uniq(_.flatten(pluralSimple));
-                            pluralUpperCase = _.uniq(_.flatten(pluralUpperCase));
+                            pluralSimple = uniq(pluralSimple);
+                            pluralUpperCase = uniq(pluralUpperCase);
                         }
 
                         const aString = pluralSimple.toString().toLowerCase();

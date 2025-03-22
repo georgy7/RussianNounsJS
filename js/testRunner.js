@@ -48,9 +48,7 @@
             $scope.completed.push(false);
 
             $scope.loadingStatuses.push(
-                _(part.length).times(function () {
-                    return null;
-                })
+                Array(part.length).fill(null)
             );
 
             $scope.workers.push(new Worker('js/test.js'));
