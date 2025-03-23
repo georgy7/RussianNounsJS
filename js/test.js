@@ -10,6 +10,8 @@ let main = function () {
 
     const uniq = a => a.filter((item, index) => a.indexOf(item) === index);
 
+    const pushAll = (arr, other) => arr.push.apply(arr, other);
+
     function arraysEqual(a, b) {
         if (a.length !== b.length) {
             return false;
@@ -309,8 +311,8 @@ let main = function () {
                                 ) {
                                     const pluralized1 = currentLemmaActualPluralNominativeArray[pluralizedIndex];
                                     const pluralized2 = currentLemmaActualPluralNominativeUpperCaseArray[pluralizedIndex];
-                                    pluralSimple.push.apply(pluralSimple, rne.decline(lemma, c, pluralized1));
-                                    pluralUpperCase.push.apply(pluralUpperCase, rne.decline(lemmaUpperCase, c, pluralized2));
+                                    pushAll(pluralSimple, rne.decline(lemma, c, pluralized1));
+                                    pushAll(pluralUpperCase, rne.decline(lemmaUpperCase, c, pluralized2));
                                 }
                             }
 

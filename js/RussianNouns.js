@@ -42,10 +42,6 @@
     const GenderValues = Object.freeze(Object.values(Gender));
     const CaseValues = Object.freeze(Object.values(Case));
 
-    const rk = s => s.split('').map(ch => String.fromCharCode(ch.charCodeAt(0) + 1)).join('');
-
-    const rkComma = s => s.split(',').map(rk).join(',');
-
     /**
      * @param o A plain old JavaScript object.
      * @returns {string|null} Описание ошибки на английском или null.
@@ -1023,7 +1019,7 @@
         addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', '' +
             'бочок,' +  // лежать на бочку, т.е. лежать боком вниз (почти не употребляется)
             'борт,воз,горб,кол,мост,плот,сук,' +
-            rkComma('фти,')
+            'х' + String.fromCharCode(1091) + 'й'
         );
 
         // 6. вещества и материалы («в» и «на»)
@@ -2449,8 +2445,6 @@
             'попки', 'турки', 'узы', 'хлопоты', 'шахматы'
         ]));
 
-        obj.jov = new Set([rk('фтз'), 'чаи']);
-
         obj.flatEndings = [
             'х', 'ых', 'их',
             'м', 'ым', 'им',
@@ -2633,7 +2627,7 @@
                 } else if (endsWithAny(lcPlural, [
                         'зятья', 'кумовья', 'деверья', 'края', 'клеи', 'холуи'
                     ])
-                    || declinePluralData.jov.has(lcPlural)) {
+                    || (lcPlural.endsWith('и') && ['ча', 'ху'].includes(init(lcPlural)))) {
                     return init(plural) + 'ёв';
                 } else if (endsWithAny(lcPlural, ['мессии'])) {
                     return init(plural) + 'й';
