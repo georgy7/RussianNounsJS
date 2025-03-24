@@ -404,6 +404,20 @@
             }
         }
 
+        /**
+         * Максимально тупой метод, но зато самый универсальный.
+         * @param {number} hash
+         * @returns {array} Список пар лемма-значение.
+         */
+        _getEntities(hash) {
+            const homonyms = this.data[hash];
+            if (homonyms instanceof Array) {
+                return homonyms;
+            } else {
+                return [];
+            }
+        }
+
         remove(lemma) {
             const lemmaObject = createLemma(lemma);
             const hash = lemmaObject._hash;
@@ -686,18 +700,29 @@
                 super.put(lemma, settings);
             }
 
-            hasStressedEndingSingular(lemma, grCase) {
+            _getOne(query) {
+                const mainFlags = query._flags & 0x1F;
+                const extraFlags = query._flags & 0x7FFFFFE0;
+
+                // Дополнительные флаги должны быть такими же или
+                // более общими (содержать меньше признаков - меньше бит).
+                const entities = this._getEntities(query._hash)
+                    .filter(pair => ((pair[0]._flags & 0xF) === mainFlags) &&
+                        ((pair[0]._flags & extraFlags) <= extraFlags));
+
+                return entities[0] ? entities[0][1] : null;
+            }
+
+            hasStressedEndingSingular(query, grCase) {
                 const caseIndex = CaseValues.indexOf(grCase);
 
                 if (caseIndex >= 0) {
-                    let v = this.get(lemma, true);
-                    if (!v) {
-                        if (lemma.getGender() === Gender.MASCULINE) {
-                            if (stressHashes.a.has(lemma._hash)) {
-                                v = 'SEESEEE-';
-                            } else if (stressHashes.b.has(lemma._hash)) {
-                                v = 'SEEEEEE-';
-                            }
+                    let v = this._getOne(query);
+                    if (!v && (query.getGender() === Gender.MASCULINE)) {
+                        if (stressHashes.a.has(query._hash)) {
+                            v = 'SEESEEE-';
+                        } else if (stressHashes.b.has(query._hash)) {
+                            v = 'SEEEEEE-';
                         }
                     }
 
@@ -721,17 +746,15 @@
                 return []; // вместо undefined
             }
 
-            hasStressedEndingPlural(lemma, grCase) {
+            hasStressedEndingPlural(query, grCase) {
                 const caseIndex = CaseValues.indexOf(grCase);
 
                 if (caseIndex >= 0 && caseIndex < 6) {
-                    let v = this.get(lemma, true);
-                    if (!v) {
-                        if (lemma.getGender() === Gender.MASCULINE) {
-                            if (stressHashes.a.has(lemma._hash) ||
-                                    (lemma.isAnimate() && stressHashes.b.has(lemma._hash))) {
-                                v = '-EEEEEE';
-                            }
+                    let v = this._getOne(query);
+                    if (!v && (query.getGender() === Gender.MASCULINE)) {
+                        if (stressHashes.a.has(query._hash) ||
+                                (query.isAnimate() && stressHashes.b.has(query._hash))) {
+                            v = '-EEEEEE';
                         }
                     }
 
