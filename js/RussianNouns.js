@@ -2514,7 +2514,11 @@
 
         // Из-за ветвления вверху функции, здесь grCaseNumber >= 2.
         // Через Math.min локатив приравниваем к предложному падежу.
-        const flatEndingIndex = 3 * Math.min(4, grCaseNumber - 2);
+        const itemsPerCase = 3;
+        const flatEndingIndex = itemsPerCase * Math.min(
+            Math.round(declinePluralData.flatEndings.length / itemsPerCase - 1),
+            grCaseNumber - 2
+        );
 
         if (isSurnameType1 || lcPlural.endsWith('ничьи')) {
             return plural + declinePluralData.flatEndings[flatEndingIndex];
@@ -2524,7 +2528,11 @@
             return nInit(plural, 2) + declinePluralData.flatEndings[flatEndingIndex + 2];
 
         } else if ((grCaseNumber > 2) && (grCaseNumber !== 4)) {
-            const flatIndex2 = 2 * Math.min(4, grCaseNumber - 3);
+            const itemsPerCase2 = 2;
+            const flatIndex2 = itemsPerCase2 * Math.min(
+                Math.round(declinePluralData.endings2.length / itemsPerCase2 - 1),
+                grCaseNumber - 3
+            );
 
             if (endsWithAny(lcPlural, declinePluralData.softEndings)) {
                 return init(plural) + declinePluralData.endings2[flatIndex2];
