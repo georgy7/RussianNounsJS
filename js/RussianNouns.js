@@ -710,7 +710,13 @@
                     .filter(pair => ((pair[0]._flags & 0xF) === mainFlags) &&
                         ((pair[0]._flags & extraFlags) <= extraFlags));
 
-                return entities[0] ? entities[0][1] : null;
+                const exactYo = entities.filter(pair => pair[0].lower() === query.lower());
+
+                if (exactYo.length) {
+                    return exactYo[0][1];
+                } else if (entities.length) {
+                    return entities[0][1];
+                }
             }
 
             hasStressedEndingSingular(query, grCase) {
@@ -1898,7 +1904,7 @@
             return part.substring(0, index) + r + part.substring(index + 1);
         }
 
-        function yeruOrI(doNotUnYo) {
+        function yeruOrI() {
             if (bincludes(0b11101000000000010001001000, last(lcStem))  // sibilant or velar
                 || 'яйь'.includes(last(lcWord))
                 || endsWithAny(lcWord, ['сосед'])) {
@@ -1917,8 +1923,6 @@
 
                 if (softPatronymic()) {
                     result.push(softPatronymicForm2() + 'ы');
-                    result.push(simpleFirstPart + 'ы');
-                } else if (doNotUnYo) {
                     result.push(simpleFirstPart + 'ы');
                 } else {
                     Array.prototype.push.apply(result,
