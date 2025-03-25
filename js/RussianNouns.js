@@ -1929,7 +1929,8 @@
                     result.push(softPatronymicForm2() + 'и');
                     result.push(simpleFirstPart + 'и');
                 } else {
-                    result.push(simpleFirstPart + 'и');
+                    Array.prototype.push.apply(result,
+                        eStem(simpleFirstPart, s => s + 'и'));
                 }
 
             } else if (tsWord(lcWord)) {
