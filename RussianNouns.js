@@ -272,24 +272,24 @@
 
     const unYo = s => s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');
 
-    // Daniel J. Bernstein's hash function
-    // http://www.cse.yorku.ca/~oz/hash.html
-    // https://theartincode.stanis.me/008-djb2/
-    // The result is the same as if the hash were of type uint32_t.
-    function djb2Hash32(byteArray) {
-        let hash = 5381;
-        for (let i = 0; i < byteArray.length; i++) {
-            hash = (hash * 33 + byteArray[i]) % 0x100000000;
-        }
-        return hash;
-    }
-
     function getFuzzyHash(lowerCaseUnicodeString) {
-        function toByte(ch) {
-            const chCode = ch.charCodeAt(0);
-            return (chCode <= 127) ? (0x80 + chCode) : (0x7F & (chCode-1072));
+        const preparedString = lowerCaseUnicodeString.replaceAll('ё', 'е');
+
+        // Daniel J. Bernstein's hash function
+        // http://www.cse.yorku.ca/~oz/hash.html
+        // https://theartincode.stanis.me/008-djb2/
+        // The result is the same as if the hash were of type uint32_t.
+        let hash = 5381;
+        for (let i = 0; i < preparedString.length; i++) {
+
+            // Just converting a russian letter to a byte.
+            const chCode = preparedString.charCodeAt(i);
+            const uchar = (chCode <= 127) ? (0x80 + chCode) : (0x7F & (chCode-1072));
+
+            hash = (hash * 33 + uchar) % 0x100000000;
         }
-        return djb2Hash32(lowerCaseUnicodeString.replaceAll('ё', 'е').split('').map(toByte));
+
+        return hash;
     }
 
     const stressHashes = (() => {
