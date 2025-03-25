@@ -51,7 +51,7 @@ let main = function () {
 
         const all = [
             'ой', 'ей',
-            'ою', 'ею'		// This is a literary norm of the 19th century.
+            'ою', 'ею'        // This is a literary norm of the 19th century.
         ];
 
         const suExpected = uniq(expected).sort();
@@ -134,7 +134,7 @@ let main = function () {
             const surname = (data[i].g.indexOf('Surn') >= 0);
             const name = (data[i].g.indexOf('Name') >= 0);
 
-            const lemma = RussianNouns.createLemma({
+            const lemma = RussianNouns.createLemmaOrNull({
                 text: word,
                 gender: gender,
                 animate: animate,
@@ -143,6 +143,11 @@ let main = function () {
                 indeclinable: fixed,
                 pluraleTantum: pluraleTantum
             });
+
+            // Я здесь даже не проверяю тип. Какой смысл?
+            // Я могу лишь выкинуть исключение, а оно итак вылетит на следующей строчке.
+            // Если там null, в консоли будет следующее.
+            // Uncaught TypeError: Cannot read properties of null (reading 'newText')
 
             const lemmaUpperCase = lemma.newText(o => o.text().toUpperCase());
 
