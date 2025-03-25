@@ -384,7 +384,7 @@ let main = function () {
                 "indeclinable": fixed,
                 "animate": animate,
                 "declension": declension,
-                "frequent": (mostFrequent.has(lemma.text()) && !abbr),
+                "frequent": (mostFrequent.has(lemma.lower().replaceAll('ё', 'е')) && !abbr),
                 "status": wordStatus
             });
         }
