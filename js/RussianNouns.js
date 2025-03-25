@@ -1549,9 +1549,9 @@
         }
 
         if (Case.INSTRUMENTAL === grCase) {
-            if ((iyWord && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский', 'ской'])) {
+            if ((iyWord && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой'])) {
 
-                if (endsWithAny(lcWord, ['вое', 'лое', 'мое', 'ное', 'рое', 'тое'])) {
+                if (endsWithAny(lcWord, ['вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый'])) {
                     return stem + 'ым';
                 } else {
                     return stem + 'им';
