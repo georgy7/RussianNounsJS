@@ -721,7 +721,7 @@
                 // Дополнительные флаги должны быть такими же или
                 // более общими (содержать меньше признаков - меньше бит).
                 const entities = this._getEntities(query._hash)
-                    .filter(pair => ((pair[0]._flags & 0xF) === mainFlags) &&
+                    .filter(pair => ((pair[0]._flags & 0x1F) === mainFlags) &&
                         ((pair[0]._flags & extraFlags) <= extraFlags));
 
                 const exactYo = entities.filter(pair => pair[0].lower() === query.lower());
@@ -886,6 +886,8 @@
         const m = Object.freeze({gender: Gender.MASCULINE});
         const ma = Object.freeze({gender: Gender.MASCULINE, animate: true});
         const f = Object.freeze({gender: Gender.FEMININE});
+        const fa = Object.freeze({gender: Gender.FEMININE, animate: true});
+        const ca = Object.freeze({gender: Gender.COMMON, animate: true});
         const putM = (settings, word) => d.putAll(m, settings, word);
 
         d.putAll(m,
@@ -950,26 +952,25 @@
             'EEEEEEE-SsESEE',
             'плечо');
 
-        // Следующие слова важны из-за р.п. мн.ч.,
-        // который зависит от ударения в им.п. ед.ч.
+        // Если основа слова заканчивается на буквы жшчщц,
+        // от ударения зависит окончание творительного падежа ед.ч.
+        // В остальных словах ударение в им.п. ед.ч.
+        // влияет на окончание в р.п. мн.ч.
 
-        d.put(
-            {text: 'судья', gender: Gender.COMMON, animate: true},
-            'EEEEEEE-SSSSSS'
-        );
+        d.putAll(ca, 'EEEEEEE-SSSSSS', 'судья');
+        d.putAll(ca, API.FIXED_ENDING_STRESS, 'левша');
 
         d.putAll(f, 'EEEEEEE-SESSSS', 'семья,макросемья');
+        d.putAll(f, 'EEEEEEE-SEESEE', 'вожжа,свеча');
+        d.putAll(f, 'EEESEEE-SSSSSS', 'душа');
 
-        d.put(
-            {text: 'свинья', gender: Gender.FEMININE, animate: true},
-            'EEEEEEE-SESESS'
-        );
+        d.putAll(fa, 'EEEEEEE-SESESS', 'свинья,овца');
 
         d.putAll(f, 'EEEEEEE-eEeeee', 'скамья');
 
         d.putAll(f,
             API.FIXED_ENDING_STRESS,
-            'ладья,статья,башка');
+            'башка,ладья,лапша,моча,пыльца,статья');
 
         return d;
     }
@@ -1700,7 +1701,9 @@
                     return stem + 'ею';
                 } else if (ayaWord()) {
                     return stem + 'ой';
-                } else if (soft() || ('жшчщц'.includes(last(lcStem)) && !lcWord.endsWith('овца'))) {
+                } else if (soft() ||
+                        ('жшчщц'.includes(last(lcStem)) &&
+                            !(engine.sd.hasStressedEndingSingular(lemma, grCase).includes(true)))) {
                     if ('и' === last(lcHead)) {
                         return head + 'ей';
                     } else {
