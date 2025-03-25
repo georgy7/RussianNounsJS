@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.4.0
+  RussianNounsJS v1.4.1-SNAPSHOT
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
@@ -197,6 +197,10 @@
     }
 
     class StressDictionaryException extends Error {
+    }
+
+    function createLemmaOrNull(options) {
+        return (null === validateCreateLemma(options)) ? Object.freeze(new Lemma(options)) : null;
     }
 
     function createLemmaNoThrow(o) {
@@ -613,6 +617,16 @@
          * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
          */
         createLemmaNoThrow: createLemmaNoThrow,
+
+        /**
+         * Создание корректной леммы с теоретически минимальными накладными расходами:
+         * здесь нет лишних аллокаций, нет динамического определения типа аргумента.
+         * Цена за это — отказ принимать существующую лемму в качестве аргумента.
+         *
+         * @param {Object} options
+         * @returns {RussianNouns.Lemma|null}
+         */
+        createLemmaOrNull: createLemmaOrNull,
 
         /**
          * Склонение существительного.
