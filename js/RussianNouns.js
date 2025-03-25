@@ -954,8 +954,7 @@
 
         // Если основа слова заканчивается на буквы жшчщц,
         // от ударения зависит окончание творительного падежа ед.ч.
-        // В остальных словах ударение в им.п. ед.ч.
-        // влияет на окончание в р.п. мн.ч.
+        // В остальных словах ударение влияет на окончание в р.п. мн.ч.
 
         d.putAll(ca, 'EEEEEEE-SSSSSS', 'судья');
         d.putAll(ca, API.FIXED_ENDING_STRESS, 'левша');
@@ -970,7 +969,7 @@
 
         d.putAll(f,
             API.FIXED_ENDING_STRESS,
-            'башка,ладья,лапша,моча,пыльца,статья');
+            'башка,кишка,ладья,лапша,моча,пыльца,статья');
 
         return d;
     }
@@ -2781,7 +2780,7 @@
                 if ('ьй'.includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
-                } else if (endsWithAny(lcPlural, ['земли', 'петли'])) {
+                } else if (endsWithAny(lcPlural, ['земли', 'петли', 'капли'])) {
                     return init(stem) + 'ель';
                 } else {
                     return stem + 'ь';
