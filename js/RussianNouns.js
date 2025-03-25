@@ -282,7 +282,7 @@
         let hash = 5381;
         for (let i = 0; i < preparedString.length; i++) {
 
-            // Just converting a russian letter to a byte.
+            // Just converting a Russian letter to a byte.
             const chCode = preparedString.charCodeAt(i);
             const uchar = (chCode <= 127) ? (0x80 + chCode) : (0x7F & (chCode-1072));
 
@@ -1498,7 +1498,9 @@
             } else if (okWord(lcWord)) {
                 return init(head) + 'ка';
             } else if (endsWithAny(lcWord, ['шко']) && (Gender.MASCULINE === gender)) {
-                // дружище - не уверен, сюда ли его отнести
+                // Не уверен, сюда ли отнести слово "дружище".
+                // Но это не важно: оно не употребляется в родительном падеже ед.ч.
+                // (в национальном корпусе два с половиной примера из 19-го века).
                 return head + 'и';
             } else {
                 let r = [];
@@ -2523,6 +2525,8 @@
             if (endsWithAny(lcPlural, ['дети', 'люди'])
                     && !endsWithAny(lcPlural, ['нелюди'])) {
                 return init(plural) + 'ьми';
+            } else if (endsWithAny(lcPlural, ['вери', 'дочери'])) {
+                return [init(plural) + 'ями', init(plural) + 'ьми'];
             }
         }
 
