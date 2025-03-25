@@ -1376,7 +1376,7 @@
                     'шиповник,' + // про отвар/сироп
                     'шоколад,шорох,шум,яд'
                 ).split(','));
-        obj.ogoEndings = ['ое', 'нький', 'ский', 'евой', 'овой', 'ской', 'отой', 'живой'];
+        obj.ogoEndings = ['ое', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой', 'евой', 'овой', 'живой'];
         obj.egoEndings = ['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'];
         return Object.freeze(obj);
     })();
@@ -1549,7 +1549,7 @@
         }
 
         if (Case.INSTRUMENTAL === grCase) {
-            if ((iyWord && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой'])) {
+            if ((iyWord && lemma.isASurname()) || endsWithAny(lcWord, ['ее', 'ое', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой'])) {
 
                 if (endsWithAny(lcWord, ['вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый'])) {
                     return stem + 'ым';
@@ -2227,7 +2227,7 @@
                     ) {
                         result.push(nInit(word, 2) + 'е');
 
-                        // В корпусе фигурирует 🤷‍♂️
+                        // В корпусе фигурирует
                         if ('барин' === lcWord) {
                             result.push(nInit(word, 2) + 'ы');
                         }
@@ -2256,7 +2256,7 @@
                     } else if (lcWord.endsWith('ый') || endsWithAny(lcWord, ['щий', 'чий', 'жний', 'шний', 'ский'])) {
                         result.push(init(word) + 'е');
                     } else if ((lcWord.endsWith('вой') && vowelCount(nInit(word, 3)) >= 2)
-                        || endsWithAny(lcWord, ['живой', 'отой'])
+                        || endsWithAny(lcWord, ['живой', 'лстой', 'отой', 'утой'])
                         || (endsWithAny(lcWord, ['ной', 'мой']) && word.length >= 6)) {
                         result.push(nInit(word, 2) + 'ые');
                     } else if (endsWithAny(lcWord, ['хой', 'ской', 'ший', 'жий'])) {
