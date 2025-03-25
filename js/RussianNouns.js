@@ -929,7 +929,7 @@
         d.putAll(f, 'EEEEEEE-SSESEE', 'слеза');
 
         // Почти все слова на ж/ш/ч/ц с ударением на окончание
-        // захешированы (см. функцию extractHashes).
+        // захешированы (см. stressHashes).
 
         d.putAll(m,
             'SbbSbbb-bbbbbb',
@@ -1376,6 +1376,8 @@
                     'шиповник,' + // про отвар/сироп
                     'шоколад,шорох,шум,яд'
                 ).split(','));
+        obj.ogoEndings = ['ое', 'нький', 'ский', 'евой', 'овой', 'ской', 'отой', 'живой'];
+        obj.egoEndings = ['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'];
         return Object.freeze(obj);
     })();
 
@@ -1484,9 +1486,9 @@
 
             if ((iyWord && lemma.isASurname())
                 || iyoy()
-                || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
+                || endsWithAny(lcWord, decline1Data.ogoEndings)) {
                 return stem + 'ого';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
+            } else if (endsWithAny(lcWord, decline1Data.egoEndings) || lcWord.endsWith('ее')) {
                 return stem + 'его';
             } else if (iyWord) {
                 let r = [eiStem() + 'я'];
@@ -1514,9 +1516,9 @@
         if (Case.DATIVE === grCase) {
             if ((iyWord && lemma.isASurname())
                 || iyoy()
-                || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
+                || endsWithAny(lcWord, decline1Data.ogoEndings)) {
                 return stem + 'ому';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
+            } else if (endsWithAny(lcWord, decline1Data.egoEndings) || lcWord.endsWith('ее')) {
                 return stem + 'ему';
             } else if (iyWord) {
                 return eiStem() + 'ю';
@@ -1547,7 +1549,7 @@
         }
 
         if (Case.INSTRUMENTAL === grCase) {
-            if ((iyWord && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский'])) {
+            if ((iyWord && lemma.isASurname()) || endsWithAny(lcWord, ['ое', 'ее', 'нький', 'ский', 'ской'])) {
 
                 if (endsWithAny(lcWord, ['вое', 'лое', 'мое', 'ное', 'рое', 'тое'])) {
                     return stem + 'ым';
@@ -1555,9 +1557,9 @@
                     return stem + 'им';
                 }
 
-            } else if (iyoy() || endsWithAny(lcWord, ['евой', 'овой'])) {
+            } else if (iyoy() || endsWithAny(lcWord, ['евой', 'овой', 'отой', 'живой'])) {
                 return stem + 'ым';
-            } else if (endsWithAny(lcWord, ['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
+            } else if (endsWithAny(lcWord, decline1Data.egoEndings)) {
                 return init(head) + 'им';
             } else if (iyWord) {
                 return eiStem() + 'ем';
@@ -1587,9 +1589,9 @@
         if (Case.PREPOSITIONAL === grCase) {
             if ((iyWord && lemma.isASurname())
                 || iyoy()
-                || endsWithAny(lcWord, ['ое', 'нький', 'ский', 'евой', 'овой'])) {
+                || endsWithAny(lcWord, decline1Data.ogoEndings)) {
                 return stem + 'ом';
-            } else if (endsWithAny(lcWord, ['ее', 'кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'])) {
+            } else if (endsWithAny(lcWord, decline1Data.egoEndings) || lcWord.endsWith('ее')) {
                 return stem + 'ем';
             } else if (endsWithAny(lcWord, ['воробей'])) {
                 const i = init(head);
@@ -1658,7 +1660,7 @@
                     return stem + 'ей';
                 } else if (ayaWord()) {
                     return stem + 'ой';
-                } else if (lemma.isASurname()) {
+                } else if (lemma.isASurname() && !lcWord.endsWith('да')) {
                     return head + 'ой';
                 } else if (lcWord.endsWith('ничья')) {
                     return head + 'ей';
@@ -1674,7 +1676,7 @@
                     return stem + 'ей';
                 } else if (ayaWord()) {
                     return stem + 'ой';
-                } else if (lemma.isASurname()) {
+                } else if (lemma.isASurname() && !lcWord.endsWith('да')) {
                     return head + 'ой';
                 } else if (nLast(lcWord, 2) === 'ия') {
                     return head + 'и';
@@ -1712,7 +1714,7 @@
                     return stem + 'ей';
                 } else if (ayaWord()) {
                     return stem + 'ой';
-                } else if (lemma.isASurname()) {
+                } else if (lemma.isASurname() && !lcWord.endsWith('да')) {
                     return head + 'ой';
                 } else if (nLast(lcWord, 2) === 'ия') {
                     return head + 'и';
@@ -2254,9 +2256,10 @@
                     } else if (lcWord.endsWith('ый') || endsWithAny(lcWord, ['щий', 'чий', 'жний', 'шний', 'ский'])) {
                         result.push(init(word) + 'е');
                     } else if ((lcWord.endsWith('вой') && vowelCount(nInit(word, 3)) >= 2)
+                        || endsWithAny(lcWord, ['живой', 'отой'])
                         || (endsWithAny(lcWord, ['ной', 'мой']) && word.length >= 6)) {
                         result.push(nInit(word, 2) + 'ые');
-                    } else if (endsWithAny(lcWord, ['хой', 'ший', 'жий'])) {
+                    } else if (endsWithAny(lcWord, ['хой', 'ской', 'ший', 'жий'])) {
                         result.push(nInit(word, 2) + 'ие');
                     } else if (lcWord.endsWith('его')) {
                         result.push(nInit(word, 3) + 'ие');

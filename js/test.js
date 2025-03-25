@@ -146,8 +146,7 @@ let main = function () {
 
             // Я здесь даже не проверяю тип. Какой смысл?
             // Я могу лишь выкинуть исключение, а оно итак вылетит на следующей строчке.
-            // Если там null, в консоли будет следующее.
-            // Uncaught TypeError: Cannot read properties of null (reading 'newText')
+            // Если там null, в консоли будет TypeError.
 
             const lemmaUpperCase = lemma.newText(o => o.text().toUpperCase());
 
