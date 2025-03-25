@@ -94,36 +94,21 @@ For TypeScript, there are
 ### The basics
 
 ```js
-RussianNouns.CASES;
-// [
-//     "именительный",
-//     "родительный",
-//     "дательный",
-//     "винительный",
-//     "творительный",
-//     "предложный",
-//     "местный"
-// ]
-
-// Grammatical gender is a noun class system in Russian.
-RussianNouns.Gender;
-// {
-//     FEMININE: "женский",
-//     MASCULINE: "мужской",
-//     NEUTER: "средний",
-//     COMMON: "общий"
-// }
-
 const rne = new RussianNouns.Engine();
 
-rne.decline({text: 'имя', gender: 'средний'}, 'родительный');
-// [ "имени" ]
-
-rne.decline({text: 'имя', gender: 'средний'}, 'творительный');
-// [ "именем" ]
+// Grammatical gender is sort of noun class, related primarily to their sound.
+// Although mostly native speakers just remember them.
 
 const Gender = RussianNouns.Gender;
 const Case = RussianNouns.Case;
+
+
+rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.GENITIVE);
+// ◂ [ "имени" ]
+
+rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.INSTRUMENTAL);
+// ◂ [ "именем" ]
+
 
 let coat = RussianNouns.createLemma({
     text: 'пальто',
@@ -132,10 +117,11 @@ let coat = RussianNouns.createLemma({
 });
 
 rne.decline(coat, Case.GENITIVE);
-// [ "пальто" ]
+// ◂ [ "пальто" ]
 
 RussianNouns.getDeclension(coat);
-// -1
+// ◂ -1
+
 
 let mountain = RussianNouns.createLemma({
     text: 'гора',
@@ -145,7 +131,8 @@ let mountain = RussianNouns.createLemma({
 RussianNouns.CASES.map(c => {
     return rne.decline(mountain, c);
 });
-// [
+
+// ◂ [
 //     ["гора"]
 //     ["горы"]
 //     ["горе"]
@@ -156,13 +143,13 @@ RussianNouns.CASES.map(c => {
 // ]
 
 rne.pluralize(mountain);
-// [ "горы" ]
+// ◂ [ "горы" ]
 
 RussianNouns.CASES.map(c => {
     return rne.decline(mountain, c, 'горы');
 });
 
-// [ 
+// ◂ [ 
 //     [ 'горы' ]
 //     [ 'гор' ]
 //     [ 'горам' ]
@@ -173,10 +160,8 @@ RussianNouns.CASES.map(c => {
 // ]
 
 RussianNouns.getDeclension(mountain);
-// 2
+// ◂ 2
 
-RussianNouns.getSchoolDeclension(mountain);
-// 1
 
 let way = RussianNouns.createLemma({
     text: 'путь',
@@ -184,7 +169,8 @@ let way = RussianNouns.createLemma({
 });
 
 RussianNouns.getDeclension(way);
-// 0
+// ◂ 0
+
 
 let scissors = RussianNouns.createLemma({
     text: 'ножницы',
@@ -192,12 +178,13 @@ let scissors = RussianNouns.createLemma({
 });
 
 rne.pluralize(scissors);
-// [ 'ножницы' ]
+// ◂ [ 'ножницы' ]
 
 RussianNouns.CASES.map(c => {
     return rne.decline(scissors, c);
 });
-// [
+
+// ◂ [
 //     [ 'ножницы' ]
 //     [ 'ножниц' ]
 //     [ 'ножницам' ]
@@ -218,7 +205,7 @@ let кринж = RussianNouns.createLemma({
 
 const rne = new RussianNouns.Engine();
 
-rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжем" ]
 
 // Change of stresses.
 // Before the hyphen, there are singular settings.
@@ -231,16 +218,16 @@ rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем" ]
 // E — Stress is on the ending only.
 rne.sd.put(кринж, 'SEESESE-EEEEEE');
 
-rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжом" ]
 
 rne.sd.put(кринж, 'SEESbSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем", "кринжом" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжем", "кринжом" ]
 
 rne.sd.put(кринж, 'SEESsSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжем", "кринжом" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжем", "кринжом" ]
 
 rne.sd.put(кринж, 'SEESeSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом", "кринжем" ]
+rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжом", "кринжем" ]
 ```
 
 ### A complex example
@@ -248,24 +235,25 @@ rne.decline(кринж, Case.INSTRUMENTAL);  // [ "кринжом", "кринж�
 ```js
 const rne = new RussianNouns.Engine();
 
-const Ⰳ = (word, caseNumber) => {
+const decline = (word, caseNumber) => {
     const c = RussianNouns.CASES[caseNumber - 1];
     return rne.decline(word, c)[0];
 };
 
-const Ⰴ = (word, caseNumber) => {
+const rareForm = (word, caseNumber) => {
     const c = RussianNouns.CASES[caseNumber - 1];
     const result = rne.decline(word, c);
     return result[result.length - 1];
 };
 
-const ⰃⰃ = (word, caseNumber) => {
+const plural = (word, caseNumber) => {
     const c = RussianNouns.CASES[caseNumber - 1];
     const pluralForm = rne.pluralize(word)[0];
     return rne.decline(word, c, pluralForm)[0];
 };
 
-const L = RussianNouns.createLemma;
+const lemma = RussianNouns.createLemma;
+
 const Gender = RussianNouns.Gender;
 const cap = (str) => str[0].toUpperCase() + str.substring(1);
 
@@ -274,28 +262,28 @@ const cap = (str) => str[0].toUpperCase() + str.substring(1);
 // Александр Сергеевич Пушкин
 // Зимний вечер (фрагмент)
 
-const буря = L({text: 'буря', gender: Gender.FEMININE});
-const мгла = L({text: 'мгла', gender: Gender.FEMININE});
-const небо = L({text: 'небо', gender: Gender.NEUTER});
-const вихрь = L({text: 'вихрь', gender: Gender.MASCULINE});
+const буря = lemma({text: 'буря', gender: Gender.FEMININE});
+const мгла = lemma({text: 'мгла', gender: Gender.FEMININE});
+const небо = lemma({text: 'небо', gender: Gender.NEUTER});
+const вихрь = lemma({text: 'вихрь', gender: Gender.MASCULINE});
 
-const зверь = L({text: 'зверь', gender: Gender.MASCULINE, animate: true});
-const дитя = L({text: 'дитя', gender: Gender.NEUTER, animate: true});
+const зверь = lemma({text: 'зверь', gender: Gender.MASCULINE, animate: true});
+const дитя = lemma({text: 'дитя', gender: Gender.NEUTER, animate: true});
 
-const кровля = L({text: 'кровля', gender: Gender.FEMININE});
-const солома = L({text: 'солома', gender: Gender.FEMININE});
+const кровля = lemma({text: 'кровля', gender: Gender.FEMININE});
+const солома = lemma({text: 'солома', gender: Gender.FEMININE});
 
-const путник = L({text: 'путник', gender: Gender.MASCULINE, animate: true});
-const окошко = L({text: 'окошко', gender: Gender.NEUTER});
+const путник = lemma({text: 'путник', gender: Gender.MASCULINE, animate: true});
+const окошко = lemma({text: 'окошко', gender: Gender.NEUTER});
 
-console.log(`${cap(Ⰳ(буря, 1))} ${Ⰴ(мгла, 5)} ${Ⰳ(небо, 4)} кроет,
-${cap(ⰃⰃ(вихрь, 4))} снежные крутя;
-То, как ${Ⰳ(зверь, 1)}, она завоет,
-То заплачет, как ${Ⰳ(дитя, 1)},
-То по ${Ⰳ(кровля, 3)} обветшалой
-Вдруг ${Ⰳ(солома, 5)} зашумит,
-То, как ${Ⰳ(путник, 1)} запоздалый,
-К нам в ${Ⰳ(окошко, 4)} застучит.`);
+console.log(`${cap(decline(буря, 1))} ${rareForm(мгла, 5)} ${decline(небо, 4)} кроет,
+${cap(plural(вихрь, 4))} снежные крутя;
+То, как ${decline(зверь, 1)}, она завоет,
+То заплачет, как ${decline(дитя, 1)},
+То по ${decline(кровля, 3)} обветшалой
+Вдруг ${decline(солома, 5)} зашумит,
+То, как ${decline(путник, 1)} запоздалый,
+К нам в ${decline(окошко, 4)} застучит.`);
 
 // Буря мглою небо кроет,
 // Вихри снежные крутя;
@@ -311,17 +299,22 @@ ${cap(ⰃⰃ(вихрь, 4))} снежные крутя;
 // Николай Степанович Гумилев
 // Рассказ девушки (фрагмент)
 
-const ворота = L({text: 'ворота', pluraleTantum: true});
-const тень = L({text: 'тень', gender: Gender.FEMININE});
-const ель = L({text: 'ель', gender: Gender.FEMININE});
-const снег = L({text: 'снег', gender: Gender.MASCULINE});
-const высота = L({text: 'высота', gender: Gender.FEMININE});
+const ворота = lemma({text: 'ворота', pluraleTantum: true});
+const тень = lemma({text: 'тень', gender: Gender.FEMININE});
+const снег = lemma({text: 'снег', gender: Gender.MASCULINE});
+
+const милая = lemma({text: 'милая', gender: Gender.FEMININE});
+const старая = lemma({text: 'старая', gender: Gender.FEMININE});
+const ель = lemma({text: 'ель', gender: Gender.FEMININE});
+
+const неведомая = lemma({text: 'неведомая', gender: Gender.FEMININE});
+const высота = lemma({text: 'высота', gender: Gender.FEMININE});
 
 console.log(`* * *
-Я отдыхала у ${ⰃⰃ(ворота, 2)}
-Под ${Ⰳ(тень, 5)} милой, старой ${Ⰳ(ель, 2)},
+Я отдыхала у ${plural(ворота, 2)}
+Под ${decline(тень, 5)} ${decline(милая, 2)}, ${decline(старая, 2)} ${decline(ель, 2)},
 А надо мною пламенели
-${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`);
+${cap(plural(снег, 1))} ${plural(неведомая, 2)} ${plural(высота, 2)}.`);
 
 // * * *
 // Я отдыхала у ворот
