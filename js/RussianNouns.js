@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.4.1-SNAPSHOT
+  RussianNounsJS v1.4.1
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
