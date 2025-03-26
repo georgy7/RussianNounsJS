@@ -7,12 +7,39 @@ function djb2Hash32(byteArray) {
 }
 
 function getHash(unicodeString) {
-    function toByte(ch) {
-        const chCode = ch.charCodeAt(0);
-        return (chCode <= 127) ? (0x80 + chCode) : (0x7F & (chCode-1072));
+    // У нас в зашитом в скрипт словаре ударений довольно много коротких
+    // строк (от трёх до шести букв). Если представлять эти строки очень компактно,
+    // хэши считаются без многократных переполнений, не превращаются в белый шум
+    // и намного лучше жмутся.
+
+    function toBits(ch) {
+        const chCode = (ch.charCodeAt(0) - 1072) & 0x1F;
+        const bits = chCode.toString(2);
+        return '0'.repeat(5 - bits.length) + bits;
     }
 
-    return djb2Hash32(unicodeString.toLowerCase().replaceAll('ё', 'е').split('').map(toByte));
+    // Биты я наполняю справа налево, потому что так числа растут медленнее.
+    // Допустим, для строки 'яяяя', если заполнять справа налево,
+    // получится ['00001111', '11111111', '11111111'], т.е. [15, 255, 255].
+    // Если бы я наполнял слева направо, получилось бы
+    // ['11111111', '11111111', '11110000'], т.е. [255, 255, 240].
+    // Так что, даже вне зависимости от порядка дальнейшей обработки байтов,
+    // заполнение бит справа налево даёт меньшую хэш-сумму
+    // и её более компактную запись.
+
+    const preparedString = unicodeString.toLowerCase().replaceAll('ё', 'е');
+    let allBits = preparedString.split('').toReversed().map(toBits).join('');
+
+    if (allBits.length % 8) {
+        allBits = '0'.repeat(8 - allBits.length % 8) + allBits;
+    }
+
+    const byteArray = [];
+    for (var i = 0; i < allBits.length; i += 8) {
+        byteArray.push(parseInt(allBits.substring(i, i+8), 2));
+    }
+
+    return djb2Hash32(byteArray.toReversed());
 }
 
 // -----------------------------------------
