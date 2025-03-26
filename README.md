@@ -158,7 +158,7 @@ rne.pluralize(mountain);
 
 
 // When you have the plural form in the nominative case, pass it
-// as the third argument to decline in plural.
+// as the third argument of the decline function to decline in plural.
 
 RussianNouns.CASES.map(c => {
     return rne.decline(mountain, c, 'горы');
@@ -173,9 +173,6 @@ RussianNouns.CASES.map(c => {
 //     [ 'горах' ]
 //     [ 'горах' ]
 // ]
-
-RussianNouns.getDeclension(mountain);
-// ◂ 2
 
 
 // For words that are used only in plural, the original form
