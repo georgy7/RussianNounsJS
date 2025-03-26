@@ -127,7 +127,7 @@ RussianNouns.getDeclension(coat);
 
 
 // Cases can be specified not only by name, but also by number.
-// In the usual order: NOM, GEN, DAT, ACC, INST, PREP.
+// In the usual order: NOM, GEN, DAT, ACC, INS, PREP.
 // And there is also the locative case as the seventh.
 // It usually matches the prepositional one.
 
@@ -244,57 +244,63 @@ rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжом", "кри�
 ### A complex example
 
 ```js
+const Gender = RussianNouns.Gender;
+const createLemma = RussianNouns.createLemma;
+
 const rne = new RussianNouns.Engine();
 
-const decline = (word, caseNumber) => {
+function usual(lemma, caseNumber) {
     const c = RussianNouns.CASES[caseNumber - 1];
-    return rne.decline(word, c)[0];
-};
+    return rne.decline(lemma, c)[0];
+}
 
-const rareForm = (word, caseNumber) => {
+// To get a little-used or older form.
+function unusual(lemma, caseNumber) {
     const c = RussianNouns.CASES[caseNumber - 1];
-    const result = rne.decline(word, c);
+    const result = rne.decline(lemma, c);
     return result[result.length - 1];
-};
+}
 
-const plural = (word, caseNumber) => {
+function plural(lemma, caseNumber) {
     const c = RussianNouns.CASES[caseNumber - 1];
-    const pluralForm = rne.pluralize(word)[0];
-    return rne.decline(word, c, pluralForm)[0];
-};
+    const pluralForm = rne.pluralize(lemma)[0];
+    return rne.decline(lemma, c, pluralForm)[0];
+}
 
-const lemma = RussianNouns.createLemma;
-
-const Gender = RussianNouns.Gender;
-const cap = (str) => str[0].toUpperCase() + str.substring(1);
+function cap(str) {
+    return str[0].toUpperCase() + str.substring(1);
+}
 
 // -----------------------------------------------
 
 // Александр Сергеевич Пушкин
 // Зимний вечер (фрагмент)
 
-const буря = lemma({text: 'буря', gender: Gender.FEMININE});
-const мгла = lemma({text: 'мгла', gender: Gender.FEMININE});
-const небо = lemma({text: 'небо', gender: Gender.NEUTER});
-const вихрь = lemma({text: 'вихрь', gender: Gender.MASCULINE});
+const буря = createLemma({text: 'буря', gender: Gender.FEMININE});
+const мгла = createLemma({text: 'мгла', gender: Gender.FEMININE});
+const небо = createLemma({text: 'небо', gender: Gender.NEUTER});
+const зверь = createLemma({text: 'зверь', gender: Gender.MASCULINE, animate: true});
+const дитя = createLemma({text: 'дитя', gender: Gender.NEUTER, animate: true});
+const солома = createLemma({text: 'солома', gender: Gender.FEMININE});
+const окошко = createLemma({text: 'окошко', gender: Gender.NEUTER});
 
-const зверь = lemma({text: 'зверь', gender: Gender.MASCULINE, animate: true});
-const дитя = lemma({text: 'дитя', gender: Gender.NEUTER, animate: true});
+const снежный = createLemma({text: 'снежный', gender: Gender.MASCULINE});
+const вихрь = createLemma({text: 'вихрь', gender: Gender.MASCULINE});
 
-const кровля = lemma({text: 'кровля', gender: Gender.FEMININE});
-const солома = lemma({text: 'солома', gender: Gender.FEMININE});
+const обветшалая = createLemma({text: 'обветшалая', gender: Gender.FEMININE});
+const кровля = createLemma({text: 'кровля', gender: Gender.FEMININE});
 
-const путник = lemma({text: 'путник', gender: Gender.MASCULINE, animate: true});
-const окошко = lemma({text: 'окошко', gender: Gender.NEUTER});
+const запоздалый = createLemma({text: 'запоздалый', gender: Gender.MASCULINE, animate: true});
+const путник = createLemma({text: 'путник', gender: Gender.MASCULINE, animate: true});
 
-console.log(`${cap(decline(буря, 1))} ${rareForm(мгла, 5)} ${decline(небо, 4)} кроет,
-${cap(plural(вихрь, 4))} снежные крутя;
-То, как ${decline(зверь, 1)}, она завоет,
-То заплачет, как ${decline(дитя, 1)},
-То по ${decline(кровля, 3)} обветшалой
-Вдруг ${decline(солома, 5)} зашумит,
-То, как ${decline(путник, 1)} запоздалый,
-К нам в ${decline(окошко, 4)} застучит.`);
+console.log(`${cap(usual(буря, 1))} ${unusual(мгла, 5)} ${usual(небо, 4)} кроет,
+${cap(plural(вихрь, 4))} ${plural(снежный, 4)} крутя;
+То, как ${usual(зверь, 1)}, она завоет,
+То заплачет, как ${usual(дитя, 1)},
+То по ${usual(кровля, 3)} ${usual(обветшалая, 3)}
+Вдруг ${usual(солома, 5)} зашумит,
+То, как ${usual(путник, 1)} ${usual(запоздалый, 1)},
+К нам в ${usual(окошко, 4)} застучит.`);
 
 // Буря мглою небо кроет,
 // Вихри снежные крутя;
@@ -310,20 +316,20 @@ ${cap(plural(вихрь, 4))} снежные крутя;
 // Николай Степанович Гумилев
 // Рассказ девушки (фрагмент)
 
-const ворота = lemma({text: 'ворота', pluraleTantum: true});
-const тень = lemma({text: 'тень', gender: Gender.FEMININE});
-const снег = lemma({text: 'снег', gender: Gender.MASCULINE});
+const ворота = createLemma({text: 'ворота', pluraleTantum: true});
+const тень = createLemma({text: 'тень', gender: Gender.FEMININE});
+const снег = createLemma({text: 'снег', gender: Gender.MASCULINE});
 
-const милая = lemma({text: 'милая', gender: Gender.FEMININE});
-const старая = lemma({text: 'старая', gender: Gender.FEMININE});
-const ель = lemma({text: 'ель', gender: Gender.FEMININE});
+const милая = createLemma({text: 'милая', gender: Gender.FEMININE});
+const старая = createLemma({text: 'старая', gender: Gender.FEMININE});
+const ель = createLemma({text: 'ель', gender: Gender.FEMININE});
 
-const неведомая = lemma({text: 'неведомая', gender: Gender.FEMININE});
-const высота = lemma({text: 'высота', gender: Gender.FEMININE});
+const неведомая = createLemma({text: 'неведомая', gender: Gender.FEMININE});
+const высота = createLemma({text: 'высота', gender: Gender.FEMININE});
 
 console.log(`* * *
 Я отдыхала у ${plural(ворота, 2)}
-Под ${decline(тень, 5)} ${decline(милая, 2)}, ${decline(старая, 2)} ${decline(ель, 2)},
+Под ${usual(тень, 5)} ${usual(милая, 2)}, ${usual(старая, 2)} ${usual(ель, 2)},
 А надо мною пламенели
 ${cap(plural(снег, 1))} ${plural(неведомая, 2)} ${plural(высота, 2)}.`);
 

@@ -73,18 +73,18 @@ const RussianNouns = require('./RussianNouns.js');
 (() => {
     const rne = new RussianNouns.Engine();
 
+    const Gender = RussianNouns.Gender;
+    const Case = RussianNouns.Case;
+
     let result;
 
-    result = rne.decline({text: 'имя', gender: 'средний'}, 'родительный');
+    result = rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.GENITIVE);
     assertEqualsSingleValue(result, "имени");
 
-    result = rne.decline({text: 'имя', gender: 'средний'}, 'творительный');
+    result = rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.INSTRUMENTAL);
     assertEqualsSingleValue(result, "именем");
 
     console.log('--------------- 1 ----------------');
-
-    const Gender = RussianNouns.Gender;
-    const Case = RussianNouns.Case;
 
     let coat = RussianNouns.createLemma({
         text: 'пальто',
@@ -478,82 +478,89 @@ const RussianNouns = require('./RussianNouns.js');
 
 (() => {
 
+    const Gender = RussianNouns.Gender;
+    const createLemma = RussianNouns.createLemma;
+
     const rne = new RussianNouns.Engine();
 
-    const Ⰳ = (word, caseNumber) => {
+    function usual(lemma, caseNumber) {
         const c = RussianNouns.CASES[caseNumber - 1];
-        return rne.decline(word, c)[0];
-    };
+        return rne.decline(lemma, c)[0];
+    }
 
-    const Ⰴ = (word, caseNumber) => {
+    // To get a little-used or older form.
+    function unusual(lemma, caseNumber) {
         const c = RussianNouns.CASES[caseNumber - 1];
-        const result = rne.decline(word, c);
+        const result = rne.decline(lemma, c);
         return result[result.length - 1];
-    };
+    }
 
-    const ⰃⰃ = (word, caseNumber) => {
+    function plural(lemma, caseNumber) {
         const c = RussianNouns.CASES[caseNumber - 1];
-        const pluralForm = rne.pluralize(word)[0];
-        return rne.decline(word, c, pluralForm)[0];
-    };
+        const pluralForm = rne.pluralize(lemma)[0];
+        return rne.decline(lemma, c, pluralForm)[0];
+    }
 
-    const L = RussianNouns.createLemma;
-    const Gender = RussianNouns.Gender;
-    const cap = (str) => str[0].toUpperCase() + str.substring(1);
+    function cap(str) {
+        return str[0].toUpperCase() + str.substring(1);
+    }
 
     console.log('Winter Evening (fragment) by Alexander Sergeyevich Pushkin');
 
-    const буря = L({text: 'буря', gender: Gender.FEMININE});
-    const мгла = L({text: 'мгла', gender: Gender.FEMININE});
-    const небо = L({text: 'небо', gender: Gender.NEUTER});
-    const вихрь = L({text: 'вихрь', gender: Gender.MASCULINE});
+    const буря = createLemma({text: 'буря', gender: Gender.FEMININE});
+    const мгла = createLemma({text: 'мгла', gender: Gender.FEMININE});
+    const небо = createLemma({text: 'небо', gender: Gender.NEUTER});
+    const зверь = createLemma({text: 'зверь', gender: Gender.MASCULINE, animate: true});
+    const дитя = createLemma({text: 'дитя', gender: Gender.NEUTER, animate: true});
+    const солома = createLemma({text: 'солома', gender: Gender.FEMININE});
+    const окошко = createLemma({text: 'окошко', gender: Gender.NEUTER});
 
-    const зверь = L({text: 'зверь', gender: Gender.MASCULINE, animate: true});
-    const дитя = L({text: 'дитя', gender: Gender.NEUTER, animate: true});
+    const снежный = createLemma({text: 'снежный', gender: Gender.MASCULINE});
+    const вихрь = createLemma({text: 'вихрь', gender: Gender.MASCULINE});
 
-    const кровля = L({text: 'кровля', gender: Gender.FEMININE});
-    const солома = L({text: 'солома', gender: Gender.FEMININE});
+    const обветшалая = createLemma({text: 'обветшалая', gender: Gender.FEMININE});
+    const кровля = createLemma({text: 'кровля', gender: Gender.FEMININE});
 
-    const путник = L({text: 'путник', gender: Gender.MASCULINE, animate: true});
-    const окошко = L({text: 'окошко', gender: Gender.NEUTER});
+    const запоздалый = createLemma({text: 'запоздалый', gender: Gender.MASCULINE, animate: true});
+    const путник = createLemma({text: 'путник', gender: Gender.MASCULINE, animate: true});
 
     assertEquals(
-        `${cap(Ⰳ(буря, 1))} ${Ⰴ(мгла, 5)} ${Ⰳ(небо, 4)} кроет,`,
+        `${cap(usual(буря, 1))} ${unusual(мгла, 5)} ${usual(небо, 4)} кроет,`,
         'Буря мглою небо кроет,'
     );
 
     assertEquals(
-        `${cap(ⰃⰃ(вихрь, 4))} снежные крутя;`,
+        `${cap(plural(вихрь, 4))} ${plural(снежный, 4)} крутя;`,
         'Вихри снежные крутя;'
     );
 
     assertEquals(
-        `То, как ${Ⰳ(зверь, 1)}, она завоет,`,
+        `То, как ${usual(зверь, 1)}, она завоет,`,
         'То, как зверь, она завоет,'
     );
 
     assertEquals(
-        `То заплачет, как ${Ⰳ(дитя, 1)},`,
+        `То заплачет, как ${usual(дитя, 1)},`,
         'То заплачет, как дитя,'
     );
 
     assertEquals(
-        `То по ${Ⰳ(кровля, 3)} обветшалой`,
+        `То по ${usual(кровля, 3)} ${usual(обветшалая, 3)}`,
         'То по кровле обветшалой'
     );
 
     assertEquals(
-        `Вдруг ${Ⰳ(солома, 5)} зашумит,`,
+        `Вдруг ${usual(солома, 5)} зашумит,`,
         'Вдруг соломой зашумит,'
     );
 
     assertEquals(
-        `То, как ${Ⰳ(путник, 1)} запоздалый,`,
+        `То, как ${usual(путник, 1)} ${usual(запоздалый, 1)},`,
         'То, как путник запоздалый,'
     );
 
     assertEquals(
-        `К нам в ${Ⰳ(окошко, 4)} застучит.`,
+        `К нам в ${usual(окошко, 4)} застучит.`,
         'К нам в окошко застучит.'
     );
 
@@ -561,22 +568,27 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('A girl\'s story (fragment) by Nikolay Stepanovich Gumilyov');
 
-    const ворота = L({text: 'ворота', pluraleTantum: true});
-    const тень = L({text: 'тень', gender: Gender.FEMININE});
-    const ель = L({text: 'ель', gender: Gender.FEMININE});
-    const снег = L({text: 'снег', gender: Gender.MASCULINE});
-    const высота = L({text: 'высота', gender: Gender.FEMININE});
+    const ворота = createLemma({text: 'ворота', pluraleTantum: true});
+    const тень = createLemma({text: 'тень', gender: Gender.FEMININE});
+    const снег = createLemma({text: 'снег', gender: Gender.MASCULINE});
+
+    const милая = createLemma({text: 'милая', gender: Gender.FEMININE});
+    const старая = createLemma({text: 'старая', gender: Gender.FEMININE});
+    const ель = createLemma({text: 'ель', gender: Gender.FEMININE});
+
+    const неведомая = createLemma({text: 'неведомая', gender: Gender.FEMININE});
+    const высота = createLemma({text: 'высота', gender: Gender.FEMININE});
 
     assertEquals(true, ворота.isPluraleTantum());
     assertEquals(true, ворота.isPluraliaTantum());  // deprecated
 
     assertEquals(
-        `Я отдыхала у ${ⰃⰃ(ворота, 2)}`,
+        `Я отдыхала у ${plural(ворота, 2)}`,
         'Я отдыхала у ворот'
     );
 
     assertEquals(
-        `Под ${Ⰳ(тень, 5)} милой, старой ${Ⰳ(ель, 2)},`,
+        `Под ${usual(тень, 5)} ${usual(милая, 2)}, ${usual(старая, 2)} ${usual(ель, 2)},`,
         'Под тенью милой, старой ели,'
     );
 
@@ -586,7 +598,7 @@ const RussianNouns = require('./RussianNouns.js');
     );
 
     assertEquals(
-        `${cap(ⰃⰃ(снег, 1))} неведомых ${ⰃⰃ(высота, 2)}.`,
+        `${cap(plural(снег, 1))} ${plural(неведомая, 2)} ${plural(высота, 2)}.`,
         'Снега неведомых высот.'
     );
 
@@ -594,77 +606,89 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('Swan by Fyodor Ivanovich Tyutchev');
 
-    const орел = L({text: 'орел', gender: Gender.MASCULINE, animate: true});
-    const облако = L({text: 'облако', gender: Gender.NEUTER});
-    const молния = L({text: 'молния', gender: Gender.FEMININE});
-    const полет = L({text: 'полет', gender: Gender.MASCULINE});
+    const орел = createLemma({text: 'орел', gender: Gender.MASCULINE, animate: true});
+    const облако = createLemma({text: 'облако', gender: Gender.NEUTER});
+    const молния = createLemma({text: 'молния', gender: Gender.FEMININE});
+    const полет = createLemma({text: 'полет', gender: Gender.MASCULINE});
 
-    const око = L({text: 'око', gender: Gender.NEUTER});
-    const солнце = L({text: 'солнце', gender: Gender.NEUTER});
-    const свет = L({text: 'свет', gender: Gender.MASCULINE});
+    const неподвижное = createLemma({text: 'неподвижное', gender: Gender.NEUTER});
+    const око = createLemma({text: 'око', gender: Gender.NEUTER});
+    const солнце = createLemma({text: 'солнце', gender: Gender.NEUTER});
+    const свет = createLemma({text: 'свет', gender: Gender.MASCULINE});
 
-    const удел = L({text: 'удел', gender: Gender.MASCULINE});
-    const лебедь = L({text: 'лебедь', gender: Gender.MASCULINE, animate: true});
-    const стихия = L({text: 'стихия', gender: Gender.FEMININE});
-    const божество = L({text: 'божество', gender: Gender.NEUTER, animate: true});
+    const удел = createLemma({text: 'удел', gender: Gender.MASCULINE});
 
-    const бездна = L({text: 'бездна', gender: Gender.FEMININE});
-    const сон = L({text: 'сон', gender: Gender.MASCULINE});
-    const слава = L({text: 'слава', gender: Gender.FEMININE});
-    const твердь = L({text: 'твердь', gender: Gender.FEMININE});
+    const чистый = createLemma({text: 'чистый', gender: Gender.MASCULINE, animate: true});
+    const лебедь = createLemma({text: 'лебедь', gender: Gender.MASCULINE, animate: true});
+
+    const чистая = createLemma({text: 'чистая', gender: Gender.FEMININE});
+    const стихия = createLemma({text: 'стихия', gender: Gender.FEMININE});
+    const божество = createLemma({text: 'божество', gender: Gender.NEUTER, animate: true});
+
+    const двойная = createLemma({text: 'двойная', gender: Gender.FEMININE});
+    const бездна = createLemma({text: 'бездна', gender: Gender.FEMININE});
+
+    const всезрящий = createLemma({text: 'всезрящий', gender: Gender.MASCULINE});
+    const сон = createLemma({text: 'сон', gender: Gender.MASCULINE});
+
+    const полная = createLemma({text: 'полная', gender: Gender.FEMININE});
+    const слава = createLemma({text: 'слава', gender: Gender.FEMININE});
+
+    const звездная = createLemma({text: 'звездная', gender: Gender.FEMININE});
+    const твердь = createLemma({text: 'твердь', gender: Gender.FEMININE});
 
     assertEquals(
-        `Пускай ${Ⰳ(орел, 1)} за ${ⰃⰃ(облако, 5)}`,
+        `Пускай ${usual(орел, 1)} за ${plural(облако, 5)}`,
         'Пускай орел за облаками'
     );
 
     assertEquals(
-        `Встречает ${Ⰳ(молния, 2)} ${Ⰳ(полет, 4)}`,
+        `Встречает ${usual(молния, 2)} ${usual(полет, 4)}`,
         'Встречает молнии полет'
     );
 
     assertEquals(
-        `И неподвижными ${ⰃⰃ(око, 5)}`,
+        `И ${plural(неподвижное, 5)} ${plural(око, 5)}`,
         'И неподвижными очами'
     );
 
     assertEquals(
-        `В себя впивает ${Ⰳ(солнце, 2)} ${Ⰳ(свет, 4)}.`,
+        `В себя впивает ${usual(солнце, 2)} ${usual(свет, 4)}.`,
         'В себя впивает солнца свет.'
     );
 
     assertEquals(
-        `Но нет завиднее ${Ⰳ(удел, 2)},`,
+        `Но нет завиднее ${usual(удел, 2)},`,
         'Но нет завиднее удела,'
     );
 
     assertEquals(
-        `О, ${Ⰳ(лебедь, 1)} чистый, твоего!`,
+        `О, ${usual(лебедь, 1)} ${usual(чистый, 1)}, твоего!`,
         'О, лебедь чистый, твоего!'
     );
 
     assertEquals(
-        `И чистой, как ты сам, одело`,
+        `И ${usual(чистая, 5)}, как ты сам, одело`,
         'И чистой, как ты сам, одело'
     );
 
     assertEquals(
-        `Тебя ${Ⰳ(стихия, 5)} ${cap(Ⰳ(божество, 1))}.`,
+        `Тебя ${usual(стихия, 5)} ${cap(usual(божество, 1))}.`,
         'Тебя стихией Божество.'
     );
 
     assertEquals(
-        `Она между двойною ${Ⰳ(бездна, 5)}`,
+        `Она между двойною ${usual(бездна, 5)}`,    // TODO ${unusual(двойная, 5)}
         'Она между двойною бездной'
     );
 
     assertEquals(
-        `Лелеет твой всезрящий ${Ⰳ(сон, 4)},`,
+        `Лелеет твой ${usual(всезрящий, 4)} ${usual(сон, 4)},`,
         'Лелеет твой всезрящий сон,'
     );
 
     assertEquals(
-        `И полной ${Ⰳ(слава, 5)} ${Ⰳ(твердь, 2)} звездной`,
+        `И ${usual(полная, 5)} ${usual(слава, 5)} ${usual(твердь, 2)} ${usual(звездная, 2)}`,
         'И полной славой тверди звездной'
     );
 
@@ -677,25 +701,25 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('Potec (fragment) by Alexander Ivanovich Vvedensky');
 
-    const лошадь = L({text: 'лошадь', gender: Gender.FEMININE, animate: true});
-    const конь = L({text: 'конь', gender: Gender.MASCULINE, animate: true});
+    const лошадь = createLemma({text: 'лошадь', gender: Gender.FEMININE, animate: true});
+    const конь = createLemma({text: 'конь', gender: Gender.MASCULINE, animate: true});
 
-    const волна = L({text: 'волна', gender: Gender.FEMININE});
-    const подкова = L({text: 'подкова', gender: Gender.FEMININE});
-    const жар = L({text: 'жар', gender: Gender.MASCULINE});
+    const волна = createLemma({text: 'волна', gender: Gender.FEMININE});
+    const подкова = createLemma({text: 'подкова', gender: Gender.FEMININE});
+    const жар = createLemma({text: 'жар', gender: Gender.MASCULINE});
 
     assertEquals(
-        `Несутся ${ⰃⰃ(лошадь, 1)} как ${ⰃⰃ(волна, 1)},`,
+        `Несутся ${plural(лошадь, 1)} как ${plural(волна, 1)},`,
         'Несутся лошади как волны,'
     );
 
     assertEquals(
-        `Стучат ${ⰃⰃ(подкова, 1)}.`,
+        `Стучат ${plural(подкова, 1)}.`,
         'Стучат подковы.'
     );
 
     assertEquals(
-        `Лихие ${ⰃⰃ(конь, 1)} ${Ⰳ(жар, 5)} полны.`,
+        `Лихие ${plural(конь, 1)} ${usual(жар, 5)} полны.`,
         'Лихие кони жаром полны.'
     );
 
@@ -738,31 +762,31 @@ const RussianNouns = require('./RussianNouns.js');
     };
 
     checkSingularAndPlural(
-        L({text: 'арбуз', gender: Gender.MASCULINE}),
+        createLemma({text: 'арбуз', gender: Gender.MASCULINE}),
         ['арбуз', 'арбуза', 'арбузу', 'арбуз', 'арбузом', 'арбузе', 'арбузе'],
         ['арбузы', 'арбузов', 'арбузам', 'арбузы', 'арбузами', 'арбузах', 'арбузах']
     );
 
     checkSingularAndPlural(
-        L({text: 'окно', gender: Gender.NEUTER}),
+        createLemma({text: 'окно', gender: Gender.NEUTER}),
         ['окно', 'окна', 'окну', 'окно', 'окном', 'окне', 'окне'],
         ['окна', 'окон', 'окнам', 'окна', 'окнами', 'окнах', 'окнах']
     );
 
     checkSingularAndPlural(
-        L({text: 'кот', gender: Gender.MASCULINE, animate: true}),
+        createLemma({text: 'кот', gender: Gender.MASCULINE, animate: true}),
         ['кот', 'кота', 'коту', 'кота', 'котом', 'коте', 'коте'],
         ['коты', 'котов', 'котам', 'котов', 'котами', 'котах', 'котах']
     );
 
     checkSingularAndPlural(
-        L({text: 'кошка', gender: Gender.FEMININE, animate: true}),
+        createLemma({text: 'кошка', gender: Gender.FEMININE, animate: true}),
         ['кошка', 'кошки', 'кошке', 'кошку', ['кошкой', 'кошкою'], 'кошке', 'кошке'],
         ['кошки', 'кошек', 'кошкам', 'кошек', 'кошками', 'кошках', 'кошках']
     );
 
     checkSingularAndPlural(
-        L({text: 'дитя', gender: Gender.NEUTER, animate: true}),
+        createLemma({text: 'дитя', gender: Gender.NEUTER, animate: true}),
         ['дитя', 'дитяти', 'дитяти', 'дитя', ['дитятей', 'дитятею'], 'дитяти', 'дитяти'],
         ['дети', 'детей', 'детям', 'детей', 'детьми', 'детях', 'детях']
     );
@@ -772,165 +796,165 @@ const RussianNouns = require('./RussianNouns.js');
     // Или можно задать вопрос «благодаря чему».
 
     checkSingularAndPlural(
-        L({text: 'знамя', gender: Gender.NEUTER}),
+        createLemma({text: 'знамя', gender: Gender.NEUTER}),
         ['знамя', 'знамени', 'знамени', 'знамя', 'знаменем', 'знамени', 'знамени'],
         ['знамёна', 'знамён', 'знамёнам', 'знамёна', 'знамёнами', 'знамёнах', 'знамёнах']
     );
 
     checkSingularAndPlural(
-        L({text: 'время', gender: Gender.NEUTER}),
+        createLemma({text: 'время', gender: Gender.NEUTER}),
         ['время', 'времени', 'времени', 'время', 'временем', 'времени', 'времени'],
         ['времена', 'времён', 'временам', 'времена', 'временами', 'временах', 'временах']
     );
 
     checkSingularAndPlural(
-        L({text: 'семя', gender: Gender.NEUTER}),
+        createLemma({text: 'семя', gender: Gender.NEUTER}),
         ['семя', 'семени', 'семени', 'семя', 'семенем', 'семени', 'семени'],
         ['семена', 'семян', 'семенам', 'семена', 'семенами', 'семенах', 'семенах']
     );
 
     checkSingular(
-        L({text: 'вымя', gender: Gender.NEUTER}),
+        createLemma({text: 'вымя', gender: Gender.NEUTER}),
         ['вымя', 'вымени', 'вымени', 'вымя', 'выменем', 'вымени', 'вымени']
     );
 
     checkSingular(
-        L({text: 'темя', gender: Gender.NEUTER}),
+        createLemma({text: 'темя', gender: Gender.NEUTER}),
         ['темя', 'темени', 'темени', 'темя', 'теменем', 'темени', 'темени']
     );
 
     checkSingularAndPlural(
-        L({text: 'имя', gender: Gender.NEUTER}),
+        createLemma({text: 'имя', gender: Gender.NEUTER}),
         ['имя', 'имени', 'имени', 'имя', 'именем', 'имени', 'имени'],
         ['имена', 'имён', 'именам', 'имена', 'именами', 'именах', 'именах']
     );
 
     checkSingular(
-        L({text: 'пламя', gender: Gender.NEUTER}),
+        createLemma({text: 'пламя', gender: Gender.NEUTER}),
         ['пламя', 'пламени', 'пламени', 'пламя', 'пламенем', 'пламени', 'пламени']
     );
 
     checkSingularAndPlural(
-        L({text: 'стремя', gender: Gender.NEUTER}),
+        createLemma({text: 'стремя', gender: Gender.NEUTER}),
         ['стремя', 'стремени', 'стремени', 'стремя', 'стременем', 'стремени', 'стремени'],
         ['стремена', 'стремян', 'стременам', 'стремена', 'стременами', 'стременах', 'стременах']
     );
 
     checkSingularAndPlural(
-        L({text: 'задира', gender: Gender.COMMON, animate: true}),
+        createLemma({text: 'задира', gender: Gender.COMMON, animate: true}),
         ['задира', 'задиры', 'задире', 'задиру', ['задирой', 'задирою'], 'задире', 'задире'],
         ['задиры', 'задир', 'задирам', 'задир', 'задирами', 'задирах', 'задирах']
     );
 
     checkSingularAndPlural(
-        L({text: 'хитрюга', gender: Gender.COMMON, animate: true}),
+        createLemma({text: 'хитрюга', gender: Gender.COMMON, animate: true}),
         ['хитрюга', 'хитрюги', 'хитрюге', 'хитрюгу', ['хитрюгой', 'хитрюгою'], 'хитрюге', 'хитрюге'],
         ['хитрюги', 'хитрюг', 'хитрюгам', 'хитрюг', 'хитрюгами', 'хитрюгах', 'хитрюгах']
     );
 
     checkSingularAndPlural(
-        L({text: 'нелюдь', gender: Gender.MASCULINE, animate: true}),
+        createLemma({text: 'нелюдь', gender: Gender.MASCULINE, animate: true}),
         ['нелюдь', 'нелюдя', 'нелюдю', 'нелюдя', 'нелюдем', 'нелюде', 'нелюде'],
         ['нелюди', 'нелюдей', 'нелюдям', 'нелюдей', 'нелюдями', 'нелюдях', 'нелюдях']
     );
 
     checkSingularAndPlural(
-        L({text: 'паровоз', gender: Gender.MASCULINE}),
+        createLemma({text: 'паровоз', gender: Gender.MASCULINE}),
         ['паровоз', 'паровоза', 'паровозу', 'паровоз', 'паровозом', 'паровозе', 'паровозе'],
         ['паровозы', 'паровозов', 'паровозам', 'паровозы', 'паровозами', 'паровозах', 'паровозах']
     );
 
     checkSingular(
-        L({text: 'Ад', gender: Gender.MASCULINE}),
+        createLemma({text: 'Ад', gender: Gender.MASCULINE}),
         ['Ад', 'Ада', 'Аду', 'Ад', 'Адом', 'Аде', 'Аду']
     );
 
     checkSingularAndPlural(
-        L({text: 'вид', gender: Gender.MASCULINE}),
+        createLemma({text: 'вид', gender: Gender.MASCULINE}),
         ['вид', 'вида', 'виду', 'вид', 'видом', 'виде', 'виду'],
         ['виды', 'видов', 'видам', 'виды', 'видами', 'видах', 'видах']
     );
 
     checkSingularAndPlural(
-        L({text: 'снег', gender: Gender.MASCULINE}),
+        createLemma({text: 'снег', gender: Gender.MASCULINE}),
         ['снег', ['снега', 'снегу'], 'снегу', 'снег', 'снегом', 'снеге', 'снегу'],
         ['снега', 'снегов', 'снегам', 'снега', 'снегами', 'снегах', 'снегах']
     );
 
     checkSingularAndPlural(
-        L({text: 'мать', gender: Gender.FEMININE, animate: true}),
+        createLemma({text: 'мать', gender: Gender.FEMININE, animate: true}),
         ['мать', 'матери', 'матери', 'мать', 'матерью', 'матери', 'матери'],
         ['матери', 'матерей', 'матерям', 'матерей', 'матерями', 'матерях', 'матерях']
     );
 
     checkSingularAndPlural(
-        L({text: 'отец', gender: Gender.MASCULINE, animate: true}),
+        createLemma({text: 'отец', gender: Gender.MASCULINE, animate: true}),
         ['отец', 'отца', 'отцу', 'отца', 'отцом', 'отце', 'отце'],
         ['отцы', 'отцов', 'отцам', 'отцов', 'отцами', 'отцах', 'отцах']
     );
 
     checkSingularAndPlural(
-        L({text: 'дочь', gender: Gender.FEMININE, animate: true}),
+        createLemma({text: 'дочь', gender: Gender.FEMININE, animate: true}),
         ['дочь', 'дочери', 'дочери', 'дочь', 'дочерью', 'дочери', 'дочери'],
         ['дочери', 'дочерей', 'дочерям', 'дочерей', ['дочерями', 'дочерьми'], 'дочерях', 'дочерях']
     );
 
     checkSingularAndPlural(
-        L({text: 'зять', gender: Gender.MASCULINE, animate: true}),
+        createLemma({text: 'зять', gender: Gender.MASCULINE, animate: true}),
         ['зять', 'зятя', 'зятю', 'зятя', 'зятем', 'зяте', 'зяте'],
         ['зятья', 'зятьёв', 'зятьям', 'зятьёв', 'зятьями', 'зятьях', 'зятьях']
     );
 
     checkSingularAndPlural(
-        L({text: 'ирония', gender: Gender.FEMININE}),
+        createLemma({text: 'ирония', gender: Gender.FEMININE}),
         ['ирония', 'иронии', 'иронии', 'иронию', 'иронией', 'иронии', 'иронии'],
         ['иронии', 'ироний', 'ирониям', 'иронии', 'ирониями', 'ирониях', 'ирониях']
     );
 
     checkSingularAndPlural(
-        L({text: 'пальто', gender: Gender.NEUTER, indeclinable: true}),
+        createLemma({text: 'пальто', gender: Gender.NEUTER, indeclinable: true}),
         ['пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто'],
         ['пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто', 'пальто']
     );
 
     checkSingularAndPlural(
-        L({text: 'путь', gender: Gender.MASCULINE}),
+        createLemma({text: 'путь', gender: Gender.MASCULINE}),
         ['путь', 'пути', 'пути', 'путь', 'путём', 'пути', 'пути'],
         ['пути', 'путей', 'путям', 'пути', 'путями', 'путях', 'путях']
     );
 
     checkSingularAndPlural(
-        L({text: 'муть', gender: Gender.FEMININE}),
+        createLemma({text: 'муть', gender: Gender.FEMININE}),
         ['муть', 'мути', 'мути', 'муть', 'мутью', 'мути', 'мути'],
         ['мути', 'мутей', 'мутям', 'мути', 'мутями', 'мутях', 'мутях']
     );
 
     checkSingularAndPlural(
-        L({text: 'λ-выражение', gender: Gender.NEUTER}),
+        createLemma({text: 'λ-выражение', gender: Gender.NEUTER}),
         ['λ-выражение', 'λ-выражения', 'λ-выражению', 'λ-выражение', 'λ-выражением', 'λ-выражении', 'λ-выражении'],
         ['λ-выражения', 'λ-выражений', 'λ-выражениям', 'λ-выражения', 'λ-выражениями', 'λ-выражениях', 'λ-выражениях']
     );
 
     checkSingularAndPlural(
-        L({text: 'α-частица', gender: Gender.FEMININE}),
+        createLemma({text: 'α-частица', gender: Gender.FEMININE}),
         ['α-частица', 'α-частицы', 'α-частице', 'α-частицу', ['α-частицей', 'α-частицею'], 'α-частице', 'α-частице'],
         ['α-частицы', 'α-частиц', 'α-частицам', 'α-частицы', 'α-частицами', 'α-частицах', 'α-частицах']
     );
 
     checkSingularAndPlural(
-        L({text: 'овца', gender: Gender.FEMININE, animate: true}),
+        createLemma({text: 'овца', gender: Gender.FEMININE, animate: true}),
         ['овца', 'овцы', 'овце', 'овцу', ['овцой', 'овцою'], 'овце', 'овце'],
         ['овцы', 'овец', 'овцам', 'овец', 'овцами', 'овцах', 'овцах']
     );
 
     checkSingularAndPlural(
-        L({text: 'рок-н-ролл', gender: Gender.MASCULINE}),
+        createLemma({text: 'рок-н-ролл', gender: Gender.MASCULINE}),
         ['рок-н-ролл', 'рок-н-ролла', 'рок-н-роллу', 'рок-н-ролл', 'рок-н-роллом', 'рок-н-ролле', 'рок-н-ролле'],
         ['рок-н-роллы', 'рок-н-роллов', 'рок-н-роллам', 'рок-н-роллы', 'рок-н-роллами', 'рок-н-роллах', 'рок-н-роллах']
     );
 
     checkSingularAndPlural(
-        L({text: 'теле-пресс-конференция', gender: Gender.FEMININE}),
+        createLemma({text: 'теле-пресс-конференция', gender: Gender.FEMININE}),
         [
             'теле-пресс-конференция',
             'теле-пресс-конференции',
@@ -950,53 +974,31 @@ const RussianNouns = require('./RussianNouns.js');
     );
 
     checkSingularAndPlural(
-        L({text: 'судно', gender: Gender.NEUTER}),
+        createLemma({text: 'судно', gender: Gender.NEUTER}),
         ['судно', 'судна', 'судну', 'судно', 'судном', 'судне', 'судне'],
         ['судна', 'суден', 'суднам', 'судна', 'суднами', 'суднах', 'суднах']
     );
 
     checkSingularAndPlural(
-        L({text: 'судно', gender: Gender.NEUTER, transport: true}),
+        createLemma({text: 'судно', gender: Gender.NEUTER, transport: true}),
         ['судно', 'судна', 'судну', 'судно', 'судном', 'судне', 'судне'],
         ['суда', 'судов', 'судам', 'суда', 'судами', 'судах', 'судах']
     );
 
-    // TODO имена собственные какие-нибудь
-
-    // checkSingularAndPlural(
-    //     L({text: 'окно', gender: Gender.NEUTER}),
-    //     ['', '', '', '', '', '', ''],
-    //     ['', '', '', '', '', '', '']
-    // );
-
     console.log('----------------------------------');
 
-    console.log('Experimental: adjectives, participles.');
+    console.log('Adjectives, participles.');
 
-    const лихой = L({text: 'лихой', gender: Gender.MASCULINE, animate: true});
+    const лихой = createLemma({text: 'лихой', gender: Gender.MASCULINE, animate: true});
 
     assertEquals(
-        `${cap(ⰃⰃ(лихой, 1))} ${ⰃⰃ(конь, 1)} ${Ⰳ(жар, 5)} полны.`,
+        `${cap(plural(лихой, 1))} ${plural(конь, 1)} ${usual(жар, 5)} полны.`,
         'Лихие кони жаром полны.'
-    );
-
-    const неподвижное = L({text: 'неподвижное', gender: Gender.NEUTER});
-
-    assertEquals(
-        `И ${ⰃⰃ(неподвижное, 5)} ${ⰃⰃ(око, 5)}`,
-        'И неподвижными очами'
-    );
-
-    const чистая = L({text: 'чистая', gender: Gender.FEMININE});
-
-    assertEquals(
-        `И ${Ⰳ(чистая, 5)}, как ты сам, одело`,
-        'И чистой, как ты сам, одело' // тебя стихией Божество.
     );
 
     console.log('--------------- 1 ----------------');
 
-    const адаптировавший = L({text: 'адаптировавший', gender: Gender.MASCULINE, animate: true});
+    const адаптировавший = createLemma({text: 'адаптировавший', gender: Gender.MASCULINE, animate: true});
 
     (() => {
         const result = RussianNouns.CASES.map(c => {
@@ -1016,7 +1018,7 @@ const RussianNouns = require('./RussianNouns.js');
         console.log('--------------- 2 ----------------');
     })();
 
-    const адаптировавшее = L({text: 'адаптировавшее', gender: Gender.NEUTER});
+    const адаптировавшее = createLemma({text: 'адаптировавшее', gender: Gender.NEUTER});
 
     (() => {
         const result = RussianNouns.CASES.map(c => {
@@ -1036,7 +1038,7 @@ const RussianNouns = require('./RussianNouns.js');
         console.log('--------------- 3 ----------------');
     })();
 
-    const адаптировавшая = L({text: 'адаптировавшая', gender: Gender.FEMININE});
+    const адаптировавшая = createLemma({text: 'адаптировавшая', gender: Gender.FEMININE});
 
     (() => {
         const result = RussianNouns.CASES.map(c => {
