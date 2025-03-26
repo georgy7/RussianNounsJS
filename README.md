@@ -96,7 +96,7 @@ For TypeScript, there are
 ```js
 const rne = new RussianNouns.Engine();
 
-// Grammatical gender is sort of noun class, related primarily to their sound.
+// Grammatical gender is a sort of noun class, related primarily to their sound.
 // Although mostly native speakers just remember them.
 
 const Gender = RussianNouns.Gender;
@@ -110,6 +110,9 @@ rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.INSTRUMENTAL);
 // ◂ [ "именем" ]
 
 
+// A number of loan words are not declined.
+// You should explicitly state this to prevent inflection.
+
 let coat = RussianNouns.createLemma({
     text: 'пальто',
     gender: Gender.NEUTER,
@@ -122,6 +125,11 @@ rne.decline(coat, Case.GENITIVE);
 RussianNouns.getDeclension(coat);
 // ◂ -1
 
+
+// Cases can be specified not only by name, but also by number.
+// In the usual order: NOM, GEN, DAT, ACC, INST, PREP.
+// And there is also the locative case as the seventh.
+// It usually matches the prepositional one.
 
 let mountain = RussianNouns.createLemma({
     text: 'гора',
@@ -142,8 +150,15 @@ RussianNouns.CASES.map(c => {
 //     ["горе"]
 // ]
 
+
+// This is how you can get a plural form in the nominative case.
+
 rne.pluralize(mountain);
 // ◂ [ "горы" ]
+
+
+// When you have the plural form in the nominative case, pass it
+// as the third argument to decline in plural.
 
 RussianNouns.CASES.map(c => {
     return rne.decline(mountain, c, 'горы');
@@ -163,14 +178,10 @@ RussianNouns.getDeclension(mountain);
 // ◂ 2
 
 
-let way = RussianNouns.createLemma({
-    text: 'путь',
-    gender: Gender.MASCULINE
-});
-
-RussianNouns.getDeclension(way);
-// ◂ 0
-
+// For words that are used only in plural, the original form
+// of the word is the plural form in the nominative case.
+// You should also explicitly state this.
+// The concept of grammatical gender doesn't make sense for such words.
 
 let scissors = RussianNouns.createLemma({
     text: 'ножницы',
