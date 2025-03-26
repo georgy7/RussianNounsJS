@@ -25,7 +25,9 @@ npx uglifyjs \
 
 ls -l RussianNouns.min.js
 
-unexpand -t 4 RussianNouns.min.js > RussianNouns.min.temp.js
+unexpand -t 4 -f RussianNouns.min.js > RussianNouns.min.temp.js
+sed -i 's/\t  case /\tcase /' RussianNouns.min.temp.js
+sed -i 's/\t  default/\tdefault/' RussianNouns.min.temp.js
 mv RussianNouns.min.temp.js RussianNouns.min.js
 
 ls -l RussianNouns.min.js
