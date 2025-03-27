@@ -246,19 +246,12 @@ const createLemma = RussianNouns.createLemma;
 
 const rne = new RussianNouns.Engine();
 
-function usual(lemma, caseNumber) {
+function sg(lemma, caseNumber) {
     const c = RussianNouns.CASES[caseNumber - 1];
     return rne.decline(lemma, c)[0];
 }
 
-// To get a little-used or older form.
-function unusual(lemma, caseNumber) {
-    const c = RussianNouns.CASES[caseNumber - 1];
-    const result = rne.decline(lemma, c);
-    return result[result.length - 1];
-}
-
-function plural(lemma, caseNumber) {
+function pl(lemma, caseNumber) {
     const c = RussianNouns.CASES[caseNumber - 1];
     const pluralForm = rne.pluralize(lemma)[0];
     return rne.decline(lemma, c, pluralForm)[0];
@@ -268,47 +261,6 @@ function cap(str) {
     return str[0].toUpperCase() + str.substring(1);
 }
 
-// -----------------------------------------------
-
-// Александр Сергеевич Пушкин
-// Зимний вечер (фрагмент)
-
-const буря = createLemma({text: 'буря', gender: Gender.FEMININE});
-const мгла = createLemma({text: 'мгла', gender: Gender.FEMININE});
-const небо = createLemma({text: 'небо', gender: Gender.NEUTER});
-const зверь = createLemma({text: 'зверь', gender: Gender.MASCULINE, animate: true});
-const дитя = createLemma({text: 'дитя', gender: Gender.NEUTER, animate: true});
-const солома = createLemma({text: 'солома', gender: Gender.FEMININE});
-const окошко = createLemma({text: 'окошко', gender: Gender.NEUTER});
-
-const снежный = createLemma({text: 'снежный', gender: Gender.MASCULINE});
-const вихрь = createLemma({text: 'вихрь', gender: Gender.MASCULINE});
-
-const обветшалая = createLemma({text: 'обветшалая', gender: Gender.FEMININE});
-const кровля = createLemma({text: 'кровля', gender: Gender.FEMININE});
-
-const запоздалый = createLemma({text: 'запоздалый', gender: Gender.MASCULINE, animate: true});
-const путник = createLemma({text: 'путник', gender: Gender.MASCULINE, animate: true});
-
-console.log(`${cap(usual(буря, 1))} ${unusual(мгла, 5)} ${usual(небо, 4)} кроет,
-${cap(plural(вихрь, 4))} ${plural(снежный, 4)} крутя;
-То, как ${usual(зверь, 1)}, она завоет,
-То заплачет, как ${usual(дитя, 1)},
-То по ${usual(кровля, 3)} ${usual(обветшалая, 3)}
-Вдруг ${usual(солома, 5)} зашумит,
-То, как ${usual(путник, 1)} ${usual(запоздалый, 1)},
-К нам в ${usual(окошко, 4)} застучит.`);
-
-// Буря мглою небо кроет,
-// Вихри снежные крутя;
-// То, как зверь, она завоет,
-// То заплачет, как дитя,
-// То по кровле обветшалой
-// Вдруг соломой зашумит,
-// То, как путник запоздалый,
-// К нам в окошко застучит.
-
-// -----------------------------------------------
 
 // Николай Степанович Гумилев
 // Рассказ девушки (фрагмент)
@@ -325,10 +277,10 @@ const неведомая = createLemma({text: 'неведомая', gender: Gend
 const высота = createLemma({text: 'высота', gender: Gender.FEMININE});
 
 console.log(`* * *
-Я отдыхала у ${plural(ворота, 2)}
-Под ${usual(тень, 5)} ${usual(милая, 2)}, ${usual(старая, 2)} ${usual(ель, 2)},
+Я отдыхала у ${pl(ворота, 2)}
+Под ${sg(тень, 5)} ${sg(милая, 2)}, ${sg(старая, 2)} ${sg(ель, 2)},
 А надо мною пламенели
-${cap(plural(снег, 1))} ${plural(неведомая, 2)} ${plural(высота, 2)}.`);
+${cap(pl(снег, 1))} ${pl(неведомая, 2)} ${pl(высота, 2)}.`);
 
 // * * *
 // Я отдыхала у ворот
