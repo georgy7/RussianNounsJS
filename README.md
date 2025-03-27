@@ -22,32 +22,7 @@
     <a href="https://github.com/georgy7/RussianNounsJS/wiki">Wiki</a>
   </p>
 </p>
-
-
-
-<!-- TABLE OF CONTENTS -->
-<details open="open">
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#installation">Installation</a>
-      <ul>
-        <li><a href="#frontend">Frontend</a></li>
-        <li><a href="#backend">Backend</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#usage">Usage</a>
-      <ul>
-        <li><a href="#the-basics">The basics</a></li>
-        <li><a href="#stress-dictionary-tuning">Stress dictionary tuning</a></li>
-        <li><a href="#a-complex-example">A complex example</a></li>
-      </ul>
-    </li>
-    <li><a href="#limitations">Limitations</a></li>
-    <li><a href="#references">References</a></li>
-  </ol>
-</details>
+<br />
 
 
 ## Installation
