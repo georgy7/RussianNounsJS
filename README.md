@@ -203,41 +203,6 @@ RussianNouns.CASES.map(c => {
 // ]
 ```
 
-### Stress dictionary tuning
-
-```js
-let кринж = RussianNouns.createLemma({
-    text: 'кринж',
-    gender: Gender.MASCULINE
-});
-
-const rne = new RussianNouns.Engine();
-
-rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжем" ]
-
-// Change of stresses.
-// Before the hyphen, there are singular settings.
-// After the hyphen are the plural settings.
-// The letter number in the settings is the case number in CASES.
-// S — Stress is on the stem only.
-// s — Stress is more often on the stem.
-// b — Stress can be both on the stem and the ending equally.
-// e — Stress is more often on the ending.
-// E — Stress is on the ending only.
-rne.sd.put(кринж, 'SEESESE-EEEEEE');
-
-rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжом" ]
-
-rne.sd.put(кринж, 'SEESbSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжем", "кринжом" ]
-
-rne.sd.put(кринж, 'SEESsSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжем", "кринжом" ]
-
-rne.sd.put(кринж, 'SEESeSE-EEEEEE');
-rne.decline(кринж, Case.INSTRUMENTAL);  // ◂ [ "кринжом", "кринжем" ]
-```
-
 ### A complex example
 
 ```js
