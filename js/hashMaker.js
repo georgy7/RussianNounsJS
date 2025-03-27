@@ -30,6 +30,12 @@ function getHash(unicodeString) {
     const preparedString = unicodeString.toLowerCase().replaceAll('ё', 'е');
     let allBits = preparedString.split('').toReversed().map(toBits).join('');
 
+    // Пока что у меня была только одна коллизия - между словами "рюш" и "уж".
+    // Так что я добавляю супердешёвое решение, чтобы её избежать - бит контроля
+    // чётности справа. Только здесь он считает не биты, а количество букв.
+
+    allBits += (preparedString.length % 2).toString(2);
+
     if (allBits.length % 8) {
         allBits = '0'.repeat(8 - allBits.length % 8) + allBits;
     }
