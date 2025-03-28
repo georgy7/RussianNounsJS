@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.4.2] - 2025-03-27
 ### Fixed
 - I packed letters more tightly before hashing, which led to a smaller spread
-  of values for short words. This eventually reduced the size of the gzipped script
-  by about 200 bytes. To reduce the chance of collisions, I added
+  of values for short words. This eventually reduced the size of the script
+  (minified and gzipped) by 245 bytes. To reduce the chance of collisions, I added
   a parity bit for the number of letters.
 
 ## [1.4.1] - 2025-03-25
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - A bug in the stress dictionary, leading to ignoring whether words are animate.
-- The processing of several words.
+- The singular declension of 45 words, as well as the pluralization of 29 words. It cost 202 bytes.
 
 ## [1.4.0] - 2025-03-24
 This is a fairly large refactoring, during which it was possible to increase the speed
@@ -26,6 +26,8 @@ of lemmas, moved some operations to the beginning of the script execution
 (see initializing the variables `stemData`, `decline1Data`, `declinePluralData`)
 and moved most of the stress dictionary to a hardcoded set of word hashes
 (for aesthetic reasons).
+
+The size of the script (minified and gzipped) increased by 344 bytes.
 
 ## [1.3.1] - 2021-11-13
 ### Changed
