@@ -51,6 +51,7 @@
             return 'No parameters specified.';
         }
 
+        // pluraliaTantum parameter is deprecated since version 1.5.0
         for (let fieldName of [
             'pluraleTantum', 'pluraliaTantum',
             'indeclinable', 'animate',
@@ -480,58 +481,47 @@
     }
 
     const LocativeFormAttribute = Object.freeze({
-        // Вместилище.
         CONTAINER: 1,
-
-        // Пространство, помещение, участок суши.
         LOCATION: 2,
+        STRUCTURE: 4,
+        SURFACE: 8,
 
-        /**
-         * Конфигурация объектов, образующая устойчивую структуру.
-         * Т.е. структура здесь — в том смысле, что это всегда порядок
-         * каких-то объектов: людей, вещей и т. п.
-         */
-        STRUCTURE: 3,
-
-        // Поверхность.
-        SURFACE: 4,
         // Метафорический путь. Луч времени, на (или в) котором лежат события.
-        WAY: 5,
+        WAY: 16,
 
         // Объект с функциональной (не обязательно плоской) поверхностью.
-        OBJECT_WITH_FUNCTIONAL_SURFACE: 6,
+        OBJECT_WITH_FUNCTIONAL_SURFACE: 32,
 
         // Вещество (обволакивающее или покрывающее).
-        SUBSTANCE: 7,
+        SUBSTANCE: 64,
         // Материал, средство изготовления, приготовления (еды), ремонта.
-        RESOURCE: 8,
+        RESOURCE: 128,
 
         // Состояние, свойство, положение дел.
-        CONDITION: 9,
+        CONDITION: 256,
+
         // Испытываемое воздействие (стихии или внимания/отношения человека).
-        EXPOSURE: 10,
+        EXPOSURE: 512,
+
         // Перемещение или кратковременное пространственное положение.
-        MOTION: 11,
+        MOTION: 1024,
+
         // Мероприятие.
-        EVENT: 12,
+        EVENT: 2048,
 
-        WITH_ADJECTIVE: 13,
-        WITHOUT_ADJECTIVE: 14,
+        WITH_ADJECTIVE: 4096,
+        WITHOUT_ADJECTIVE: 8192,
 
-        /**
-         * Употребляется только в религиозном контексте, причём скорее всего
-         * только в определённой религии или даже в определённой конфессии.
-         * Т.е. использовать такие выражения следует с большой осторожностью,
-         * иначе можно сказануть что-то очень странное.
-         */
-        RELIGIOUS: 15
+        // Я еще не до конца понял этот аспект.
+        // Этот флаг наверняка исчезнет в будущих релизах.
+        RELIGIOUS: 16384
     });
 
     class LocativeForm {
         /**
          * @param {string} preposition Предлог.
          * @param {string} word Форма слова.
-         * @param {array} attributes Предикаты, которые все должны быть истинными.
+         * @param {number} attributes Предикаты, которые все должны быть истинными.
          */
         constructor(preposition, word, attributes) {
             this.preposition = preposition;
@@ -542,6 +532,7 @@
 
     /**
      * Для внутреннего использования.
+     * Под это число в конфиге будет выделено 3 бита (не более восьми состояний).
      */
     const LocativeDeclensionType = Object.freeze({
         /**
@@ -559,15 +550,43 @@
 
     /**
      * Для внутреннего использования.
-     * Правило, по которому мы получаем локатив, с учетом семантики и предлогов.
-     * Атрибуты — это предикаты, которые все должны быть истинными.
+     * Под это число в конфиге будет выделено 3 бита (не более восьми состояний).
      */
-    class LocativeConfig {
-        constructor(preposition, declensionType, attributes) {
-            this.preposition = preposition;
-            this.declensionType = declensionType;
-            this.attributes = attributes;
+    const LocativePreposition = Object.freeze({
+        V: 1,
+        VO: 2,
+        NA: 3
+    });
+
+    /**
+     * Для внутреннего использования.
+     * @param {LocativePreposition} preposition
+     * @param {LocativeDeclensionType} declensionType
+     * @param {number} attributes - флаги LocativeFormAttribute.
+     */
+    function encodeLocativeConfig(preposition, declensionType, attributes) {
+        const dcCode = (declensionType - 1) & 0b111;
+        const prCode = (preposition - 1) & 0b111;
+        return (attributes << 6) | (prCode << 3) | dcCode;
+    }
+
+    function extractDeclensionType(locativeConfig) {
+        return (locativeConfig & 0b111) + 1;
+    }
+
+    function extractPreposition(locativeConfig) {
+        const code = ((locativeConfig >> 3) & 0b111) + 1;
+        if (LocativePreposition.V === code) {
+            return "в"
+        } else if (LocativePreposition.VO === code) {
+            return "во"
+        } else if (LocativePreposition.NA === code) {
+            return "на"
         }
+    }
+
+    function extractAttributes(locativeConfig) {
+        return locativeConfig >> 6;
     }
 
     const locativeDictionary = Object.freeze(makeDefaultLocativeDictionary());
@@ -893,11 +912,11 @@
                 if (declension && (declension >= 0)) {
                     const configs = locativeDictionary.get(o, false);
                     if (configs instanceof Array) {
-                        return configs.map(c => (new LocativeForm(
-                            c.preposition,
-                            toLocativeSingular(engine, declension, o, c.declensionType),
-                            c.attributes
-                        )));
+                        return configs.map(config => new LocativeForm(
+                            extractPreposition(config),
+                            toLocativeSingular(engine, declension, o, extractDeclensionType(config)),
+                            extractAttributes(config)
+                        ));
                     }
                 }
 
@@ -1006,9 +1025,7 @@
         const m = Object.freeze({gender: Gender.MASCULINE});
         const mAnimate = Object.freeze({gender: Gender.MASCULINE, animate: true});
 
-        function addConfig(lemmaPrototype, condition, ps, ws, dTypes) {
-            const andConditions = (condition instanceof Array) ? condition : [condition];
-            const prepositions = ps.split(',');
+        function addConfig(lemmaPrototype, condition, prepositions, ws, dTypes) {
             const words = ws.split(',');
 
             // Тут если номер, то это LocativeDeclensionType,
@@ -1029,7 +1046,7 @@
 
                 for (let p of prepositions) {
                     for (let d of declensionTypes) {
-                        configArray.push(new LocativeConfig(p, d, andConditions));
+                        configArray.push(encodeLocativeConfig(p, d, condition));
                     }
                 }
             }
@@ -1038,34 +1055,38 @@
         // В. А. Плунгян выделяет у слов мужского рода
         // с особыми формами локатива семь семантических классов:
 
+        const v = Object.freeze([LocativePreposition.V]);
+        const vo = Object.freeze([LocativePreposition.VO]);
+        const na = Object.freeze([LocativePreposition.NA]);
+
         // 1. вместилища, сосуды («в»)
-        addConfig(m, LocativeFormAttribute.CONTAINER, 'в', 'мозг,пруд,стог,таз,год');
-        addConfig(m, LocativeFormAttribute.CONTAINER, 'во', 'рот');
+        addConfig(m, LocativeFormAttribute.CONTAINER, v, 'мозг,пруд,стог,таз,год');
+        addConfig(m, LocativeFormAttribute.CONTAINER, vo, 'рот');
         // Год может быть тем, в чём содержатся дни, например,
         // и может быть тем, на чём лежат события.
         // Это два разных случая. Их нельзя в один конфиг помещать,
         // т.к. у них условия через конъюнкцию проверяются.
-        addConfig(m, LocativeFormAttribute.WAY, 'в', 'год');
-        addConfig(m, LocativeFormAttribute.CONTAINER, 'в', 'гроб');
+        addConfig(m, LocativeFormAttribute.WAY, v, 'год');
+        addConfig(m, LocativeFormAttribute.CONTAINER, v, 'гроб');
         // Не уверен, что семантика "во гробе" тут правильная.
         // Не исключено, что это имеет совершенно другой религиозный смысл, чем вместилище,
         // поэтому и склонение отличается.
-        addConfig(m, [LocativeFormAttribute.CONTAINER, LocativeFormAttribute.RELIGIOUS],
-            'во', 'гроб', [LocativeDeclensionType.PREPOSITIONAL]);
+        addConfig(m, LocativeFormAttribute.CONTAINER|LocativeFormAttribute.RELIGIOUS,
+            vo, 'гроб', [LocativeDeclensionType.PREPOSITIONAL]);
 
         // 2. пространства («в»)
-        addConfig(m, LocativeFormAttribute.LOCATION, 'в',
+        addConfig(m, LocativeFormAttribute.LOCATION, v,
             'ад,бор,лес,порт,аэропорт,рай,сад,тыл,' +
             'низ,' +
             'хлев'  // по классификации Плунгяна, это вместилище (как и "цех")
         );
 
         // 3. конфигурации объектов, образующих устойчивые структуры («в»)
-        addConfig(m, LocativeFormAttribute.STRUCTURE, 'в',
+        addConfig(m, LocativeFormAttribute.STRUCTURE, v,
             'круг,полк,артполк,ряд,род,строй,лад');
 
         // 4. поверхности («на»)
-        addConfig(m, LocativeFormAttribute.SURFACE, 'на', '' +
+        addConfig(m, LocativeFormAttribute.SURFACE, na, '' +
             'баз,' +    // скотный двор
             'берег,' +
             'бережок,' +    // (спорно)
@@ -1073,16 +1094,16 @@
         );
         // На своём веку, столько-то раз на дню.
         // При этом, в веке — 100 лет, в дне — 24 часа.
-        addConfig(m, LocativeFormAttribute.WAY, 'на', 'век,день');
+        addConfig(m, LocativeFormAttribute.WAY, na, 'век,день');
         // Это читерство небольшое, но тут аналогичная ситуация.
-        addConfig(m, LocativeFormAttribute.WAY, 'в', 'час');
+        addConfig(m, LocativeFormAttribute.WAY, v, 'час');
         // "на корню" — устойчивое выражение (наречие), означающее "в процессе формирования".
         // "зарубить на корню" — "уничтожить в самом начале".
-        addConfig(m, LocativeFormAttribute.WAY, 'на', 'корень');
+        addConfig(m, LocativeFormAttribute.WAY, na, 'корень');
 
         // 5. объекты с функциональной (не обязательно плоской) поверхностью («на»)
-        addConfig(mAnimate, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', 'вор');
-        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', '' +
+        addConfig(mAnimate, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, 'вор');
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, '' +
             'бочок,' +  // лежать на бочку, т.е. лежать боком вниз (почти не употребляется)
             'борт,воз,горб,кол,мост,плот,сук,' +
             'х' + String.fromCharCode(1091) + 'й'
@@ -1090,53 +1111,49 @@
 
         // 6. вещества и материалы («в» и «на»)
         const substance_or_resource = ',мёд,мех,пар,пух';
-        addConfig(m, LocativeFormAttribute.SUBSTANCE, 'в', 'дым,жир,мел,пушок' + substance_or_resource);
-        addConfig(m, LocativeFormAttribute.RESOURCE, 'на', 'газ,клей,спирт' + substance_or_resource);
+        addConfig(m, LocativeFormAttribute.SUBSTANCE, v, 'дым,жир,мел,пушок' + substance_or_resource);
+        addConfig(m, LocativeFormAttribute.RESOURCE, na, 'газ,клей,спирт' + substance_or_resource);
 
         // 7. ситуации и состояния («в» и «на»)
-        addConfig(m, LocativeFormAttribute.CONDITION, 'в',
+        addConfig(m, LocativeFormAttribute.CONDITION, v,
             'бой,бред,быт,долг,плен,пыл,сок,ход,лад');
         // Тут я имею в виду смысл, употреблённый в текущем предложении.
         // Кое-где пишут, что есть еще употребление "в виду гор" в значении "там, откуда видны горы".
         // Никогда не слышал, чтобы так говорили. Если в эту классификацию это вписывать,
         // я не уверен, EXPOSURE это, CONDITION или что-то третье.
-        addConfig(m, LocativeFormAttribute.EXPOSURE, 'в,на', 'вид');
-        addConfig(m, LocativeFormAttribute.EXPOSURE, 'на', 'слух,счёт,ветер,ветр,свет');
-        addConfig(m, LocativeFormAttribute.MOTION, 'на', 'ход,бег,вес');
+        addConfig(m, LocativeFormAttribute.EXPOSURE, v.concat(na), 'вид');
+        addConfig(m, LocativeFormAttribute.EXPOSURE, na, 'слух,счёт,ветер,ветр,свет');
+        addConfig(m, LocativeFormAttribute.MOTION, na, 'ход,бег,вес');
         // Пока непонятно, как разграничить "на каждом шагу" и "на первом шаге".
-        addConfig(m, [LocativeFormAttribute.MOTION, LocativeFormAttribute.WITH_ADJECTIVE], 'на', 'шаг');
-        addConfig(m, LocativeFormAttribute.EVENT, 'на', 'бал,пир');
+        addConfig(m, LocativeFormAttribute.MOTION|LocativeFormAttribute.WITH_ADJECTIVE, na, 'шаг');
+        addConfig(m, LocativeFormAttribute.EVENT, na, 'бал,пир');
         // Может быть "дух" когда-то и значило "исповедь",
         // сейчас это только всех запутает.
-        addConfig(m, LocativeFormAttribute.CONDITION, 'на', 'дух');
+        addConfig(m, LocativeFormAttribute.CONDITION, na, 'дух');
         // На полном газу. Не уверен, как это сюда записать. Вроде, устойчивое выражение.
-        addConfig(m, [LocativeFormAttribute.MOTION, LocativeFormAttribute.WITH_ADJECTIVE], 'на', 'газ');
+        addConfig(m, LocativeFormAttribute.MOTION|LocativeFormAttribute.WITH_ADJECTIVE, na, 'газ');
 
         // 1 и 5.
-        addConfig(m, LocativeFormAttribute.CONTAINER, 'в', 'глаз,нос,шкаф');
-        addConfig(m, LocativeFormAttribute.CONTAINER, 'во', 'лоб');
-        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', 'глаз,лоб,нос,шкаф');
+        addConfig(m, LocativeFormAttribute.CONTAINER, v, 'глаз,нос,шкаф');
+        addConfig(m, LocativeFormAttribute.CONTAINER, vo, 'лоб');
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, 'глаз,лоб,нос,шкаф');
 
         let two_and_five = 'бок,верх,зад,угол';
-        addConfig(m, LocativeFormAttribute.LOCATION, 'в', two_and_five);
-        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, 'на', two_and_five);
+        addConfig(m, LocativeFormAttribute.LOCATION, v, two_and_five);
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, two_and_five);
         // Есть сомнения, в каких случаях используется форма предложного падежа.
         // Является ли решающим наличие любого определения (в *Красноярском* крае, на *внешнем* крае)
         // или подобные выражения являются исключениями и их нельзя обобщать.
         // Я пока что склоняюсь к первому варианту.
-        addConfig(m, [
-            LocativeFormAttribute.LOCATION,
-            LocativeFormAttribute.WITHOUT_ADJECTIVE
-        ], 'в', 'край');
-        addConfig(m, [
-            LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE,
-            LocativeFormAttribute.WITHOUT_ADJECTIVE
-        ], 'на', 'край');
+        addConfig(m, LocativeFormAttribute.LOCATION|LocativeFormAttribute.WITHOUT_ADJECTIVE, v, 'край');
+        addConfig(m,
+            LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE|LocativeFormAttribute.WITHOUT_ADJECTIVE,
+            na, 'край');
 
         // 4 и 6
-        addConfig(m, LocativeFormAttribute.SURFACE, 'на', 'лёд,мох,снег');
-        addConfig(m, LocativeFormAttribute.SUBSTANCE, 'во', 'лёд,мох');
-        addConfig(m, LocativeFormAttribute.SUBSTANCE, 'в', 'снег');
+        addConfig(m, LocativeFormAttribute.SURFACE, na, 'лёд,мох,снег');
+        addConfig(m, LocativeFormAttribute.SUBSTANCE, vo, 'лёд,мох');
+        addConfig(m, LocativeFormAttribute.SUBSTANCE, v, 'снег');
 
         // А также, у слов женского рода третьего склонения с особыми формами
         // локатива пять семантических классов.
@@ -1649,7 +1666,7 @@
 
             const locativeConfigs = locativeDictionary.get(lemma, false);
             if (locativeConfigs) {
-                const declensionTypes = unique(locativeConfigs.map(x => x.declensionType));
+                const declensionTypes = unique(locativeConfigs.map(x => extractDeclensionType(x)));
                 return declensionTypes.map(dType => toLocativeSingular1(engine, lemma, dType));
             }
 

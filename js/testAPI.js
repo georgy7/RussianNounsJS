@@ -196,8 +196,10 @@ const RussianNouns = require('./RussianNouns.js');
     const LocativeFormAttribute = RussianNouns.LocativeFormAttribute;
 
     (() => {
+        const values = Object.values(LocativeFormAttribute);
+
         const uniqueLocativeFormAttributes = new Set();
-        for (let sc of Object.values(LocativeFormAttribute)) {
+        for (let sc of values) {
             uniqueLocativeFormAttributes.add(sc);
         }
 
@@ -206,6 +208,19 @@ const RussianNouns = require('./RussianNouns.js');
             uniqueLocativeFormAttributes.size,
             'Enum values must be unique.'
         );
+
+        // Каждый атрибут кодируется отдельным битом, и они должны поместиться в одно 32-битное
+        // целое число, вместе с кодом предлога и кодом типа склонения. Думаю, под эти два кода
+        // можно выделить по 3 бита, так что на атрибуты останется 26 бит.
+
+        // Будем не преобразовывать их во флаги в рантайме, а сразу работать с ними
+        // как с флагами. Бинарные представления значений не должны пересекаться.
+
+        assertEquals(true, values.every(x => Math.round(x) === x));
+        assertEquals(true, values.reduce((a, b) => a|b) === values.reduce((a, b) => a^b));
+
+        assertEquals(true, values.reduce((a, b) => Math.min(a, b)) === 1);
+        assertEquals(true, values.reduce((a, b) => Math.max(a, b)) <= (1 << 25));
     })();
 
     let row = RussianNouns.createLemma({
@@ -218,16 +233,21 @@ const RussianNouns = require('./RussianNouns.js');
     });
 
     assertAllCases(result, ['ряд', 'ряда', 'ряду', 'ряд', 'рядом', 'ряде', 'ряду']);
+
+    console.log('.');
     assertIsArray(rne.getLocativeForms(row), 'getLocativeForms(x) type');
     assertEquals(rne.getLocativeForms(row).length, 1, 'locative forms count');
     assertEquals(rne.getLocativeForms(row)[0].preposition, 'в', 'lf.preposition');
     assertEquals(rne.getLocativeForms(row)[0].word, 'ряду', 'lf.word');
-    assertEqualsSingleValue(
+
+    console.log('..');
+    assertEquals(
         rne.getLocativeForms(row)[0].attributes,
         LocativeFormAttribute.STRUCTURE,
         'lf.semantics'
     );
 
+    console.log('...');
     assertIsArray(rne.getLocativeForms(mountain), 'getLocativeForms(x) type (a mountain)');
     assertEquals(rne.getLocativeForms(mountain).length, 0, 'locative forms count (a mountain)');
 
@@ -250,21 +270,23 @@ const RussianNouns = require('./RussianNouns.js');
         return rne.decline(steam, c);
     });
 
+    console.log('....');
     assertIsArray(result);
     assertEqualsSingleValue(result[5], 'паре');
     assertEqualsSingleValue(result[6], 'пару');
     const steamLocativeForms = rne.getLocativeForms(steam);
     assertIsArray(steamLocativeForms, 'getLocativeForms(x) type (steam)');
 
+    console.log('.....');
     function findFormWithSingleAttribute(locativeForms, attribute) {
-        return locativeForms.filter(f => ((f.attributes.length === 1)
-            && ((f.attributes[0] === attribute))));
+        return locativeForms.filter(f => f.attributes === attribute);
     }
 
     const steamSubstance = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SUBSTANCE);
     const steamResource = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.RESOURCE);
     const steamSurface = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SURFACE);
 
+    console.log('......');
     assertEquals(steamSubstance.length, 1, 'Steam as a substance must have a locative form.');
     assertEquals(steamResource.length, 1, 'Steam as a resource must have a locative form.');
     assertEquals(steamSurface.length, 0, 'Steam as a surface must not have a locative form.');
