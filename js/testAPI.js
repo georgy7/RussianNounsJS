@@ -582,7 +582,6 @@ const RussianNouns = require('./RussianNouns.js');
     const высота = createLemma({text: 'высота', gender: Gender.FEMININE});
 
     assertEquals(true, ворота.isPluraleTantum());
-    assertEquals(true, ворота.isPluraliaTantum());  // deprecated
 
     assertEquals(
         `Я отдыхала у ${plural(ворота, 2)}`,
