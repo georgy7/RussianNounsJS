@@ -1,6 +1,7 @@
 .idea
 js/
 opencorpora-testing/
+changelog.md
 CHANGELOG.md
 CONTRIBUTING.RU.md
 RussianNouns.min.js
