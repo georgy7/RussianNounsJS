@@ -570,7 +570,7 @@
         }
     }
 
-    const locativeDictionary = Object.freeze(makeDefaultLocativeDictionary())
+    const locativeDictionary = Object.freeze(makeDefaultLocativeDictionary());
 
     const API = {
         Case: Case,
@@ -578,7 +578,14 @@
 
         CASES: CaseValues,
 
+        /**
+         * @deprecated since version 1.5.0
+         */
         LemmaException: LemmaException,
+
+        /**
+         * @deprecated since version 1.5.0
+         */
         StressDictionaryException: StressDictionaryException,
 
         /**
@@ -687,7 +694,14 @@
             }
         },
 
+        /**
+         * @deprecated since version 1.5.0
+         */
         FIXED_STEM_STRESS: 'SSSSSSS-SSSSSS',
+
+        /**
+         * @deprecated since version 1.5.0
+         */
         FIXED_ENDING_STRESS: 'EEEEEEE-EEEEEE',
 
         /**
@@ -714,7 +728,11 @@
 
                 // "b" значит "both".
 
-                if (!(settings.match(/^[SsbeE]{7}-[SsbeE]{6}$/))) {
+                const parts = settings.split('-');
+                const bad = (part, len) => part.length !== len ||
+                    part.split('').some(x => !'SsbeE'.includes(x));
+
+                if (parts.length !== 2 || bad(parts[0], 7) || bad(parts[1], 6)) {
                     throw new API.StressDictionaryException('Bad settings format.');
                 }
 
