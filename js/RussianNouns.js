@@ -234,7 +234,7 @@
     // Without ё, the Russian alphabet consists of 32 letters.
     function lcBit(lcChar) {
         const x = lcChar.charCodeAt(0) - 1072;
-        return (x === 33) ? 0b100000 : ((x === (0x1F & x)) ? (1 << x) : 0)
+        return (x === 33) ? 0b100000 : ((x === (0x1F & x)) ? (1 << x) : 0);
     }
 
     function bincludes(mask, lcChar) {
@@ -1258,20 +1258,23 @@
             case Gender.FEMININE:
                 return t === "а" || t === "я" ? 2 :
                     isConsonantLc(t) ? -1 : 3;
+
             case Gender.MASCULINE:
                 return t === "а" || t === "я" ? 2 :
                     lcWord === "путь" ? 0 : 1;
+
             case Gender.NEUTER:
                 return ['дитя', 'полудитя'].includes(lcWord) ? 0 :
                     nLast(lcWord, 2) === "мя" ? 3 : 1;
+
             case Gender.COMMON:
                 if (t === 'а' || t === 'я') {
                     return 2;
                 } else if (t === 'и') {
                     return -1;
-                } else {
-                    return 1;
                 }
+                return 1;
+
             default:
                 throw new Error('incorrect gender');
         }
@@ -1494,19 +1497,18 @@
             return word;
         }
 
-        if (Case.GENITIVE === grCase) {
-
-            function addUForm(r) {
-                if (!lemma.isAnimate() && decline1Data.uForm.has(lcWord)) {
-                    if (last(lcWord) === 'й') {
-                        r.push(init(word) + upperLike('ю', last(word)));
-                    } else {
-                        r = r.concat(eStem(stem, s => s + upperLike('у', last(s))));
-                    }
+        function addUForm(r) {
+            if (!lemma.isAnimate() && decline1Data.uForm.has(lcWord)) {
+                if (last(lcWord) === 'й') {
+                    r.push(init(word) + upperLike('ю', last(word)));
+                } else {
+                    r = r.concat(eStem(stem, s => s + upperLike('у', last(s))));
                 }
-                return r;
             }
+            return r;
+        }
 
+        if (Case.GENITIVE === grCase) {
             if ((iyWord && lemma.isASurname())
                 || iyoy()
                 || endsWithAny(lcWord, decline1Data.ogoEndings)) {
@@ -1680,6 +1682,7 @@
         switch (grCase) {
             case Case.NOMINATIVE:
                 return word;
+
             case Case.GENITIVE:
                 if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                     return stem + 'ей';
@@ -1693,9 +1696,9 @@
                     soft() || bincludes(0b11101000000000010001001000, last(lcStem))  // soft, sibilant or velar
                 ) {
                     return head + 'и';
-                } else {
-                    return head + 'ы';
                 }
+                return head + 'ы';
+
             case Case.DATIVE:
                 if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                     return stem + 'ей';
@@ -1707,9 +1710,9 @@
                     return head + 'и';
                 } else if (lcWord.endsWith('ничья')) {
                     return head + 'ей';
-                } else {
-                    return head + 'е';
                 }
+                return head + 'е';
+
             case Case.ACCUSATIVE:
                 if (ayaWord()) {
                     return stem + 'ую';
@@ -1717,9 +1720,9 @@
                     return stem + 'юю';
                 } else if (soft()) {
                     return head + 'ю';
-                } else {
-                    return head + 'у';
                 }
+                return head + 'у';
+
             case Case.INSTRUMENTAL:
                 if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                     return stem + 'ею';
@@ -1733,9 +1736,9 @@
                     } else {
                         return [head + 'ей', head + 'ею'];
                     }
-                } else {
-                    return [head + 'ой', head + 'ою'];
                 }
+                return [head + 'ой', head + 'ою'];
+
             case Case.PREPOSITIONAL:
                 if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                     return stem + 'ей';
@@ -1747,9 +1750,9 @@
                     return head + 'и';
                 } else if (lcWord.endsWith('ничья')) {
                     return head + 'ей';
-                } else {
-                    return head + 'е';
                 }
+                return head + 'е';
+
             case Case.LOCATIVE:
                 return decline2(engine, lemma, Case.PREPOSITIONAL);
         }
@@ -1803,9 +1806,8 @@
                 case Case.INSTRUMENTAL:
                     if (endsWithAny(lcWord, ['вошь', 'рожь', 'церковь'])) {
                         return word + 'ю';
-                    } else {
-                        return stem + 'ью';
                     }
+                    return stem + 'ью';
                 case Case.PREPOSITIONAL:
                     return stem + 'и';
                 case Case.LOCATIVE:
@@ -2281,7 +2283,7 @@
                         && lemma.isAnimate()) {
                         result.push(nInit(word, 4) + 'ата');
                     } else if (okWord(lcWord)) {
-                        result.push(nInit(word, 2) + 'ки')
+                        result.push(nInit(word, 2) + 'ки');
                     } else if (lcWord.endsWith('ый') || endsWithAny(lcWord, ['щий', 'чий', 'жний', 'шний', 'ский'])) {
                         result.push(init(word) + 'е');
                     } else if ((lcWord.endsWith('вой') && vowelCount(nInit(word, 3)) >= 2)
@@ -2310,7 +2312,7 @@
                     ) {
                         result.push(init(word) + 'и');
                     } else if (lcWord.endsWith('имое')) {
-                        result.push(stem + 'ые')
+                        result.push(stem + 'ые');
 
                     } else if (lcWord.endsWith('ее')) {
                         result.push(stem + 'ие');
@@ -2725,7 +2727,7 @@
                 } else if (lcPlural.endsWith('мена')) {
                     return nInit(plural, 3) + 'ён';
                 } else if (lemma.lower().endsWith('яйцо')) {
-                    return upperLike('яиц', init(plural))
+                    return upperLike('яиц', init(plural));
                 } else if (lcPlural.endsWith('нца')) {
                     return [genitiveStem(), init(plural) + 'ев'];
                 } else if (endsWithAny(lcPlural, ['а', 'не', 'ищи'])

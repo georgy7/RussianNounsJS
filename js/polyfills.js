@@ -20,8 +20,8 @@ if (!Object.freeze) {
                 }
             }
             has(x) {
-                return this._a.includes(x)
+                return this._a.includes(x);
             }
-        }
+        };
     }
 })();
