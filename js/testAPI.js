@@ -383,6 +383,8 @@ const RussianNouns = require('./RussianNouns.js');
 
     // ----------------------
 
+    // Функция createLemmaNoThrow будет вскоре удалена.
+
     const assertHasError = a => {
         assertIsArray(a);
         assertEquals(a.length, 2);

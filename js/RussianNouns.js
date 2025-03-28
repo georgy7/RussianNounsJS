@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.4.2
+  RussianNounsJS v1.5.0-SNAPSHOT
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
@@ -84,9 +84,9 @@
     class Lemma {
 
         /**
-         * *Не для внешнего использования!*
+         * Не для внешнего использования.
          * Пожалуйста, используйте {@link RussianNouns.createLemma}
-         * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
+         * или {@link RussianNouns.createLemmaOrNull} вместо конструктора.
          * @param {RussianNouns.Lemma|Object} o
          */
         constructor(o) {
@@ -219,13 +219,16 @@
     }
 
     function createLemma(o) {
-        const r = createLemmaNoThrow(o);
-
-        if (r[0]) {
-            return r[0];
-        } else {
-            throw new LemmaException(r[1]);
+        if (o instanceof Lemma) {
+            return o;
         }
+
+        const err = validateCreateLemma(o);
+        if (err) {
+            throw new LemmaException(err);
+        }
+
+        return Object.freeze(new Lemma(o));
     }
 
     // Without ё, the Russian alphabet consists of 32 letters.
@@ -440,6 +443,9 @@
             }
         }
 
+        /**
+         * @deprecated since version 1.5.0
+         */
         remove(lemma) {
             const lemmaObject = createLemma(lemma);
             const hash = lemmaObject._hash;
@@ -456,11 +462,8 @@
         }
 
         /**
-         * Благодаря этому методу, словарь можно использовать для других целей.
-         * Например, если там есть слово, можно посмотреть его род и признаки.
-         *
+         * @deprecated since version 1.5.0
          * @param word Слово, по которому производится поиск.
-         * Буква Ё и регистр игнорируются.
          * @returns {Array} Список лемм.
          */
         find(word) {
@@ -603,18 +606,13 @@
          * позволяющую выбирать стратегии словоизменения и различать омонимы.
          *
          * Пожалуйста, используйте {@link RussianNouns.createLemma}
-         * или {@link RussianNouns.createLemmaNoThrow} вместо конструктора.
+         * или {@link RussianNouns.createLemmaOrNull} вместо конструктора.
          */
         Lemma: Lemma,
 
         /**
          * Интерфейс с именованными параметрами для создания лемм.
          * Если параметр — уже лемма, вернет тот же объект, а не копию.
-         *
-         * Леммы, которые в коде используются много раз, следует
-         * конструировать через эту функцию или {@link RussianNouns.createLemmaNoThrow},
-         * иначе они будут неявно конструироваться на каждый вызов любой функции
-         * или метода в этой библиотеке.
          *
          * @param {RussianNouns.Lemma|Object} o
          * @throws {RussianNouns.LemmaException} Ошибки из конструктора леммы.
@@ -623,23 +621,14 @@
         createLemma: createLemma,
 
         /**
-         * Интерфейс с именованными параметрами для создания лемм.
-         * Если параметр — уже лемма, вернет в массиве тот же объект, а не копию.
-         *
-         * Леммы, которые в коде используются много раз, следует
-         * конструировать через эту функцию или {@link RussianNouns.createLemma},
-         * иначе они будут неявно конструироваться на каждый вызов любой функции
-         * или метода в этой библиотеке.
-         *
+         * @deprecated since version 1.5.0
          * @param {RussianNouns.Lemma|Object} o
          * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
          */
         createLemmaNoThrow: createLemmaNoThrow,
 
         /**
-         * Создание корректной леммы с теоретически минимальными накладными расходами:
-         * здесь нет лишних аллокаций, нет динамического определения типа аргумента.
-         * Цена за это — отказ принимать существующую лемму в качестве аргумента.
+         * Безопасное создание леммы с минимальными накладными расходами.
          *
          * @param {Object} options
          * @returns {RussianNouns.Lemma|null}
