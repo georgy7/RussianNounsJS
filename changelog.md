@@ -16,8 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RussianNouns.createLemmaOrNull`. This is a method with minimal overhead.
 
 ### Fixed
-- A bug in the stress dictionary, leading to ignoring whether words are animate.
-- The singular declension of 45 words, as well as the pluralization of 29 words. It cost 202 bytes.
+- Bug in the stress dictionary, leading to ignoring whether words are animate.
+- Singular declension of 45 words, as well as pluralization of 29 words. It cost 202 bytes.
 
 ## [1.4.0] - 2025-03-24
 This is a fairly large refactoring, during which it was possible to increase the speed
