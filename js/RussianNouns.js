@@ -204,14 +204,15 @@
      * используя числа в качестве ключей в коллекции Map.
      *
      * @param {Lemma} lemma
+     * @param {boolean} [emptyYoBit=false]
      * @returns {number}
      */
-    function toKey(lemma) {
+    function toKey(lemma, emptyYoBit) {
         // Мои тесты показали, что наша хэш-функция иногда даёт коллизию
         // у коротких слов из одинакового количества символов. И я заметил,
         // что у всех коллизий всегда были соседние коды первых букв.
         const start = (lemma.lower().charCodeAt(0) % 2);
-        const hasYo = (lemma.lower().includes('ё'))&1;
+        const hasYo = ((lemma.lower().includes('ё'))&1) & (!emptyYoBit);
         const msb = (lemma._flags << 2) | (start << 1) | hasYo;
 
         // Предполагается, что в переменной msb всего 10 бит,
@@ -401,18 +402,26 @@
      */
     class Dictionary {
         constructor() {
-            this.data = {};
+            this._data = new Map();
+        }
+
+        _getKey(lemmaObject) {
+            // В результате остатка от деления остаётся 39 бит.
+            // Так мы оставляем род, признаки одушевлённости и несклоняемости (это 5 бит)
+            // и бит чётности первой буквы, но убираем букву ё (см. второй параметр).
+            // Это очень хороший ключ с практически нулевым уровнем коллизий.
+            return toKey(lemmaObject, true) % 0x8000000000;
         }
 
         put(lemma, value) {
             const lemmaObject = createLemma(lemma);
-            const hash = lemmaObject._hash;
+            const hash = this._getKey(lemmaObject);
 
-            let homonyms = this.data[hash];
+            let homonyms = this._data.get(hash);
 
             if (!(homonyms instanceof Array)) {
                 homonyms = [];
-                this.data[hash] = homonyms;
+                this._data.set(hash, homonyms);
             }
 
             const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
@@ -440,9 +449,9 @@
          */
         get(lemma, fuzzy) {
             const lemmaObject = (lemma instanceof Lemma) ? lemma : createLemma(lemma);
-            const hash = lemmaObject._hash;
+            const hash = this._getKey(lemmaObject);
 
-            const homonyms = this.data[hash];
+            const homonyms = this._data.get(hash);
 
             if (homonyms instanceof Array) {
                 let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
@@ -458,12 +467,12 @@
         }
 
         /**
-         * Максимально тупой метод, но зато самый универсальный.
-         * @param {number} hash
+         * @param {RussianNouns.Lemma|Object} query
          * @returns {array} Список пар лемма-значение.
          */
-        _getEntities(hash) {
-            const homonyms = this.data[hash];
+        _getEntities(query) {
+            const hash = this._getKey(query);
+            const homonyms = this._data.get(hash);
             if (homonyms instanceof Array) {
                 return homonyms;
             } else {
@@ -476,28 +485,26 @@
          */
         remove(lemma) {
             const lemmaObject = createLemma(lemma);
-            const hash = lemmaObject._hash;
+            const hash = this._getKey(lemmaObject);
 
-            const homonyms = this.data[hash];
+            const homonyms = this._data.get(hash);
 
             if (homonyms instanceof Array) {
-                this.data[hash] = homonyms.filter(ls => !lemmaObject.equals(ls[0]));
-
-                if (this.data[hash].length === 0) {
-                    delete this.data[hash];
-                }
+                this._data.set(hash, homonyms.filter(ls => !lemmaObject.equals(ls[0])));
             }
         }
 
         /**
+         * Пожалуйста, не используйте.
          * @deprecated since version 1.5.0
          * @param word Слово, по которому производится поиск.
          * @returns {Array} Список лемм.
          */
         find(word) {
+            // TODO: Единственный выход - перебрать всю мэпку, лол.
             const hash = getFuzzyHash(word.toLowerCase());
 
-            const homonyms = this.data[hash];
+            const homonyms = this._data.get(hash);
 
             if (homonyms instanceof Array) {
                 return homonyms.map(pair => pair[0]);
@@ -786,13 +793,12 @@
             }
 
             _getOne(query) {
-                const mainFlags = query._flags & 0x1F;
                 const extraFlags = query._flags & 0x7FFFFFE0;
 
                 // Дополнительные флаги должны быть такими же или
                 // более общими (содержать меньше признаков - меньше бит).
-                const entities = this._getEntities(query._hash)
-                    .filter(pair => ((pair[0]._flags & 0x1F) === mainFlags) &&
+                const entities = this._getEntities(query)
+                    .filter(pair =>
                         ((pair[0]._flags & extraFlags) <= extraFlags));
 
                 const exactYo = entities.filter(pair => pair[0].lower() === query.lower());
