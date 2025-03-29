@@ -36,4 +36,18 @@ if (!Object.freeze) {
             }
         };
     }
+
+    if (typeof Map === 'undefined') {
+        g.Map = class Map {
+            constructor() {
+                this._sparse = [];
+            }
+            set(integerKey, value) {
+                this._sparse[integerKey] = value;
+            }
+            get(integerKey) {
+                return this._sparse[integerKey];
+            }
+        };
+    }
 })();
