@@ -112,7 +112,7 @@
 
                 this._txt = o.text;
                 this._lc = this._txt.toLowerCase();
-                this._hash = getFuzzyHash(this._lc);
+                this._hash = calculateHash(this._lc);
             }
         }
 
@@ -120,7 +120,7 @@
             const lemmaCopy = new Lemma(this);
             lemmaCopy._txt = provider(this);
             lemmaCopy._lc = lemmaCopy._txt.toLowerCase();
-            lemmaCopy._hash = getFuzzyHash(lemmaCopy._lc);
+            lemmaCopy._hash = calculateHash(lemmaCopy._lc);
             return Object.freeze(lemmaCopy);
         }
 
@@ -302,7 +302,7 @@
 
     const unYo = s => s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');
 
-    function getFuzzyHash(lowerCaseUnicodeString) {
+    function calculateHash(lowerCaseUnicodeString) {
         const preparedString = lowerCaseUnicodeString.replaceAll('ё', 'е');
 
         let state = preparedString.length % 2;
@@ -395,125 +395,6 @@
         return Object.freeze(obj);
     })();
 
-    /**
-     * Нечто среднее между Map и Multimap.
-     * Одной лемме соответствует одно значение,
-     * но можно также искать неточное совпадение.
-     */
-    class Dictionary {
-        constructor() {
-            this._data = new Map();
-        }
-
-        _getKey(lemmaObject) {
-            // В результате остатка от деления остаётся 39 бит.
-            // Так мы оставляем род, признаки одушевлённости и несклоняемости (это 5 бит)
-            // и бит чётности первой буквы, но убираем букву ё (см. второй параметр).
-            // Это очень хороший ключ с практически нулевым уровнем коллизий.
-            return toKey(lemmaObject, true) % 0x8000000000;
-        }
-
-        put(lemma, value) {
-            const lemmaObject = createLemma(lemma);
-            const hash = this._getKey(lemmaObject);
-
-            let homonyms = this._data.get(hash);
-
-            if (!(homonyms instanceof Array)) {
-                homonyms = [];
-                this._data.set(hash, homonyms);
-            }
-
-            const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-            if (found) {
-                found[1] = value;
-            } else {
-                homonyms.push([lemmaObject, value]);
-            }
-        }
-
-        putAll(lemmaPrototype, value, joinedWordList) {
-            const list = joinedWordList.split(',');
-            for (let word of list) {
-                const lemma = Object.assign({}, lemmaPrototype);
-                lemma.text = word;
-                this.put(lemma, value);
-            }
-        }
-
-        /**
-         * @param {RussianNouns.Lemma|Object} lemma
-         * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
-         * @returns {*} Значение или undefined.
-         */
-        get(lemma, fuzzy) {
-            const lemmaObject = (lemma instanceof Lemma) ? lemma : createLemma(lemma);
-            const hash = this._getKey(lemmaObject);
-
-            const homonyms = this._data.get(hash);
-
-            if (homonyms instanceof Array) {
-                let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-                if (!found && fuzzy) {
-                    found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
-                }
-
-                if (found) {
-                    return found[1];
-                }
-            }
-        }
-
-        /**
-         * @param {RussianNouns.Lemma|Object} query
-         * @returns {array} Список пар лемма-значение.
-         */
-        _getEntities(query) {
-            const hash = this._getKey(query);
-            const homonyms = this._data.get(hash);
-            if (homonyms instanceof Array) {
-                return homonyms;
-            } else {
-                return [];
-            }
-        }
-
-        /**
-         * @deprecated since version 1.5.0
-         */
-        remove(lemma) {
-            const lemmaObject = createLemma(lemma);
-            const hash = this._getKey(lemmaObject);
-
-            const homonyms = this._data.get(hash);
-
-            if (homonyms instanceof Array) {
-                this._data.set(hash, homonyms.filter(ls => !lemmaObject.equals(ls[0])));
-            }
-        }
-
-        /**
-         * Пожалуйста, не используйте.
-         * @deprecated since version 1.5.0
-         * @param word Слово, по которому производится поиск.
-         * @returns {Array} Список лемм.
-         */
-        find(word) {
-            // TODO: Единственный выход - перебрать всю мэпку, лол.
-            const hash = getFuzzyHash(word.toLowerCase());
-
-            const homonyms = this._data.get(hash);
-
-            if (homonyms instanceof Array) {
-                return homonyms.map(pair => pair[0]);
-            } else {
-                return [];
-            }
-        }
-    }
-
     const LocativeFormAttribute = Object.freeze({
         CONTAINER: 1,
         LOCATION: 2,
@@ -550,19 +431,6 @@
         // Этот флаг наверняка исчезнет в будущих релизах.
         RELIGIOUS: 16384
     });
-
-    class LocativeForm {
-        /**
-         * @param {string} preposition Предлог.
-         * @param {string} word Форма слова.
-         * @param {number} attributes Предикаты, которые все должны быть истинными.
-         */
-        constructor(preposition, word, attributes) {
-            this.preposition = preposition;
-            this.word = word;
-            this.attributes = attributes;
-        }
-    }
 
     /**
      * Для внутреннего использования.
@@ -657,8 +525,16 @@
          * и списком условий применения, которые складываются через логическое И.
          * Т.е. если хотя бы один атрибут как предикат ложен,
          * то эта комбинация формы слова и предлога не может быть использована.
+         *
+         * @param {string} preposition Предлог.
+         * @param {string} word Форма слова.
+         * @param {number} attributes Предикаты, которые все должны быть истинными.
          */
-        LocativeForm: LocativeForm,
+        LocativeForm: function LocativeForm(preposition, word, attributes) {
+            this.preposition = preposition;
+            this.word = word;
+            this.attributes = attributes;
+        },
 
         /**
          * Нормальная форма слова.
@@ -762,42 +638,38 @@
          * и это будет влиять на поведение экземпляра движка, который
          * владеет этим словарём.
          */
-        StressDictionary: class StressDictionary extends Dictionary {
+        StressDictionary: function StressDictionary() {
+
+            const _data = new Map();
+
+            const _getKey = function (lemmaObject) {
+                // В результате остатка от деления остаётся 39 бит.
+                // Так мы оставляем род, признаки одушевлённости и несклоняемости (это 5 бит)
+                // и бит чётности первой буквы, но убираем букву ё (см. второй параметр).
+                // Это очень хороший ключ с практически нулевым уровнем коллизий.
+                return toKey(lemmaObject, true) % 0x8000000000;
+            };
 
             /**
-             * @param {RussianNouns.Lemma|Object} lemma
-             * @param {string} settings Строка настроек в формате 1234567-123456.
-             * До дефиса — единственное число, после дефиса — множественное.
-             * Номер символа — номер падежа в {@link RussianNouns.CASES}.
-             * Возможные значения каждого символа:
-             * S — ударение только на основу;
-             * s — чаще на основу;
-             * b — оба варианта употребляются одинаково часто;
-             * e — чаще на окончание;
-             * E — только на окончание.
-             * @throws {RussianNouns.StressDictionaryException}
+             * @param {RussianNouns.Lemma|Object} query
+             * @returns {array} Список пар лемма-значение.
              */
-            put(lemma, settings) {
-
-                // "b" значит "both".
-
-                const parts = settings.split('-');
-                const bad = (part, len) => part.length !== len ||
-                    part.split('').some(x => !'SsbeE'.includes(x));
-
-                if (parts.length !== 2 || bad(parts[0], 7) || bad(parts[1], 6)) {
-                    throw new API.StressDictionaryException('Bad settings format.');
+            const _getEntities = (query) => {
+                const hash = _getKey(query);
+                const homonyms = _data.get(hash);
+                if (homonyms instanceof Array) {
+                    return homonyms;
+                } else {
+                    return [];
                 }
+            };
 
-                super.put(lemma, settings);
-            }
-
-            _getOne(query) {
+            const _getOne = (query) => {
                 const extraFlags = query._flags & 0x7FFFFFE0;
 
                 // Дополнительные флаги должны быть такими же или
                 // более общими (содержать меньше признаков - меньше бит).
-                const entities = this._getEntities(query)
+                const entities = _getEntities(query)
                     .filter(pair =>
                         ((pair[0]._flags & extraFlags) <= extraFlags));
 
@@ -808,13 +680,121 @@
                 } else if (entities.length) {
                     return entities[0][1];
                 }
-            }
+            };
 
-            hasStressedEndingSingular(query, grCase) {
+            /**
+             * @param {RussianNouns.Lemma|Object} lemma
+             * @param {string} settings Строка настроек в формате 1234567-123456.
+             * До дефиса — единственное число, после дефиса — множественное.
+             * Номер символа — номер падежа в {@link RussianNouns.CASES}.
+             * Возможные значения каждого символа:
+             * S — ударение только на основу;
+             * s — чаще на основу;
+             * b — оба варианта употребляются одинаково часто ("b" значит "both");
+             * e — чаще на окончание;
+             * E — только на окончание.
+             * @throws {RussianNouns.StressDictionaryException}
+             */
+            this.put = function (lemma, settings) {
+                const parts = settings.split('-');
+                const bad = (part, len) => part.length !== len ||
+                    part.split('').some(x => !'SsbeE'.includes(x));
+
+                if (parts.length !== 2 || bad(parts[0], 7) || bad(parts[1], 6)) {
+                    throw new API.StressDictionaryException('Bad settings format.');
+                }
+
+                const lemmaObject = createLemma(lemma);
+                const hash = _getKey(lemmaObject);
+
+                let homonyms = _data.get(hash);
+
+                if (!(homonyms instanceof Array)) {
+                    homonyms = [];
+                    _data.set(hash, homonyms);
+                }
+
+                const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+                if (found) {
+                    found[1] = settings;
+                } else {
+                    homonyms.push([lemmaObject, settings]);
+                }
+            };
+
+            this.putAll = function (lemmaPrototype, value, joinedWordList) {
+                const list = joinedWordList.split(',');
+                for (let word of list) {
+                    const lemma = Object.assign({}, lemmaPrototype);
+                    lemma.text = word;
+                    this.put(lemma, value);
+                }
+            };
+
+            /**
+             * @deprecated since version 1.5.0
+             * @param {RussianNouns.Lemma|Object} lemma
+             * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
+             * @returns {*} Значение или undefined.
+             */
+            this.get = function (lemma, fuzzy) {
+                const lemmaObject = (lemma instanceof Lemma) ? lemma : createLemma(lemma);
+                const hash = _getKey(lemmaObject);
+
+                const homonyms = _data.get(hash);
+
+                if (homonyms instanceof Array) {
+                    let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+
+                    if (!found && fuzzy) {
+                        found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
+                    }
+
+                    if (found) {
+                        return found[1];
+                    }
+                }
+            };
+
+            /**
+             * @deprecated since version 1.5.0
+             */
+            this.remove = function (lemma) {
+                const lemmaObject = createLemma(lemma);
+                const hash = _getKey(lemmaObject);
+
+                const homonyms = _data.get(hash);
+
+                if (homonyms instanceof Array) {
+                    _data.set(hash, homonyms.filter(ls => !lemmaObject.equals(ls[0])));
+                }
+            };
+
+            /**
+             * Пожалуйста, не используйте.
+             * @deprecated since version 1.5.0
+             * @param word Слово, по которому производится поиск.
+             * @returns {Array} Список лемм.
+             */
+            this.find = function (word) {
+                // TODO: Единственный выход - перебрать всю мэпку, лол.
+                const hash = calculateHash(word.toLowerCase());
+
+                const homonyms = _data.get(hash);
+
+                if (homonyms instanceof Array) {
+                    return homonyms.map(pair => pair[0]);
+                } else {
+                    return [];
+                }
+            };
+
+            this.hasStressedEndingSingular = function (query, grCase) {
                 const caseIndex = CaseValues.indexOf(grCase);
 
                 if (caseIndex >= 0) {
-                    let v = this._getOne(query);
+                    let v = _getOne(query);
                     if (!v && (query.getGender() === Gender.MASCULINE)) {
                         if (stressHashes.a.has(query._hash)) {
                             v = 'SEESEEE-';
@@ -841,13 +821,13 @@
                 }
 
                 return []; // вместо undefined
-            }
+            };
 
-            hasStressedEndingPlural(query, grCase) {
+            this.hasStressedEndingPlural = function (query, grCase) {
                 const caseIndex = CaseValues.indexOf(grCase);
 
                 if (caseIndex >= 0 && caseIndex < 6) {
-                    let v = this._getOne(query);
+                    let v = _getOne(query);
                     if (!v && (query.getGender() === Gender.MASCULINE)) {
                         if (stressHashes.a.has(query._hash) ||
                                 (query.isAnimate() && stressHashes.b.has(query._hash))) {
@@ -873,7 +853,7 @@
                 }
 
                 return []; // вместо undefined
-            }
+            };
         },
         Engine: class Engine {
 
@@ -945,7 +925,7 @@
                 if (declension && (declension >= 0)) {
                     const configs = locativeDictionary.get(toKey(o));
                     if (configs instanceof Array) {
-                        return configs.map(config => new LocativeForm(
+                        return configs.map(config => new API.LocativeForm(
                             extractPreposition(config),
                             toLocativeSingular(engine, declension, o, extractDeclensionType(config)),
                             extractAttributes(config)
