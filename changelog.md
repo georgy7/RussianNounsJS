@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - Soon
+### Deprecated
+- `pluraliaTantum` named parameter (you should use `pluraleTantum`)
+- `LemmaException` (will be replaced by Error)
+- `StressDictionaryException` (will be replaced by Error)
+- `RussianNouns.createLemmaNoThrow`
+- `RussianNouns.FIXED_STEM_STRESS` public constant
+- `RussianNouns.FIXED_ENDING_STRESS` public constant
+- `StressDictionary.get`
+- `StressDictionary.remove`
+- `StressDictionary.find`
+
 ## [1.4.2] - 2025-03-27
 ### Fixed
 - I packed letters more tightly before hashing, which led to a smaller spread
