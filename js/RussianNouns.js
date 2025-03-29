@@ -194,6 +194,31 @@
         }
     }
 
+    /**
+     * Числа в JS - 64-битные с плавающей точкой, по стандарту.
+     * Обычно говорят, что максимальное безопасное целое число - это (2^53)-1,
+     * но это не всегда так. Есть реализации, точность в которых начинает снижаться
+     * где-то на диапазоне от 2^42 до 2^45. Так или иначе, хотя побитовые операции
+     * и не работают с целыми числами больше 32 бит, в тип Number в JS можно
+     * уместить гораздо больше. И это отличный способ сэкономить оперативную память,
+     * используя числа в качестве ключей в коллекции Map.
+     *
+     * @param {Lemma} lemma
+     * @returns {number}
+     */
+    function toKey(lemma) {
+        // Мои тесты показали, что наша хэш-функция иногда даёт коллизию
+        // у коротких слов из одинакового количества символов. И я заметил,
+        // что у всех коллизий всегда были соседние коды первых букв.
+        const start = (lemma.lower().charCodeAt(0) % 2);
+        const hasYo = (lemma.lower().includes('ё'))&1;
+        const msb = (lemma._flags << 2) | (start << 1) | hasYo;
+
+        // Предполагается, что в переменной msb всего 10 бит,
+        // Так что мы можем безопасно подвинуть их на 32 бита влево.
+        return (msb * 0x100000000) + lemma._hash;
+    }
+
     class LemmaException extends Error {
     }
 
@@ -288,6 +313,8 @@
         // The result is the same as if the hash were of type uint32_t.
         let hash = 5381;
         function flushBits() {
+            // Multiplication instead of shifting is used in order
+            // to ensure that the result is unsigned.
             hash = (hash * 33 + (state & 0xFF)) % 0x100000000;
             state = state >> 8;
             readyBits -= 8;
@@ -910,7 +937,7 @@
                 const declension = getDeclension(o);
 
                 if (declension && (declension >= 0)) {
-                    const configs = locativeDictionary.get(o, false);
+                    const configs = locativeDictionary.get(toKey(o));
                     if (configs instanceof Array) {
                         return configs.map(config => new LocativeForm(
                             extractPreposition(config),
@@ -1019,9 +1046,8 @@
     }
 
     function makeDefaultLocativeDictionary() {
-        // Dictionary используется вместо Map, т.к. он проверяет совпадения через equals.
-        // И возможно редактирование будет в дальнейшем открыто наружу.
-        const dictionary = new Dictionary();
+        const map = new Map();
+
         const m = Object.freeze({gender: Gender.MASCULINE});
         const mAnimate = Object.freeze({gender: Gender.MASCULINE, animate: true});
 
@@ -1038,10 +1064,12 @@
                 const lemma = Object.assign({}, lemmaPrototype);
                 lemma.text = word;
 
-                let configArray = dictionary.get(lemma, false);
+                const lemmaKey = toKey(createLemma(lemma));
+
+                let configArray = map.get(lemmaKey);
                 if (!configArray) {
                     configArray = [];
-                    dictionary.put(lemma, configArray);
+                    map.set(lemmaKey, configArray);
                 }
 
                 for (let p of prepositions) {
@@ -1161,7 +1189,7 @@
         // от предложного падежа только ударение — смещается на последний слог,
         // на письме они не отличаются.
 
-        return dictionary;
+        return map;
     }
 
     const reYo = s => {
@@ -1664,7 +1692,7 @@
 
         if (Case.LOCATIVE === grCase) {
 
-            const locativeConfigs = locativeDictionary.get(lemma, false);
+            const locativeConfigs = locativeDictionary.get(toKey(lemma));
             if (locativeConfigs) {
                 const declensionTypes = unique(locativeConfigs.map(x => extractDeclensionType(x)));
                 return declensionTypes.map(dType => toLocativeSingular1(engine, lemma, dType));
