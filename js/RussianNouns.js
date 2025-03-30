@@ -140,6 +140,9 @@
                 && (this.lower() === o.lower());
         }
 
+        /**
+         * @deprecated since version 1.5.0
+         */
         fuzzyEquals(o) {
             return (o instanceof Lemma)
                 && ((this._flags & 0xF) === (o._flags & 0xF))
@@ -751,6 +754,9 @@
                 }
             };
 
+            /**
+             * @deprecated since version 1.5.0
+             */
             this.putAll = function (lemmaPrototype, value, joinedWordList) {
                 const list = joinedWordList.split(',');
                 for (let word of list) {
