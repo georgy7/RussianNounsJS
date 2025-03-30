@@ -12,9 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RussianNouns.createLemmaNoThrow`
 - `RussianNouns.FIXED_STEM_STRESS` public constant
 - `RussianNouns.FIXED_ENDING_STRESS` public constant
+- `StressDictionary.putAll`
 - `StressDictionary.get`
 - `StressDictionary.remove`
 - `StressDictionary.find`
+- `Lemma.fuzzyEquals`
 
 ## [1.4.2] - 2025-03-27
 ### Fixed
