@@ -302,39 +302,39 @@ const RussianNouns = require('./RussianNouns.js');
 })();
 
 (() => {
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma(123);
     });
     console.log('createLemma: number');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma('гора');
     });
     console.log('createLemma: string');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma(null);
     });
     console.log('createLemma: null');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma(undefined);
     });
     console.log('createLemma: undefined');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma({});
     });
     console.log('createLemma: {}');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma({
             text: 'гора'
         });
     });
     console.log('createLemma: gender undefined');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma({
             text: 'гора',
             gender: 'fgsfds'
@@ -342,7 +342,7 @@ const RussianNouns = require('./RussianNouns.js');
     });
     console.log('createLemma: gender fgsfds');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma({
             text: 'ножницы',
             pluraleTantum: 123
@@ -350,7 +350,7 @@ const RussianNouns = require('./RussianNouns.js');
     });
     console.log('createLemma: pluraleTantum 123');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma({
             text: 'пальто',
             gender: RussianNouns.Gender.NEUTER,
@@ -359,7 +359,7 @@ const RussianNouns = require('./RussianNouns.js');
     });
     console.log('createLemma: indeclinable fgsfds');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma({
             text: 'трактор',
             gender: RussianNouns.Gender.MASCULINE,
@@ -368,7 +368,7 @@ const RussianNouns = require('./RussianNouns.js');
     });
     console.log('createLemma: transport fgsfds');
 
-    itShouldThrow(RussianNouns.LemmaException, () => {
+    itShouldThrow(Error, () => {
         RussianNouns.createLemma({
             gender: RussianNouns.Gender.MASCULINE
         });
@@ -405,99 +405,80 @@ const RussianNouns = require('./RussianNouns.js');
 
     // ----------------------
 
-    // Функция createLemmaNoThrow будет вскоре удалена.
+    assertEquals(null, RussianNouns.createLemmaOrNull(123));
+    console.log('createLemmaOrNull: number');
 
-    const assertHasError = a => {
-        assertIsArray(a);
-        assertEquals(a.length, 2);
-        assertEquals(a[0], null);
-        assertEquals(typeof a[1], 'string');
-    };
+    assertEquals(null, RussianNouns.createLemmaOrNull('гора'));
+    console.log('createLemmaOrNull: string');
 
-    assertHasError(RussianNouns.createLemmaNoThrow(123));
-    console.log('createLemmaNoThrow: number');
+    assertEquals(null, RussianNouns.createLemmaOrNull(null));
+    console.log('createLemmaOrNull: null');
 
-    assertHasError(RussianNouns.createLemmaNoThrow('гора'));
-    console.log('createLemmaNoThrow: string');
+    assertEquals(null, RussianNouns.createLemmaOrNull(undefined));
+    console.log('createLemmaOrNull: undefined');
 
-    assertHasError(RussianNouns.createLemmaNoThrow(null));
-    console.log('createLemmaNoThrow: null');
+    assertEquals(null, RussianNouns.createLemmaOrNull({}));
+    console.log('createLemmaOrNull: {}');
 
-    assertHasError(RussianNouns.createLemmaNoThrow(undefined));
-    console.log('createLemmaNoThrow: undefined');
-
-    assertHasError(RussianNouns.createLemmaNoThrow({}));
-    console.log('createLemmaNoThrow: {}');
-
-    assertHasError(RussianNouns.createLemmaNoThrow({
+    assertEquals(null, RussianNouns.createLemmaOrNull({
         text: 'гора'
     }));
-    console.log('createLemmaNoThrow: gender undefined');
+    console.log('createLemmaOrNull: gender undefined');
 
-    assertHasError(RussianNouns.createLemmaNoThrow({
+    assertEquals(null, RussianNouns.createLemmaOrNull({
         text: 'гора',
         gender: 'fgsfds'
     }));
-    console.log('createLemmaNoThrow: gender fgsfds');
+    console.log('createLemmaOrNull: gender fgsfds');
 
-    assertHasError(RussianNouns.createLemmaNoThrow({
+    assertEquals(null, RussianNouns.createLemmaOrNull({
         text: 'ножницы',
         pluraleTantum: 123
     }));
-    console.log('createLemmaNoThrow: pluraleTantum 123');
+    console.log('createLemmaOrNull: pluraleTantum 123');
 
-    assertHasError(RussianNouns.createLemmaNoThrow({
+    assertEquals(null, RussianNouns.createLemmaOrNull({
         text: 'пальто',
         gender: RussianNouns.Gender.NEUTER,
         indeclinable: 'fgsfds'
     }));
-    console.log('createLemmaNoThrow: indeclinable fgsfds');
+    console.log('createLemmaOrNull: indeclinable fgsfds');
 
-    assertHasError(RussianNouns.createLemmaNoThrow({
+    assertEquals(null, RussianNouns.createLemmaOrNull({
         text: 'трактор',
         gender: RussianNouns.Gender.MASCULINE,
         transport: 'наземный'
     }));
-    console.log('createLemmaNoThrow: transport fgsfds');
+    console.log('createLemmaOrNull: transport fgsfds');
 
-    assertHasError(RussianNouns.createLemmaNoThrow({
+    assertEquals(null, RussianNouns.createLemmaOrNull({
         gender: RussianNouns.Gender.MASCULINE
     }));
-    console.log('createLemmaNoThrow: text undefined');
+    console.log('createLemmaOrNull: text undefined');
 
     let x;
 
-    x = RussianNouns.createLemmaNoThrow({
+    x = RussianNouns.createLemmaOrNull({
         text: 'гора',
         gender: RussianNouns.Gender.FEMININE
     });
-    assertIsArray(x);
-    assertEquals(x.length, 2);
-    assertEquals(x[1], null);
-    assertEquals(x[0] instanceof RussianNouns.Lemma, true);
-    assertEquals(x[0].text(), 'гора');
-    assertEquals(x[0].getGender(), RussianNouns.Gender.FEMININE);
-    assertEquals(x[0].isPluraleTantum(), false);
-    assertEquals(x[0].isIndeclinable(), false);
-    console.log('createLemmaNoThrow: valid (1)');
+    assertEquals(x instanceof RussianNouns.Lemma, true);
+    assertEquals(x.text(), 'гора');
+    assertEquals(x.getGender(), RussianNouns.Gender.FEMININE);
+    assertEquals(x.isPluraleTantum(), false);
+    assertEquals(x.isIndeclinable(), false);
+    console.log('createLemmaOrNull: valid (1)');
 
-    x = RussianNouns.createLemmaNoThrow({
+    x = RussianNouns.createLemmaOrNull({
         text: 'ножницы',
         pluraleTantum: true
     });
-    assertIsArray(x);
-    assertEquals(x.length, 2);
-    assertEquals(x[1], null);
-    assertEquals(x[0] instanceof RussianNouns.Lemma, true);
-    assertEquals(x[0].text(), 'ножницы');
-    assertEquals(x[0].isPluraleTantum(), true);
-    assertEquals(x[0].getGender(), undefined);
-    assertEquals(x[0].isIndeclinable(), false);
-    console.log('createLemmaNoThrow: valid (2)');
-
-    let y = RussianNouns.createLemmaNoThrow(x[0]);
-    assertEquals(y[0], x[0]);
-    console.log('createLemmaNoThrow: the same object');
+    assertEquals(x instanceof RussianNouns.Lemma, true);
+    assertEquals(x.text(), 'ножницы');
+    assertEquals(x.isPluraleTantum(), true);
+    assertEquals(x.getGender(), undefined);
+    assertEquals(x.isIndeclinable(), false);
+    console.log('createLemmaOrNull: valid (2)');
 })();
 
 (() => {

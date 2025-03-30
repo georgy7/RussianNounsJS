@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v1.5.0
+  RussianNounsJS v2.0.0-SNAPSHOT
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
@@ -51,9 +51,8 @@
             return 'No parameters specified.';
         }
 
-        // pluraliaTantum parameter is deprecated since version 1.5.0
         for (let fieldName of [
-            'pluraleTantum', 'pluraliaTantum',
+            'pluraleTantum',
             'indeclinable', 'animate',
             'surname', 'name', 'transport'
         ]) {
@@ -63,13 +62,11 @@
             }
         }
 
-        const pluraleTantum = (!!(o.pluraleTantum)) || (!!(o.pluraliaTantum));
-
         if (o.text == null) {
             return 'A cyrillic word required.';
         }
 
-        if (!pluraleTantum) {   // Это слова т. н. парного рода.
+        if (!o.pluraleTantum) {
             if (o.gender == null) {
                 return 'A grammatical gender required.';
             }
@@ -98,7 +95,7 @@
                 this._flags = o._flags;
 
             } else {
-                if (o.pluraleTantum || o.pluraliaTantum) {
+                if (o.pluraleTantum) {
                     this._flags = 5;
                 } else {
                     this._flags = 1 + GenderValues.indexOf(o.gender);
@@ -140,15 +137,6 @@
                 && (this.lower() === o.lower());
         }
 
-        /**
-         * @deprecated since version 1.5.0
-         */
-        fuzzyEquals(o) {
-            return (o instanceof Lemma)
-                && ((this._flags & 0xF) === (o._flags & 0xF))
-                && (unYo(this.lower()) === unYo(o.lower()));
-        }
-
         text() {
             return this._txt;
         }
@@ -159,14 +147,6 @@
 
         isPluraleTantum() {
             return 5 === (0b111 & this._flags);
-        }
-
-        /**
-         * @deprecated since version 1.3.0 (2021 A.D.)
-         * @returns {boolean}
-         */
-        isPluraliaTantum() {
-            return this.isPluraleTantum();
         }
 
         getGender() {
@@ -223,29 +203,8 @@
         return (msb * 0x100000000) + lemma._hash;
     }
 
-    class LemmaException extends Error {
-    }
-
-    class StressDictionaryException extends Error {
-    }
-
     function createLemmaOrNull(options) {
         return (null === validateCreateLemma(options)) ? Object.freeze(new Lemma(options)) : null;
-    }
-
-    function createLemmaNoThrow(o) {
-        let result;
-
-        if (o instanceof Lemma) {
-            result = [o, null];
-        } else {
-            result = [null, validateCreateLemma(o)];
-            if (null === result[1]) {
-                result[0] = Object.freeze(new Lemma(o));
-            }
-        }
-
-        return Object.freeze(result);
     }
 
     function createLemma(o) {
@@ -255,7 +214,7 @@
 
         const err = validateCreateLemma(o);
         if (err) {
-            throw new LemmaException(err);
+            throw new Error(err);
         }
 
         return Object.freeze(new Lemma(o));
@@ -531,16 +490,6 @@
         CASES: CaseValues,
 
         /**
-         * @deprecated since version 1.5.0
-         */
-        LemmaException: LemmaException,
-
-        /**
-         * @deprecated since version 1.5.0
-         */
-        StressDictionaryException: StressDictionaryException,
-
-        /**
          * Это еще не стабилизированная часть API.
          *
          * Предикаты, по которым можно узнать, уместно ли
@@ -582,17 +531,10 @@
          * Если параметр — уже лемма, вернет тот же объект, а не копию.
          *
          * @param {RussianNouns.Lemma|Object} o
-         * @throws {RussianNouns.LemmaException} Ошибки из конструктора леммы.
+         * @throws {Error} Ошибки из конструктора леммы.
          * @returns {RussianNouns.Lemma} Иммутабельный объект.
          */
         createLemma: createLemma,
-
-        /**
-         * @deprecated since version 1.5.0
-         * @param {RussianNouns.Lemma|Object} o
-         * @returns {array} Результат в Go-стиле: результат или null, строка с описанием ошибки или null.
-         */
-        createLemmaNoThrow: createLemmaNoThrow,
 
         /**
          * Безопасное создание леммы с минимальными накладными расходами.
@@ -653,16 +595,6 @@
                 return d;
             }
         },
-
-        /**
-         * @deprecated since version 1.5.0
-         */
-        FIXED_STEM_STRESS: 'SSSSSSS-SSSSSS',
-
-        /**
-         * @deprecated since version 1.5.0
-         */
-        FIXED_ENDING_STRESS: 'EEEEEEE-EEEEEE',
 
         /**
          * Словарь ударений. В него можно вносить изменения в рантайме,
@@ -726,7 +658,7 @@
              * b — оба варианта употребляются одинаково часто ("b" значит "both");
              * e — чаще на окончание;
              * E — только на окончание.
-             * @throws {RussianNouns.StressDictionaryException}
+             * @throws {Error} Если некорректный формат значения.
              */
             this.put = function (lemma, settings) {
                 const parts = settings.split('-');
@@ -734,7 +666,7 @@
                     part.split('').some(x => !'SsbeE'.includes(x));
 
                 if (parts.length !== 2 || bad(parts[0], 7) || bad(parts[1], 6)) {
-                    throw new API.StressDictionaryException('Bad settings format.');
+                    throw new Error('Bad settings format.');
                 }
 
                 const lemmaObject = createLemma(lemma);
@@ -754,75 +686,6 @@
                 } else {
                     homonyms.push([lemmaObject, settings]);
                 }
-            };
-
-            /**
-             * @deprecated since version 1.5.0
-             */
-            this.putAll = function (lemmaPrototype, value, joinedWordList) {
-                const list = joinedWordList.split(',');
-                for (let word of list) {
-                    const lemma = Object.assign({}, lemmaPrototype);
-                    lemma.text = word;
-                    this.put(lemma, value);
-                }
-            };
-
-            /**
-             * @deprecated since version 1.5.0
-             * @param {RussianNouns.Lemma|Object} lemma
-             * @param {boolean} fuzzy Если нет точных совпадений, вернуть первое неточное.
-             * @returns {*} Значение или undefined.
-             */
-            this.get = function (lemma, fuzzy) {
-                const lemmaObject = (lemma instanceof Lemma) ? lemma : createLemma(lemma);
-                const hash = _getKey(lemmaObject);
-
-                const homonyms = _data.get(hash);
-
-                if (homonyms instanceof Array) {
-                    let found = homonyms.find(ls => lemmaObject.equals(ls[0]));
-
-                    if (!found && fuzzy) {
-                        found = homonyms.find(ls => lemmaObject.fuzzyEquals(ls[0]));
-                    }
-
-                    if (found) {
-                        return found[1];
-                    }
-                }
-            };
-
-            /**
-             * @deprecated since version 1.5.0
-             */
-            this.remove = function (lemma) {
-                const lemmaObject = createLemma(lemma);
-                const hash = _getKey(lemmaObject);
-
-                const homonyms = _data.get(hash);
-
-                if (homonyms instanceof Array) {
-                    _data.set(hash, homonyms.filter(ls => !lemmaObject.equals(ls[0])));
-                }
-            };
-
-            /**
-             * Пожалуйста, не используйте.
-             * @deprecated since version 1.5.0
-             * @param word Слово, по которому производится поиск.
-             * @returns {Array} Список лемм.
-             */
-            this.find = function (word) {
-                let result = [];
-                const query = word.toLowerCase();
-
-                _data.forEach(homonyms => {
-                    const lemmas = homonyms.map(pair => pair[0]);
-                    result = result.concat(lemmas.filter(x => query === x.lower()));
-                });
-
-                return result;
             };
 
             this.hasStressedEndingSingular = function (query, grCase) {
@@ -974,35 +837,44 @@
     };
 
     function makeDefaultStressDictionary() {
+        function putAll(dictionary, lemmaPrototype, value, joinedWordList) {
+            const list = joinedWordList.split(',');
+            for (let word of list) {
+                const lemma = Object.assign({}, lemmaPrototype);
+                lemma.text = word;
+                dictionary.put(lemma, value);
+            }
+        }
+
         const d = new API.StressDictionary();
         const m = Object.freeze({gender: Gender.MASCULINE});
         const ma = Object.freeze({gender: Gender.MASCULINE, animate: true});
         const f = Object.freeze({gender: Gender.FEMININE});
         const fa = Object.freeze({gender: Gender.FEMININE, animate: true});
         const ca = Object.freeze({gender: Gender.COMMON, animate: true});
-        const putM = (settings, word) => d.putAll(m, settings, word);
+        const putM = (settings, word) => putAll(d, m, settings, word);
 
-        d.putAll(m,
-            API.FIXED_STEM_STRESS,
+        putAll(d, m,
+            'SSSSSSS-SSSSSS',
             'брёх,дёрн,идиш,имидж,мед');
 
-        d.putAll({pluraleTantum: true},
-            API.FIXED_STEM_STRESS,
+        putAll(d, {pluraleTantum: true},
+            'SSSSSSS-SSSSSS',
             'ножны');
 
-        d.putAll(m,
+        putAll(d, m,
             'SSSSSSS-EEEEEE',
             'адрес,век,вечер,город,детдом,поезд,спецсчёт,субсчёт');
 
-        d.putAll(m,
+        putAll(d, m,
             'SSSSSSE-EEEEEE',
             'берег,бок,вес,лес,снег,дом,катер,счёт,мёд');
 
-        d.putAll(ma,
-            API.FIXED_STEM_STRESS,
+        putAll(d, ma,
+            'SSSSSSS-SSSSSS',
             'балансёр,шофёр');
 
-        d.putAll(m,
+        putAll(d, m,
             'SSSSSSS-bbbbbb',
             'вексель,ветер');
 
@@ -1010,37 +882,37 @@
         putM('SSSSSSE-bEEbEE', 'год');
         putM('SSSSSSb-bbbbbb', 'цех');
 
-        d.putAll({gender: Gender.NEUTER},
+        putAll(d, {gender: Gender.NEUTER},
             'EEEEEEE-SSSSSS',
             'тесло,' +
             'стекло,автостекло,бронестекло,оргстекло,' +
             'пеностекло,смарт-стекло,спецстекло,' +
             'бедро,берцо,блесна,чело,стегно,стебло');
 
-        d.putAll(f, 'EEEbEEE-SSESEE', 'щека');
-        d.putAll(f, 'EEEEEEE-SSESEE', 'слеза');
+        putAll(d, f, 'EEEbEEE-SSESEE', 'щека');
+        putAll(d, f, 'EEEEEEE-SSESEE', 'слеза');
 
         // Почти все слова на ж/ш/ч/ц с ударением на окончание
         // захешированы (см. stressHashes).
 
-        d.putAll(m,
+        putAll(d, m,
             'SbbSbbb-bbbbbb',
             'грош,шприц');
 
-        d.putAll(m,
+        putAll(d, m,
             'SssSsss-ssssss',
             'кишмиш,' +
             'кряж,' +  // обрубок бревна; гряда холмов
             'слеш,слэш');
 
-        d.putAll(ma,
+        putAll(d, ma,
             'Sssssss-ssssss',
             'паныч');
 
         putM('SEESeEE-EEEEEE', 'стеллаж');
         putM('SeeSeee-eeeeee', 'шиномонтаж');
 
-        d.putAll({gender: Gender.NEUTER},
+        putAll(d, {gender: Gender.NEUTER},
             'EEEEEEE-SsESEE',
             'плечо');
 
@@ -1048,19 +920,19 @@
         // от ударения зависит окончание творительного падежа ед.ч.
         // В остальных словах ударение влияет на окончание в р.п. мн.ч.
 
-        d.putAll(ca, 'EEEEEEE-SSSSSS', 'судья');
-        d.putAll(ca, API.FIXED_ENDING_STRESS, 'левша');
+        putAll(d, ca, 'EEEEEEE-SSSSSS', 'судья');
+        putAll(d, ca, 'EEEEEEE-EEEEEE', 'левша');
 
-        d.putAll(f, 'EEEEEEE-SESSSS', 'семья,макросемья');
-        d.putAll(f, 'EEEEEEE-SEESEE', 'вожжа,свеча');
-        d.putAll(f, 'EEESEEE-SSSSSS', 'душа');
+        putAll(d, f, 'EEEEEEE-SESSSS', 'семья,макросемья');
+        putAll(d, f, 'EEEEEEE-SEESEE', 'вожжа,свеча');
+        putAll(d, f, 'EEESEEE-SSSSSS', 'душа');
 
-        d.putAll(fa, 'EEEEEEE-SESESS', 'свинья,овца');
+        putAll(d, fa, 'EEEEEEE-SESESS', 'свинья,овца');
 
-        d.putAll(f, 'EEEEEEE-eEeeee', 'скамья');
+        putAll(d, f, 'EEEEEEE-eEeeee', 'скамья');
 
-        d.putAll(f,
-            API.FIXED_ENDING_STRESS,
+        putAll(d, f,
+            'EEEEEEE-EEEEEE',
             'башка,кишка,ладья,лапша,моча,пыльца,статья');
 
         return d;
@@ -1322,7 +1194,7 @@
                 return 1;
 
             default:
-                throw new Error('incorrect gender');
+                return -1;
         }
     }
 
