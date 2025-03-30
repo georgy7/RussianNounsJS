@@ -678,6 +678,8 @@
                 // Так мы оставляем род, признаки одушевлённости и несклоняемости (это 5 бит)
                 // и бит чётности первой буквы, но убираем букву ё (см. второй параметр).
                 // Это очень хороший ключ с практически нулевым уровнем коллизий.
+                // Но из-за того, что я вынужден поддерживать все эти устаревшие методы,
+                // толку от этого никакого - я не могу выкинуть леммы из этого словаря.
                 return toKey(lemmaObject, true) % 0x8000000000;
             };
 
@@ -812,16 +814,15 @@
              * @returns {Array} Список лемм.
              */
             this.find = function (word) {
-                // TODO: Единственный выход - перебрать всю мэпку, лол.
-                const hash = calculateHash(word.toLowerCase());
+                let result = [];
+                const query = word.toLowerCase();
 
-                const homonyms = _data.get(hash);
+                _data.forEach(homonyms => {
+                    const lemmas = homonyms.map(pair => pair[0]);
+                    result = result.concat(lemmas.filter(x => query === x.lower()));
+                });
 
-                if (homonyms instanceof Array) {
-                    return homonyms.map(pair => pair[0]);
-                } else {
-                    return [];
-                }
+                return result;
             };
 
             this.hasStressedEndingSingular = function (query, grCase) {
