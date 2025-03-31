@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `StressDictionary.find`
 - `Lemma.fuzzyEquals`
 
+### Changed
+- Attributes in LocativeForm objects resulting from `rne.getLocativeForms(lemma)`
+  are no longer an array, but bit flags. This feature is still experimental.
+
 ## [1.4.2] - 2025-03-27
 ### Fixed
 - I packed letters more tightly before hashing, which led to a smaller spread
