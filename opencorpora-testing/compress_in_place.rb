@@ -22,30 +22,32 @@ def encode_incremental(str_to_encode, base_string)
   return [common, str_to_encode[common..-1]]
 end
 
-def encode_strings(arr, base_string, dictionary)
-  return arr.map { |x|
-    result = encode_incremental(x, base_string)
-    dict_index = dictionary.index { |x| x == result[1] }
+def encode(collection, lemma, dictionary, base_string)
+  base = base_string
 
-    if nil == dict_index
-      dictionary.push(result[1])
-      dict_index = dictionary.size - 1
-    end
+  encode_strings = ->(arr) {
+    return arr.map { |x|
+      throw 'base_string is not a string' unless base.kind_of?(String)
+      result = encode_incremental(x, base)
+      dict_index = dictionary.index { |x| x == result[1] }
+      base = x
 
-    throw '>= 255 common characters' if result[0] > 0xFF
+      if nil == dict_index
+        dictionary.push(result[1])
+        dict_index = dictionary.size - 1
+      end
 
-    dict_index * 0x100 + result[0]
+      throw '>= 255 common characters' if result[0] > 0xFF
+
+      dict_index * 0x100 + result[0]
+    }
   }
-end
 
-def encode(collection, lemma, dictionary)
-  if collection.size > 0
-    base_string = collection.last['name']
-    throw 'Name is not a string!' unless base_string.kind_of?(String)
-    lemma['cases'].map! {|arr| encode_strings(arr, base_string, dictionary) }
-    lemma['casesPlural'].map! {|arr| encode_strings(arr, base_string, dictionary) }
-  end
+  lemma['cases'].map! {|arr| encode_strings.(arr) }
+  lemma['casesPlural'].map! {|arr| encode_strings.(arr) }
+
   collection.push(lemma)
+  base
 end
 
 abc.each { |letter|
@@ -61,18 +63,24 @@ abc.each { |letter|
 
   counter = 0
 
+  base_string_p = ''
+  base_string_m = ''
+  base_string_f = ''
+  base_string_n = ''
+  base_string_c = ''
+
   input.each { |chunk|
     chunk.each { |lemma|
       if lemma['g'].include?('Pltm')
-        encode(dataP, lemma, dictionary)
+        base_string_p = encode(dataP, lemma, dictionary, base_string_p)
       elsif lemma['g'].include?('masc')
-        encode(dataM, lemma, dictionary)
+        base_string_m = encode(dataM, lemma, dictionary, base_string_m)
       elsif lemma['g'].include?('femn')
-        encode(dataF, lemma, dictionary)
+        base_string_f = encode(dataF, lemma, dictionary, base_string_f)
       elsif lemma['g'].include?('neut')
-        encode(dataN, lemma, dictionary)
+        base_string_n = encode(dataN, lemma, dictionary, base_string_n)
       elsif lemma['g'].include?('ms-f')
-        encode(dataC, lemma, dictionary)
+        base_string_c = encode(dataC, lemma, dictionary, base_string_c)
       end
 
       counter += 1
