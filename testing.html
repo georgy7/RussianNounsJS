@@ -327,7 +327,7 @@
 
                                         <!--&lt;!&ndash;<td>{{rowNumber}}</td>&ndash;&gt;-->
 
-                                        <th ng-repeat="wordForm in item.wordForms"
+                                        <th ng-repeat="wordForm in item.wordForms track by $index"
                                             ng-class="{'bg-danger': wordForm.failure, 'bg-warning': wordForm.warning}">
                                             {{wordForm.actual}}
                                             <div ng-if="wordForm.failureOrWarning">Правильно: {{wordForm.expected}}
@@ -357,7 +357,7 @@
                                     </tr>
                                     <tr class="plural">
 
-                                        <th ng-repeat="pluralForm in item.pluralForms"
+                                        <th ng-repeat="pluralForm in item.pluralForms track by $index"
                                             ng-class="{'bg-danger': pluralForm.failure, 'bg-warning': pluralForm.warning}">
                                             <div ng-if="(pluralForm.expected.length)">
                                                 {{pluralForm.actual}}

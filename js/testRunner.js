@@ -26,82 +26,7 @@
             gender: null
         };
 
-        const abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
-        const parts = [];
-
-        const partCount = 4;
-        const chunkSize = Math.floor(abc.length / partCount);
-
-        for (let i = 0; i < (partCount-1); i++) {
-            parts.push(abc.slice(i * chunkSize, (i+1) * chunkSize));
-        }
-
-        parts.push(abc.slice((partCount-1) * chunkSize, abc.length));
-
-        $scope.loadingStatuses = [];
-        $scope.results = [];
-        $scope.completed = [];
-        $scope.workers = [];
-
-        for (let part of parts) {
-            $scope.results.push([]);
-            $scope.completed.push(false);
-
-            $scope.loadingStatuses.push(
-                Array(part.length).fill(null)
-            );
-
-            $scope.workers.push(new Worker('js/test.js'));
-        }
-
-        $scope.runLetter = (workerIndex, letterIndex) => {
-            var worker = $scope.workers[workerIndex];
-            var letter = parts[workerIndex][letterIndex];
-            if (!letter) {
-                throw 'Out of bound of letter list index.';
-            }
-            jQuery.get('opencorpora-testing/nouns_' + letter + '.json', function (words) {
-                worker.postMessage({
-                    type: 'start',
-                    words: words,
-                    workerIndex: workerIndex,
-                    letterIndex: letterIndex
-                });
-            });
-        };
-
-        $scope.listenEvents = workerIndex => {
-            $scope.workers[workerIndex].onmessage = function (e) {
-                if (e.data.type === 'loading') {
-                    $scope.loadingStatuses[e.data.workerIndex][e.data.letterIndex] = e.data;
-                    $scope.updateLoading($scope.calculateLoading());
-
-                } else if (e.data.type === 'testResult') {
-
-                    console.log('{1} completed: {2} words processed.'
-                        .replace('{1}', parts[e.data.workerIndex][e.data.letterIndex])
-                        .replace('{2}', e.data.totalWords)
-                    );
-
-                    $scope.results[e.data.workerIndex][e.data.letterIndex] = e.data;
-                    var next = e.data.letterIndex + 1;
-                    if (parts[e.data.workerIndex].length > next) {
-                        $scope.runLetter(e.data.workerIndex, next);
-                    } else {
-                        console.log(new Date(), 'Process ' + (1 + e.data.workerIndex) + ' completed');
-                        $scope.completed[e.data.workerIndex] = true;
-                        $scope.workers[workerIndex].terminate();
-                        if ($scope.completed.every(x => x)) {
-                            $scope.$apply(() => {
-                                $scope.showResults();
-                            });
-                        }
-                    }
-                }
-            };
-        };
-
-        $scope.wordComparableView = (word) => {
+        function wordComparableView(word) {
             if (word) {
                 if ((word.wordForms[0]) && (typeof word.wordForms[0].expected === 'string')) {
                     return word.wordForms[0].expected;
@@ -111,86 +36,192 @@
             } else {
                 return '';
             }
-        };
+        }
 
-        $scope.showResults = () => {
-            console.log(new Date(), 'Finish.');
-            let totalCases = 0;
-            let wrongCases = 0;
-            let totalWords = 0;
-            let totalWordsSingular = 0;
-            let correctWordsWithWarningsSingular = 0;
-            let wrongWordsSingular = 0;
-            let items = [];
+        (() => {
+            const abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
+            const parts = [];
 
-            let pluralizeWrong = 0;
-            let pluralizeTotal = 0;
+            const partCount = 4;
+            const chunkSize = Math.floor(abc.length / partCount);
 
-            let totalCasesPluralExceptTheNominativeCase = 0;
-            let wrongCasesPluralExceptTheNominativeCase = 0;
+            for (let i = 0; i < (partCount-1); i++) {
+                parts.push(abc.slice(i * chunkSize, (i+1) * chunkSize));
+            }
 
-            let itemLen = 0;
+            parts.push(abc.slice((partCount-1) * chunkSize, abc.length));
 
-            for (let eArray of $scope.results) {
-                for (let data of eArray) {
-                    totalCases += data.totalCases;
-                    wrongCases += data.wrongCases;
-                    totalWords += data.totalWords;
-                    totalWordsSingular += data.totalWordsSingular;
-                    correctWordsWithWarningsSingular += data.correctWordsWithWarningsSingular;
-                    wrongWordsSingular += data.wrongWordsSingular;
+            const loadingStatuses = [];
+            const results = [];
+            const completed = [];
+            const workers = [];
 
-                    pluralizeWrong += data.pluralizeWrong;
-                    pluralizeTotal += data.pluralizeTotal;
+            for (let part of parts) {
+                results.push([]);
+                completed.push(false);
 
-                    totalCasesPluralExceptTheNominativeCase += data.totalCasesPluralExceptTheNominativeCase;
-                    wrongCasesPluralExceptTheNominativeCase += data.wrongCasesPluralExceptTheNominativeCase;
+                loadingStatuses.push(
+                    Array(part.length).fill(null)
+                );
 
-                    items = items.concat(data.resultForTemplate.items);
-                    itemLen += data.resultForTemplate.items.length;
+                workers.push(new Worker('js/test.js'));
+            }
+
+            const loadLetter = (workerIndex, letterIndex) => {
+                var worker = workers[workerIndex];
+                var letter = parts[workerIndex][letterIndex];
+                if (!letter) {
+                    throw 'Out of bound of letter list index.';
                 }
+                jQuery.get('opencorpora-testing/nouns_' + letter + '.json', function (words) {
+                    worker.postMessage({
+                        type: 'start',
+                        words: words,
+                        workerIndex: workerIndex,
+                        letterIndex: letterIndex
+                    });
+                });
+            };
+
+            const calculateLoading = () => {
+                let count = 0;
+                let sum = 0;
+                for (var i = 0; i < loadingStatuses.length; i++) {
+                    var arr = loadingStatuses[i];
+                    for (var j = 0; j < arr.length; j++) {
+                        if (arr[j]) {
+                            sum += arr[j].status;
+                        }
+                        count++;
+                    }
+                }
+                return sum / count;
+            };
+
+            const updateLoading = (loadStatus) => {
+                let barWidth = '' + Math.round(100 * loadStatus) + '%';
+                jQuery('#loadingBar .status').css('width', barWidth);
+            };
+
+            const listenEvents = workerIndex => {
+                workers[workerIndex].onmessage = function (e) {
+                    if (e.data.type === 'loading') {
+                        loadingStatuses[e.data.workerIndex][e.data.letterIndex] = e.data;
+                        updateLoading(calculateLoading());
+
+                    } else if (e.data.type === 'testResult') {
+
+                        console.log('{1} completed: {2} words processed.'
+                            .replace('{1}', parts[e.data.workerIndex][e.data.letterIndex])
+                            .replace('{2}', e.data.totalWords)
+                        );
+
+                        results[e.data.workerIndex][e.data.letterIndex] = e.data;
+                        var next = e.data.letterIndex + 1;
+                        if (parts[e.data.workerIndex].length > next) {
+                            loadLetter(e.data.workerIndex, next);
+                        } else {
+                            console.log(new Date(), 'Process ' + (1 + e.data.workerIndex) + ' completed');
+                            completed[e.data.workerIndex] = true;
+                            workers[workerIndex].terminate();
+                            if (completed.every(x => x)) {
+                                $scope.$apply(() => {
+                                    showResults();
+                                });
+                            }
+                        }
+                    }
+                };
+            };
+
+            function showResults() {
+                console.log(new Date(), 'Finish.');
+                let totalCases = 0;
+                let wrongCases = 0;
+                let totalWords = 0;
+                let totalWordsSingular = 0;
+                let correctWordsWithWarningsSingular = 0;
+                let wrongWordsSingular = 0;
+                let items = [];
+
+                let pluralizeWrong = 0;
+                let pluralizeTotal = 0;
+
+                let totalCasesPluralExceptTheNominativeCase = 0;
+                let wrongCasesPluralExceptTheNominativeCase = 0;
+
+                let itemLen = 0;
+
+                for (let eArray of results) {
+                    for (let data of eArray) {
+                        totalCases += data.totalCases;
+                        wrongCases += data.wrongCases;
+                        totalWords += data.totalWords;
+                        totalWordsSingular += data.totalWordsSingular;
+                        correctWordsWithWarningsSingular += data.correctWordsWithWarningsSingular;
+                        wrongWordsSingular += data.wrongWordsSingular;
+
+                        pluralizeWrong += data.pluralizeWrong;
+                        pluralizeTotal += data.pluralizeTotal;
+
+                        totalCasesPluralExceptTheNominativeCase += data.totalCasesPluralExceptTheNominativeCase;
+                        wrongCasesPluralExceptTheNominativeCase += data.wrongCasesPluralExceptTheNominativeCase;
+
+                        items.push(data.resultForTemplate.items);
+                        itemLen += data.resultForTemplate.items.length;
+                    }
+                }
+
+                items = [].concat(...items);
+
+                if (items.length !== totalWords) {
+                    console.error('Incorrect totalWords value.')
+                }
+
+                items.sort((a, b) => {
+                    const aView = wordComparableView(a);
+                    const bView = wordComparableView(b);
+                    return aView.localeCompare(bView)
+                });
+
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    item.id = i;
+                }
+
+                $scope.items = items;
+                $scope.wordTableParams.reload();
+
+                $scope.wordsTotal = totalWords;
+
+                $scope.wordsCorrectSingular = totalWordsSingular - wrongWordsSingular;
+                $scope.totalWordsSingular = totalWordsSingular;
+                $scope.wordsCorrectSingularShare = $scope.wordsCorrectSingular / $scope.totalWordsSingular * 100;
+
+                $scope.wordFormsCorrect = totalCases - wrongCases;
+                $scope.wordFormsTotal = totalCases;
+                $scope.wordFormsCorrectShare = $scope.wordFormsCorrect / $scope.wordFormsTotal * 100;
+
+                $scope.pluralizeCorrectWords = pluralizeTotal - pluralizeWrong;
+                $scope.pluralizeTotalWords = pluralizeTotal;
+                $scope.pluralizeCorrectShare = $scope.pluralizeCorrectWords / $scope.pluralizeTotalWords * 100;
+
+                $scope.pluralWordFormsCorrect =
+                    totalCasesPluralExceptTheNominativeCase - wrongCasesPluralExceptTheNominativeCase;
+                $scope.pluralWordFormsTotal = totalCasesPluralExceptTheNominativeCase;
+                $scope.pluralWordFormsCorrectShare = $scope.pluralWordFormsCorrect / $scope.pluralWordFormsTotal * 100;
+
+                $scope.wordsHasWarningsSingular = correctWordsWithWarningsSingular;
+                $scope.wordsHasWarningsSingularShare = correctWordsWithWarningsSingular / totalWordsSingular * 100;
             }
 
-            if (items.length !== totalWords) {
-                console.error('Incorrect totalWords value.')
+            console.log(new Date(), 'Start.');
+            for (let w = 0; w < workers.length; w++) {
+                listenEvents(w);
+                loadLetter(w, 0);
             }
+        })();
 
-            items.sort((a, b) => {
-                const aView = $scope.wordComparableView(a);
-                const bView = $scope.wordComparableView(b);
-                return aView.localeCompare(bView)
-            });
-
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                item.id = i;
-            }
-
-            $scope.items = items;
-            $scope.wordTableParams.reload();
-
-            $scope.wordsTotal = totalWords;
-
-            $scope.wordsCorrectSingular = totalWordsSingular - wrongWordsSingular;
-            $scope.totalWordsSingular = totalWordsSingular;
-            $scope.wordsCorrectSingularShare = $scope.wordsCorrectSingular / $scope.totalWordsSingular * 100;
-
-            $scope.wordFormsCorrect = totalCases - wrongCases;
-            $scope.wordFormsTotal = totalCases;
-            $scope.wordFormsCorrectShare = $scope.wordFormsCorrect / $scope.wordFormsTotal * 100;
-
-            $scope.pluralizeCorrectWords = pluralizeTotal - pluralizeWrong;
-            $scope.pluralizeTotalWords = pluralizeTotal;
-            $scope.pluralizeCorrectShare = $scope.pluralizeCorrectWords / $scope.pluralizeTotalWords * 100;
-
-            $scope.pluralWordFormsCorrect =
-                totalCasesPluralExceptTheNominativeCase - wrongCasesPluralExceptTheNominativeCase;
-            $scope.pluralWordFormsTotal = totalCasesPluralExceptTheNominativeCase;
-            $scope.pluralWordFormsCorrectShare = $scope.pluralWordFormsCorrect / $scope.pluralWordFormsTotal * 100;
-
-            $scope.wordsHasWarningsSingular = correctWordsWithWarningsSingular;
-            $scope.wordsHasWarningsSingularShare = correctWordsWithWarningsSingular / totalWordsSingular * 100;
-        };
 
         $scope.wordTableMode = 1;
 
@@ -200,7 +231,7 @@
         };
 
         $scope.updateFilter = () => {
-            $scope.previousTopWordView = $scope.wordComparableView($scope.wordTableParams.data[0]);
+            $scope.previousTopWordView = wordComparableView($scope.wordTableParams.data[0]);
 
             const t = $scope.wordTableParams;
             t.reload();
@@ -215,7 +246,7 @@
             }
 
             function lastWordViewOnThisPage() {
-                return $scope.wordComparableView(filtered[count * (pageIndex + 1) - 1]);
+                return wordComparableView(filtered[count * (pageIndex + 1) - 1]);
             }
 
             while (nextPageExists() && (lastWordViewOnThisPage().localeCompare($scope.previousTopWordView) < 0)) {
@@ -279,32 +310,6 @@
                 return filtered.slice(start, stop);
             }
         });
-
-        $scope.calculateLoading = () => {
-            let count = 0;
-            let sum = 0;
-            for (var i = 0; i < $scope.loadingStatuses.length; i++) {
-                var arr = $scope.loadingStatuses[i];
-                for (var j = 0; j < arr.length; j++) {
-                    if (arr[j]) {
-                        sum += arr[j].status;
-                    }
-                    count++;
-                }
-            }
-            return sum / count;
-        };
-
-        $scope.updateLoading = (loadStatus) => {
-            let barWidth = '' + Math.round(100 * loadStatus) + '%';
-            jQuery('#loadingBar .status').css('width', barWidth);
-        };
-
-        console.log(new Date(), 'Start.');
-        for (let w = 0; w < $scope.workers.length; w++) {
-            $scope.listenEvents(w);
-            $scope.runLetter(w, 0);
-        }
 
         $scope.genderColor = (item) => {
             if (!item.gender) {
