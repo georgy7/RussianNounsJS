@@ -2,8 +2,7 @@
 importScripts('RussianNouns.js');
 importScripts('freq.js');
 
-let inputLemmaCount;
-let dataM, dataF, dataN, dataC, dataP;
+let testData;
 let workerIndex, letterIndex;
 
 let main = function () {
@@ -108,7 +107,8 @@ let main = function () {
         }
     }
 
-    function test(rne, data, gender, loadingStepCompleted) {
+    function test(rne, data, dictionary, gender, loadingStepCompleted) {
+        let baseString = '';
 
         for (let i = 0; i < data.length; i++) {
 
@@ -126,8 +126,39 @@ let main = function () {
             const pluraleTantum = (data[i].g.indexOf('Pltm') >= 0);
             const abbr = (data[i].g.indexOf('Abbr') >= 0);
 
-            const word = pluraleTantum ? (data[i].casesPlural[0][0]) : (data[i].cases[0][0]); // Именительный падеж
-            const expResults = data[i].cases;
+            const unpacked = {
+                cases: [],
+                casesPlural: []
+            };
+
+            function decodeIncremental(code) {
+                const dictIndex = code >> 8;
+                const common = code % 0x100;
+                const decoded = baseString.substring(0, common) + dictionary[dictIndex];
+                baseString = decoded;
+                return decoded;
+            }
+
+            function decodeWordForm(inputValue) {
+                if (typeof inputValue === "number") {
+                    return [decodeIncremental(inputValue)];
+                } else if (inputValue instanceof Array) {
+                    return inputValue.map(x => decodeIncremental(x));
+                } else {
+                    return [];
+                }
+            }
+
+            for (let ci = 0; ci < data[i].cases.length; ci++) {
+                unpacked.cases[ci] = decodeWordForm(data[i].cases[ci]);
+            }
+
+            for (let ci = 0; ci < data[i].casesPlural.length; ci++) {
+                unpacked.casesPlural[ci] = decodeWordForm(data[i].casesPlural[ci]);
+            }
+
+            const word = pluraleTantum ? (unpacked.casesPlural[0][0]) : (unpacked.cases[0][0]); // Именительный падеж
+            const expResults = unpacked.cases;
 
             const animate = (data[i].g.indexOf('anim') >= 0);
             const fixed = (data[i].g.indexOf('Fixd') >= 0);
@@ -270,9 +301,9 @@ let main = function () {
             let wordIsWrongPlural = false;
             let wordHasWarningPlural = false;
 
-            if (data[i].casesPlural.length > 0) {
+            if (unpacked.casesPlural.length > 0) {
 
-                const expectedCasesPlural = data[i].casesPlural;
+                const expectedCasesPlural = unpacked.casesPlural;
 
                 for (let j = 0; j <= 5; j++) {
                     resultPluralForms[j] = {
@@ -392,11 +423,11 @@ let main = function () {
 
     const rne = new RussianNouns.Engine();
 
-    test(rne, dataM, RussianNouns.Gender.MASCULINE, 1);
-    test(rne, dataF, RussianNouns.Gender.FEMININE, 2);
-    test(rne, dataN, RussianNouns.Gender.NEUTER, 3);
-    test(rne, dataC, RussianNouns.Gender.COMMON, 4);
-    test(rne, dataP, null, 5);
+    test(rne, testData.m, testData.dict, RussianNouns.Gender.MASCULINE, 1);
+    test(rne, testData.f, testData.dict, RussianNouns.Gender.FEMININE, 2);
+    test(rne, testData.n, testData.dict, RussianNouns.Gender.NEUTER, 3);
+    test(rne, testData.c, testData.dict, RussianNouns.Gender.COMMON, 4);
+    test(rne, testData.p, testData.dict, null, 5);
 
     postMessage({
         type: 'testResult',
@@ -406,7 +437,6 @@ let main = function () {
         wrongCases: wrongCases,
         totalWords: totalWords,
         totalWordsSingular: totalWordsSingular,
-        inputWords: inputLemmaCount,
         wrongWordsSingular: wrongWordsSingular,
         correctWordsWithWarningsSingular: correctWordsWithWarningsSingular,
         pluralizeWrong: pluralizeWrong,
@@ -420,32 +450,20 @@ let main = function () {
 
 onmessage = function (e) {
     if (e.data.type === 'start') {
-        const wordList = e.data.words;
+        testData = e.data.words;
         workerIndex = e.data.workerIndex;
         letterIndex = e.data.letterIndex;
-        postMessage({type: 'started', wordsLen: wordList.length});
-        dataM = [];
-        dataF = [];
-        dataN = [];
-        dataC = [];
-        dataP = [];
-        inputLemmaCount = 0;
-        for (let lemmaList of wordList) {
-            inputLemmaCount += lemmaList.length;
-            for (let lemma of lemmaList) {
-                if (lemma.g.indexOf('Pltm') >= 0) {
-                    dataP.push(lemma);
-                } else if (lemma.g.indexOf('masc') >= 0) {
-                    dataM.push(lemma);
-                } else if (lemma.g.indexOf('femn') >= 0) {
-                    dataF.push(lemma);
-                } else if (lemma.g.indexOf('neut') >= 0) {
-                    dataN.push(lemma);
-                } else if (lemma.g.indexOf('ms-f') >= 0) {
-                    dataC.push(lemma);
-                }
-            }
-        }
+
+        postMessage({
+            type: 'started',
+            wordsLen: (
+                testData.m.length +
+                testData.f.length +
+                testData.n.length +
+                testData.c.length +
+                testData.p.length)
+        });
+
         main();
     }
 };

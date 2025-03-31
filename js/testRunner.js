@@ -78,10 +78,9 @@
 
                 } else if (e.data.type === 'testResult') {
 
-                    console.log('{1} completed: {2} of {3} words processed.'
+                    console.log('{1} completed: {2} words processed.'
                         .replace('{1}', parts[e.data.workerIndex][e.data.letterIndex])
                         .replace('{2}', e.data.totalWords)
-                        .replace('{3}', e.data.inputWords)
                     );
 
                     $scope.results[e.data.workerIndex][e.data.letterIndex] = e.data;
@@ -165,35 +164,6 @@
             for (let i = 0; i < items.length; i++) {
                 const item = items[i];
                 item.id = i;
-
-                // if (item.frequent) {
-                //     const w = $scope.wordComparableView(item);
-                //
-                //     let g = item.pluraleTantum ? 'P' : null;
-                //
-                //     if (!g) {
-                //         switch (item.gender) {
-                //             case RussianNouns.Gender.MASCULINE:
-                //                 g = 'M';
-                //                 break;
-                //             case RussianNouns.Gender.FEMININE:
-                //                 g = 'F';
-                //                 break;
-                //             case RussianNouns.Gender.COMMON:
-                //                 g = 'C';
-                //                 break;
-                //             case RussianNouns.Gender.NEUTER:
-                //                 g = 'N';
-                //         }
-                //     }
-                //
-                //     const f = !!item.indeclinable;
-                //     const a = !!item.animate;
-                //
-                //     if (w && (!w.toLowerCase().endsWith('и')) && (!w.toLowerCase().endsWith('ы')) && ('P' === g)) {
-                //         console.log('FREQUENT:' + w + '|' + g + '|' + f + '|' + a)
-                //     }
-                // }
             }
 
             $scope.items = items;
