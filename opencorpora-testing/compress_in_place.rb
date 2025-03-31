@@ -26,7 +26,7 @@ def encode(collection, lemma, dictionary, base_string)
   base = base_string
 
   encode_strings = ->(arr) {
-    return arr.map { |x|
+    r = arr.map { |x|
       throw 'base_string is not a string' unless base.kind_of?(String)
       result = encode_incremental(x, base)
       dict_index = dictionary.index { |x| x == result[1] }
@@ -41,6 +41,8 @@ def encode(collection, lemma, dictionary, base_string)
 
       dict_index * 0x100 + result[0]
     }
+
+    if r.size > 1 then r else r[0] end
   }
 
   lemma['cases'].map! {|arr| encode_strings.(arr) }
