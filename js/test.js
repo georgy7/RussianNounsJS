@@ -131,7 +131,11 @@ let main = function () {
                 casesPlural: []
             };
 
-            function extractMicroTuple(code) {
+            // This format supports fairly large numbers on the left
+            // and numbers ranging from 0 to 63 on the right.
+            // I use something very similar to varint for the right part:
+            // https://protobuf.dev/programming-guides/encoding/#varints
+            function extractPair(code) {
                 if ((code & 0b100) === 0) {
                     return [code >> 3, code & 0b11];
                 }
@@ -139,8 +143,9 @@ let main = function () {
                 return [code >> 7, ((code >> 1) & 0b111100) | (code & 0b11)];
             }
 
+            // https://en.wikipedia.org/wiki/Incremental_encoding
             function decodeIncremental(code) {
-                const pair = extractMicroTuple(code);
+                const pair = extractPair(code);
                 const dictIndex = pair[0];
                 const common = baseString.length - pair[1];
                 const decoded = baseString.substring(0, common) + dictionary[dictIndex];

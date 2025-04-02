@@ -40,9 +40,9 @@ def encode_incremental(str_to_encode, base_string)
   return [diff, str_to_encode[common..-1]]
 end
 
-# The right number is in the range [0,63].
+# The right number is in range [0,63].
 # It's encoded with varint-like method.
-def make_micro_tuple(left, right)
+def make_integer_pair(left, right)
   if right <= 0b11
     (left << 3) + right
   else
@@ -69,7 +69,7 @@ def encode(collection, lemma, dictionary, base_string)
         $max_dict_size = [$max_dict_size, dictionary.size].max
       end
 
-      make_micro_tuple(dict_index, result[0])
+      make_integer_pair(dict_index, result[0])
     }
 
     if r.size > 1 then r else r[0] end
