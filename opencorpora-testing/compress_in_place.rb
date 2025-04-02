@@ -75,6 +75,7 @@ def encode(collection, lemma, dictionary, base_string)
     if r.size > 1 then r else r[0] end
   }
 
+  lemma.delete('name')
   lemma['cases'].map! {|arr| encode_strings.(arr) }
   lemma['casesPlural'].map! {|arr| encode_strings.(arr) }
 
