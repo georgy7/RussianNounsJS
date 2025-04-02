@@ -131,9 +131,18 @@ let main = function () {
                 casesPlural: []
             };
 
+            function extractMicroTuple(code) {
+                if ((code & 0b100) === 0) {
+                    return [code >> 3, code & 0b11];
+                }
+
+                return [code >> 7, ((code >> 1) & 0b111100) | (code & 0b11)];
+            }
+
             function decodeIncremental(code) {
-                const dictIndex = code >> 8;
-                const common = code % 0x100;
+                const pair = extractMicroTuple(code);
+                const dictIndex = pair[0];
+                const common = baseString.length - pair[1];
                 const decoded = baseString.substring(0, common) + dictionary[dictIndex];
                 baseString = decoded;
                 return decoded;
