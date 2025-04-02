@@ -26,6 +26,18 @@ function decodeIncremental(code, baseString, dictionary) {
     return baseString.substring(0, common) + dictionary[dictIndex];
 }
 
+function knowThyself(mixedArray) {
+    const known = [];
+    for (let i = 0; i < mixedArray.length; i++) {
+        let v = mixedArray[i];
+        if (typeof v === "number") {
+            v = decodeIncremental(v, known[i-1], known);
+        }
+        known.push(v);
+    }
+    return known;
+}
+
 
 let main = function () {
 
@@ -469,16 +481,7 @@ let main = function () {
 onmessage = function (e) {
     if (e.data.type === 'start') {
         testData = e.data.words;
-
-        const processedDict = [];
-        for (let i = 0; i < testData.dict.length; i++) {
-            let v = testData.dict[i];
-            if (typeof v === "number") {
-                v = decodeIncremental(v, processedDict[i-1], processedDict);
-            }
-            processedDict.push(v);
-        }
-        testData.dict = processedDict;
+        testData.dict = knowThyself(testData.dict);
 
         workerIndex = e.data.workerIndex;
         letterIndex = e.data.letterIndex;
