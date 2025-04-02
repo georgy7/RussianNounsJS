@@ -52,6 +52,8 @@
             parts.push(abc.slice((partCount-1) * chunkSize, abc.length));
 
             const loadingStatuses = [];
+            const jsonPromises = [];
+
             const results = [];
             const completed = [];
             const workers = [];
@@ -65,15 +67,12 @@
                 );
 
                 workers.push(new Worker('js/test.js'));
+                jsonPromises.push([]);
             }
 
-            const loadLetter = (workerIndex, letterIndex) => {
+            const listenLetterPromise = (workerIndex, letterIndex) => {
                 var worker = workers[workerIndex];
-                var letter = parts[workerIndex][letterIndex];
-                if (!letter) {
-                    throw 'Out of bound of letter list index.';
-                }
-                jQuery.get('opencorpora-testing/nouns_' + letter + '.json', function (words) {
+                jsonPromises[workerIndex][letterIndex].then(words => {
                     worker.postMessage({
                         type: 'start',
                         words: words,
@@ -105,7 +104,40 @@
 
             const listenEvents = workerIndex => {
                 workers[workerIndex].onmessage = function (e) {
-                    if (e.data.type === 'loading') {
+                    if (e.data.type === 'ready') {
+
+                        function load(theLetter) {
+                            jsonPromises[workerIndex].push(
+                                fetch('opencorpora-testing/nouns_' + theLetter + '.json')
+                                    .then(response => response.json()));
+                        }
+
+                        // Я пробовал делать через приоритеты.
+                        // Там проблема в том, что low - он как будто глобально low,
+                        // не только на моей вкладке.
+                        // В общем, у меня только через setTimeout получилось сделать так,
+                        // чтобы при большом пинге быстро появлялась строка загрузки.
+                        const loadChunk = 3;
+                        const loadDelay = 500;
+
+                        const part = parts[workerIndex];
+
+                        for (let li = 0; li < part.length; li += loadChunk) {
+                            if (0 === li) {
+                                for (let letter of part.slice(li, li + loadChunk)) {
+                                    load(letter);
+                                }
+                                listenLetterPromise(workerIndex, 0);
+                            } else {
+                                setTimeout(() => {
+                                    for (let letter of part.slice(li, li + loadChunk)) {
+                                        load(letter);
+                                    }
+                                }, Math.floor(1 + li/loadChunk) * loadDelay);
+                            }
+                        }
+
+                    } else if (e.data.type === 'loading') {
                         loadingStatuses[e.data.workerIndex][e.data.letterIndex] = e.data;
                         updateLoading(calculateLoading());
 
@@ -119,7 +151,7 @@
                         results[e.data.workerIndex][e.data.letterIndex] = e.data;
                         var next = e.data.letterIndex + 1;
                         if (parts[e.data.workerIndex].length > next) {
-                            loadLetter(e.data.workerIndex, next);
+                            listenLetterPromise(e.data.workerIndex, next);
                         } else {
                             console.log(new Date(), 'Process ' + (1 + e.data.workerIndex) + ' completed');
                             completed[e.data.workerIndex] = true;
@@ -218,7 +250,6 @@
             console.log(new Date(), 'Start.');
             for (let w = 0; w < workers.length; w++) {
                 listenEvents(w);
-                loadLetter(w, 0);
             }
         })();
 

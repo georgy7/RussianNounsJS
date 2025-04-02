@@ -499,3 +499,5 @@ onmessage = function (e) {
         main();
     }
 };
+
+postMessage({type: 'ready'});
