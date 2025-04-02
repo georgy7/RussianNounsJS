@@ -1,10 +1,7 @@
-(function () {
-
-    const root = (self !== 'undefined' ? self : this);
 
     // http://dict.ruslang.ru/freq.php
 
-    root.mostFrequent = new Set([
+    const mostFrequent = new Set([
         'год',
         'человек',
         'время',
@@ -12742,4 +12739,3 @@
         'словарный'
     ]);
 
-})();
