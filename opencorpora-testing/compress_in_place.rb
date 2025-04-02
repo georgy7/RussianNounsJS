@@ -123,6 +123,22 @@ abc.each { |letter|
     }
   }
 
+  dict_base_str = ''
+  dictionary.size.times { |i|
+    item = dictionary[i]
+    result = encode_incremental(item, dict_base_str)
+    dict_index = dictionary.index { |x| x == result[1] }
+    dict_base_str = item
+
+    if (dict_index != nil) && (dict_index < i)
+      code = make_integer_pair(dict_index, result[0])
+      # This is compression, not bloating.
+      if code < 1000
+        dictionary[i] = code
+      end
+    end
+  }
+
   puts "Max dictionary size: #{$max_dict_size}"
 
   IO.write(fn, JSON.pretty_generate({

@@ -107,8 +107,30 @@ let main = function () {
         }
     }
 
+    // This format supports fairly large numbers on the left
+    // and numbers ranging from 0 to 63 on the right.
+    // I use something very similar to varint for the right part:
+    // https://protobuf.dev/programming-guides/encoding/#varints
+    function extractPair(code) {
+        if ((code & 0b100) === 0) {
+            return [code >> 3, code & 0b11];
+        }
+
+        return [code >> 7, ((code >> 1) & 0b111100) | (code & 0b11)];
+    }
+
+    // https://en.wikipedia.org/wiki/Incremental_encoding
+    function decodeIncremental(code, basePointer, dictionary) {
+        const pair = extractPair(code);
+        const dictIndex = pair[0];
+        const common = basePointer[0].length - pair[1];
+        const decoded = basePointer[0].substring(0, common) + dictionary[dictIndex];
+        basePointer[0] = decoded;
+        return decoded;
+    }
+
     function test(rne, data, dictionary, gender, loadingStepCompleted) {
-        let baseString = '';
+        let baseStringPointer = [''];
 
         for (let i = 0; i < data.length; i++) {
 
@@ -131,33 +153,11 @@ let main = function () {
                 casesPlural: []
             };
 
-            // This format supports fairly large numbers on the left
-            // and numbers ranging from 0 to 63 on the right.
-            // I use something very similar to varint for the right part:
-            // https://protobuf.dev/programming-guides/encoding/#varints
-            function extractPair(code) {
-                if ((code & 0b100) === 0) {
-                    return [code >> 3, code & 0b11];
-                }
-
-                return [code >> 7, ((code >> 1) & 0b111100) | (code & 0b11)];
-            }
-
-            // https://en.wikipedia.org/wiki/Incremental_encoding
-            function decodeIncremental(code) {
-                const pair = extractPair(code);
-                const dictIndex = pair[0];
-                const common = baseString.length - pair[1];
-                const decoded = baseString.substring(0, common) + dictionary[dictIndex];
-                baseString = decoded;
-                return decoded;
-            }
-
             function decodeWordForm(inputValue) {
                 if (typeof inputValue === "number") {
-                    return [decodeIncremental(inputValue)];
+                    return [decodeIncremental(inputValue, baseStringPointer, dictionary)];
                 } else if (inputValue instanceof Array) {
-                    return inputValue.map(x => decodeIncremental(x));
+                    return inputValue.map(x => decodeIncremental(x, baseStringPointer, dictionary));
                 } else {
                     return [];
                 }
@@ -436,6 +436,13 @@ let main = function () {
     }
 
     const rne = new RussianNouns.Engine();
+
+    const dictDecodingState = [''];
+    for (let i = 0; i < testData.dict.length; i++) {
+        if (typeof testData.dict[i] === "number") {
+            testData.dict[i] = decodeIncremental(testData.dict[i], dictDecodingState, testData.dict);
+        }
+    }
 
     test(rne, testData.m, testData.dict, RussianNouns.Gender.MASCULINE, 1);
     test(rne, testData.f, testData.dict, RussianNouns.Gender.FEMININE, 2);
