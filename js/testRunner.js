@@ -18,7 +18,7 @@
         NgTableParams
     ) {
 
-        $scope.genders = Object.values(RussianNouns.Gender).sort();
+        $scope.genders = ['женский', 'мужской', 'общий', 'средний'];
 
         $scope.filter = {
             frequentOnly: true,
@@ -98,8 +98,11 @@
             };
 
             const updateLoading = (loadStatus) => {
-                let barWidth = '' + Math.round(100 * loadStatus) + '%';
-                jQuery('#loadingBar .status').css('width', barWidth);
+                const statusTag = document.querySelector('#loadingBar .status');
+                if (statusTag) {
+                    let barWidth = '' + Math.round(100 * loadStatus) + '%';
+                    statusTag.style.width = barWidth;
+                }
             };
 
             const listenEvents = workerIndex => {
