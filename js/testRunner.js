@@ -66,7 +66,7 @@
                     Array(part.length).fill(null)
                 );
 
-                workers.push(new Worker('js/test.js'));
+                workers.push(new Worker('js/test2.js'));
                 jsonPromises.push([]);
             }
 
