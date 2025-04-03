@@ -90,7 +90,7 @@
         constructor(o) {
             if (o instanceof Lemma) {
                 this._txt = o._txt;
-                this._lc = o._lc;
+                //this._lc = o._lc;
                 this._hash = o._hash;
                 this._flags = o._flags;
 
@@ -108,16 +108,16 @@
                 this._flags |= (1 << 7) * (o.transport&1);
 
                 this._txt = o.text;
-                this._lc = this._txt.toLowerCase();
-                this._hash = calculateHash(this._lc);
+                //this._lc = this._txt.toLowerCase();
+                this._hash = calculateHash(this._txt.toLowerCase());
             }
         }
 
         newText(provider) {
             const lemmaCopy = new Lemma(this);
             lemmaCopy._txt = provider(this);
-            lemmaCopy._lc = lemmaCopy._txt.toLowerCase();
-            lemmaCopy._hash = calculateHash(lemmaCopy._lc);
+            //lemmaCopy._lc = lemmaCopy._txt.toLowerCase();
+            lemmaCopy._hash = calculateHash(lemmaCopy.lower());
             return Object.freeze(lemmaCopy);
         }
 
@@ -142,7 +142,7 @@
         }
 
         lower() {
-            return this._lc;
+            return this._txt.toLowerCase();
         }
 
         isPluraleTantum() {
@@ -455,6 +455,7 @@
      * @param {LocativePreposition} preposition
      * @param {LocativeDeclensionType} declensionType
      * @param {number} attributes - флаги LocativeFormAttribute.
+     * @returns {number}
      */
     function encodeLocativeConfig(preposition, declensionType, attributes) {
         const dcCode = (declensionType - 1) & 0b111;
