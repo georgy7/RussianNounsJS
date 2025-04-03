@@ -90,7 +90,6 @@
         constructor(o) {
             if (o instanceof Lemma) {
                 this._txt = o._txt;
-                //this._lc = o._lc;
                 this._hash = o._hash;
                 this._flags = o._flags;
 
@@ -101,15 +100,20 @@
                     this._flags = 1 + GenderValues.indexOf(o.gender);
                 }
 
+                const lcWord = o.text.toLowerCase();
+
+                this._txt = o.text;
+                this._hash = calculateHash(lcWord);
+
                 this._flags |= (1 << 3) * (o.indeclinable&1);
                 this._flags |= (1 << 4) * (o.animate&1);
                 this._flags |= (1 << 5) * (o.surname&1);
                 this._flags |= (1 << 6) * (o.name&1);
                 this._flags |= (1 << 7) * (o.transport&1);
 
-                this._txt = o.text;
-                //this._lc = this._txt.toLowerCase();
-                this._hash = calculateHash(this._txt.toLowerCase());
+                this._flags |= (1 << 16) * (
+                    2 + calculateDeclension(lcWord, o.pluraleTantum, o.gender, o.indeclinable)
+                );
             }
         }
 
@@ -1158,15 +1162,12 @@
         return getNounStem0(word, lcWord);
     }
 
-    function getDeclension(lemma) {
-        const lcWord = lemma.lower();
-        const gender = lemma.getGender();
-
-        if (lemma.isPluraleTantum()) {
-            return undefined;
+    function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
+        if (pluraleTantum) {
+            return -2; // Error
         }
 
-        if (lemma.isIndeclinable()) {
+        if (indeclinable) {
             return -1;
         }
 
@@ -1193,8 +1194,12 @@
                 return 1;
 
             default:
-                return -1;
+                return -2; // Error
         }
+    }
+
+    function getDeclension(lemma) {
+        return (lemma._flags >> 16) - 2;
     }
 
     const tsWord = w => last(w) === 'ц';
