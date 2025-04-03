@@ -45,7 +45,18 @@ function getHash(unicodeString) {
         byteArray.push(parseInt(allBits.substring(i, i+8), 2));
     }
 
-    return djb2Hash32(byteArray.toReversed());
+    const simpleHash = djb2Hash32(byteArray.toReversed());
+
+    // Мои тесты показали, что наша хэш-функция иногда даёт коллизию
+    // у коротких слов из одинакового количества символов. И я заметил,
+    // что у всех коллизий всегда были соседние коды первых букв.
+    const start = preparedString.charCodeAt(0) % 2;
+
+    // Поскольку в JS 64-битные числа с плавающей точкой, я мог бы
+    // сохранить текущий хэш целиком и просто добавить к нему информацию,
+    // но я хочу, чтобы число выглядело как uint32_t в основном
+    // из эстетических соображений.
+    return ((0x7fffffff & simpleHash) * 2) + start;
 }
 
 // -----------------------------------------

@@ -72,7 +72,7 @@
 
             const listenLetterPromise = (workerIndex, letterIndex) => {
                 var worker = workers[workerIndex];
-                jsonPromises[workerIndex][letterIndex].then(words => {
+                jsonPromises[workerIndex][letterIndex].then(response => response.json()).then(words => {
                     worker.postMessage({
                         type: 'start',
                         words: words,
@@ -111,8 +111,7 @@
 
                         function load(theLetter) {
                             jsonPromises[workerIndex].push(
-                                fetch('opencorpora-testing/nouns_' + theLetter + '.json')
-                                    .then(response => response.json()));
+                                fetch('opencorpora-testing/nouns_' + theLetter + '.json'));
                         }
 
                         // Я пробовал делать через приоритеты.
