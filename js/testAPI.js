@@ -1161,6 +1161,22 @@ const RussianNouns = require('./RussianNouns.js');
         assertEquals(x.text(), 'АБВО');
         assertEquals(x.lower(), 'абво');
         assertEquals(x.getGender(), Gender.FEMININE);
+
+        x = RussianNouns.createLemma({
+            text: 'сын',
+            gender: Gender.MASCULINE
+        });
+        y = x.newText(() => 'юноша');
+        assertEquals(RussianNouns.getDeclension(x), 1);
+        assertEquals(RussianNouns.getDeclension(y), 2);
+
+        x = RussianNouns.createLemma({
+            text: 'абвгдеёжзиклмя',
+            gender: Gender.NEUTER
+        });
+        y = x.newGender(() => Gender.FEMININE);
+        assertEquals(RussianNouns.getDeclension(x), 3);
+        assertEquals(RussianNouns.getDeclension(y), 2);
     })();
 
 })();

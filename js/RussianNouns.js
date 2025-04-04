@@ -117,20 +117,42 @@
             }
         }
 
+        /**
+         * @deprecated since version 2.0.0
+         */
         newText(provider) {
             const lemmaCopy = new Lemma(this);
             lemmaCopy._txt = provider(this);
-            //lemmaCopy._lc = lemmaCopy._txt.toLowerCase();
             lemmaCopy._hash = calculateHash(lemmaCopy.lower());
+            lemmaCopy._flags &= 0xFFFF;
+            lemmaCopy._flags |= (1 << 16) * (
+                2 + calculateDeclension(
+                    lemmaCopy.lower(),
+                    lemmaCopy.isPluraleTantum(),
+                    lemmaCopy.getGender(),
+                    lemmaCopy.isIndeclinable()
+                )
+            );
             return Object.freeze(lemmaCopy);
         }
 
+        /**
+         * @deprecated since version 2.0.0
+         */
         newGender(provider) {
             const g = provider(this);
             if (GenderValues.includes(g)) {
                 const lemmaCopy = new Lemma(this);
-                lemmaCopy._flags &= 0xFFFFFFF8;
+                lemmaCopy._flags &= 0xFFF8;
                 lemmaCopy._flags |= 1 + GenderValues.indexOf(g);
+                lemmaCopy._flags |= (1 << 16) * (
+                    2 + calculateDeclension(
+                        lemmaCopy.lower(),
+                        lemmaCopy.isPluraleTantum(),
+                        g,
+                        lemmaCopy.isIndeclinable()
+                    )
+                );
                 return Object.freeze(lemmaCopy);
             }
         }
@@ -1309,6 +1331,16 @@
         }
     }
 
+    function fastClone(lemma, newText) {
+        const lemmaCopy = new Lemma(lemma);
+        lemmaCopy._txt = newText;
+        lemmaCopy._hash = calculateHash(lemmaCopy.lower());
+        // Здесь не обновляется склонение, потому что
+        // везде, где я использую эту функцию, я уже знаю,
+        // какое склонение получится.
+        return Object.freeze(lemmaCopy);
+    }
+
     /**
      * @param {RussianNouns.Engine} engine
      * @param {RussianNouns.Lemma} lemma
@@ -1328,22 +1360,22 @@
                 return word;
             } else {
 
-                const h = o => (!['полминуты'].includes(o.lower()))
-                    ? ('полу' + o.text().substring(3)) : o.text();
+                const h = () => (!['полминуты'].includes(lcWord))
+                    ? ('полу' + word.substring(3)) : word;
 
                 if ('полпути' === lcWord) {
                     if ([Case.PREPOSITIONAL, Case.LOCATIVE].includes(grCase)) {
                         return word;
                     } else {
-                        let lemmaCopy = lemma.newText(o => init(h(o)) + 'ь');
+                        let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
                         return decline0(engine, lemmaCopy, grCase);
                     }
                 } else if (lcWord.endsWith('зни')) {
-                    let lemmaCopy = lemma.newText(o => init(h(o)) + 'ь');
+                    let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
                     return decline3(engine, lemmaCopy, grCase);
                 } else {
-                    let lemmaCopy = lemma.newText(o => init(h(o)) +
-                        ((last(o.lower()) === 'н') ? 'я' : 'а'));
+                    let lemmaCopy = fastClone(lemma, init(h()) +
+                        ((last(lcWord) === 'н') ? 'я' : 'а'));
                     return decline2(engine, lemmaCopy, grCase);
                 }
             }
@@ -1671,7 +1703,7 @@
 
         if (![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
             if (Object.keys(specialD3).includes(lcWord)) {
-                const lemmaCopy = lemma.newText(() => specialD3[lcWord]);
+                const lemmaCopy = fastClone(lemma, specialD3[lcWord]);
                 return decline3(engine, lemmaCopy, grCase);
             }
         }
