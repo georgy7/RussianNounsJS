@@ -630,19 +630,24 @@
 
             const _data = new Map();
 
-            const _getKey = function (lemmaObject) {
-                // В результате остатка от деления остаётся 39 бит.
-                // Так мы оставляем род, признаки одушевлённости и несклоняемости (это 5 бит)
-                // и бит чётности первой буквы, но убираем букву ё (см. второй параметр).
-                // Это очень хороший ключ с практически нулевым уровнем коллизий.
-                // Но из-за того, что я вынужден поддерживать все эти устаревшие методы,
-                // толку от этого никакого - я не могу выкинуть леммы из этого словаря.
-                return toKey(lemmaObject, true) % 0x8000000000;
+            const _getKey = function (lemma) {
+                // Если убрать информацию о склонении из флагов, находящуюся в старших 16 битах,
+                // то останется что-то около девяти бит, которые можно безопасно подвинуть
+                // на 32 бита влево, посколькую числа в JS легко держат больше 40 разрядов целых чисел.
+                // Но для словаря ударений даже не нужны все флаги.
+                // Нас интересует только род, признаки одушевлённости и несклоняемости. Это пять бит.
+                return ((lemma._flags & 0b11111) * 0x100000000) + lemma._hash;
+            };
+
+            const _getYoPosition = function (lemma) {
+                // Я думаю, что могут быть почти полные омонимы с ударной буквой ё на разных слогах.
+                // Так что я собираюсь закодировать точную позицию буквы ё в 8 бит.
+                return (lemma.lower().indexOf('ё') + 1) & 0xFF;
             };
 
             /**
              * @param {RussianNouns.Lemma|Object} query
-             * @returns {array} Список пар лемма-значение.
+             * @returns {array} Список пар: расширенные флаги, значение.
              */
             const _getEntities = (query) => {
                 const hash = _getKey(query);
@@ -655,15 +660,15 @@
             };
 
             const _getOne = (query) => {
-                const extraFlags = query._flags & 0x7FFFFFE0;
+                const extraFlags = query._flags & 0xFFE0;
 
                 // Дополнительные флаги должны быть такими же или
                 // более общими (содержать меньше признаков - меньше бит).
                 const entities = _getEntities(query)
                     .filter(pair =>
-                        ((pair[0]._flags & extraFlags) <= extraFlags));
+                        ((pair[0] & extraFlags) <= extraFlags));
 
-                const exactYo = entities.filter(pair => pair[0].lower() === query.lower());
+                const exactYo = entities.filter(pair => (pair[0] >> 16) === _getYoPosition(query));
 
                 if (exactYo.length) {
                     return exactYo[0][1];
@@ -695,21 +700,22 @@
                 }
 
                 const lemmaObject = createLemma(lemma);
-                const hash = _getKey(lemmaObject);
+                const key = _getKey(lemmaObject);
 
-                let homonyms = _data.get(hash);
+                let homonyms = _data.get(key);
 
                 if (!(homonyms instanceof Array)) {
                     homonyms = [];
-                    _data.set(hash, homonyms);
+                    _data.set(key, homonyms);
                 }
 
-                const found = homonyms.find(ls => lemmaObject.equals(ls[0]));
+                const extendedFlags = (lemmaObject._flags & 0xFFFF) | (_getYoPosition(lemmaObject) << 16);
+                const found = homonyms.find(ls => extendedFlags === ls[0]);
 
                 if (found) {
                     found[1] = settings;
                 } else {
-                    homonyms.push([lemmaObject, settings]);
+                    homonyms.push([extendedFlags, settings]);
                 }
             };
 
