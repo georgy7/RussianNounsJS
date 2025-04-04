@@ -205,16 +205,10 @@
 
     /**
      * Ключ для словаря местного падежа.
-     * Это почти 100% уникальный ключ, который учитывает наличие буквы ё и флаги.
-     *
-     * Обычно говорят, что максимальное безопасное целое число - это (2^53)-1,
-     * но это не всегда так. Есть реализации, точность в которых начинает снижаться
-     * где-то на диапазоне от 2^42 до 2^45. Так что, хотя битовые операции
-     * и не работают с такими большими целыми числами, мы можем уместить и хэш,
-     * и всё остальное в обычное JS-число.
+     * Это почти 100% уникальный ключ леммы, который учитывает наличие буквы ё и флаги.
      *
      * @param {Lemma} lemma
-     * @returns {number}
+     * @returns {number} Размер числа примерно сопоставим с 2^42.
      */
     function toKey(lemma) {
         const hasYo = (lemma.lower().includes('ё'))&1;
@@ -261,19 +255,16 @@
         return bincludes(0b00000011111101111011110011011110, lcChar);
     }
 
-    const isUpper = s => s === s.toUpperCase();
-
-    const upperLike = (lowerCase, pattern) => isUpper(pattern) ? lowerCase.toUpperCase() : lowerCase;
+    const upperLike = (str, pattern) =>
+        (pattern === pattern.toUpperCase()) ? str.toUpperCase() : str;
 
     const vowelCount = s => s.split('').filter(isVowel).length;
 
-    const last = str => str.substring(str.length - 1);
-
     const nLast = (str, n) => str.substring(str.length - n);
+    const last = str => nLast(str, 1);
 
-    const init = s => s.substring(0, s.length - 1);
-
-    const nInit = (s, n) => s.substring(0, s.length - n);
+    const nInit = (str, n) => str.substring(0, str.length - n);
+    const init = str => nInit(str, 1);
 
     const lastOfNInitial = (str, n) => last(nInit(str, n));
 

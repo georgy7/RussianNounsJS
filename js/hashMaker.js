@@ -78,17 +78,17 @@ function makeHashes(commaSeparatedWords) {
     return result;
 }
 
-function arrayToStr(arr) {
+function arrayToStr(arr, noSpaces) {
     let result = '';
     let row = '';
 
     for (let x of arr) {
         const v = x.toString();
 
-        if (row.length + 1 + v.length + 1 > 82) {
+        if (row.length + 1 + v.length + (noSpaces&1) > 82) {
             result += row + '\n';
             row = '';
-        } else if (row.length > 0) {
+        } else if ((row.length > 0) && !noSpaces) {
             row += ' ';
         }
 
@@ -322,17 +322,41 @@ function encodeWithDictionary(inputStrings, dictionary) {
     return result;
 }
 
+function encodeItself(dictionary) {
+    let baseString = '';
+
+    for (let i = 0; i < dictionary.length; i++) {
+        const item = dictionary[i];
+        const encoded = encodeIncremental(item, baseString);
+        let dictIndex = dictionary.indexOf(encoded[1]);
+        baseString = item;
+
+        if ((dictIndex >= 0) && (dictIndex < i)) {
+            code = makePair(dictIndex, encoded[0]);
+            if (code < 1000) {
+                dictionary[i] = code;
+            }
+        }
+    }
+}
+
 const reverseAll = arr => arr.map(s => s.split('').reverse().join(''));
 
 const stressHashesAPrepared = reverseAll(stressHashesAInput.split(',')).toSorted();
 const stressHashesBPrepared = reverseAll(stressHashesBInput.split(',')).toSorted();
 
-let stressIncrementalDictionary = [];
+// Pass 1.
+const stressIncrementalDictionary = [];
+encodeWithDictionary(stressHashesAPrepared, stressIncrementalDictionary);
+encodeWithDictionary(stressHashesBPrepared, stressIncrementalDictionary);
+
+stressIncrementalDictionary.sort((a, b) => 10000*(a.length - b.length) + a.localeCompare(b));
 const stressHashesAIncremental = encodeWithDictionary(stressHashesAPrepared, stressIncrementalDictionary);
 const stressHashesBIncremental = encodeWithDictionary(stressHashesBPrepared, stressIncrementalDictionary);
 
 console.log("stressHashesDict:");
-console.log(stressIncrementalDictionary);
+encodeItself(stressIncrementalDictionary);
+console.log(arrayToStr(stressIncrementalDictionary, true));
 
 console.log("stressHashesA:");
 console.log(arrayToStr(stressHashesAIncremental));
