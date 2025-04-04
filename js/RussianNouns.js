@@ -388,6 +388,19 @@
         'ячмень'
     ];
 
+    const ok1 = [
+        'лапоток', 'желток'
+    ];
+    const ok2 = [
+        'поток', 'приток', 'переток', 'проток', 'биоток', 'электроток',
+        'восток', 'водосток', 'водоток', 'воток',
+        'знаток'
+    ];
+    const okExceptions = [
+        'инок', 'исток',
+        'обморок', 'порок', 'пророк', 'сток', 'урок'
+    ];
+
     // decline1
     const uForm = new Set((
         'клей,чай,' +
@@ -1188,7 +1201,7 @@
 
     function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
         if (pluraleTantum) {
-            return -2; // Error
+            return -2; // undefined
         }
 
         if (indeclinable) {
@@ -1260,23 +1273,11 @@
     }
 
     function okWord(w) {
-        const tok = [
-            'лапоток', 'желток'
-        ];
-        const tok2 = [
-            'поток', 'приток', 'переток', 'проток', 'биоток', 'электроток',
-            'восток', 'водосток', 'водоток', 'воток',
-            'знаток'
-        ];
-        const exceptThese = [
-            'инок', 'исток',
-            'обморок', 'порок', 'пророк', 'сток', 'урок'
-        ];
         return (endsWithAny(w, ['чек', 'шек']) && (w.length >= 6))
-            || endsWithAny(w, tok)
+            || endsWithAny(w, ok1)
             || (
-                w.endsWith('ок') && !w.endsWith('шок') && !exceptThese.includes(w)
-                && !endsWithAny(w, tok2)
+                w.endsWith('ок') && !w.endsWith('шок') && !okExceptions.includes(w)
+                && !endsWithAny(w, ok2)
                 && !isVowel(lastOfNInitial(w, 2))
                 && (isVowel(lastOfNInitial(w, 3)) || endsWithAny(nInit(w, 2), ['ст', 'рт']))
                 && w.length >= 4

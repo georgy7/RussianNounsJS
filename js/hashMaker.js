@@ -242,10 +242,10 @@ const stressHashesBInput = 'алкаш,' +
             rkComma('фЯц,') +
             'циркач,червец,чернец,черныш,швец,шельмец,чтец,чиж,юнец';
 
-console.log("stressHashesA hash deltas:");
+console.log("stressHashesA delta:");
 console.log(makeHashDeltas(stressHashesAInput));
 
-console.log("stressHashesB hash deltas:");
+console.log("stressHashesB delta:");
 console.log(makeHashDeltas(stressHashesBInput));
 
 // Чтож, не похоже, что хэши - это очень компактно.
@@ -342,27 +342,102 @@ function encodeItself(dictionary) {
 
 const reverseAll = arr => arr.map(s => s.split('').reverse().join(''));
 
-const stressHashesAPrepared = reverseAll(stressHashesAInput.split(',')).toSorted();
-const stressHashesBPrepared = reverseAll(stressHashesBInput.split(',')).toSorted();
+    // Stemmer data
+    const mobileVowelA = ['бубен', 'бугор',
+        'ветер', 'вошь', 'вымысел', 'горшок', 'дятел', 'домысел', 'замысел',
+        'кашель', 'коготь',
+        'лапоть', 'лоб', 'локоть', 'ломоть', 'молебен', 'мох', 'ноготь', 'овен',
+        'пепел', 'пес', 'пёс', 'петушок', 'помысел', 'порошок',
+        'промысел', 'псалом', 'пушок', 'ров', 'рожь', 'рот',
+        'сон', 'стебель', 'стишок',
+        'угол', 'умысел', 'хребет', 'церковь', 'шов'
+    ];
+    const mobileVowelB = ['узел', 'уголь', 'чок', 'ешок', 'хол'];
+    const en2a2b = [
+        'ясень', 'бюллетень', 'олень', 'тюлень',
+        'гордень', 'пельмень',
+        'ячмень'
+    ];
+
+    const ok1 = [
+        'лапоток', 'желток'
+    ];
+    const ok2 = [
+        'поток', 'приток', 'переток', 'проток', 'биоток', 'электроток',
+        'восток', 'водосток', 'водоток', 'воток',
+        'знаток'
+    ];
+    const okExceptions = [
+        'инок', 'исток',
+        'обморок', 'порок', 'пророк', 'сток', 'урок'
+    ];
+
+const preparedStressA = reverseAll(stressHashesAInput.split(',')).toSorted();
+const preparedStressB = reverseAll(stressHashesBInput.split(',')).toSorted();
+
+const preparedMobileVowelA = reverseAll(mobileVowelA).toSorted();
+const preparedMobileVowelB = reverseAll(mobileVowelB).toSorted();
+const preparedEn2a2b = reverseAll(en2a2b).toSorted();
+const preparedOk1 = reverseAll(ok1).toSorted();
+const preparedOk2 = reverseAll(ok2).toSorted();
+const preparedOkExceptions = reverseAll(okExceptions).toSorted();
 
 // Pass 1.
 const stressIncrementalDictionary = [];
-encodeWithDictionary(stressHashesAPrepared, stressIncrementalDictionary);
-encodeWithDictionary(stressHashesBPrepared, stressIncrementalDictionary);
+encodeWithDictionary(preparedStressA, stressIncrementalDictionary);
+encodeWithDictionary(preparedStressB, stressIncrementalDictionary);
 
 stressIncrementalDictionary.sort((a, b) => 10000*(a.length - b.length) + a.localeCompare(b));
-const stressHashesAIncremental = encodeWithDictionary(stressHashesAPrepared, stressIncrementalDictionary);
-const stressHashesBIncremental = encodeWithDictionary(stressHashesBPrepared, stressIncrementalDictionary);
+const stressHashesAIncremental = encodeWithDictionary(preparedStressA, stressIncrementalDictionary);
+const stressHashesBIncremental = encodeWithDictionary(preparedStressB, stressIncrementalDictionary);
 
-console.log("stressHashesDict:");
+console.log("stress dict:");
 encodeItself(stressIncrementalDictionary);
 console.log(arrayToStr(stressIncrementalDictionary, true));
 
-console.log("stressHashesA:");
+console.log("stress A:");
 console.log(arrayToStr(stressHashesAIncremental));
 
-console.log("stressHashesB:");
+console.log("stress B:");
 console.log(arrayToStr(stressHashesBIncremental));
+
+
+const okDictionary = [];
+// Pass 1
+encodeWithDictionary(preparedMobileVowelA, okDictionary);
+encodeWithDictionary(preparedMobileVowelB, okDictionary);
+encodeWithDictionary(preparedEn2a2b, okDictionary);
+encodeWithDictionary(preparedOk1, okDictionary);
+encodeWithDictionary(preparedOk2, okDictionary);
+encodeWithDictionary(preparedOkExceptions, okDictionary);
+
+okDictionary.sort((a, b) => 10000*(a.length - b.length) + a.localeCompare(b));
+const mobileVowelAIncremental = encodeWithDictionary(preparedMobileVowelA, okDictionary);
+const mobileVowelBIncremental = encodeWithDictionary(preparedMobileVowelB, okDictionary);
+const en2a2bIncremental = encodeWithDictionary(preparedEn2a2b, okDictionary);
+const ok1Incremental = encodeWithDictionary(preparedOk1, okDictionary);
+const ok2Incremental = encodeWithDictionary(preparedOk2, okDictionary);
+const okExceptionsIncremental = encodeWithDictionary(preparedOkExceptions, okDictionary);
+
+console.log("Ok dict:");
+encodeItself(okDictionary);
+console.log(arrayToStr(okDictionary, true));
+
+console.log("mobileVowelA:");
+console.log(arrayToStr(mobileVowelAIncremental));
+console.log("mobileVowelB:");
+console.log(arrayToStr(mobileVowelBIncremental));
+console.log("en2a2b:");
+console.log(arrayToStr(en2a2bIncremental));
+console.log("ok1:");
+console.log(arrayToStr(ok1Incremental));
+console.log("ok2:");
+console.log(arrayToStr(ok2Incremental));
+console.log("okExceptions:");
+console.log(arrayToStr(okExceptionsIncremental));
+
+// Но на небольших массивах этот подход не оправдался - гзипованный файл только растёт.
+
 
 // -----------------------------------------
 
