@@ -78,24 +78,12 @@ function makeHashes(commaSeparatedWords) {
     return result;
 }
 
-function makeHashDeltas(commaSeparatedWords) {
-    const hashes = makeHashes(commaSeparatedWords);
-    hashes.sort((a, b) => a-b);
-
-    const delta = [hashes[0]];
-    for (var i = 1; i < hashes.length; i++) {
-        const x = hashes[i] - hashes[i-1];
-        // Дублирующиеся хэши добавлять нет смысла, если потом это просто будет складываться в Set.
-        if (x !== 0) {
-            delta.push(x);
-        }
-    }
-
+function arrayToStr(arr) {
     let result = '';
     let row = '';
 
-    for (let d of delta) {
-        const v = d.toString();
+    for (let x of arr) {
+        const v = x.toString();
 
         if (row.length + 1 + v.length + 1 > 82) {
             result += row + '\n';
@@ -111,6 +99,22 @@ function makeHashDeltas(commaSeparatedWords) {
     result = result.substring(0, result.length-1); // last comma
 
     return result;
+}
+
+function makeHashDeltas(commaSeparatedWords) {
+    const hashes = makeHashes(commaSeparatedWords);
+    hashes.sort((a, b) => a-b);
+
+    const delta = [hashes[0]];
+    for (var i = 1; i < hashes.length; i++) {
+        const x = hashes[i] - hashes[i-1];
+        // Дублирующиеся хэши добавлять нет смысла, если потом это просто будет складываться в Set.
+        if (x !== 0) {
+            delta.push(x);
+        }
+    }
+
+    return arrayToStr(delta);
 }
 
 // -----------------------------------------
@@ -243,6 +247,98 @@ console.log(makeHashDeltas(stressHashesAInput));
 
 console.log("stressHashesB hash deltas:");
 console.log(makeHashDeltas(stressHashesBInput));
+
+// Чтож, не похоже, что хэши - это очень компактно.
+// Вместо этого, я бы хотел попробовать инкрементное кодирование,
+// которое уже хорошо себя зарекомендовало в тестах.
+// Но поскольку у нас слова имеют разные начала, но одинаковые окончания,
+// инкрементное кодирование я буду применять к словам, развёрнутым задом наперёд.
+
+// https://en.wikipedia.org/wiki/Incremental_encoding
+function encodeIncremental(strToEncode, baseString) {
+    let common = 0;
+    for (let len = 1; len <= baseString.length; len++) {
+        if (strToEncode.indexOf(baseString.substring(0, len)) !== 0) {
+            break;
+        }
+        common = len;
+    }
+
+    const diff = baseString.length - common;
+    return [diff, strToEncode.substring(common, strToEncode.length)];
+}
+
+assertEquals(encodeIncremental('abcde', 'abc')[0], 0);
+assertEquals(encodeIncremental('abcde', 'abc')[1], 'de');
+
+assertEquals(encodeIncremental('abcde', 'abcx')[0], 1);
+assertEquals(encodeIncremental('abcde', 'abcx')[1], 'de');
+
+
+function makePair(left, right) {
+    if (right <= 0b11) {
+        return (left << 3) + right;
+    } else {
+        const lsb = right % 0b100;
+        const msb = right - lsb;
+
+        if (msb > 0b111100) {
+            throw 'More than 4 bits.';
+        }
+
+        return (left << 7) | (msb << 1) | 0b100 | lsb;
+    }
+}
+
+function extractPair(code) {
+    if ((code & 0b100) === 0) {
+        return [code >> 3, code & 0b11];
+    }
+
+    return [code >> 7, ((code >> 1) & 0b111100) | (code & 0b11)];
+}
+
+assertEquals(extractPair(makePair(1234567, 22))[0], 1234567);
+assertEquals(extractPair(makePair(1234567, 22))[1], 22);
+
+
+function encodeWithDictionary(inputStrings, dictionary) {
+    let baseString = '';
+    let result = [];
+
+    for (let s of inputStrings) {
+        const encoded = encodeIncremental(s, baseString);
+        let dictIndex = dictionary.indexOf(encoded[1]);
+        baseString = s;
+
+        if (dictIndex < 0) {
+            dictionary.push(encoded[1]);
+            dictIndex = dictionary.length - 1;
+        }
+
+        result.push(makePair(dictIndex, encoded[0]));
+    }
+
+    return result;
+}
+
+const reverseAll = arr => arr.map(s => s.split('').reverse().join(''));
+
+const stressHashesAPrepared = reverseAll(stressHashesAInput.split(',')).toSorted();
+const stressHashesBPrepared = reverseAll(stressHashesBInput.split(',')).toSorted();
+
+let stressIncrementalDictionary = [];
+const stressHashesAIncremental = encodeWithDictionary(stressHashesAPrepared, stressIncrementalDictionary);
+const stressHashesBIncremental = encodeWithDictionary(stressHashesBPrepared, stressIncrementalDictionary);
+
+console.log("stressHashesDict:");
+console.log(stressIncrementalDictionary);
+
+console.log("stressHashesA:");
+console.log(arrayToStr(stressHashesAIncremental));
+
+console.log("stressHashesB:");
+console.log(arrayToStr(stressHashesBIncremental));
 
 // -----------------------------------------
 
