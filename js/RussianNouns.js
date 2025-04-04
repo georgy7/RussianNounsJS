@@ -1150,9 +1150,8 @@
         return word;
     }
 
-    function getNounStem(lemma) {
+    function getNounStem(lemma, lcWord) {
         const word = lemma.text();
-        const lcWord = lemma.lower();
         const lcLastChar = last(lcWord);
         const lcLastBit = lcBit(lcLastChar);
 
@@ -1293,12 +1292,12 @@
             let subWord = lcWord.substring(3);
 
             // На случай дефисов.
-            let offset = subWord.search(/[а-яА-ЯёЁ]/);
+            let offset = subWord.search(/[а-яё]/);
 
             // Сюда не должны попадать как минимум
             // мягкий и твердый знаки помимо гласных.
 
-            return (offset >= 0) && isConsonantLc(subWord[offset].toLowerCase());
+            return (offset >= 0) && isConsonantLc(subWord[offset]);
 
         } else {
             return false;
@@ -1382,7 +1381,7 @@
             }
         }
 
-        let stem = getNounStem(lemma);
+        let stem = getNounStem(lemma, lcWord);
         let head = init(word);
 
         const soft = (half && lcWord.endsWith('я')) || softD1(lcWord);
@@ -1596,7 +1595,7 @@
         const word = lemma.text();
         const lcWord = lemma.lower();
 
-        const stem = getNounStem(lemma);
+        const stem = getNounStem(lemma, lcWord);
         const lcStem = stem.toLowerCase();
 
         const head = init(word);
@@ -1709,7 +1708,7 @@
             }
         }
 
-        const stem = getNounStem(lemma);
+        const stem = getNounStem(lemma, lcWord);
 
         if (nLast(lcWord, 2) === 'мя') {
             switch (grCase) {
@@ -1792,7 +1791,7 @@
         if (LocativeDeclensionType.U_SUFFIX === declensionType) {
             const word = lemma.text();
             const lcWord = lemma.lower();
-            let stem = getNounStem(lemma);
+            let stem = getNounStem(lemma, lcWord);
             let head = init(word);
 
             const half = halfSomething(lcWord);
@@ -1830,7 +1829,7 @@
         const word = lemma.text();
         const lcWord = lemma.lower();
 
-        const stem = getNounStem(lemma);
+        const stem = getNounStem(lemma, lcWord);
         const lcStem = stem.toLowerCase();
 
         if (lcWord.endsWith('яя')) {

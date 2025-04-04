@@ -12996,15 +12996,15 @@ let main = function () {
                         return actual.indexOf(e) >= 0;
                     });
                     const actualWithoutYo = actual.map(function (word) {
-                        return word.toLowerCase().replace(/ё/g, 'е');
+                        return word.toLowerCase().replaceAll('ё', 'е');
                     });
                     const exactMatchIgnoringYo = sameCount && expected.every(function (word) {
-                        var yoLess = word.toLowerCase().replace(/ё/g, 'е');
+                        var yoLess = word.toLowerCase().replaceAll('ё', 'е');
                         return actualWithoutYo.indexOf(yoLess) >= 0;
                     });
                     const exactMatchIgnoringNjeNjiAndYo = sameCount && (1 === actual.length) && (function () {
-                        const yoLess = expected[0].toLowerCase().replace(/ё/g, 'е');
-                        const actualYoLess = actual[0].toLowerCase().replace(/ё/g, 'е');
+                        const yoLess = expected[0].toLowerCase().replaceAll('ё', 'е');
+                        const actualYoLess = actual[0].toLowerCase().replaceAll('ё', 'е');
                         if (!(yoLess.endsWith('нье') || yoLess.endsWith('ньи'))) {
                             return false;
                         }
