@@ -446,9 +446,25 @@
         'шоколад,шорох,шум,яд'
     ).split(','));
 
-    const ogoEndings = new Set(['ое', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой', 'евой', 'овой', 'живой'].map(packEnding));
+    const ogoEndings = new Set([
+        'ое',
+        'нький', 'ский', 'ской',
+        'лстой', 'отой', 'утой', 'евой', 'овой', 'живой'].map(packEnding));
+    const ogoEndings2 = new Set([
+        'ее', 'ое',
+        'нький', 'ский', 'ской',
+        'лстой', 'отой', 'утой'].map(packEnding));
+    const ogoEndings3 = new Set([
+        'евой', 'овой', 'отой', 'живой'].map(packEnding));
+
     const egoEndings = new Set(['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
 
+    const jeEndings = new Set([
+        'ий', 'ие', 'чье', 'тье', 'дье', 'вье', 'бье',
+        'енье', 'ружье', 'божье', 'верье', 'мужье'].map(packEnding));
+
+    const ojeEngings = new Set([
+        'вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый'].map(packEnding));
 
     const LocativeFormAttribute = Object.freeze({
         CONTAINER: 1,
@@ -1268,8 +1284,6 @@
         return (lemma._flags >> 16) - 2;
     }
 
-    const tsWord = w => last(w) === 'ц';
-
     function tsStem(word, lemma) {
         const head = init(word);
         const lcHead = init(lemma.lower());
@@ -1383,6 +1397,7 @@
     function decline1(engine, lemma, grCase) {
         const word = lemma.text();
         const lcWord = lemma.lower();
+        const lcLastChar = last(lcWord);
         const gender = lemma.getGender();
 
         const half = halfSomething(lcWord);
@@ -1408,7 +1423,7 @@
                     return decline3(engine, lemmaCopy, grCase);
                 } else {
                     let lemmaCopy = fastClone(lemma, init(h()) +
-                        ((last(lcWord) === 'н') ? 'я' : 'а'));
+                        ((lcLastChar === 'н') ? 'я' : 'а'));
                     return decline2(engine, lemmaCopy, grCase);
                 }
             }
@@ -1434,7 +1449,7 @@
             return stressedEnding.map(b => b ? f(unYo(s), b) : f(s, b));
         };
 
-        const iyWord = last(lcWord) === 'й'
+        const iyWord = (lcLastChar === 'й')
             || ['ий', 'ие', 'иё'].includes(nLast(lcWord, 2));
 
         const eiWord = () => endsWithAny(lcWord, [
@@ -1462,7 +1477,7 @@
 
         function addUForm(r) {
             if (!lemma.isAnimate() && uForm.has(lcWord)) {
-                if (last(lcWord) === 'й') {
+                if (lcLastChar === 'й') {
                     r.push(init(word) + upperLike('ю', last(word)));
                 } else {
                     r = r.concat(eStem(stem, s => s + upperLike('у', last(s))));
@@ -1487,7 +1502,7 @@
                     return addUForm(r);
                 } else if (soft && !schWord()) {
                     return stem + 'я';
-                } else if (tsWord(lcWord)) {
+                } else if (lcLastChar === 'ц') {
                     return tsStem(word, lemma) + 'ца';
                 } else if (okWord(lcWord)) {
                     return init(head) + 'ка';
@@ -1517,7 +1532,7 @@
                     return eiStem() + 'ю';
                 } else if (soft && !schWord()) {
                     return stem + 'ю';
-                } else if (tsWord(lcWord)) {
+                } else if (lcLastChar === 'ц') {
                     return tsStem(word, lemma) + 'цу';
                 } else if (okWord(lcWord)) {
                     return init(head) + 'ку';
@@ -1538,16 +1553,15 @@
                 return word;
 
             case Case.INSTRUMENTAL:
-                if ((iyWord && lemma.isASurname()) ||
-                        endsWithAny(lcWord, ['ее', 'ое', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой'])) {
+                if ((iyWord && lemma.isASurname()) || endingIn(lemma._tail, ogoEndings2)) {
 
-                    if (endsWithAny(lcWord, ['вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый'])) {
+                    if (endingIn(lemma._tail, ojeEngings)) {
                         return stem + 'ым';
                     } else {
                         return stem + 'им';
                     }
 
-                } else if (iyoy() || endsWithAny(lcWord, ['евой', 'овой', 'отой', 'живой'])) {
+                } else if (iyoy() || endingIn(lemma._tail, ogoEndings3)) {
                     return stem + 'ым';
                 } else if (endingIn(lemma._tail, egoEndings)) {
                     return init(head) + 'им';
@@ -1558,7 +1572,7 @@
                     return eStem(stem, (s, stressedEnding) => stressedEnding
                         ? (s + 'ом') : (s + 'ем'));
 
-                } else if (tsWord(lcWord)) {
+                } else if (lcLastChar === 'ц') {
 
                     return eStem(word, (w, stressedEnding) => stressedEnding
                         ? (tsStem(w, lemma) + 'цом') : (tsStem(w, lemma) + 'цем'));
@@ -1584,18 +1598,15 @@
                 } else if (endsWithAny(lcWord, ['воробей'])) {
                     const i = init(head);
                     return i + upperLike('ье', last(i));
-                } else if (endsWithAny(lcWord, [
-                    'ий', 'ие', 'чье', 'тье', 'дье', 'вье', 'бье',
-                    'енье', 'жалованье',
-                    'ружье', 'божье', 'верье', 'мужье'
-                ]) && !endsWithAny(lcWord, [
+                } else if ((endingIn(lemma._tail, jeEndings) || lcWord.endsWith('жалованье')) &&
+                    !endsWithAny(lcWord, [
                     'запястье', 'здоровье', 'изголовье',
                     'платье'
                 ])) {
                     return head + 'и';
-                } else if ((last(lcWord) === 'й') || ('иё' === nLast(lcWord, 2))) {
+                } else if ((lcLastChar === 'й') || ('иё' === nLast(lcWord, 2))) {
                     return eiStem() + 'е';
-                } else if (tsWord(lcWord)) {
+                } else if (lcLastChar === 'ц') {
                     return tsStem(word, lemma) + 'це';
                 } else if (okWord(lcWord)) {
                     return init(head) + 'ке';
@@ -1919,7 +1930,7 @@
                         eStem(simpleFirstPart, s => s + 'и'));
                 }
 
-            } else if (tsWord(lcWord)) {
+            } else if (last(lcWord) === 'ц') {
                 result.push(tsStem(word, lemma) + 'цы');
 
             } else {
