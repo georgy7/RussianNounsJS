@@ -91,6 +91,7 @@
             if (o instanceof Lemma) {
                 this._txt = o._txt;
                 this._hash = o._hash;
+                this._tail = o._tail;
                 this._flags = o._flags;
 
             } else {
@@ -104,6 +105,7 @@
 
                 this._txt = o.text;
                 this._hash = calculateHash(lcWord);
+                this._tail = packEnding(lcWord);
 
                 this._flags |= (1 << 3) * (o.indeclinable&1);
                 this._flags |= (1 << 4) * (o.animate&1);
@@ -268,7 +270,18 @@
 
     const lastOfNInitial = (str, n) => last(nInit(str, n));
 
+    // This function has O(n) complexity in relation to the number of characters in the array.
     const endsWithAny = (w, arr) => arr.some(a => w.endsWith(a));
+
+    // This function five times slower than Set.prototype.has.
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set#description
+    function endingIn(ending, endingSet) {
+        return endingSet.has(ending & 0x3fffffff) ||
+            endingSet.has(ending & 0xffffff) ||
+            endingSet.has(ending & 0x3ffff) ||
+            endingSet.has(ending & 0xfff) ||
+            endingSet.has(ending & 0x3f);
+    }
 
     const unique = a => a.filter((item, index) => a.indexOf(item) === index);
 
@@ -319,6 +332,23 @@
         // кодами первой буквы всё еще встречаются коллизии.
         const start = preparedString.charCodeAt(0) % 2;
         return ((0x7fffffff & hash) * 2) + start;
+    }
+
+    function packEnding(lowerCaseUnicodeString) {
+        // Нам всё же очень важно отличать букву А от пустого места, так что 6 бит.
+        // И, в качестве бонуса, так мы получаем возможность различать букву ё.
+
+        let state = 0;
+        const len = Math.min(5, lowerCaseUnicodeString.length);
+        const lastIndex = lowerCaseUnicodeString.length - 1;
+
+        for (let i = 0; i < len; i++) {
+            const readyBits = 6 * i;
+            const chCode = (lowerCaseUnicodeString.charCodeAt(lastIndex-i) - 1071) & 0x3F;
+            state |= chCode << readyBits;
+        }
+
+        return state;
     }
 
     function extract(input) {
@@ -381,7 +411,7 @@
         'сон', 'стебель', 'стишок',
         'угол', 'умысел', 'хребет', 'церковь', 'шов'
     ]);
-    const mobileVowelB = ['узел', 'уголь', 'чок', 'ешок', 'хол'];
+    const mobileVowelB = new Set(['узел', 'уголь', 'чок', 'ешок', 'хол'].map(packEnding));
     const en2a2b = [
         'ясень', 'бюллетень', 'олень', 'тюлень',
         'гордень', 'пельмень',
@@ -415,8 +445,10 @@
         'шиповник,' + // про отвар/сироп
         'шоколад,шорох,шум,яд'
     ).split(','));
-    const ogoEndings = ['ое', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой', 'евой', 'овой', 'живой'];
-    const egoEndings = ['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'];
+
+    const ogoEndings = new Set(['ое', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой', 'евой', 'овой', 'живой'].map(packEnding));
+    const egoEndings = new Set(['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
+
 
     const LocativeFormAttribute = Object.freeze({
         CONTAINER: 1,
@@ -1156,7 +1188,7 @@
         const lcLastBit = lcBit(lcLastChar);
 
         if (!!(0b10000001001110011110000000110 & lcLastBit) && (mobileVowelA.has(lcWord)
-            || endsWithAny(lcWord, mobileVowelB)
+            || endingIn(lemma._tail, mobileVowelB)
             || (lemma.isAnimate() && lcWord.endsWith('посол')))
         ) {
             const w = (lcLastChar === 'ь') ? init(word) : word;
@@ -1271,14 +1303,15 @@
 
     function okWord(w) {
         return (endsWithAny(w, ['чек', 'шек']) && (w.length >= 6))
-            || endsWithAny(w, ok1)
-            || (
-                w.endsWith('ок') && !w.endsWith('шок') && !okExceptions.includes(w)
-                && !endsWithAny(w, ok2)
-                && !isVowel(lastOfNInitial(w, 2))
-                && (isVowel(lastOfNInitial(w, 3)) || endsWithAny(nInit(w, 2), ['ст', 'рт']))
-                && w.length >= 4
-            );
+            || (w.endsWith('ок') && (
+                endsWithAny(w, ok1)
+                || (
+                    !w.endsWith('шок') && !okExceptions.includes(w)
+                    && !endsWithAny(w, ok2)
+                    && !isVowel(lastOfNInitial(w, 2))
+                    && (isVowel(lastOfNInitial(w, 3)) || endsWithAny(nInit(w, 2), ['ст', 'рт']))
+                    && w.length >= 4
+                )));
     }
 
     const softD1 = w => (last(w) === 'ь' && !w.endsWith('господь'))
@@ -1445,9 +1478,9 @@
             case Case.GENITIVE:
                 if ((iyWord && lemma.isASurname())
                     || iyoy()
-                    || endsWithAny(lcWord, ogoEndings)) {
+                    || endingIn(lemma._tail, ogoEndings)) {
                     return stem + 'ого';
-                } else if (endsWithAny(lcWord, egoEndings) || lcWord.endsWith('ее')) {
+                } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
                     return stem + 'его';
                 } else if (iyWord) {
                     let r = [eiStem() + 'я'];
@@ -1476,9 +1509,9 @@
             case Case.DATIVE:
                 if ((iyWord && lemma.isASurname())
                     || iyoy()
-                    || endsWithAny(lcWord, ogoEndings)) {
+                    || endingIn(lemma._tail, ogoEndings)) {
                     return stem + 'ому';
-                } else if (endsWithAny(lcWord, egoEndings) || lcWord.endsWith('ее')) {
+                } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
                     return stem + 'ему';
                 } else if (iyWord) {
                     return eiStem() + 'ю';
@@ -1516,7 +1549,7 @@
 
                 } else if (iyoy() || endsWithAny(lcWord, ['евой', 'овой', 'отой', 'живой'])) {
                     return stem + 'ым';
-                } else if (endsWithAny(lcWord, egoEndings)) {
+                } else if (endingIn(lemma._tail, egoEndings)) {
                     return init(head) + 'им';
                 } else if (iyWord) {
                     return eiStem() + 'ем';
@@ -1544,9 +1577,9 @@
             case Case.PREPOSITIONAL:
                 if ((iyWord && lemma.isASurname())
                     || iyoy()
-                    || endsWithAny(lcWord, ogoEndings)) {
+                    || endingIn(lemma._tail, ogoEndings)) {
                     return stem + 'ом';
-                } else if (endsWithAny(lcWord, egoEndings) || lcWord.endsWith('ее')) {
+                } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
                     return stem + 'ем';
                 } else if (endsWithAny(lcWord, ['воробей'])) {
                     const i = init(head);
@@ -2332,11 +2365,10 @@
     }
 
 
-    const declinePluralSoftEndings = [
-        'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
-        'ьи', 'ья', 'ия', 'ря', 'ля', 'ая',
-        'аи', 'ои', 'уи', 'эи', 'ыи', 'яи', 'ёи', 'юи', 'еи', 'ии'
-    ];
+    const declinePluralSoftEndings = new Set([
+        777, 1161, 137, 201, 329, 1225, 1033, 1097, 905, 1353, 521, 1865, 1888, 608,
+        1120, 800, 96, 73, 969, 1289, 1929, 1801, 2057, 2185, 1993, 393, 585
+    ]);
 
     const declinePluralEy = [
         'беготни',
@@ -2460,6 +2492,8 @@
 
     function declinePlural(engine, lemma, grCase, plural) {
         const lcPlural = plural.toLowerCase();
+        const pluralEnding = packEnding(lcPlural);
+
         const lcLastChar = last(lcPlural);
         const lcLastBit = lcBit(lcLastChar);
 
@@ -2516,7 +2550,7 @@
                 grCaseNumber - 3
             );
 
-            if (endsWithEeOrYa && endsWithAny(lcPlural, declinePluralSoftEndings)) {
+            if (endingIn(pluralEnding, declinePluralSoftEndings)) {
                 return init(plural) + declinePluralEndings2[flatIndex2];
             } else if (engine.sd.hasStressedEndingPlural(lemma, grCase).includes(true)) {
                 return unYo(stem) + declinePluralEndings2[flatIndex2 + 1];
@@ -2733,7 +2767,7 @@
                 return nInit(stem, 2) + 'ек';
             }
 
-            if ((stem.length === lcPlural.length - 1) && endsWithEeOrYa && endsWithAny(lcPlural, declinePluralSoftEndings)) {
+            if ((stem.length === lcPlural.length - 1) && endingIn(pluralEnding, declinePluralSoftEndings)) {
 
                 if ('ьй'.includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
                     const end = last(stem);

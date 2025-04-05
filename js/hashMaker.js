@@ -154,7 +154,7 @@ const stressHashesAInput = 'багаж,' +
             'голубец,грабёж,' +
             'гуж,гуляш,дворец,делёж,дергач,долбёж,долгунец,' +
             'драч,' + // плотницкий инструмент
-            'ёж,ёрш,зубец,зубрёж,' +			// ежей я добавил позже
+            'ёж,ёрш,зубец,зубрёж,' +            // ежей я добавил позже
             'изразец,калач,ключ,' +
             'камыш,' + // растение
             'карандаш,картёж,кедрач,кирпич,' +
@@ -372,6 +372,8 @@ const reverseAll = arr => arr.map(s => s.split('').reverse().join(''));
         'обморок', 'порок', 'пророк', 'сток', 'урок'
     ];
 
+/*
+
 const preparedStressA = reverseAll(stressHashesAInput.split(',')).toSorted();
 const preparedStressB = reverseAll(stressHashesBInput.split(',')).toSorted();
 
@@ -438,6 +440,53 @@ console.log(arrayToStr(okExceptionsIncremental));
 
 // Но на небольших массивах этот подход не оправдался - гзипованный файл только растёт.
 
+*/
+
+function packEnding(lowerCaseUnicodeString) {
+    // Нам всё же очень важно отличать букву А от пустого места, так что 6 бит.
+    // И, в качестве бонуса, так мы получаем возможность различать букву ё.
+
+    let state = 0;
+    const len = Math.min(5, lowerCaseUnicodeString.length);
+    const lastIndex = lowerCaseUnicodeString.length - 1;
+
+    for (let i = 0; i < len; i++) {
+        const readyBits = 6 * i;
+        const chCode = (lowerCaseUnicodeString.charCodeAt(lastIndex-i) - 1071) & 0x3F;
+        state |= chCode << readyBits;
+    }
+
+    return state;
+}
+
+
+assertEquals(packEnding('а'), 1);
+assertEquals(packEnding('аааа'), 0b000001000001000001000001);
+assertEquals(packEnding('аааааааааааааааааааа'), 0b000001000001000001000001000001);
+
+assertEquals(packEnding('бвг'), 0b000010000011000100);
+assertEquals(packEnding('ааааааааабвг'), 0b000001000001000010000011000100);
+assertEquals(packEnding('ааааааабвгаа'), 0b000010000011000100000001000001);
+
+
+const ogoEndings = ['ое', 'нький', 'ский', 'ской', 'лстой', 'отой', 'утой', 'евой', 'овой', 'живой'];
+
+const egoEndings = ['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'];
+
+console.log("ogoEndings:");
+console.log(ogoEndings.map(packEnding));
+
+console.log("egoEndings:");
+console.log(egoEndings.map(packEnding));
+
+const declinePluralSoftEndings = [
+        'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
+        'ьи', 'ья', 'ия', 'ря', 'ля', 'ая',
+        'аи', 'ои', 'уи', 'эи', 'ыи', 'яи', 'ёи', 'юи', 'еи', 'ии'
+    ];
+
+console.log("declinePluralSoftEndings:");
+console.log(declinePluralSoftEndings.map(packEnding));
 
 // -----------------------------------------
 
