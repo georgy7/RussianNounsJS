@@ -1,6 +1,0 @@
-﻿Информация о существительных получена из словаря OpenCorpora,
-распространяемого по лицензии Creative Commons Attribution-ShareAlike 3.0
-http://creativecommons.org/licenses/by-sa/3.0/deed.ru
-
-Подробнее об авторах словаря.
-http://opencorpora.org/?page=team
