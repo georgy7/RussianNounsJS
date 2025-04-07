@@ -1388,6 +1388,23 @@
         return Object.freeze(lemmaCopy);
     }
 
+    function decline1Half(engine, lemma, grCase, lcWord) {
+        const h = () => (lcWord !== 'полминуты') ?
+            ('полу' + lemma.text().substring(3)) : lemma.text();
+
+        if ('полпути' === lcWord) {
+            let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
+            return decline0(engine, lemmaCopy, grCase);
+        } else if (lcWord.endsWith('зни')) {
+            let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
+            return decline3(engine, lemmaCopy, grCase);
+        } else {
+            let lemmaCopy = fastClone(lemma, init(h()) +
+                ((last(lcWord) === 'н') ? 'я' : 'а'));
+            return decline2(engine, lemmaCopy, grCase);
+        }
+    }
+
     /**
      * @param {RussianNouns.Engine} engine
      * @param {RussianNouns.Lemma} lemma
@@ -1400,39 +1417,10 @@
         const lcLastChar = last(lcWord);
         const gender = lemma.getGender();
 
-        const half = halfSomething(lcWord);
-
-        if (half && endsWithAny(lcWord, ['и', 'ы'])) {
-
-            if ([Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
-                return word;
-            } else {
-
-                const h = () => (!['полминуты'].includes(lcWord))
-                    ? ('полу' + word.substring(3)) : word;
-
-                if ('полпути' === lcWord) {
-                    if ([Case.PREPOSITIONAL, Case.LOCATIVE].includes(grCase)) {
-                        return word;
-                    } else {
-                        let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
-                        return decline0(engine, lemmaCopy, grCase);
-                    }
-                } else if (lcWord.endsWith('зни')) {
-                    let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
-                    return decline3(engine, lemmaCopy, grCase);
-                } else {
-                    let lemmaCopy = fastClone(lemma, init(h()) +
-                        ((lcLastChar === 'н') ? 'я' : 'а'));
-                    return decline2(engine, lemmaCopy, grCase);
-                }
-            }
-        }
-
         let stem = getNounStem(lemma, lcWord);
         let head = init(word);
 
-        const soft = (half && lcWord.endsWith('я')) || softD1(lcWord);
+        const half = halfSomething(lcWord);
 
         if (half) {
             stem = 'полу' + stem.substring(3);
@@ -1448,6 +1436,8 @@
             }
             return stressedEnding.map(b => b ? f(unYo(s), b) : f(s, b));
         };
+
+        const soft = () => (half && lcWord.endsWith('я')) || softD1(lcWord);
 
         const iyWord = (lcLastChar === 'й')
             || ['ий', 'ие', 'иё'].includes(nLast(lcWord, 2));
@@ -1486,31 +1476,66 @@
             return r;
         }
 
+        // ветка half из начала у нас заканчивалась на и,ы
+
+        // ogo и ego заканчиваются преимущественно
+        // на й, изредка - на е
+        // iyoy - на й
+        // iyWord - й,е,ё
+
+        // soft - заканчивается на я,ь,е,ё
+
+        // дальше очевидно ц
+
+        // okWord - очевидно на к
+
         switch (grCase) {
             case Case.NOMINATIVE:
                 return word;
 
             case Case.GENITIVE:
-                if ((iyWord && lemma.isASurname())
-                    || iyoy()
-                    || endingIn(lemma._tail, ogoEndings)) {
-                    return stem + 'ого';
-                } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
-                    return stem + 'его';
-                } else if (iyWord) {
-                    let r = [eiStem() + 'я'];
-                    return addUForm(r);
-                } else if (soft && !schWord()) {
-                    return stem + 'я';
-                } else if (lcLastChar === 'ц') {
-                    return tsStem(word, lemma) + 'ца';
-                } else if (okWord(lcWord)) {
-                    return init(head) + 'ка';
-                } else if (endsWithAny(lcWord, ['шко']) && (Gender.MASCULINE === gender)) {
-                    // Не уверен, сюда ли отнести слово "дружище".
-                    // Но это не важно: оно не употребляется в родительном падеже ед.ч.
-                    // (в национальном корпусе два с половиной примера из 19-го века).
-                    return head + 'и';
+                switch (lcLastChar) {
+                    case 'и':
+                    case 'ы':
+                        if (half) {
+                            return decline1Half(engine, lemma, grCase, lcWord);
+                        }
+                        break;
+
+                    case 'й':
+                    case 'е':
+                        if ((iyWord && lemma.isASurname())
+                            || iyoy()
+                            || endingIn(lemma._tail, ogoEndings)) {
+                            return stem + 'ого';
+                        } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
+                            return stem + 'его';
+                        }
+                    case 'ё':
+                    case 'я':
+                    case 'ь':
+                        if (iyWord) {
+                            let r = [eiStem() + 'я'];
+                            return addUForm(r);
+                        } else if (soft() && !schWord()) {
+                            return stem + 'я';
+                        }
+                        break;
+
+                    case 'ц':
+                        return tsStem(word, lemma) + 'ца';
+
+                    case 'к':
+                        if (okWord(lcWord)) {
+                            return init(head) + 'ка';
+                        }
+                        break;
+
+                    case 'о':
+                        if (endsWithAny(lcWord, ['шко']) && (Gender.MASCULINE === gender)) {
+                            return head + 'и';
+                        }
+                        break;
                 }
 
                 let r = [];
@@ -1522,27 +1547,50 @@
                 return addUForm(r);
 
             case Case.DATIVE:
-                if ((iyWord && lemma.isASurname())
-                    || iyoy()
-                    || endingIn(lemma._tail, ogoEndings)) {
-                    return stem + 'ому';
-                } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
-                    return stem + 'ему';
-                } else if (iyWord) {
-                    return eiStem() + 'ю';
-                } else if (soft && !schWord()) {
-                    return stem + 'ю';
-                } else if (lcLastChar === 'ц') {
-                    return tsStem(word, lemma) + 'цу';
-                } else if (okWord(lcWord)) {
-                    return init(head) + 'ку';
-                } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
+                switch (lcLastChar) {
+                    case 'и':
+                    case 'ы':
+                        if (half) {
+                            return decline1Half(engine, lemma, grCase, lcWord);
+                        }
+                        break;
+
+                    case 'й':
+                    case 'е':
+                        if ((iyWord && lemma.isASurname())
+                            || iyoy()
+                            || endingIn(lemma._tail, ogoEndings)) {
+                            return stem + 'ому';
+                        } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
+                            return stem + 'ему';
+                        }
+                    case 'ё':
+                    case 'я':
+                    case 'ь':
+                        if (iyWord) {
+                            return eiStem() + 'ю';
+                        } else if (soft() && !schWord()) {
+                            return stem + 'ю';
+                        }
+                        break;
+
+                    case 'ц':
+                        return tsStem(word, lemma) + 'цу';
+
+                    case 'к':
+                        if (okWord(lcWord)) {
+                            return init(head) + 'ку';
+                        }
+                }
+
+                if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
                     return stem + 'у';
                 }
                 return eStem(stem, s => s + 'у');
 
             case Case.ACCUSATIVE:
-                if (gender === Gender.NEUTER) {
+                if ((gender === Gender.NEUTER) ||
+                        ('иы'.includes(lcLastChar) && half)) {
                     return word;
                 }
 
@@ -1553,69 +1601,118 @@
                 return word;
 
             case Case.INSTRUMENTAL:
-                if ((iyWord && lemma.isASurname()) || endingIn(lemma._tail, ogoEndings2)) {
+                switch (lcLastChar) {
+                    case 'и':
+                    case 'ы':
+                        if (half) {
+                            return decline1Half(engine, lemma, grCase, lcWord);
+                        }
+                        break;
+                    
+                    case 'й':
+                    case 'е':
+                    case 'ё':
+                    case 'я':
+                    case 'ь':
+                        if ((iyWord && lemma.isASurname()) || endingIn(lemma._tail, ogoEndings2)) {
+                            if (endingIn(lemma._tail, ojeEngings)) {
+                                return stem + 'ым';
+                            } else {
+                                return stem + 'им';
+                            }
+                        } else if (iyoy() || endingIn(lemma._tail, ogoEndings3)) {
+                            return stem + 'ым';
+                        } else if (endingIn(lemma._tail, egoEndings)) {
+                            return init(head) + 'им';
+                        } else if (iyWord) {
+                            return eiStem() + 'ем';
+                        } else if (lcWord.endsWith('це')) {
+                            return word + 'м';
+                        }
+                        break;
 
-                    if (endingIn(lemma._tail, ojeEngings)) {
-                        return stem + 'ым';
-                    } else {
-                        return stem + 'им';
-                    }
+                    case 'ц':
+                        return eStem(word, (w, stressedEnding) => stressedEnding
+                            ? (tsStem(w, lemma) + 'цом') : (tsStem(w, lemma) + 'цем'));
 
-                } else if (iyoy() || endingIn(lemma._tail, ogoEndings3)) {
-                    return stem + 'ым';
-                } else if (endingIn(lemma._tail, egoEndings)) {
-                    return init(head) + 'им';
-                } else if (iyWord) {
-                    return eiStem() + 'ем';
-                } else if (soft || ('жшчщ'.includes(last(lcStem)))) {
+                    case 'к':
+                        if (okWord(lcWord)) {
+                            return init(head) + 'ком';
+                        }
+                        break;
 
+                    case 'н':
+                    case 'в':
+                        if (surnameType1()) {
+                            return word + 'ым';
+                        }
+                }
+
+                if (soft() || ('жшчщ'.includes(last(lcStem)))) {
                     return eStem(stem, (s, stressedEnding) => stressedEnding
                         ? (s + 'ом') : (s + 'ем'));
-
-                } else if (lcLastChar === 'ц') {
-
-                    return eStem(word, (w, stressedEnding) => stressedEnding
-                        ? (tsStem(w, lemma) + 'цом') : (tsStem(w, lemma) + 'цем'));
-
-                } else if (lcWord.endsWith('це')) {
-                    return word + 'м';
-                } else if (okWord(lcWord)) {
-                    return init(head) + 'ком';
-                } else if (surnameType1()) {
-                    return word + 'ым';
                 } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
                     return stem + 'ом';
                 }
                 return eStem(stem, s => s + 'ом');
 
             case Case.PREPOSITIONAL:
-                if ((iyWord && lemma.isASurname())
-                    || iyoy()
-                    || endingIn(lemma._tail, ogoEndings)) {
-                    return stem + 'ом';
-                } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
-                    return stem + 'ем';
-                } else if (endsWithAny(lcWord, ['воробей'])) {
-                    const i = init(head);
-                    return i + upperLike('ье', last(i));
-                } else if ((endingIn(lemma._tail, jeEndings) || lcWord.endsWith('жалованье')) &&
-                    !endsWithAny(lcWord, [
-                    'запястье', 'здоровье', 'изголовье',
-                    'платье'
-                ])) {
-                    return head + 'и';
-                } else if ((lcLastChar === 'й') || ('иё' === nLast(lcWord, 2))) {
-                    return eiStem() + 'е';
-                } else if (lcLastChar === 'ц') {
-                    return tsStem(word, lemma) + 'це';
-                } else if (okWord(lcWord)) {
-                    return init(head) + 'ке';
-                } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
+                if ('полпути' === lcWord) {
+                    return word;
+                }
+
+                switch (lcLastChar) {
+                    case 'и':
+                    case 'ы':
+                        if (half) {
+                            return decline1Half(engine, lemma, grCase, lcWord);
+                        }
+                        break;
+                    
+                    case 'й':
+                    case 'е':
+                    case 'ё':
+                    case 'я':
+                    case 'ь':
+                        if ((iyWord && lemma.isASurname())
+                            || iyoy()
+                            || endingIn(lemma._tail, ogoEndings)) {
+                            return stem + 'ом';
+                        } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
+                            return stem + 'ем';
+                        } else if (endsWithAny(lcWord, ['воробей'])) {
+                            const i = init(head);
+                            return i + upperLike('ье', last(i));
+                        } else if ((endingIn(lemma._tail, jeEndings) || lcWord.endsWith('жалованье')) &&
+                            !endsWithAny(lcWord, [
+                            'запястье', 'здоровье', 'изголовье',
+                            'платье'
+                        ])) {
+                            return head + 'и';
+                        } else if ((lcLastChar === 'й') || ('иё' === nLast(lcWord, 2))) {
+                            return eiStem() + 'е';
+                        }
+                        break;
+
+                    case 'ц':
+                        return tsStem(word, lemma) + 'це';
+
+                    case 'к':
+                        if (okWord(lcWord)) {
+                            return init(head) + 'ке';
+                        }
+                }
+
+                if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
                     return stem + 'е';
                 }
                 return eStem(stem, s => s + 'е');
 
             case Case.LOCATIVE:
+                if ('полпути' === lcWord) {
+                    return word;
+                }
+
                 const locativeConfigs = locativeDictionary.get(toKey(lemma));
                 if (locativeConfigs) {
                     const declensionTypes = unique(locativeConfigs.map(x => extractDeclensionType(x)));
