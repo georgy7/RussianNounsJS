@@ -1644,12 +1644,11 @@
                 return eStem(stem, s => s + 'ом');
 
             case Case.PREPOSITIONAL:
-                if ('полпути' === lcWord) {
-                    return word;
-                }
-
                 switch (lcLastChar) {
                     case 'и':
+                        if ('полпути' === lcWord) {
+                            return word;
+                        }
                     case 'ы':
                         if (half) {
                             return decline1Half(engine, lemma, grCase, lcWord);
