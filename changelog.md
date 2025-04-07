@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-04-07
+### Changed
+- The script works a little faster now, and the code
+  is clearer in places, but it's bigger.
+
+### Deprecated
+- `Lemma.prototype.newText`
+- `Lemma.prototype.newGender`
+
+### Removed
+- `pluraliaTantum` named parameter
+- `LemmaException` (replaced by Error)
+- `StressDictionaryException` (replaced by Error)
+- `RussianNouns.createLemmaNoThrow`
+- `RussianNouns.FIXED_STEM_STRESS` public constant
+- `RussianNouns.FIXED_ENDING_STRESS` public constant
+- `StressDictionary.putAll`
+- `StressDictionary.get`
+- `StressDictionary.remove`
+- `StressDictionary.find`
+- `Lemma.fuzzyEquals`
+
 ## [1.5.0] - 2025-03-30
 ### Deprecated
 - `pluraliaTantum` named parameter (you should use `pluraleTantum`)

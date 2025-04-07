@@ -13,11 +13,9 @@
     A JavaScript library that declines nouns.
     <br />
     <br />
-    <a href="https://georgy7.github.io/RussianNounsJS/">View Demo</a>
+    <a href="https://georgy7.github.io/RussianNounsJS/testing.html">Test it in your browser</a>
     ·
-    <a href="https://georgy7.github.io/RussianNounsJS/testing.html">Run Tests</a>
-    ·
-    <a href="https://github.com/georgy7/RussianNounsJS/issues">Report Bug</a>
+    <a href="https://github.com/georgy7/RussianNounsJS/issues">Report Bugs</a>
     ·
     <a href="https://github.com/georgy7/RussianNounsJS/wiki">Wiki</a>
   </p>
@@ -30,7 +28,7 @@
 ### Frontend
 
 ```html
-<script src="RussianNouns.js"></script>
+<script src="RussianNouns.min.js"></script>
 ```
 
 or (without [AMD](https://en.wikipedia.org/wiki/Asynchronous_module_definition))
@@ -41,13 +39,13 @@ or (without [AMD](https://en.wikipedia.org/wiki/Asynchronous_module_definition))
 ```
 
 ```js
-import 'RussianNouns.js';
+import 'RussianNouns.min.js';
 ```
 
 or (in a Web Worker)
 
 ```js
-importScripts('RussianNouns.js');
+importScripts('RussianNouns.min.js');
 ```
 
 ### Backend
@@ -59,10 +57,6 @@ npm i --save russian-nouns-js
 ```js
 const RussianNouns = require('russian-nouns-js');
 ```
-
-For TypeScript, there are
-[type definitions](https://www.npmjs.com/package/@types/russian-nouns-js)
-[written by Alexander Semin](https://github.com/RusAnonym/DefinitelyTyped/tree/master/types/russian-nouns-js).
 
 ## Usage
 
@@ -231,7 +225,7 @@ ${cap(pl(снег, 1))} ${pl(неведомая, 2)} ${pl(высота, 2)}.`);
 
 ## Limitations
 
-This library does not prevent you from misusing the [singularia tantum](https://en.wikipedia.org/wiki/Plurale_tantum#Singulare_tantum).
+This library does not prevent you from misusing [singularia tantum](https://en.wikipedia.org/wiki/Plurale_tantum#Singulare_tantum).
 
 ## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.

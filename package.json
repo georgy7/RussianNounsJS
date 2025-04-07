@@ -1,7 +1,7 @@
 {
   "name": "russian-nouns-js",
-  "version": "1.5.0",
-  "description": "Declension by cases, plural.",
+  "version": "2.0.0",
+  "description": "Declension by cases. Pluralization.",
   "main": "RussianNouns.js",
   "scripts": {
     "test": "node testAPI.js"
@@ -12,29 +12,9 @@
   },
   "keywords": [
     "Russian",
-    "nouns",
-    "noun",
-    "inflect",
-    "inflector",
-    "declination",
-    "decline-word",
-    "word-decliner",
-    "word-declination",
-    "word-declension",
-    "русский",
-    "язык",
+    "inflection",
     "падежи",
-    "существительные",
-    "склонение",
-    "склонение-слов",
-    "именительный",
-    "родительный",
-    "дательный",
-    "винительный",
-    "творительный",
-    "предложный",
-    "pluralize",
-    "plural"
+    "склонение-слов"
   ],
   "author": "Georgy Ustinov",
   "license": "MIT",
