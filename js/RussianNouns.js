@@ -2834,7 +2834,7 @@
                         } else {
                             if (endingIn(pluralEnding, bratjaEngings) && endsWithAny(lcPlural, bratja)) {
                                 return init(plural) + 'ев';
-                            } else if (endsWithAny(lcPlural, ['зятья', 'кумовья', 'деверья', 'края'])) {
+                            } else if (endsWithAny(lcPlural, ['зятья', 'кумовья', 'деверья', 'края', 'острия'])) {
                                 return init(plural) + 'ёв';
                             } else if (endsWithAny(lcPlural, ['ья', 'ия'])) {
                                 if (Gender.MASCULINE === gender) {
