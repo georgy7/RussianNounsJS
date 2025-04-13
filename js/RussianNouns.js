@@ -1192,6 +1192,9 @@
 
         if (bincludes(0b11101000000010000100001100100001, lcLastChar)) {
             if (isVowel(last(init(lcWord)))) {
+                if (lcWord.endsWith('медвежий')) {
+                    return nInit(word, 2) + upperLike('ь', nInit(word, 2));
+                }
                 return nInit(word, 2);
             } else if ('й' !== lcLastChar) {
                 return init(word);
@@ -1625,7 +1628,7 @@
                         } else if (iyoy() || endingIn(lemma._tail, ogoEndings3)) {
                             return stem + 'ым';
                         } else if (endingIn(lemma._tail, egoEndings)) {
-                            return init(head) + 'им';
+                            return stem + 'им';
                         } else if (iyWord) {
                             return eiStem() + 'ем';
                         } else if (lcWord.endsWith('це')) {
