@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v2.0.0
+  RussianNounsJS v2.1.0-SNAPSHOT
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
@@ -1334,6 +1334,7 @@
     function halfSomething(lcWord) {
         if (lcWord.startsWith('пол')
             && bincludes(0b10011000000000000000000100000001, last(lcWord))
+            && (lcWord[3] !== 'л')
             && (vowelCount(lcWord) >= 2)) {
 
             let subWord = lcWord.substring(3);
@@ -1349,6 +1350,12 @@
         } else {
             return false;
         }
+    }
+
+    function halfSomethingLight(lcWord) {
+        return lcWord.endsWith('полночь') || (lcWord.startsWith('пол')
+            && bincludes(0b00001000000000000000000100000000, last(lcWord))
+            && (vowelCount(lcWord) >= 2));
     }
 
     function decline0(engine, lemma, grCase) {
@@ -1395,12 +1402,12 @@
         if ('полпути' === lcWord) {
             let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
             return decline0(engine, lemmaCopy, grCase);
-        } else if (lcWord.endsWith('зни')) {
+        } else if (lcWord.endsWith('зни') || lcWord.endsWith('сти')) {
             let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
             return decline3(engine, lemmaCopy, grCase);
         } else {
             let lemmaCopy = fastClone(lemma, init(h()) +
-                ((last(lcWord) === 'н') ? 'я' : 'а'));
+                ((nLast(lcWord, 2) === 'ни') ? 'я' : 'а'));
             return decline2(engine, lemmaCopy, grCase);
         }
     }
@@ -1825,7 +1832,11 @@
             }
         }
 
-        const stem = getNounStem(lemma, lcWord);
+        let stem = getNounStem(lemma, lcWord);
+
+        if (halfSomethingLight(lcWord)) {
+            stem = 'полу' + stem.substring(3);
+        }
 
         if (nLast(lcWord, 2) === 'мя') {
             switch (grCase) {
@@ -2047,6 +2058,7 @@
                     'князь': ['князи', 'князья'],
                     'кол': ['колы', 'колья'],   // TODO: можно разделить на омонимы
                     'месяц': ['месяцы'],
+                    'полдень': ['полдни', 'полудни'],
                     'татарин': ['татары'],
                     'хозяин': ['хозяева'],
                     'цветок': ['цветки', 'цветы']
@@ -2114,6 +2126,7 @@
                     'колесо': ['колёса'],
                     'облачко': ['облачка'],
                     'озеро': ['озёра'],
+                    'полсотни': ['полусотни'],
                     'ребро': ['рёбра'],
                     'ремесло': ['ремёсла'],
                     'седло': ['сёдла'],
@@ -2622,7 +2635,7 @@
             if ((grCaseNumber === 2) || (grCaseNumber === 4)) {
                 if (endsWithAny(lcPlural, ['овичи', 'евичи'])) {
                     return init(plural) + 'ей';
-                } else if (lcPlural.endsWith('вны') && (lcPlural !== 'овны')) {
+                } else if (endsWithAny(lcPlural, ['вны', 'полусотни']) && (lcPlural !== 'овны')) {
                     return nInit(plural, 2) + 'ен';
                 }
             } else if (grCaseNumber === 5) {
@@ -2888,6 +2901,8 @@
                     return nInit(plural, 2) + 'ень';
                 } else if (lcPlural.endsWith('кухни')) {
                     return nInit(plural, 2) + 'онь';
+                } else if (lcPlural === 'сотни') {
+                    return [nInit(plural, 2), nInit(plural, 2) + 'ен'];
                 } else {
                     return nInit(plural, 2) + 'ен';
                 }
