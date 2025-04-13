@@ -20,7 +20,10 @@
     // Ссылки:
     // - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
     // - Статья http://en.wikipedia.org/wiki/Russian_grammar
-    // - К семантике русского локатива - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
+    // - Плунгян В. А. К семантике русского локатива («второго предложного» падежа)
+            // Семиотика и информатика. 2002. Вып. 37. С. 229-254
+    // - Открытый корпус http://opencorpora.org/
+    // - Национальный корпус русского языка https://ruscorpora.ru/
 
     const Case = Object.freeze({
         NOMINATIVE: 'именительный',
@@ -1161,7 +1164,7 @@
 
         // 4 и 6
         addConfig(m, LocativeFormAttribute.SURFACE, na, 'лёд,мох,снег');
-        addConfig(m, LocativeFormAttribute.SUBSTANCE, vo, 'лёд,мох');
+        addConfig(m, LocativeFormAttribute.SUBSTANCE, vo, 'лёд,лён,мох');
         addConfig(m, LocativeFormAttribute.SUBSTANCE, v, 'снег');
 
         // А также, у слов женского рода третьего склонения с особыми формами
@@ -1220,7 +1223,8 @@
                 } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
                     return nInit(word, 2) + 'йк';
                 }
-            } else if (['лёд', 'лед'].includes(lcWord) || (('лев' === lcWord) && lemma.isAnimate())) {
+            } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
+                    (('лев' === lcWord) && lemma.isAnimate())) {
                 return nInit(word, 2) + upperLike('ь', last(init(word))) + last(word);
             }
 
