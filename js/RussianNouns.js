@@ -2487,9 +2487,10 @@
 
 
     const declinePluralSoftEndings = new Set([
-        777, 1161, 137, 201, 329, 1225, 1033, 1097, 905, 1353, 521, 1865, 1888, 608,
-        1120, 800, 96, 73, 969, 1289, 1929, 1801, 2057, 2185, 1993, 393, 585
-    ]);
+        'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
+        'ьи', 'ья', 'ия', 'ря', 'ля', 'ая',
+        'аи', 'ои', 'уи', 'эи', 'ыи', 'яи', 'ёи', 'юи', 'еи', 'ии'
+    ].map(packEnding));
 
     const declinePluralEy = [
         'беготни',
@@ -2931,7 +2932,7 @@
                 if ('ьй'.includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
-                } else if (endsWithAny(lcPlural, ['земли', 'петли', 'капли'])) {
+                } else if (endsWithAny(lcPlural, ['земли', 'петли', 'пли', 'вли'])) {
                     return init(stem) + 'ель';
                 } else {
                     return stem + 'ь';
