@@ -1126,6 +1126,7 @@
         // 5. объекты с функциональной (не обязательно плоской) поверхностью («на»)
         addConfig(mAnimate, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, 'вор');
         addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, '' +
+            'повод,' +  // ремень упряжки (возможно, обстоятельство - метафорическая упряжка, не уверен)
             'бочок,' +  // лежать на бочку, т.е. лежать боком вниз (почти не употребляется)
             'борт,воз,горб,кол,мост,плот,сук,' +
             'х' + String.fromCharCode(1091) + 'й'
@@ -2082,7 +2083,9 @@
                     'полдень': ['полдни', 'полудни'],
                     'татарин': ['татары'],
                     'хозяин': ['хозяева'],
-                    'цветок': ['цветки', 'цветы']
+                    'цветок': ['цветки', 'цветы'],
+                    'черт': ['черти'],
+                    'чёрт': ['черти']
                 }
             ],
             [
@@ -2831,7 +2834,7 @@
                                 return init(plural) + 'й';
                             } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
                                 return init(plural) + 'ев';
-                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки'])
+                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки'])
                                 && ((Gender.MASCULINE !== gender) || endsWithAny(lcPlural, mShki))
                                 && !(lemma.lower().endsWith('ок'))) {
                                 return genitiveStem();
