@@ -1650,7 +1650,8 @@
                                 return stem + 'им';
                             }
                         } else if (iyoy()) {
-                            if (lastOfNInitial(lcWord, 1) === 'и') {
+                            if ((lastOfNInitial(lcWord, 1) === 'и') || lcWord.endsWith('хой')) {
+                                // TODO добавить прилагательные в testing.html, выяснить, какая тут закономерность
                                 return stem + 'им';
                             } else {
                                 return stem + 'ым';

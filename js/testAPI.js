@@ -1391,7 +1391,7 @@ const RussianNouns = require('./RussianNouns.js');
     })();
 
     (() => {
-        const глухое = createLemma({text: 'глухое', gender: Gender.FEMININE, animate: true});
+        const глухое = createLemma({text: 'глухое', gender: Gender.NEUTER});
 
         const result = RussianNouns.CASES.map(c => {
             return rne.decline(глухое, c);
