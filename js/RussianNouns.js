@@ -472,6 +472,24 @@
 
     const egoEndings = new Set(['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
 
+    const endingsOfAdjectives = new Set([
+        'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
+        'латой', 'витой', 'литой', 'питой', 'житой', 'отой', 'утой', 'ятой',
+        'лагой', 'рагой', 'огой', 'угой',
+        'лубой', 'любой',
+        'илой', 'ылой', 'злой', 'малой',
+        'овой', 'евой', 'живой', 'ской', 'акой', 'укой',
+        'нний',
+        'ский', 'йкий', 'цкий', 'зкий', 'ткий', 'лкий', 'мкий', 'хкий',
+        'оркий', 'аркий', 'яркий', 'ький', 'ёкий',
+        'бокий', 'оокий', 'cокий', 'токий', 'ликий', 'дикий', 'укий', 'ыкий',
+        'який', 'пкий', 'дкий', 'бкий', 'нкий', 'жкий', 'чкий', 'гкий', 'овкий', 'авкий'
+    ].map(packEnding));
+
+    const isAdjectiveLike = (lemma, lcWord) => (nLast(lcWord, 2) === 'ый') ||
+        ((lcWord.endsWith('кривой') || endingIn(lemma._tail, endingsOfAdjectives)) &&
+            vowelCount(lcWord) >= 2);
+
     const jeEndings = new Set([
         'ий', 'ие', 'чье', 'тье', 'дье', 'вье', 'бье',
         'енье', 'ружье', 'божье', 'верье', 'мужье'].map(packEnding));
@@ -1491,22 +1509,6 @@
                 || lcWord.endsWith('ов') || lcWord.endsWith('ев') || lcWord.endsWith('ёв')
             );
 
-        // Adjectives
-        const iyoy = () => (nLast(lcWord, 2) === 'ый')
-            || (endsWithAny(lcWord, [
-                'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
-                'латой', 'витой', 'литой', 'питой', 'житой', 'отой', 'утой', 'ятой',
-                'лагой', 'рагой', 'огой', 'угой',
-                'лубой', 'любой',
-                'илой', 'ылой', 'злой', 'малой',
-                'овой', 'евой', 'живой', 'кривой', 'ской', 'акой', 'укой',
-                'нний',
-                'ский', 'йкий', 'цкий', 'зкий', 'ткий', 'лкий', 'мкий', 'хкий',
-                'оркий', 'аркий', 'яркий', 'ький', 'ёкий',
-                'бокий', 'оокий', 'cокий', 'токий', 'ликий', 'дикий', 'укий', 'ыкий',
-                'який', 'пкий', 'дкий', 'бкий', 'нкий', 'жкий', 'чкий', 'гкий', 'овкий', 'авкий'
-            ]) && vowelCount(word) >= 2);
-
         function addUForm(r) {
             if (!lemma.isAnimate() && uForm.has(lcWord)) {
                 if (lcLastChar === 'й') {
@@ -1534,7 +1536,7 @@
                     case 'й':
                     case 'е':
                         if ((iyWord && lemma.isASurname())
-                            || iyoy()
+                            || isAdjectiveLike(lemma, lcWord)
                             || endingIn(lemma._tail, ogoEndings)) {
                             return stem + 'ого';
                         } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
@@ -1587,7 +1589,7 @@
                     case 'й':
                     case 'е':
                         if ((iyWord && lemma.isASurname())
-                            || iyoy()
+                            || isAdjectiveLike(lemma, lcWord)
                             || endingIn(lemma._tail, ogoEndings)) {
                             return stem + 'ому';
                         } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
@@ -1649,7 +1651,7 @@
                             } else {
                                 return stem + 'им';
                             }
-                        } else if (iyoy()) {
+                        } else if (isAdjectiveLike(lemma, lcWord)) {
                             if ((lastOfNInitial(lcWord, 1) === 'и') || lcWord.endsWith('хой')) {
                                 // TODO добавить прилагательные в testing.html, выяснить, какая тут закономерность
                                 return stem + 'им';
@@ -1710,7 +1712,7 @@
                     case 'я':
                     case 'ь':
                         if ((iyWord && lemma.isASurname())
-                            || iyoy()
+                            || isAdjectiveLike(lemma, lcWord)
                             || endingIn(lemma._tail, ogoEndings)) {
                             return stem + 'ом';
                         } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
@@ -2392,14 +2394,16 @@
                         result.push(nInit(word, 4) + 'ата');
                     } else if (okWord(lcWord)) {
                         result.push(nInit(word, 2) + 'ки');
-                    } else if (lcWord.endsWith('ый') || endsWithAny(lcWord, ['щий', 'чий', 'жний', 'шний', 'ский'])) {
+                    } else if (endingIn(lemma._tail, egoEndings)) {
                         result.push(init(word) + 'е');
-                    } else if ((lcWord.endsWith('вой') && vowelCount(nInit(word, 3)) >= 2)
-                        || endsWithAny(lcWord, ['живой', 'лстой', 'отой', 'утой'])
-                        || (endsWithAny(lcWord, ['ной', 'мой']) && word.length >= 6)) {
-                        result.push(nInit(word, 2) + 'ые');
-                    } else if (endsWithAny(lcWord, ['хой', 'ской', 'ший', 'жий'])) {
-                        result.push(nInit(word, 2) + 'ие');
+                    } else if (isAdjectiveLike(lemma, lcWord)) {
+                        if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
+                            result.push(init(word) + 'е');
+                        } else if (lcWord.endsWith('ой') && !endsWithAny(lcWord, ['хой', 'ской'])) {
+                            result.push(nInit(word, 2) + 'ые');
+                        } else {
+                            result.push(nInit(word, 2) + 'ие');
+                        }
                     } else if (lcWord.endsWith('его')) {
                         result.push(nInit(word, 3) + 'ие');
                     } else if ([
@@ -2427,7 +2431,7 @@
 
                     } else if (lcWord.endsWith('ое')) {
 
-                        if (endsWithAny(lcStem, ['г', 'к', 'ж', 'ш'])) {
+                        if (endsWithAny(lcStem, ['г', 'к', 'ж', 'ш', 'х'])) {
                             result.push(stem + 'ие');
                         } else {
                             result.push(stem + 'ые');
@@ -2486,7 +2490,7 @@
                     result.push('зори');
 
                 } else if (lcWord.endsWith('ая') && !lcWord.endsWith('свая')) {
-                    if ('жш'.includes(last(lcStem)) || endsWithAny(lcStem, ['ск', 'цк'])) {
+                    if ('жшх'.includes(last(lcStem)) || endsWithAny(lcStem, ['вк', 'ск', 'цк'])) {
                         result.push(stem + 'ие');
                     } else {
                         result.push(stem + 'ые');

@@ -1110,14 +1110,26 @@ const RussianNouns = require('./RussianNouns.js');
         console.log('--------------- 5 ----------------');
     })();
 
-    (() => {
-        const ловкий = createLemma({text: 'ловкий', gender: Gender.MASCULINE, animate: true});
 
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(ловкий, c);
-        });
+    const nimblePluralForms = [
+        'ловкие',
+        'ловких',
+        'ловким',
+        'ловких',
+        'ловкими',
+        'ловких',
+        'ловких'
+    ];
 
-        assertAllCases(result, [
+    function inanimateForms(arr) {
+        const r = arr.slice();
+        r[3] = r[0];
+        return r;
+    }
+
+    checkSingularAndPlural(
+        createLemma({text: 'ловкий', gender: Gender.MASCULINE, animate: true}),
+        [
             'ловкий',
             'ловкого',
             'ловкому',
@@ -1125,19 +1137,14 @@ const RussianNouns = require('./RussianNouns.js');
             'ловким',
             'ловком',
             'ловком'
-        ]);
+        ],
+        nimblePluralForms
+    );
+    console.log('----- nimble - masc - anim');
 
-        console.log('----- nimble - masc - anim');
-    })();
-
-    (() => {
-        const ловкий = createLemma({text: 'ловкий', gender: Gender.MASCULINE});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(ловкий, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'ловкий', gender: Gender.MASCULINE}),
+        [
             'ловкий',
             'ловкого',
             'ловкому',
@@ -1145,19 +1152,14 @@ const RussianNouns = require('./RussianNouns.js');
             'ловким',
             'ловком',
             'ловком'
-        ]);
+        ],
+        inanimateForms(nimblePluralForms)
+    );
+    console.log('----- nimble - masc - inan');
 
-        console.log('----- nimble - masc - inan');
-    })();
-
-    (() => {
-        const ловкая = createLemma({text: 'ловкая', gender: Gender.FEMININE, animate: true});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(ловкая, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'ловкая', gender: Gender.FEMININE, animate: true}),
+        [
             'ловкая',
             'ловкой',
             'ловкой',
@@ -1165,19 +1167,14 @@ const RussianNouns = require('./RussianNouns.js');
             ['ловкой', 'ловкою'],
             'ловкой',
             'ловкой'
-        ]);
+        ],
+        nimblePluralForms
+    );
+    console.log('----- nimble - fem - anim');
 
-        console.log('----- nimble - fem - anim');
-    })();
-
-    (() => {
-        const ловкая = createLemma({text: 'ловкая', gender: Gender.FEMININE});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(ловкая, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'ловкая', gender: Gender.FEMININE}),
+        [
             'ловкая',
             'ловкой',
             'ловкой',
@@ -1185,19 +1182,14 @@ const RussianNouns = require('./RussianNouns.js');
             ['ловкой', 'ловкою'],
             'ловкой',
             'ловкой'
-        ]);
+        ],
+        inanimateForms(nimblePluralForms)
+    );
+    console.log('----- nimble - fem - inan');
 
-        console.log('----- nimble - fem - inan');
-    })();
-
-    (() => {
-        const ловкое = createLemma({text: 'ловкое', gender: Gender.NEUTER});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(ловкое, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'ловкое', gender: Gender.NEUTER}),
+        [
             'ловкое',
             'ловкого',
             'ловкому',
@@ -1205,19 +1197,25 @@ const RussianNouns = require('./RussianNouns.js');
             'ловким',
             'ловком',
             'ловком'
-        ]);
+        ],
+        inanimateForms(nimblePluralForms)
+    );
+    console.log('----- nimble - neu');
 
-        console.log('----- nimble - neu');
-    })();
 
-    (() => {
-        const красный = createLemma({text: 'красный', gender: Gender.MASCULINE});
+    const redPluralForms = [
+        'красные',
+        'красных',
+        'красным',
+        'красных',
+        'красными',
+        'красных',
+        'красных'
+    ];
 
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(красный, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'красный', gender: Gender.MASCULINE}),
+        [
             'красный',
             'красного',
             'красному',
@@ -1225,19 +1223,14 @@ const RussianNouns = require('./RussianNouns.js');
             'красным',
             'красном',
             'красном'
-        ]);
+        ],
+        inanimateForms(redPluralForms)
+    );
+    console.log('----- red - masc');
 
-        console.log('----- red - masc');
-    })();
-
-    (() => {
-        const красная = createLemma({text: 'красная', gender: Gender.FEMININE});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(красная, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'красная', gender: Gender.FEMININE}),
+        [
             'красная',
             'красной',
             'красной',
@@ -1245,19 +1238,14 @@ const RussianNouns = require('./RussianNouns.js');
             ['красной', 'красною'],
             'красной',
             'красной'
-        ]);
+        ],
+        inanimateForms(redPluralForms)
+    );
+    console.log('----- red - fem');
 
-        console.log('----- red - fem');
-    })();
-
-    (() => {
-        const красное = createLemma({text: 'красное', gender: Gender.NEUTER});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(красное, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'красное', gender: Gender.NEUTER}),
+        [
             'красное',
             'красного',
             'красному',
@@ -1265,19 +1253,25 @@ const RussianNouns = require('./RussianNouns.js');
             'красным',
             'красном',
             'красном'
-        ]);
+        ],
+        inanimateForms(redPluralForms)
+    );
+    console.log('----- red - neu');
 
-        console.log('----- red - neu');
-    })();
 
-    (() => {
-        const белый = createLemma({text: 'белый', gender: Gender.MASCULINE});
+    const whitePluralForms = [
+        'белые',
+        'белых',
+        'белым',
+        'белых',
+        'белыми',
+        'белых',
+        'белых'
+    ];
 
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(белый, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'белый', gender: Gender.MASCULINE}),
+        [
             'белый',
             'белого',
             'белому',
@@ -1285,19 +1279,14 @@ const RussianNouns = require('./RussianNouns.js');
             'белым',
             'белом',
             'белом'
-        ]);
+        ],
+        inanimateForms(whitePluralForms)
+    );
+    console.log('----- white - masc');
 
-        console.log('----- white - masc');
-    })();
-
-    (() => {
-        const белая = createLemma({text: 'белая', gender: Gender.FEMININE});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(белая, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'белая', gender: Gender.FEMININE}),
+        [
             'белая',
             'белой',
             'белой',
@@ -1305,19 +1294,14 @@ const RussianNouns = require('./RussianNouns.js');
             ['белой', 'белою'],
             'белой',
             'белой'
-        ]);
+        ],
+        inanimateForms(whitePluralForms)
+    );
+    console.log('----- white - fem');
 
-        console.log('----- white - fem');
-    })();
-
-    (() => {
-        const белое = createLemma({text: 'белое', gender: Gender.NEUTER});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(белое, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'белое', gender: Gender.NEUTER}),
+        [
             'белое',
             'белого',
             'белому',
@@ -1325,19 +1309,25 @@ const RussianNouns = require('./RussianNouns.js');
             'белым',
             'белом',
             'белом'
-        ]);
+        ],
+        inanimateForms(whitePluralForms)
+    );
+    console.log('----- white - neu');
 
-        console.log('----- white - neu');
-    })();
 
-    (() => {
-        const глухой = createLemma({text: 'глухой', gender: Gender.MASCULINE, animate: true});
+    const deafPluralForms = [
+        'глухие',
+        'глухих',
+        'глухим',
+        'глухих',
+        'глухими',
+        'глухих',
+        'глухих'
+    ];
 
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(глухой, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'глухой', gender: Gender.MASCULINE, animate: true}),
+        [
             'глухой',
             'глухого',
             'глухому',
@@ -1345,19 +1335,14 @@ const RussianNouns = require('./RussianNouns.js');
             'глухим',
             'глухом',
             'глухом'
-        ]);
+        ],
+        deafPluralForms
+    );
+    console.log('----- deaf - masc - anim');
 
-        console.log('----- deaf - masc - anim');
-    })();
-
-    (() => {
-        const глухой = createLemma({text: 'глухой', gender: Gender.MASCULINE});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(глухой, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'глухой', gender: Gender.MASCULINE}),
+        [
             'глухой',
             'глухого',
             'глухому',
@@ -1365,19 +1350,14 @@ const RussianNouns = require('./RussianNouns.js');
             'глухим',
             'глухом',
             'глухом'
-        ]);
+        ],
+        inanimateForms(deafPluralForms)
+    );
+    console.log('----- deaf - masc - inan');
 
-        console.log('----- deaf - masc - inan');
-    })();
-
-    (() => {
-        const глухая = createLemma({text: 'глухая', gender: Gender.FEMININE, animate: true});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(глухая, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'глухая', gender: Gender.FEMININE, animate: true}),
+        [
             'глухая',
             'глухой',
             'глухой',
@@ -1385,19 +1365,29 @@ const RussianNouns = require('./RussianNouns.js');
             ['глухой', 'глухою'],
             'глухой',
             'глухой'
-        ]);
+        ],
+        deafPluralForms
+    );
+    console.log('----- deaf - fem - anim');
 
-        console.log('----- deaf - fem');
-    })();
+    checkSingularAndPlural(
+        createLemma({text: 'глухая', gender: Gender.FEMININE}),
+        [
+            'глухая',
+            'глухой',
+            'глухой',
+            'глухую',
+            ['глухой', 'глухою'],
+            'глухой',
+            'глухой'
+        ],
+        inanimateForms(deafPluralForms)
+    );
+    console.log('----- deaf - fem - inan');
 
-    (() => {
-        const глухое = createLemma({text: 'глухое', gender: Gender.NEUTER});
-
-        const result = RussianNouns.CASES.map(c => {
-            return rne.decline(глухое, c);
-        });
-
-        assertAllCases(result, [
+    checkSingularAndPlural(
+        createLemma({text: 'глухое', gender: Gender.NEUTER}),
+        [
             'глухое',
             'глухого',
             'глухому',
@@ -1405,10 +1395,11 @@ const RussianNouns = require('./RussianNouns.js');
             'глухим',
             'глухом',
             'глухом'
-        ]);
+        ],
+        inanimateForms(deafPluralForms)
+    );
+    console.log('----- blind (wall) / dead (end) - neuter - inan');
 
-        console.log('----- blind/blank (wall) / dead (end) - neuter');
-    })();
 
     console.log('----------------------------------');
 
