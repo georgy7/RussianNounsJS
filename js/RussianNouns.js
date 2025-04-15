@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v2.1.0
+  RussianNounsJS v2.2.0-SNAPSHOT
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
@@ -1492,7 +1492,14 @@
             );
 
         const iyoy = () => (nLast(lcWord, 2) === 'ый')
-            || (endsWithAny(lcWord, ['ной', 'понятой']) && vowelCount(word) >= 2);
+            || (endsWithAny(lcWord, [
+                'ной', 'понятой', 'дой',
+                'нний',
+                'ский', 'йкий', 'цкий', 'зкий', 'ткий', 'лкий', 'мкий', 'хкий',
+                'оркий', 'аркий', 'яркий', 'ький', 'ёкий',
+                'бокий', 'оокий', 'cокий', 'токий', 'ликий', 'дикий', 'укий', 'ыкий',
+                'який', 'пкий', 'дкий', 'бкий', 'нкий', 'жкий', 'чкий', 'гкий', 'овкий', 'авкий'
+            ]) && vowelCount(word) >= 2);
 
         function addUForm(r) {
             if (!lemma.isAnimate() && uForm.has(lcWord)) {
@@ -1636,7 +1643,13 @@
                             } else {
                                 return stem + 'им';
                             }
-                        } else if (iyoy() || endingIn(lemma._tail, ogoEndings3)) {
+                        } else if (iyoy()) {
+                            if (lastOfNInitial(lcWord, 1) === 'и') {
+                                return stem + 'им';
+                            } else {
+                                return stem + 'ым';
+                            }
+                        } else if (endingIn(lemma._tail, ogoEndings3)) {
                             return stem + 'ым';
                         } else if (endingIn(lemma._tail, egoEndings)) {
                             return stem + 'им';
@@ -1807,7 +1820,7 @@
                 if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                     return stem + 'ею';
                 } else if (ayaWord()) {
-                    return stem + 'ой';
+                    return [stem + 'ой', stem + 'ою'];
                 } else if (soft() ||
                         ('жшчщц'.includes(last(lcStem)) &&
                             !(engine.sd.hasStressedEndingSingular(lemma, grCase).includes(true)))) {

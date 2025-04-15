@@ -682,7 +682,7 @@ const RussianNouns = require('./RussianNouns.js');
     );
 
     assertEquals(
-        `Она между двойною ${usual(бездна, 5)}`,    // TODO ${unusual(двойная, 5)}
+        `Она между ${unusual(двойная, 5)} ${usual(бездна, 5)}`,
         'Она между двойною бездной'
     );
 
@@ -1106,6 +1106,228 @@ const RussianNouns = require('./RussianNouns.js');
         checkCases(адаптировавший);
         checkCases(адаптировавшая);
         checkCases(адаптировавшее);
+
+        console.log('--------------- 5 ----------------');
+    })();
+
+    (() => {
+        const ловкий = createLemma({text: 'ловкий', gender: Gender.MASCULINE, animate: true});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(ловкий, c);
+        });
+
+        assertAllCases(result, [
+            'ловкий',
+            'ловкого',
+            'ловкому',
+            'ловкого',
+            'ловким',
+            'ловком',
+            'ловком'
+        ]);
+
+        console.log('----- nimble - masc - anim');
+    })();
+
+    (() => {
+        const ловкий = createLemma({text: 'ловкий', gender: Gender.MASCULINE});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(ловкий, c);
+        });
+
+        assertAllCases(result, [
+            'ловкий',
+            'ловкого',
+            'ловкому',
+            'ловкий',
+            'ловким',
+            'ловком',
+            'ловком'
+        ]);
+
+        console.log('----- nimble - masc - inan');
+    })();
+
+    (() => {
+        const ловкая = createLemma({text: 'ловкая', gender: Gender.FEMININE, animate: true});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(ловкая, c);
+        });
+
+        assertAllCases(result, [
+            'ловкая',
+            'ловкой',
+            'ловкой',
+            'ловкую',
+            ['ловкой', 'ловкою'],
+            'ловкой',
+            'ловкой'
+        ]);
+
+        console.log('----- nimble - fem - anim');
+    })();
+
+    (() => {
+        const ловкая = createLemma({text: 'ловкая', gender: Gender.FEMININE});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(ловкая, c);
+        });
+
+        assertAllCases(result, [
+            'ловкая',
+            'ловкой',
+            'ловкой',
+            'ловкую',
+            ['ловкой', 'ловкою'],
+            'ловкой',
+            'ловкой'
+        ]);
+
+        console.log('----- nimble - fem - inan');
+    })();
+
+    (() => {
+        const ловкое = createLemma({text: 'ловкое', gender: Gender.NEUTER});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(ловкое, c);
+        });
+
+        assertAllCases(result, [
+            'ловкое',
+            'ловкого',
+            'ловкому',
+            'ловкое',
+            'ловким',
+            'ловком',
+            'ловком'
+        ]);
+
+        console.log('----- nimble - neu');
+    })();
+
+    (() => {
+        const красный = createLemma({text: 'красный', gender: Gender.MASCULINE});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(красный, c);
+        });
+
+        assertAllCases(result, [
+            'красный',
+            'красного',
+            'красному',
+            'красный',
+            'красным',
+            'красном',
+            'красном'
+        ]);
+
+        console.log('----- red - masc');
+    })();
+
+    (() => {
+        const красная = createLemma({text: 'красная', gender: Gender.FEMININE});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(красная, c);
+        });
+
+        assertAllCases(result, [
+            'красная',
+            'красной',
+            'красной',
+            'красную',
+            ['красной', 'красною'],
+            'красной',
+            'красной'
+        ]);
+
+        console.log('----- red - fem');
+    })();
+
+    (() => {
+        const красное = createLemma({text: 'красное', gender: Gender.NEUTER});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(красное, c);
+        });
+
+        assertAllCases(result, [
+            'красное',
+            'красного',
+            'красному',
+            'красное',
+            'красным',
+            'красном',
+            'красном'
+        ]);
+
+        console.log('----- red - neu');
+    })();
+
+    (() => {
+        const белый = createLemma({text: 'белый', gender: Gender.MASCULINE});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(белый, c);
+        });
+
+        assertAllCases(result, [
+            'белый',
+            'белого',
+            'белому',
+            'белый',
+            'белым',
+            'белом',
+            'белом'
+        ]);
+
+        console.log('----- white - masc');
+    })();
+
+    (() => {
+        const белая = createLemma({text: 'белая', gender: Gender.FEMININE});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(белая, c);
+        });
+
+        assertAllCases(result, [
+            'белая',
+            'белой',
+            'белой',
+            'белую',
+            ['белой', 'белою'],
+            'белой',
+            'белой'
+        ]);
+
+        console.log('----- white - fem');
+    })();
+
+    (() => {
+        const белое = createLemma({text: 'белое', gender: Gender.NEUTER});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(белое, c);
+        });
+
+        assertAllCases(result, [
+            'белое',
+            'белого',
+            'белому',
+            'белое',
+            'белым',
+            'белом',
+            'белом'
+        ]);
+
+        console.log('----- white - neu');
     })();
 
     console.log('----------------------------------');
