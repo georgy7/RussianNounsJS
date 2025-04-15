@@ -1330,6 +1330,86 @@ const RussianNouns = require('./RussianNouns.js');
         console.log('----- white - neu');
     })();
 
+    (() => {
+        const глухой = createLemma({text: 'глухой', gender: Gender.MASCULINE, animate: true});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(глухой, c);
+        });
+
+        assertAllCases(result, [
+            'глухой',
+            'глухого',
+            'глухому',
+            'глухого',
+            'глухим',
+            'глухом',
+            'глухом'
+        ]);
+
+        console.log('----- deaf - masc - anim');
+    })();
+
+    (() => {
+        const глухой = createLemma({text: 'глухой', gender: Gender.MASCULINE});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(глухой, c);
+        });
+
+        assertAllCases(result, [
+            'глухой',
+            'глухого',
+            'глухому',
+            'глухой',
+            'глухим',
+            'глухом',
+            'глухом'
+        ]);
+
+        console.log('----- deaf - masc - inan');
+    })();
+
+    (() => {
+        const глухая = createLemma({text: 'глухая', gender: Gender.FEMININE, animate: true});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(глухая, c);
+        });
+
+        assertAllCases(result, [
+            'глухая',
+            'глухой',
+            'глухой',
+            'глухую',
+            ['глухой', 'глухою'],
+            'глухой',
+            'глухой'
+        ]);
+
+        console.log('----- deaf - fem');
+    })();
+
+    (() => {
+        const глухое = createLemma({text: 'глухое', gender: Gender.FEMININE, animate: true});
+
+        const result = RussianNouns.CASES.map(c => {
+            return rne.decline(глухое, c);
+        });
+
+        assertAllCases(result, [
+            'глухое',
+            'глухого',
+            'глухому',
+            'глухое',
+            'глухим',
+            'глухом',
+            'глухом'
+        ]);
+
+        console.log('----- blind/blank (wall) / dead (end) - neuter');
+    })();
+
     console.log('----------------------------------');
 
     console.log('Rarely used parts of API.');
