@@ -682,7 +682,7 @@ const RussianNouns = require('./RussianNouns.js');
     );
 
     assertEquals(
-        `Она между двойною ${usual(бездна, 5)}`,    // TODO ${unusual(двойная, 5)}
+        `Она между ${unusual(двойная, 5)} ${usual(бездна, 5)}`,
         'Она между двойною бездной'
     );
 
@@ -1106,7 +1106,300 @@ const RussianNouns = require('./RussianNouns.js');
         checkCases(адаптировавший);
         checkCases(адаптировавшая);
         checkCases(адаптировавшее);
+
+        console.log('--------------- 5 ----------------');
     })();
+
+
+    const nimblePluralForms = [
+        'ловкие',
+        'ловких',
+        'ловким',
+        'ловких',
+        'ловкими',
+        'ловких',
+        'ловких'
+    ];
+
+    function inanimateForms(arr) {
+        const r = arr.slice();
+        r[3] = r[0];
+        return r;
+    }
+
+    checkSingularAndPlural(
+        createLemma({text: 'ловкий', gender: Gender.MASCULINE, animate: true}),
+        [
+            'ловкий',
+            'ловкого',
+            'ловкому',
+            'ловкого',
+            'ловким',
+            'ловком',
+            'ловком'
+        ],
+        nimblePluralForms
+    );
+    console.log('----- nimble - masc - anim');
+
+    checkSingularAndPlural(
+        createLemma({text: 'ловкий', gender: Gender.MASCULINE}),
+        [
+            'ловкий',
+            'ловкого',
+            'ловкому',
+            'ловкий',
+            'ловким',
+            'ловком',
+            'ловком'
+        ],
+        inanimateForms(nimblePluralForms)
+    );
+    console.log('----- nimble - masc - inan');
+
+    checkSingularAndPlural(
+        createLemma({text: 'ловкая', gender: Gender.FEMININE, animate: true}),
+        [
+            'ловкая',
+            'ловкой',
+            'ловкой',
+            'ловкую',
+            ['ловкой', 'ловкою'],
+            'ловкой',
+            'ловкой'
+        ],
+        nimblePluralForms
+    );
+    console.log('----- nimble - fem - anim');
+
+    checkSingularAndPlural(
+        createLemma({text: 'ловкая', gender: Gender.FEMININE}),
+        [
+            'ловкая',
+            'ловкой',
+            'ловкой',
+            'ловкую',
+            ['ловкой', 'ловкою'],
+            'ловкой',
+            'ловкой'
+        ],
+        inanimateForms(nimblePluralForms)
+    );
+    console.log('----- nimble - fem - inan');
+
+    checkSingularAndPlural(
+        createLemma({text: 'ловкое', gender: Gender.NEUTER}),
+        [
+            'ловкое',
+            'ловкого',
+            'ловкому',
+            'ловкое',
+            'ловким',
+            'ловком',
+            'ловком'
+        ],
+        inanimateForms(nimblePluralForms)
+    );
+    console.log('----- nimble - neu');
+
+
+    const redPluralForms = [
+        'красные',
+        'красных',
+        'красным',
+        'красных',
+        'красными',
+        'красных',
+        'красных'
+    ];
+
+    checkSingularAndPlural(
+        createLemma({text: 'красный', gender: Gender.MASCULINE}),
+        [
+            'красный',
+            'красного',
+            'красному',
+            'красный',
+            'красным',
+            'красном',
+            'красном'
+        ],
+        inanimateForms(redPluralForms)
+    );
+    console.log('----- red - masc');
+
+    checkSingularAndPlural(
+        createLemma({text: 'красная', gender: Gender.FEMININE}),
+        [
+            'красная',
+            'красной',
+            'красной',
+            'красную',
+            ['красной', 'красною'],
+            'красной',
+            'красной'
+        ],
+        inanimateForms(redPluralForms)
+    );
+    console.log('----- red - fem');
+
+    checkSingularAndPlural(
+        createLemma({text: 'красное', gender: Gender.NEUTER}),
+        [
+            'красное',
+            'красного',
+            'красному',
+            'красное',
+            'красным',
+            'красном',
+            'красном'
+        ],
+        inanimateForms(redPluralForms)
+    );
+    console.log('----- red - neu');
+
+
+    const whitePluralForms = [
+        'белые',
+        'белых',
+        'белым',
+        'белых',
+        'белыми',
+        'белых',
+        'белых'
+    ];
+
+    checkSingularAndPlural(
+        createLemma({text: 'белый', gender: Gender.MASCULINE}),
+        [
+            'белый',
+            'белого',
+            'белому',
+            'белый',
+            'белым',
+            'белом',
+            'белом'
+        ],
+        inanimateForms(whitePluralForms)
+    );
+    console.log('----- white - masc');
+
+    checkSingularAndPlural(
+        createLemma({text: 'белая', gender: Gender.FEMININE}),
+        [
+            'белая',
+            'белой',
+            'белой',
+            'белую',
+            ['белой', 'белою'],
+            'белой',
+            'белой'
+        ],
+        inanimateForms(whitePluralForms)
+    );
+    console.log('----- white - fem');
+
+    checkSingularAndPlural(
+        createLemma({text: 'белое', gender: Gender.NEUTER}),
+        [
+            'белое',
+            'белого',
+            'белому',
+            'белое',
+            'белым',
+            'белом',
+            'белом'
+        ],
+        inanimateForms(whitePluralForms)
+    );
+    console.log('----- white - neu');
+
+
+    const deafPluralForms = [
+        'глухие',
+        'глухих',
+        'глухим',
+        'глухих',
+        'глухими',
+        'глухих',
+        'глухих'
+    ];
+
+    checkSingularAndPlural(
+        createLemma({text: 'глухой', gender: Gender.MASCULINE, animate: true}),
+        [
+            'глухой',
+            'глухого',
+            'глухому',
+            'глухого',
+            'глухим',
+            'глухом',
+            'глухом'
+        ],
+        deafPluralForms
+    );
+    console.log('----- deaf - masc - anim');
+
+    checkSingularAndPlural(
+        createLemma({text: 'глухой', gender: Gender.MASCULINE}),
+        [
+            'глухой',
+            'глухого',
+            'глухому',
+            'глухой',
+            'глухим',
+            'глухом',
+            'глухом'
+        ],
+        inanimateForms(deafPluralForms)
+    );
+    console.log('----- deaf - masc - inan');
+
+    checkSingularAndPlural(
+        createLemma({text: 'глухая', gender: Gender.FEMININE, animate: true}),
+        [
+            'глухая',
+            'глухой',
+            'глухой',
+            'глухую',
+            ['глухой', 'глухою'],
+            'глухой',
+            'глухой'
+        ],
+        deafPluralForms
+    );
+    console.log('----- deaf - fem - anim');
+
+    checkSingularAndPlural(
+        createLemma({text: 'глухая', gender: Gender.FEMININE}),
+        [
+            'глухая',
+            'глухой',
+            'глухой',
+            'глухую',
+            ['глухой', 'глухою'],
+            'глухой',
+            'глухой'
+        ],
+        inanimateForms(deafPluralForms)
+    );
+    console.log('----- deaf - fem - inan');
+
+    checkSingularAndPlural(
+        createLemma({text: 'глухое', gender: Gender.NEUTER}),
+        [
+            'глухое',
+            'глухого',
+            'глухому',
+            'глухое',
+            'глухим',
+            'глухом',
+            'глухом'
+        ],
+        inanimateForms(deafPluralForms)
+    );
+    console.log('----- blind (wall) / dead (end) - neuter - inan');
+
 
     console.log('----------------------------------');
 
