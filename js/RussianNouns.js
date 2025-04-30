@@ -1224,12 +1224,13 @@
     function getNounStem0(word, lcWord) {
         const lcLastChar = last(lcWord);
 
-        if (bincludes(0b11101000000010000100001100100001, lcLastChar)) {
-            if (isVowel(last(init(lcWord)))) {
+        if (bincludes(vowels | 512, lcLastChar)) { // vowels + й
+            if (bincludes(vowels, lastOfNInitial(lcWord, 1))) {
+                const head = nInit(word, 2);
                 if (lcWord.endsWith('медвежий')) {
-                    return nInit(word, 2) + upperLike('ь', nInit(word, 2));
+                    return head + upperLike('ь', head);
                 }
-                return nInit(word, 2);
+                return head;
             } else if ('й' !== lcLastChar) {
                 return init(word);
             }
