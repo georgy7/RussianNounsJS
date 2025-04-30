@@ -343,7 +343,7 @@
     }
 
     function packEnding(lowerCaseUnicodeString) {
-        // Нам всё же очень важно отличать букву А от пустого места, так что 6 бит.
+        // В окончаниях важно отличать букву А от пустого места, так что 6 бит.
         // И, в качестве бонуса, так мы получаем возможность различать букву ё.
 
         let state = 0;
@@ -421,7 +421,7 @@
         'сон', 'стебель', 'стишок',
         'угол', 'умысел', 'хребет', 'церковь', 'шов',
         'ковер', 'овес', 'костер'
-    ]);
+    ].map(calculateHash));
 
     const mobileVowelB = new Set([
         'овёс', 'ковёр', 'костёр',
@@ -1238,7 +1238,7 @@
         return word;
     }
 
-    function getNounStemDefault(word, lcWord, lcLastChar) {
+    function getStemDefault(word, lcWord, lcLastChar) {
         const lcLastInit = lastOfNInitial(lcWord, 1);
 
         if (('ь' === lcLastInit) ||
@@ -1249,44 +1249,63 @@
         return getNounStem0(word, lcWord);
     }
 
+    function getStemK(word, lcWord, stressedEnging) {
+        if ((word.length >= 4) && 
+            (endsWithAny(lcWord, ['рёк', 'нёк', 'лёк']) && stressedEnging !== false)
+        ) {
+            return nInit(word, 2) + 'ьк';
+        } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
+            return nInit(word, 2) + 'йк';
+        }
+    }
+
+    function getStemSoftSign(lemma, word, lcWord) {
+        if (mobileVowelA.has(lemma._hash) || endingIn(lemma._tail, mobileVowelB)) {
+            return nInit(word, 3) + lastOfNInitial(word, 1);
+        } else if (lcWord.endsWith('ень') &&
+                (lemma.getGender() === Gender.MASCULINE) &&
+                !endsWithAny(lcWord, en2a2b)) {
+            return nInit(word, 3) + 'н';
+        } else {
+            return init(word);
+        }
+    }
+
+    function hasMobileVowel(lemma, lcWord, lcLastBit) {
+        // Case 1: кл рс
+        // Case 2: бв клмн рст х
+        return (
+                ((0b0000110000110000000000 & lcLastBit) !== 0) &&
+                endingIn(lemma._tail, mobileVowelB) &&
+                !(['новосел', 'новосёл'].includes(lcWord))
+            ) ||
+            (
+                ((0b1001110011110000000110 & lcLastBit) !== 0) &&
+                (mobileVowelA.has(lemma._hash) || (lemma.isAnimate() && lcWord.endsWith('посол')))
+            );
+    }
+
     function getNounStem(lemma, lcWord, stressedEnging) {
         const word = lemma.text();
         const lcLastChar = last(lcWord);
         const lcLastBit = lcBit(lcLastChar);
 
         if (((vowels | 512) & lcLastBit) !== 0) { // vowels + й
-            return getNounStemDefault(word, lcWord, lcLastChar);
-        }
-
-        if (lcLastChar === 'к') {
-            if ((word.length >= 4) && 
-                (endsWithAny(lcWord, ['рёк', 'нёк', 'лёк']) && stressedEnging !== false)
-            ) {
-                return nInit(word, 2) + 'ьк';
-            } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
-                return nInit(word, 2) + 'йк';
+            return getStemDefault(word, lcWord, lcLastChar);
+        } else if (lcLastChar === 'к') {
+            const kResult = getStemK(word, lcWord, stressedEnging);
+            if (kResult) {
+                return kResult;
             }
         } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
                 (('лев' === lcWord) && lemma.isAnimate())) {
-            return nInit(word, 2) + upperLike('ь', last(init(word))) + last(word);
+            return nInit(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
         } else if ('ь' === lcLastChar) {
-            if (mobileVowelA.has(lcWord) || endingIn(lemma._tail, mobileVowelB)) {
-                const w = (lcLastChar === 'ь') ? init(word) : word;
-                return nInit(w, 2) + last(w);
-
-            } else if (lcWord.endsWith('ень') && (lemma.getGender() === Gender.MASCULINE) && !endsWithAny(lcWord, en2a2b)) {
-                return nInit(word, 3) + 'н';
-            } else {
-                return init(word);
-            }
+            return getStemSoftSign(lemma, word, lcWord);
         }
 
-        // бв клмн рст х
-        if (!!(0b1001110011110000000110 & lcLastBit) && (mobileVowelA.has(lcWord) ||
-                (endingIn(lemma._tail, mobileVowelB) && !unYo(lcWord).endsWith('новосел')) ||
-                (lemma.isAnimate() && lcWord.endsWith('посол')))) {
-            const w = (lcLastChar === 'ь') ? init(word) : word;
-            return nInit(w, 2) + last(w);
+        if (hasMobileVowel(lemma, lcWord, lcLastBit)) {
+            return nInit(word, 2) + last(word);
         }
 
         return word;
