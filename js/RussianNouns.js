@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v2.2.0
+  RussianNounsJS v2.3.0-SNAPSHOT
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
@@ -248,8 +248,10 @@
         return (mask & lcBit(lcChar)) !== 0;
     }
 
+    const vowels = 0b11101000000010000100000100100001;
+
     function isVowel(ch) {
-        return bincludes(0b11101000000010000100000100100001, ch.toLowerCase());
+        return bincludes(vowels, ch.toLowerCase());
     }
 
     function isConsonantLc(lcChar) {
@@ -271,7 +273,10 @@
     const nInit = (str, n) => str.substring(0, str.length - n);
     const init = str => nInit(str, 1);
 
-    const lastOfNInitial = (str, n) => last(nInit(str, n));
+    function lastOfNInitial(str, n) {
+        const index = str.length - n - 1;
+        return str.substring(index, index+1);
+    }
 
     // This function has O(n) complexity in relation to the number of characters in the array.
     const endsWithAny = (w, arr) => arr.some(a => w.endsWith(a));
@@ -1233,54 +1238,58 @@
         return word;
     }
 
+    function getNounStemDefault(word, lcWord, lcLastChar) {
+        const lcLastInit = lastOfNInitial(lcWord, 1);
+
+        if (('ь' === lcLastInit) ||
+                ('о' === lcLastChar && bincludes(0b1001100011100000000100, lcLastInit))) { // влмнстх
+            return init(word);
+        }
+
+        return getNounStem0(word, lcWord);
+    }
+
     function getNounStem(lemma, lcWord, stressedEnging) {
         const word = lemma.text();
         const lcLastChar = last(lcWord);
         const lcLastBit = lcBit(lcLastChar);
 
-        if (!!(0b10000001001110011110000000110 & lcLastBit) && (mobileVowelA.has(lcWord)
-            || (endingIn(lemma._tail, mobileVowelB) && !unYo(lcWord).endsWith('новосел'))
-            || (lemma.isAnimate() && lcWord.endsWith('посол')))
-        ) {
-            const w = (lcLastChar === 'ь') ? init(word) : word;
-            return nInit(w, 2) + last(w);
+        if (((vowels | 512) & lcLastBit) !== 0) { // vowels + й
+            return getNounStemDefault(word, lcWord, lcLastChar);
+        }
 
-        } else if (isConsonantNotJ(lcLastChar)) {
-            if (0b10000000000 & lcLastBit) {
-                if ((vowelCount(word) >= 2) && (
-                    (endsWithAny(lcWord, ['рёк', 'нёк', 'лёк']) && stressedEnging !== false) ||
-                    (endsWithAny(lcWord, ['рек', 'нек', 'лек']) && stressedEnging === true)
-                )) {
-                    return nInit(word, 2) + 'ьк';
-                } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
-                    return nInit(word, 2) + 'йк';
-                }
-            } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
-                    (('лев' === lcWord) && lemma.isAnimate())) {
-                return nInit(word, 2) + upperLike('ь', last(init(word))) + last(word);
+        if (lcLastChar === 'к') {
+            if ((word.length >= 4) && 
+                (endsWithAny(lcWord, ['рёк', 'нёк', 'лёк']) && stressedEnging !== false)
+            ) {
+                return nInit(word, 2) + 'ьк';
+            } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
+                return nInit(word, 2) + 'йк';
             }
-
-            return word;
-
+        } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
+                (('лев' === lcWord) && lemma.isAnimate())) {
+            return nInit(word, 2) + upperLike('ь', last(init(word))) + last(word);
         } else if ('ь' === lcLastChar) {
-            if (lcWord.endsWith('ень') && (lemma.getGender() === Gender.MASCULINE) && !endsWithAny(lcWord, en2a2b)) {
+            if (mobileVowelA.has(lcWord) || endingIn(lemma._tail, mobileVowelB)) {
+                const w = (lcLastChar === 'ь') ? init(word) : word;
+                return nInit(w, 2) + last(w);
+
+            } else if (lcWord.endsWith('ень') && (lemma.getGender() === Gender.MASCULINE) && !endsWithAny(lcWord, en2a2b)) {
                 return nInit(word, 3) + 'н';
             } else {
                 return init(word);
             }
         }
 
-        const lcLastInit = last(init(lcWord));
-
-        if ('ь' === lcLastInit) {
-            return init(word);
+        // бв клмн рст х
+        if (!!(0b1001110011110000000110 & lcLastBit) && (mobileVowelA.has(lcWord) ||
+                (endingIn(lemma._tail, mobileVowelB) && !unYo(lcWord).endsWith('новосел')) ||
+                (lemma.isAnimate() && lcWord.endsWith('посол')))) {
+            const w = (lcLastChar === 'ь') ? init(word) : word;
+            return nInit(w, 2) + last(w);
         }
 
-        if ('о' === lcLastChar && bincludes(0b1001100011100000000100, lcLastInit)) {
-            return init(word);
-        }
-
-        return getNounStem0(word, lcWord);
+        return word;
     }
 
     function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
