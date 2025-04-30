@@ -475,7 +475,12 @@
     const ogoEndings3 = new Set([
         'евой', 'овой', 'отой', 'живой'].map(packEnding));
 
-    const egoEndings = new Set(['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
+    const egoEndings = new Set(['шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
+
+    const egoSoftM = [
+        'божий', 'ажий', 'яжий', 'ужий', 'южий',
+        'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
+    ];
 
     const endingsOfAdjectives = new Set([
         'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
@@ -1227,7 +1232,7 @@
         if (bincludes(vowels | 512, lcLastChar)) { // vowels + й
             if (bincludes(vowels, lastOfNInitial(lcWord, 1))) {
                 const head = nInit(word, 2);
-                if (lcWord.endsWith('медвежий')) {
+                if (endsWithAny(lcWord, egoSoftM)) {
                     return head + upperLike('ь', head);
                 }
                 return head;
