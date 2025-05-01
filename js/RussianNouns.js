@@ -482,6 +482,8 @@
         'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
     ];
 
+    const egoSoftPlural = egoSoftM.map(x => nInit(x, 2) + 'ьи');
+
     const endingsOfAdjectives = new Set([
         'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
         'латой', 'витой', 'литой', 'питой', 'житой', 'отой', 'утой', 'ятой',
@@ -2429,7 +2431,11 @@
                     } else if (okWord(lcWord)) {
                         result.push(nInit(word, 2) + 'ки');
                     } else if (endingIn(lemma._tail, egoEndings)) {
-                        result.push(init(word) + 'е');
+                        if (endsWithAny(lcWord, egoSoftM)) {
+                            result.push(nInit(word, 2) + 'ьи');
+                        } else {
+                            result.push(init(word) + 'е');
+                        }
                     } else if (isAdjectiveLike(lemma, lcWord)) {
                         if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
                             result.push(init(word) + 'е');
@@ -2750,8 +2756,8 @@
             return plural + declinePluralFlatEndings[flatEndingIndex];
         } else if (lcPlural.endsWith('ые')) {
             return nInit(plural, 2) + declinePluralFlatEndings[flatEndingIndex + 1];
-        } else if (lcPlural.endsWith('ие')) {
-            return nInit(plural, 2) + declinePluralFlatEndings[flatEndingIndex + 2];
+        } else if (lcPlural.endsWith('ие') || endsWithAny(lcPlural, egoSoftPlural)) {
+            return stem + declinePluralFlatEndings[flatEndingIndex + 2];
 
         } else if ((grCaseNumber > 2) && (grCaseNumber !== 4)) {
             const itemsPerCase2 = 2;
