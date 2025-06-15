@@ -206,6 +206,39 @@
         isATransport() {
             return ((1 << 7) & this._flags) !== 0;
         }
+
+        /**
+         * Склонение существительного.
+         *
+         * Возможные значения:
+         * + -1 — несклоняемые, в основном заимствованные слова;
+         * + 0 — разносклоняемые "путь" и "дитя";
+         * + 1 — мужской и средний род без окончания;
+         * + 2 — слова на "а", "я" (м., ж. и общий род);
+         * + 3 — жен. род без окончания; слова, оканчивающиеся на "мя".
+         *
+         * Понятие «склонение» сложно применить к словам plurale tantum,
+         * поэтому этот метод возвращает для них -2 (вместо undefined).
+         */
+        getDeclension() {
+            return (this._flags >> 16) - 2;
+        }
+
+        /**
+         * Возвращает «школьный» вариант склонения:
+         * «вода» — первое склонение; «стол», «окно» — второе склонение.
+         */
+        getSchoolDeclension() {
+            const d = this.getDeclension();
+
+            if (d === 1) {
+                return 2;
+            } else if (d === 2) {
+                return 1;
+            } else {
+                return d;
+            }
+        }
     }
 
     /**
@@ -670,55 +703,17 @@
         createLemmaOrNull: createLemmaOrNull,
 
         /**
-         * Склонение существительного.
-         *
-         * Возможные значения:
-         * + -1 — несклоняемые, в основном заимствованные слова;
-         * + 0 — разносклоняемые "путь" и "дитя";
-         * + 1 — мужской и средний род без окончания;
-         * + 2 — слова на "а", "я" (м., ж. и общий род);
-         * + 3 — жен. род без окончания; слова, оканчивающиеся на "мя".
-         *
-         * Понятие "склонение" сложно применить к словам pluralia tantum,
-         * поэтому этот метод возвращает для них undefined.
-         *
-         * @param {RussianNouns.Lemma|Object} lemma
-         * @returns {number|undefined}
+         * @deprecated since version 2.3.0
          */
         getDeclension: lemma => {
-            return getDeclension(API.createLemma(lemma));
+            return API.createLemma(lemma).getDeclension();
         },
 
         /**
-         * «Названия „первое склонение“ и „второе склонение“ в школьной практике и вузовском преподавании
-         * нередко закрепляются за разными разрядами слов. В школьных учебниках первым склонением называют изменение
-         * слов с окончанием -а (вода), во многих вузовских пособиях и академических грамматиках — слов мужского
-         * рода (стол) и среднего рода (окно)».
-         *
-         * Современный русский язык. Морфология — Камынина А.А., 1999, стр. 67
-         *
-         * Почти везде указывают это число. Например, в Викисловаре.
-         * Иногда в школьных учебниках 10 слов на «-мя» относят к разносклоняемым.
-         * Здесь это третье склонение.
-         *
-         * Понятие "склонение" сложно применить к словам pluralia tantum,
-         * поэтому этот метод возвращает для них undefined.
-         *
-         * @param lemma
-         * @returns {number} «Школьный» вариант склонения:
-         * «вода» — 1; «стол», «окно» — 2,
-         * разносклоняемые — 0; несклоняемые — минус единица.
+         * @deprecated since version 2.3.0
          */
         getSchoolDeclension: lemma => {
-            const d = getDeclension(API.createLemma(lemma));
-
-            if (d === 1) {
-                return 2;
-            } else if (d === 2) {
-                return 1;
-            } else {
-                return d;
-            }
+            return API.createLemma(lemma).getSchoolDeclension();
         },
 
         /**
@@ -949,7 +944,7 @@
             getLocativeForms(lemma) {
                 const engine = this;
                 const o = API.createLemma(lemma);
-                const declension = getDeclension(o);
+                const declension = o.getDeclension();
 
                 if (declension && (declension >= 0)) {
                     const configs = locativeDictionary.get(toKey(o));
@@ -1353,10 +1348,6 @@
             default:
                 return -2; // Error
         }
-    }
-
-    function getDeclension(lemma) {
-        return (lemma._flags >> 16) - 2;
     }
 
     function tsStem(word, lemma) {
@@ -1979,7 +1970,7 @@
             return declinePlural(engine, lemma, grCase, pluralForm);
         }
 
-        const declension = getDeclension(lemma);
+        const declension = lemma.getDeclension();
 
         switch (declension) {
             case -1:
@@ -2075,7 +2066,7 @@
         };
 
         const gender = lemma.getGender();
-        const declension = getDeclension(lemma);
+        const declension = lemma.getDeclension();
 
         const simpleFirstPart = (('й' === last(lcWord) || isVowel(last(word))) && isVowel(last(init(word))))
             ? init(word)
@@ -2775,7 +2766,7 @@
             }
 
         } else {
-            const declension = getDeclension(lemma);
+            const declension = lemma.getDeclension();
 
             const genitiveStem = () => {
                 const lcStem = stem.toLowerCase();

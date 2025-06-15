@@ -1,3 +1,5 @@
+// <editor-fold defaultstate="collapsed" desc="Assertion functions">
+
 function assertEquals(a, b, msg) {
     if (a !== b) {
         console.log(`${a} !== ${b}`);
@@ -68,6 +70,8 @@ function assertAllCases(results, values) {
     }
 }
 
+// </editor-fold>
+
 const RussianNouns = require('./RussianNouns.js');
 
 (() => {
@@ -95,8 +99,11 @@ const RussianNouns = require('./RussianNouns.js');
     result = rne.decline(coat, Case.GENITIVE);
     assertEqualsSingleValue(result, "пальто");
 
+    // deprecated
     result = RussianNouns.getDeclension(coat);
     assertEquals(result, -1);
+
+    assertEquals(coat.getDeclension(), -1);
 
     let mountain = RussianNouns.createLemma({
         text: 'гора',
@@ -125,8 +132,12 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 4 ----------------');
 
+    // deprecated
     assertEquals(RussianNouns.getDeclension(mountain), 2);
     assertEquals(RussianNouns.getSchoolDeclension(mountain), 1);
+
+    assertEquals(mountain.getDeclension(), 2);
+    assertEquals(mountain.getSchoolDeclension(), 1);
 
     console.log('--------------- 5 ----------------');
 
@@ -135,7 +146,10 @@ const RussianNouns = require('./RussianNouns.js');
         gender: Gender.MASCULINE
     });
 
+    // deprecated
     assertEquals(RussianNouns.getDeclension(way), 0);
+
+    assertEquals(way.getDeclension(), 0);
 
     console.log('--------------- 6 ----------------');
 
@@ -1460,16 +1474,24 @@ const RussianNouns = require('./RussianNouns.js');
             gender: Gender.MASCULINE
         });
         y = x.newText(() => 'юноша');
+        // deprecated
         assertEquals(RussianNouns.getDeclension(x), 1);
         assertEquals(RussianNouns.getDeclension(y), 2);
+        // new API
+        assertEquals(x.getDeclension(), 1);
+        assertEquals(y.getDeclension(), 2);
 
         x = RussianNouns.createLemma({
             text: 'абвгдеёжзиклмя',
             gender: Gender.NEUTER
         });
         y = x.newGender(() => Gender.FEMININE);
+        // deprecated
         assertEquals(RussianNouns.getDeclension(x), 3);
         assertEquals(RussianNouns.getDeclension(y), 2);
+        // new API
+        assertEquals(x.getDeclension(), 3);
+        assertEquals(y.getDeclension(), 2);
     })();
 
 })();
