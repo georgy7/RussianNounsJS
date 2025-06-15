@@ -7,10 +7,11 @@ require 'uri'
 class MyServlet < WEBrick::HTTPServlet::FileHandler
   def initialize(server, folder)
     super(server, folder)
+    @uri_parser = URI::Parser.new
   end
 
   def do_GET (request, response)
-    if URI.escape(request.path) == request.path
+    if @uri_parser.escape(request.path) == request.path
       super(request, response)
     elsif request.path.end_with? '.json'
       fn = request.path.force_encoding('UTF-8')[1..-1]
