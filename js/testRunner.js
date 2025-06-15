@@ -71,6 +71,11 @@
             }
 
             const listenLetterPromise = (workerIndex, letterIndex) => {
+                if (jsonPromises[workerIndex].length <= letterIndex) {
+                    setTimeout(() => { listenLetterPromise(workerIndex, letterIndex) }, 100);
+                    return;
+                }
+
                 var worker = workers[workerIndex];
                 jsonPromises[workerIndex][letterIndex].then(response => response.json()).then(words => {
                     worker.postMessage({
