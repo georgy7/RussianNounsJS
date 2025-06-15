@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <meta name="viewport" content="width=1600, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
 
     <script src="js/third-party/angular.min.js"></script>
     <script src="js/third-party/ngtable202.js"></script>
@@ -14,15 +14,34 @@
 <body ng-app="testApp">
 
 <style>
+    .container-fluid {
+        min-width: 1180px;
+    }
+
     .row {
         margin-top: 1.5rem;
         margin-bottom: 1.5rem;
+    }
+
+    #loadingBar {
+        position: fixed;
+        top: 0;
+        left: 2%;
+        width: 96%;
     }
 
     #loadingBar .status {
         width: 0;
         background: #77de00;
         height: 3px;
+
+        position: relative;
+    }
+
+    #loadingBar .status .percent {
+        position: absolute;
+        right: 0;
+        bottom: 10px;
     }
 
     #resultTableHeader {
@@ -122,7 +141,7 @@
 
         <div ng-if="!items">
             <div id="loadingBar" style="margin-top: 5rem;">
-                <div class="status"></div>
+                <div class="status"><div class="percent"></div></div>
             </div>
         </div>
 
