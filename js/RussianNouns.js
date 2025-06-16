@@ -25,25 +25,39 @@
     // - Открытый корпус http://opencorpora.org/
     // - Национальный корпус русского языка https://ruscorpora.ru/
 
+    const CaseValues = Object.freeze([
+        "именительный",
+        "родительный",
+        "дательный",
+        "винительный",
+        "творительный",
+        "предложный",
+        "местный"
+    ]);
+
     const Case = Object.freeze({
-        NOMINATIVE: 'именительный',
-        GENITIVE: 'родительный',
-        DATIVE: 'дательный',
-        ACCUSATIVE: 'винительный',
-        INSTRUMENTAL: 'творительный',
-        PREPOSITIONAL: 'предложный',
-        LOCATIVE: 'местный'
+        NOMINATIVE: CaseValues[0],
+        GENITIVE: CaseValues[1],
+        DATIVE: CaseValues[2],
+        ACCUSATIVE: CaseValues[3],
+        INSTRUMENTAL: CaseValues[4],
+        PREPOSITIONAL: CaseValues[5],
+        LOCATIVE: CaseValues[6]
     });
+
+    const GenderValues = Object.freeze([
+        "женский",
+        "мужской",
+        "средний",
+        "общий"
+    ]);
 
     const Gender = Object.freeze({
-        "FEMININE": "женский",
-        "MASCULINE": "мужской",
-        "NEUTER": "средний",
-        "COMMON": "общий"
+        "FEMININE": GenderValues[0],
+        "MASCULINE": GenderValues[1],
+        "NEUTER": GenderValues[2],
+        "COMMON": GenderValues[3]
     });
-
-    const GenderValues = Object.freeze(Object.values(Gender));
-    const CaseValues = Object.freeze(Object.values(Case));
 
     /**
      * @param o A plain old JavaScript object.

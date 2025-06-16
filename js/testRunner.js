@@ -105,6 +105,8 @@
             const updateLoading = (loadStatus) => {
                 const statusTag = document.querySelector('#loadingBar .status');
                 const percentTag = document.querySelector('#loadingBar .status .percent');
+                percentTag.classList.remove('beginning');
+
                 if (statusTag) {
                     let barWidth = '' + Math.round(100 * loadStatus) + '%';
                     statusTag.style.width = barWidth;
