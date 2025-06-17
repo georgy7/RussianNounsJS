@@ -16,16 +16,16 @@ npx es-check es6 RussianNouns.js --module
 
 ls -l RussianNouns.js
 
-npx uglifyjs \
+uglifyjs \
         --mangle \
         --compress passes=2 \
-        --beautify indent_level=4,bracketize=true,ecma=6 \
+        --beautify indent_level=4 \
         --comments "/@license|@preserve|^!/" \
         --output RussianNouns.min.js -- RussianNouns.js
 
 ls -l RussianNouns.min.js
 
-unexpand -t 4 -f RussianNouns.min.js > RussianNouns.min.temp.js
+unexpand -t 4 RussianNouns.min.js > RussianNouns.min.temp.js
 sed -i 's/\t  case /\tcase /' RussianNouns.min.temp.js
 sed -i 's/\t  default/\tdefault/' RussianNouns.min.temp.js
 sed -i 's/\s\+$//' RussianNouns.min.temp.js
