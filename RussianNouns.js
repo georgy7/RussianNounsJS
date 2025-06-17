@@ -1,5 +1,5 @@
 /*!
-  RussianNounsJS v2.2.0
+  RussianNounsJS v2.3.0
   Copyright (c) 2011-2025 Georgy Ustinov
   Released under the MIT license
 */
@@ -25,25 +25,39 @@
     // - Открытый корпус http://opencorpora.org/
     // - Национальный корпус русского языка https://ruscorpora.ru/
 
+    const CaseValues = Object.freeze([
+        "именительный",
+        "родительный",
+        "дательный",
+        "винительный",
+        "творительный",
+        "предложный",
+        "местный"
+    ]);
+
     const Case = Object.freeze({
-        NOMINATIVE: 'именительный',
-        GENITIVE: 'родительный',
-        DATIVE: 'дательный',
-        ACCUSATIVE: 'винительный',
-        INSTRUMENTAL: 'творительный',
-        PREPOSITIONAL: 'предложный',
-        LOCATIVE: 'местный'
+        NOMINATIVE: CaseValues[0],
+        GENITIVE: CaseValues[1],
+        DATIVE: CaseValues[2],
+        ACCUSATIVE: CaseValues[3],
+        INSTRUMENTAL: CaseValues[4],
+        PREPOSITIONAL: CaseValues[5],
+        LOCATIVE: CaseValues[6]
     });
+
+    const GenderValues = Object.freeze([
+        "женский",
+        "мужской",
+        "средний",
+        "общий"
+    ]);
 
     const Gender = Object.freeze({
-        "FEMININE": "женский",
-        "MASCULINE": "мужской",
-        "NEUTER": "средний",
-        "COMMON": "общий"
+        "FEMININE": GenderValues[0],
+        "MASCULINE": GenderValues[1],
+        "NEUTER": GenderValues[2],
+        "COMMON": GenderValues[3]
     });
-
-    const GenderValues = Object.freeze(Object.values(Gender));
-    const CaseValues = Object.freeze(Object.values(Case));
 
     /**
      * @param o A plain old JavaScript object.
@@ -206,6 +220,39 @@
         isATransport() {
             return ((1 << 7) & this._flags) !== 0;
         }
+
+        /**
+         * Склонение существительного.
+         *
+         * Возможные значения:
+         * + -1 — несклоняемые, в основном заимствованные слова;
+         * + 0 — разносклоняемые "путь" и "дитя";
+         * + 1 — мужской и средний род без окончания;
+         * + 2 — слова на "а", "я" (м., ж. и общий род);
+         * + 3 — жен. род без окончания; слова, оканчивающиеся на "мя".
+         *
+         * Понятие «склонение» сложно применить к словам plurale tantum,
+         * поэтому этот метод возвращает для них -2 (вместо undefined).
+         */
+        getDeclension() {
+            return (this._flags >> 16) - 2;
+        }
+
+        /**
+         * Возвращает «школьный» вариант склонения:
+         * «вода» — первое склонение; «стол», «окно» — второе склонение.
+         */
+        getSchoolDeclension() {
+            const d = this.getDeclension();
+
+            if (d === 1) {
+                return 2;
+            } else if (d === 2) {
+                return 1;
+            } else {
+                return d;
+            }
+        }
     }
 
     /**
@@ -248,8 +295,10 @@
         return (mask & lcBit(lcChar)) !== 0;
     }
 
+    const vowels = 0b11101000000010000100000100100001;
+
     function isVowel(ch) {
-        return bincludes(0b11101000000010000100000100100001, ch.toLowerCase());
+        return bincludes(vowels, ch.toLowerCase());
     }
 
     function isConsonantLc(lcChar) {
@@ -271,7 +320,10 @@
     const nInit = (str, n) => str.substring(0, str.length - n);
     const init = str => nInit(str, 1);
 
-    const lastOfNInitial = (str, n) => last(nInit(str, n));
+    function lastOfNInitial(str, n) {
+        const index = str.length - n - 1;
+        return str.substring(index, index+1);
+    }
 
     // This function has O(n) complexity in relation to the number of characters in the array.
     const endsWithAny = (w, arr) => arr.some(a => w.endsWith(a));
@@ -338,7 +390,7 @@
     }
 
     function packEnding(lowerCaseUnicodeString) {
-        // Нам всё же очень важно отличать букву А от пустого места, так что 6 бит.
+        // В окончаниях важно отличать букву А от пустого места, так что 6 бит.
         // И, в качестве бонуса, так мы получаем возможность различать букву ё.
 
         let state = 0;
@@ -416,7 +468,7 @@
         'сон', 'стебель', 'стишок',
         'угол', 'умысел', 'хребет', 'церковь', 'шов',
         'ковер', 'овес', 'костер'
-    ]);
+    ].map(calculateHash));
 
     const mobileVowelB = new Set([
         'овёс', 'ковёр', 'костёр',
@@ -470,7 +522,14 @@
     const ogoEndings3 = new Set([
         'евой', 'овой', 'отой', 'живой'].map(packEnding));
 
-    const egoEndings = new Set(['кожий', 'шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
+    const egoEndings = new Set(['шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
+
+    const egoSoftM = [
+        'божий', 'ажий', 'яжий', 'ужий', 'южий',
+        'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
+    ];
+
+    const egoSoftPlural = egoSoftM.map(x => nInit(x, 2) + 'ьи');
 
     const endingsOfAdjectives = new Set([
         'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
@@ -658,55 +717,17 @@
         createLemmaOrNull: createLemmaOrNull,
 
         /**
-         * Склонение существительного.
-         *
-         * Возможные значения:
-         * + -1 — несклоняемые, в основном заимствованные слова;
-         * + 0 — разносклоняемые "путь" и "дитя";
-         * + 1 — мужской и средний род без окончания;
-         * + 2 — слова на "а", "я" (м., ж. и общий род);
-         * + 3 — жен. род без окончания; слова, оканчивающиеся на "мя".
-         *
-         * Понятие "склонение" сложно применить к словам pluralia tantum,
-         * поэтому этот метод возвращает для них undefined.
-         *
-         * @param {RussianNouns.Lemma|Object} lemma
-         * @returns {number|undefined}
+         * @deprecated since version 2.3.0
          */
         getDeclension: lemma => {
-            return getDeclension(API.createLemma(lemma));
+            return API.createLemma(lemma).getDeclension();
         },
 
         /**
-         * «Названия „первое склонение“ и „второе склонение“ в школьной практике и вузовском преподавании
-         * нередко закрепляются за разными разрядами слов. В школьных учебниках первым склонением называют изменение
-         * слов с окончанием -а (вода), во многих вузовских пособиях и академических грамматиках — слов мужского
-         * рода (стол) и среднего рода (окно)».
-         *
-         * Современный русский язык. Морфология — Камынина А.А., 1999, стр. 67
-         *
-         * Почти везде указывают это число. Например, в Викисловаре.
-         * Иногда в школьных учебниках 10 слов на «-мя» относят к разносклоняемым.
-         * Здесь это третье склонение.
-         *
-         * Понятие "склонение" сложно применить к словам pluralia tantum,
-         * поэтому этот метод возвращает для них undefined.
-         *
-         * @param lemma
-         * @returns {number} «Школьный» вариант склонения:
-         * «вода» — 1; «стол», «окно» — 2,
-         * разносклоняемые — 0; несклоняемые — минус единица.
+         * @deprecated since version 2.3.0
          */
         getSchoolDeclension: lemma => {
-            const d = getDeclension(API.createLemma(lemma));
-
-            if (d === 1) {
-                return 2;
-            } else if (d === 2) {
-                return 1;
-            } else {
-                return d;
-            }
+            return API.createLemma(lemma).getSchoolDeclension();
         },
 
         /**
@@ -937,7 +958,7 @@
             getLocativeForms(lemma) {
                 const engine = this;
                 const o = API.createLemma(lemma);
-                const declension = getDeclension(o);
+                const declension = o.getDeclension();
 
                 if (declension && (declension >= 0)) {
                     const configs = locativeDictionary.get(toKey(o));
@@ -1219,12 +1240,13 @@
     function getNounStem0(word, lcWord) {
         const lcLastChar = last(lcWord);
 
-        if (bincludes(0b11101000000010000100001100100001, lcLastChar)) {
-            if (isVowel(last(init(lcWord)))) {
-                if (lcWord.endsWith('медвежий')) {
-                    return nInit(word, 2) + upperLike('ь', nInit(word, 2));
+        if (bincludes(vowels | 512, lcLastChar)) { // vowels + й
+            if (bincludes(vowels, lastOfNInitial(lcWord, 1))) {
+                const head = nInit(word, 2);
+                if (endsWithAny(lcWord, egoSoftM)) {
+                    return head + upperLike('ь', head);
                 }
-                return nInit(word, 2);
+                return head;
             } else if ('й' !== lcLastChar) {
                 return init(word);
             }
@@ -1233,54 +1255,77 @@
         return word;
     }
 
+    function getStemDefault(word, lcWord, lcLastChar) {
+        const lcLastInit = lastOfNInitial(lcWord, 1);
+
+        if (('ь' === lcLastInit) ||
+                ('о' === lcLastChar && bincludes(0b1001100011100000000100, lcLastInit))) { // влмнстх
+            return init(word);
+        }
+
+        return getNounStem0(word, lcWord);
+    }
+
+    function getStemK(word, lcWord, stressedEnging) {
+        if ((word.length >= 4) && 
+            (endsWithAny(lcWord, ['рёк', 'нёк', 'лёк']) && stressedEnging !== false)
+        ) {
+            return nInit(word, 2) + 'ьк';
+        } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
+            return nInit(word, 2) + 'йк';
+        }
+    }
+
+    function getStemSoftSign(lemma, word, lcWord) {
+        if (mobileVowelA.has(lemma._hash) || endingIn(lemma._tail, mobileVowelB)) {
+            return nInit(word, 3) + lastOfNInitial(word, 1);
+        } else if (lcWord.endsWith('ень') &&
+                (lemma.getGender() === Gender.MASCULINE) &&
+                !endsWithAny(lcWord, en2a2b)) {
+            return nInit(word, 3) + 'н';
+        } else {
+            return init(word);
+        }
+    }
+
+    function hasMobileVowel(lemma, lcWord, lcLastBit) {
+        // Case 1: кл рс
+        // Case 2: бв клмн рст х
+        return (
+                ((0b0000110000110000000000 & lcLastBit) !== 0) &&
+                endingIn(lemma._tail, mobileVowelB) &&
+                !(['новосел', 'новосёл'].includes(lcWord))
+            ) ||
+            (
+                ((0b1001110011110000000110 & lcLastBit) !== 0) &&
+                (mobileVowelA.has(lemma._hash) || (lemma.isAnimate() && lcWord.endsWith('посол')))
+            );
+    }
+
     function getNounStem(lemma, lcWord, stressedEnging) {
         const word = lemma.text();
         const lcLastChar = last(lcWord);
         const lcLastBit = lcBit(lcLastChar);
 
-        if (!!(0b10000001001110011110000000110 & lcLastBit) && (mobileVowelA.has(lcWord)
-            || (endingIn(lemma._tail, mobileVowelB) && !unYo(lcWord).endsWith('новосел'))
-            || (lemma.isAnimate() && lcWord.endsWith('посол')))
-        ) {
-            const w = (lcLastChar === 'ь') ? init(word) : word;
-            return nInit(w, 2) + last(w);
-
-        } else if (isConsonantNotJ(lcLastChar)) {
-            if (0b10000000000 & lcLastBit) {
-                if ((vowelCount(word) >= 2) && (
-                    (endsWithAny(lcWord, ['рёк', 'нёк', 'лёк']) && stressedEnging !== false) ||
-                    (endsWithAny(lcWord, ['рек', 'нек', 'лек']) && stressedEnging === true)
-                )) {
-                    return nInit(word, 2) + 'ьк';
-                } else if (lcWord.endsWith('ёк') && isVowel(lastOfNInitial(word, 2))) {
-                    return nInit(word, 2) + 'йк';
-                }
-            } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
-                    (('лев' === lcWord) && lemma.isAnimate())) {
-                return nInit(word, 2) + upperLike('ь', last(init(word))) + last(word);
+        if (((vowels | 512) & lcLastBit) !== 0) { // vowels + й
+            return getStemDefault(word, lcWord, lcLastChar);
+        } else if (lcLastChar === 'к') {
+            const kResult = getStemK(word, lcWord, stressedEnging);
+            if (kResult) {
+                return kResult;
             }
-
-            return word;
-
+        } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
+                (('лев' === lcWord) && lemma.isAnimate())) {
+            return nInit(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
         } else if ('ь' === lcLastChar) {
-            if (lcWord.endsWith('ень') && (lemma.getGender() === Gender.MASCULINE) && !endsWithAny(lcWord, en2a2b)) {
-                return nInit(word, 3) + 'н';
-            } else {
-                return init(word);
-            }
+            return getStemSoftSign(lemma, word, lcWord);
         }
 
-        const lcLastInit = last(init(lcWord));
-
-        if ('ь' === lcLastInit) {
-            return init(word);
+        if (hasMobileVowel(lemma, lcWord, lcLastBit)) {
+            return nInit(word, 2) + last(word);
         }
 
-        if ('о' === lcLastChar && bincludes(0b1001100011100000000100, lcLastInit)) {
-            return init(word);
-        }
-
-        return getNounStem0(word, lcWord);
+        return word;
     }
 
     function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
@@ -1317,10 +1362,6 @@
             default:
                 return -2; // Error
         }
-    }
-
-    function getDeclension(lemma) {
-        return (lemma._flags >> 16) - 2;
     }
 
     function tsStem(word, lemma) {
@@ -1943,7 +1984,7 @@
             return declinePlural(engine, lemma, grCase, pluralForm);
         }
 
-        const declension = getDeclension(lemma);
+        const declension = lemma.getDeclension();
 
         switch (declension) {
             case -1:
@@ -2039,7 +2080,7 @@
         };
 
         const gender = lemma.getGender();
-        const declension = getDeclension(lemma);
+        const declension = lemma.getDeclension();
 
         const simpleFirstPart = (('й' === last(lcWord) || isVowel(last(word))) && isVowel(last(init(word))))
             ? init(word)
@@ -2395,7 +2436,11 @@
                     } else if (okWord(lcWord)) {
                         result.push(nInit(word, 2) + 'ки');
                     } else if (endingIn(lemma._tail, egoEndings)) {
-                        result.push(init(word) + 'е');
+                        if (endsWithAny(lcWord, egoSoftM)) {
+                            result.push(nInit(word, 2) + 'ьи');
+                        } else {
+                            result.push(init(word) + 'е');
+                        }
                     } else if (isAdjectiveLike(lemma, lcWord)) {
                         if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
                             result.push(init(word) + 'е');
@@ -2716,8 +2761,8 @@
             return plural + declinePluralFlatEndings[flatEndingIndex];
         } else if (lcPlural.endsWith('ые')) {
             return nInit(plural, 2) + declinePluralFlatEndings[flatEndingIndex + 1];
-        } else if (lcPlural.endsWith('ие')) {
-            return nInit(plural, 2) + declinePluralFlatEndings[flatEndingIndex + 2];
+        } else if (lcPlural.endsWith('ие') || endsWithAny(lcPlural, egoSoftPlural)) {
+            return stem + declinePluralFlatEndings[flatEndingIndex + 2];
 
         } else if ((grCaseNumber > 2) && (grCaseNumber !== 4)) {
             const itemsPerCase2 = 2;
@@ -2735,7 +2780,7 @@
             }
 
         } else {
-            const declension = getDeclension(lemma);
+            const declension = lemma.getDeclension();
 
             const genitiveStem = () => {
                 const lcStem = stem.toLowerCase();
