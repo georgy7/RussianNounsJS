@@ -1,6 +1,7 @@
 
     // http://dict.ruslang.ru/freq.php
 
+// <editor-fold defaultstate="collapsed" desc="const mostFrequent = new Set([ words ]);">
     const mostFrequent = new Set([
         'год',
         'человек',
@@ -12739,9 +12740,11 @@
         'словарный'
     ]);
 
+// </editor-fold>
+
 
 var window = self;
-importScripts('RussianNouns.js');
+import { default as RussianNouns } from './RussianNouns.js';
 
 let testData;
 let workerIndex, letterIndex;
@@ -12946,11 +12949,19 @@ let main = function () {
                 pluraleTantum: pluraleTantum
             });
 
-            // Я здесь даже не проверяю тип. Какой смысл?
-            // Я могу лишь выкинуть исключение, а оно итак вылетит на следующей строчке.
-            // Если там null, в консоли будет TypeError.
+            if (null === lemma) {
+                throw `Could not create lemma: ${word}`;
+            }
 
-            const lemmaUpperCase = lemma.newText(o => o.text().toUpperCase());
+            const lemmaUpperCase = RussianNouns.createLemmaOrNull({
+                text: word.toUpperCase(),
+                gender: gender,
+                animate: animate,
+                surname: surname,
+                name: name,
+                indeclinable: fixed,
+                pluraleTantum: pluraleTantum
+            });
 
             const resultWordForms = [];
 

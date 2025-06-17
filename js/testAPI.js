@@ -72,7 +72,7 @@ function assertAllCases(results, values) {
 
 // </editor-fold>
 
-const RussianNouns = require('./RussianNouns.js');
+import { default as RussianNouns } from './RussianNouns.js';
 
 (() => {
     const rne = new RussianNouns.Engine();
@@ -98,10 +98,6 @@ const RussianNouns = require('./RussianNouns.js');
 
     result = rne.decline(coat, Case.GENITIVE);
     assertEqualsSingleValue(result, "пальто");
-
-    // deprecated
-    result = RussianNouns.getDeclension(coat);
-    assertEquals(result, -1);
 
     assertEquals(coat.getDeclension(), -1);
 
@@ -132,10 +128,6 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 4 ----------------');
 
-    // deprecated
-    assertEquals(RussianNouns.getDeclension(mountain), 2);
-    assertEquals(RussianNouns.getSchoolDeclension(mountain), 1);
-
     assertEquals(mountain.getDeclension(), 2);
     assertEquals(mountain.getSchoolDeclension(), 1);
 
@@ -145,9 +137,6 @@ const RussianNouns = require('./RussianNouns.js');
         text: 'путь',
         gender: Gender.MASCULINE
     });
-
-    // deprecated
-    assertEquals(RussianNouns.getDeclension(way), 0);
 
     assertEquals(way.getDeclension(), 0);
 
@@ -1416,82 +1405,4 @@ const RussianNouns = require('./RussianNouns.js');
 
 
     console.log('----------------------------------');
-
-    console.log('Rarely used parts of API.');
-
-    (() => {
-        let x = RussianNouns.createLemma({
-            text: 'абв',
-            gender: Gender.FEMININE
-        });
-
-        assertEquals(x.text(), 'абв');
-        assertEquals(x.lower(), 'абв');
-        assertEquals(x.isPluraleTantum(), false);
-        assertEquals(x.getGender(), Gender.FEMININE);
-
-        let y = x.newText(o => o.text() + 'г');
-        assertEquals(x.text(), 'абв');
-        assertEquals(x.lower(), 'абв');
-        assertEquals(y.text(), 'абвг');
-        assertEquals(y.lower(), 'абвг');
-        // Пожалуйста, не используйте поле _hash в пользовательском коде.
-        // Тест просто проверяет, что внутренний хэш пересчитывается.
-        assertEquals(true, x._hash != y._hash);
-        assertEquals(y.getGender(), Gender.FEMININE);
-
-        y = x.newText(() => 'Александр');
-        assertEquals(x.text(), 'абв');
-        assertEquals(x.lower(), 'абв');
-        assertEquals(y.text(), 'Александр');
-        assertEquals(y.lower(), 'александр');
-        // Пожалуйста, не используйте поле _hash в пользовательском коде.
-        assertEquals(true, x._hash != y._hash);
-        assertEquals(y.getGender(), Gender.FEMININE);
-
-        y = x.newGender(() => Gender.MASCULINE);
-        assertEquals(x.isPluraleTantum(), false);
-        assertEquals(x.getGender(), Gender.FEMININE);
-        assertEquals(y.isPluraleTantum(), false);
-        assertEquals(y.getGender(), Gender.MASCULINE);
-        assertEquals(x.text(), y.text());
-        assertEquals(x.lower(), y.lower());
-
-        y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
-        assertEquals(y.getGender(), Gender.MASCULINE);
-
-        x = x.newText(o => o.text() + 'о');
-        y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
-        assertEquals(y.getGender(), Gender.NEUTER);
-
-        x = x.newText(o => o.text().toUpperCase());
-        assertEquals(x.text(), 'АБВО');
-        assertEquals(x.lower(), 'абво');
-        assertEquals(x.getGender(), Gender.FEMININE);
-
-        x = RussianNouns.createLemma({
-            text: 'сын',
-            gender: Gender.MASCULINE
-        });
-        y = x.newText(() => 'юноша');
-        // deprecated
-        assertEquals(RussianNouns.getDeclension(x), 1);
-        assertEquals(RussianNouns.getDeclension(y), 2);
-        // new API
-        assertEquals(x.getDeclension(), 1);
-        assertEquals(y.getDeclension(), 2);
-
-        x = RussianNouns.createLemma({
-            text: 'абвгдеёжзиклмя',
-            gender: Gender.NEUTER
-        });
-        y = x.newGender(() => Gender.FEMININE);
-        // deprecated
-        assertEquals(RussianNouns.getDeclension(x), 3);
-        assertEquals(RussianNouns.getDeclension(y), 2);
-        // new API
-        assertEquals(x.getDeclension(), 3);
-        assertEquals(y.getDeclension(), 2);
-    })();
-
 })();
