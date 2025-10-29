@@ -389,26 +389,25 @@
         return ((0x7fffffff & hash) * 2) + start;
     }
 
-    function toTenBitHash(hash) {
-        // Специально для 1024-битного фильтра Блума
-        return (hash >>> 30) ^
-                ((hash >>> 20) & 0x3ff) ^
-                ((hash >>> 10) & 0x3ff) ^
-                (hash & 0x3ff);
+    function to11BitHash(hash) {
+        // Специально для 2048-битного фильтра Блума
+        return ((hash >>> 22) & 0x7ff) ^
+                ((hash >>> 11) & 0x7ff) ^
+                (hash & 0x7ff);
     }
 
     /**
-     * @param {Uint8ClampedArray} filter - 128 bytes
-     * @param {number} hash10 - Ten bits
+     * @param {Uint8ClampedArray} filter - 256 bytes
+     * @param {number} hash11 - Eleven bits
      * @returns {boolean}
      */
-    function inBloom(filter, hash10) {
-        return !!((filter[hash10 >>> 3] >>> (7 - (hash10 % 8))) & 1);
+    function inBloom(filter, hash11) {
+        return !!((filter[hash11 >>> 3] >>> (7 - (hash11 % 8))) & 1);
     }
 
-    function bloomAdd(filter, hash10) {
-        const index = hash10 >>> 3;
-        filter[index] = filter[index] | (1 << (7 - (hash10 % 8)));
+    function bloomAdd(filter, hash11) {
+        const index = hash11 >>> 3;
+        filter[index] = filter[index] | (1 << (7 - (hash11 % 8)));
     }
 
     function packEnding(lowerCaseUnicodeString) {
@@ -478,9 +477,9 @@
         126869, 23630, 11218
     ]);
 
-    const stressBloomAB = new Uint8ClampedArray(128);
-    stressHashesA.forEach(h => bloomAdd(stressBloomAB, toTenBitHash(h)));
-    stressHashesB.forEach(h => bloomAdd(stressBloomAB, toTenBitHash(h)));
+    const stressBloomAB = new Uint8ClampedArray(256);
+    stressHashesA.forEach(h => bloomAdd(stressBloomAB, to11BitHash(h)));
+    stressHashesB.forEach(h => bloomAdd(stressBloomAB, to11BitHash(h)));
 
     // Stemmer data
     const mobileVowelA = new Set(['бубен', 'бугор',
@@ -854,7 +853,7 @@
                     homonyms.push([extendedFlags, settings]);
                 }
 
-                bloomAdd(_bloomFilter, toTenBitHash(lemmaObject._hash));
+                bloomAdd(_bloomFilter, to11BitHash(lemmaObject._hash));
             };
 
             const _toResult = ch => {
@@ -872,7 +871,7 @@
             }
 
             this.hasStressedEndingSingular = function (query, grCase) {
-                if (inBloom(_bloomFilter, toTenBitHash(query._hash))) {
+                if (inBloom(_bloomFilter, to11BitHash(query._hash))) {
 
                     const caseIndex = CaseValues.indexOf(grCase);
 
@@ -896,7 +895,7 @@
             };
 
             this.hasStressedEndingPlural = function (query, grCase) {
-                if (inBloom(_bloomFilter, toTenBitHash(query._hash))) {
+                if (inBloom(_bloomFilter, to11BitHash(query._hash))) {
 
                     const caseIndex = CaseValues.indexOf(grCase);
 
@@ -2064,7 +2063,7 @@
         }
     }
 
-    const highPriorityBloomFilter = new Uint8ClampedArray(128);
+    const highPriorityBloomFilter = new Uint8ClampedArray(256);
     const highPriorityExceptions = Object.freeze([
         [
             [
@@ -2161,7 +2160,7 @@
 
     for (const rule of highPriorityExceptions) {
         Object.keys(rule[1]).map(word =>
-            bloomAdd(highPriorityBloomFilter, toTenBitHash(calculateHash(word))));
+            bloomAdd(highPriorityBloomFilter, to11BitHash(calculateHash(word))));
     }
 
     // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
@@ -2337,7 +2336,7 @@
             }
         }
 
-        if (inBloom(highPriorityBloomFilter, toTenBitHash(lemma._hash))) {
+        if (inBloom(highPriorityBloomFilter, to11BitHash(lemma._hash))) {
             for (const [key, genderExceptions] of highPriorityExceptions) {
 
                 const keyGender = key[0];
