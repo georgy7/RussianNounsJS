@@ -42,7 +42,14 @@
             const abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
             const parts = [];
 
-            const partCount = 4;
+            // Режим профайлинга /testing.html#prof
+            // предназначен для запуска на локальной машине.
+            // Подразумеваю, что import работает мгновенно.
+            // Даже не заморачивался со всякими async/await.
+
+            const profileMode = location.hash.endsWith("prof");
+
+            const partCount = profileMode ? 1 : 4;
             const chunkSize = Math.floor(abc.length / partCount);
 
             for (let i = 0; i < (partCount-1); i++) {
@@ -58,6 +65,26 @@
             const completed = [];
             const workers = [];
 
+            if (profileMode) {
+                import('./RussianNouns.js');
+                import("./test2.js");
+
+                workers.push({
+                    terminate: () => {}
+                });
+
+                window.postCall = function (data) {
+                    if (workers[0].onmessage) {
+                        workers[0].onmessage({"data": data});
+                    } else {
+                        setTimeout(() => {
+                            console.log("Waiting onmessage function...");
+                            window.postCall(data);
+                        }, 50);
+                    }
+                };
+            }
+
             for (let part of parts) {
                 results.push([]);
                 completed.push(false);
@@ -66,7 +93,10 @@
                     Array(part.length).fill(null)
                 );
 
-                workers.push(new Worker('js/test2.js'));
+                if (!profileMode) {
+                    workers.push(new Worker('js/test2.js'));
+                }
+
                 jsonPromises.push([]);
             }
 
@@ -76,14 +106,20 @@
                     return;
                 }
 
-                var worker = workers[workerIndex];
                 jsonPromises[workerIndex][letterIndex].then(response => response.json()).then(words => {
-                    worker.postMessage({
+                    const messageForWorker = {
                         type: 'start',
                         words: words,
                         workerIndex: workerIndex,
                         letterIndex: letterIndex
-                    });
+                    };
+
+                    if (profileMode) {
+                        sendToWorker(messageForWorker);
+                    } else {
+                        var worker = workers[workerIndex];
+                        worker.postMessage(messageForWorker);
+                    }
                 });
             };
 

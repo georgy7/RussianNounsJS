@@ -1,6 +1,7 @@
 
     // http://dict.ruslang.ru/freq.php
 
+// <editor-fold defaultstate="collapsed" desc="const mostFrequent = new Set([ words ]);">
     const mostFrequent = new Set([
         'год',
         'человек',
@@ -12739,9 +12740,16 @@
         'словарный'
     ]);
 
+// </editor-fold>
+
 
 var window = self;
-importScripts('RussianNouns.js');
+
+if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+    importScripts('RussianNouns.js');
+}
+
+const post = (typeof postCall === "function") ? postCall : postMessage;
 
 let testData;
 let workerIndex, letterIndex;
@@ -12890,7 +12898,7 @@ let main = function () {
             if ((i % 250 == 0) || (i == (data.length - 1))) {
                 var stepWidth = 1 / totalLoadingSteps;
                 var loadStatus = stepWidth * (loadingStepCompleted + ((1 + i) / data.length));
-                postMessage({
+                post({
                     type: 'loading',
                     status: loadStatus,
                     workerIndex: workerIndex,
@@ -13200,7 +13208,7 @@ let main = function () {
     test(rne, testData.c, testData.dict, RussianNouns.Gender.COMMON, 4);
     test(rne, testData.p, testData.dict, null, 5);
 
-    postMessage({
+    post({
         type: 'testResult',
         workerIndex: workerIndex,
         letterIndex: letterIndex,
@@ -13219,7 +13227,9 @@ let main = function () {
 
 };
 
-onmessage = function (e) {
+
+
+function work(e) {
     if (e.data.type === 'start') {
         testData = e.data.words;
         testData.dict = knowThyself(testData.dict);
@@ -13227,7 +13237,7 @@ onmessage = function (e) {
         workerIndex = e.data.workerIndex;
         letterIndex = e.data.letterIndex;
 
-        postMessage({
+        post({
             type: 'started',
             wordsLen: (
                 testData.m.length +
@@ -13239,6 +13249,14 @@ onmessage = function (e) {
 
         main();
     }
-};
+}
 
-postMessage({type: 'ready'});
+
+if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
+    onmessage = work;
+} else {
+    window.sendToWorker = data => work({"data": data});
+}
+
+
+post({type: 'ready'});
