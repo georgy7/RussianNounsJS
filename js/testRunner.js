@@ -38,15 +38,11 @@
             }
         }
 
-        (() => {
+        (async () => {
             const abc = "абвгдежзийклмнопрстуфхцчшщъыьэюя".split('');
             const parts = [];
 
             // Режим профайлинга /testing.html#prof
-            // предназначен для запуска на локальной машине.
-            // Подразумеваю, что import работает мгновенно.
-            // Даже не заморачивался со всякими async/await.
-
             const profileMode = location.hash.endsWith("prof");
 
             const partCount = profileMode ? 1 : 4;
@@ -66,9 +62,6 @@
             const workers = [];
 
             if (profileMode) {
-                import('./RussianNouns.js');
-                import("./test2.js");
-
                 workers.push({
                     terminate: () => {}
                 });
@@ -83,6 +76,9 @@
                         }, 50);
                     }
                 };
+
+                await import('./RussianNouns.js');
+                await import("./test2.js");
             }
 
             for (let part of parts) {

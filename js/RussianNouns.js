@@ -850,32 +850,34 @@
                 }
             };
 
+            const _toResult = ch => {
+                switch (ch) {
+                    case 'E':
+                        return [true];
+                    case 'e':
+                        return [true, false];
+                    case 'b':
+                    case 's':
+                        return [false, true];
+                    default:
+                        return [false];
+                }
+            }
+
             this.hasStressedEndingSingular = function (query, grCase) {
                 const caseIndex = CaseValues.indexOf(grCase);
 
                 if (caseIndex >= 0) {
                     let v = _getOne(query);
-                    if (!v && (query.getGender() === Gender.MASCULINE)) {
-                        if (stressHashesA.has(query._hash)) {
-                            v = 'SEESEEE-';
-                        } else if (stressHashesB.has(query._hash)) {
-                            v = 'SEEEEEE-';
-                        }
-                    }
 
                     if (v) {
                         const singular = v.split('-')[0];
-
-                        if (singular[caseIndex] === 'E') {
-                            return [true];
-                        } else if (singular[caseIndex] === 'e') {
-                            return [true, false];
-                        } else if (singular[caseIndex] === 'b') {
-                            return [false, true];
-                        } else if (singular[caseIndex] === 's') {
-                            return [false, true];
-                        } else {
-                            return [false];
+                        return _toResult(singular[caseIndex]);
+                    } else if (query.getGender() === Gender.MASCULINE) {
+                        if (stressHashesA.has(query._hash)) {
+                            return _toResult('SEESEEE'[caseIndex]);
+                        } else if (stressHashesB.has(query._hash)) {
+                            return _toResult('SEEEEEE'[caseIndex]);
                         }
                     }
                 }
@@ -888,27 +890,14 @@
 
                 if (caseIndex >= 0 && caseIndex < 6) {
                     let v = _getOne(query);
-                    if (!v && (query.getGender() === Gender.MASCULINE)) {
-                        if (stressHashesA.has(query._hash) ||
-                                (query.isAnimate() && stressHashesB.has(query._hash))) {
-                            v = '-EEEEEE';
-                        }
-                    }
 
                     if (v) {
                         const plural = v.split('-')[1];
-
-                        if (plural[caseIndex] === 'E') {
-                            return [true];
-                        } else if (plural[caseIndex] === 'e') {
-                            return [true, false];
-                        } else if (plural[caseIndex] === 'b') {
-                            return [false, true];
-                        } else if (plural[caseIndex] === 's') {
-                            return [false, true];
-                        } else {
-                            return [false];
-                        }
+                        return _toResult(plural[caseIndex]);
+                    } else if ((query.getGender() === Gender.MASCULINE) &&
+                            (stressHashesA.has(query._hash) ||
+                                    (query.isAnimate() && stressHashesB.has(query._hash)))) {
+                        return _toResult('E');
                     }
                 }
 
