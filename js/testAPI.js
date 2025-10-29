@@ -77,10 +77,13 @@ const RussianNouns = require('./RussianNouns.js');
 (() => {
     const rne = new RussianNouns.Engine();
 
+    // Контрольная группа для проверки локальности настроек внутри движка
+    const rneControl = new RussianNouns.Engine();
+
     const Gender = RussianNouns.Gender;
     const Case = RussianNouns.Case;
 
-    let result;
+    let result, control;
 
     result = rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.GENITIVE);
     assertEqualsSingleValue(result, "имени");
@@ -179,10 +182,15 @@ const RussianNouns = require('./RussianNouns.js');
 
     result = rne.decline(cringe, Case.INSTRUMENTAL);
     assertEqualsSingleValue(result, "кринжем");
+    control = rneControl.decline(cringe, Case.INSTRUMENTAL);
+    assertEqualsSingleValue(control, "кринжем");
 
     rne.sd.put(cringe, 'SEESESE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
     assertEqualsSingleValue(result, "кринжом");
+
+    control = rneControl.decline(cringe, Case.INSTRUMENTAL);
+    assertEqualsSingleValue(control, "кринжем");
 
     rne.sd.put(cringe, 'SEESbSE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
@@ -191,6 +199,9 @@ const RussianNouns = require('./RussianNouns.js');
     assertEquals(result[0], "кринжем");
     assertEquals(result[1], "кринжом");
 
+    control = rneControl.decline(cringe, Case.INSTRUMENTAL);
+    assertEqualsSingleValue(control, "кринжем");
+
     rne.sd.put(cringe, 'SEESsSE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
     assertIsArray(result);
@@ -198,12 +209,18 @@ const RussianNouns = require('./RussianNouns.js');
     assertEquals(result[0], "кринжем");
     assertEquals(result[1], "кринжом");
 
+    control = rneControl.decline(cringe, Case.INSTRUMENTAL);
+    assertEqualsSingleValue(control, "кринжем");
+
     rne.sd.put(cringe, 'SEESeSE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
     assertIsArray(result);
     assertEquals(result.length, 2);
     assertEquals(result[0], "кринжом");
     assertEquals(result[1], "кринжем");
+
+    control = rneControl.decline(cringe, Case.INSTRUMENTAL);
+    assertEqualsSingleValue(control, "кринжем");
 
     console.log('--------------- 9 ----------------');
 

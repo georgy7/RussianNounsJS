@@ -478,6 +478,10 @@
         126869, 23630, 11218
     ]);
 
+    const stressBloomAB = new Uint8ClampedArray(128);
+    stressHashesA.forEach(h => bloomAdd(stressBloomAB, toTenBitHash(h)));
+    stressHashesB.forEach(h => bloomAdd(stressBloomAB, toTenBitHash(h)));
+
     // Stemmer data
     const mobileVowelA = new Set(['бубен', 'бугор',
         'ветер', 'вошь', 'вымысел', 'горшок',
@@ -760,6 +764,7 @@
         StressDictionary: function StressDictionary() {
 
             const _data = new Map();
+            const _bloomFilter = Uint8ClampedArray.from(stressBloomAB);
 
             const _getKey = function (lemma) {
                 // Если убрать информацию о склонении из флагов, находящуюся в старших 16 битах,
@@ -848,6 +853,8 @@
                 } else {
                     homonyms.push([extendedFlags, settings]);
                 }
+
+                bloomAdd(_bloomFilter, toTenBitHash(lemmaObject._hash));
             };
 
             const _toResult = ch => {
@@ -865,19 +872,22 @@
             }
 
             this.hasStressedEndingSingular = function (query, grCase) {
-                const caseIndex = CaseValues.indexOf(grCase);
+                if (inBloom(_bloomFilter, toTenBitHash(query._hash))) {
 
-                if (caseIndex >= 0) {
-                    let v = _getOne(query);
+                    const caseIndex = CaseValues.indexOf(grCase);
 
-                    if (v) {
-                        const singular = v.split('-')[0];
-                        return _toResult(singular[caseIndex]);
-                    } else if (query.getGender() === Gender.MASCULINE) {
-                        if (stressHashesA.has(query._hash)) {
-                            return _toResult('SEESEEE'[caseIndex]);
-                        } else if (stressHashesB.has(query._hash)) {
-                            return _toResult('SEEEEEE'[caseIndex]);
+                    if (caseIndex >= 0) {
+                        let v = _getOne(query);
+
+                        if (v) {
+                            const singular = v.split('-')[0];
+                            return _toResult(singular[caseIndex]);
+                        } else if (query.getGender() === Gender.MASCULINE) {
+                            if (stressHashesA.has(query._hash)) {
+                                return _toResult('SEESEEE'[caseIndex]);
+                            } else if (stressHashesB.has(query._hash)) {
+                                return _toResult('SEEEEEE'[caseIndex]);
+                            }
                         }
                     }
                 }
@@ -886,18 +896,21 @@
             };
 
             this.hasStressedEndingPlural = function (query, grCase) {
-                const caseIndex = CaseValues.indexOf(grCase);
+                if (inBloom(_bloomFilter, toTenBitHash(query._hash))) {
 
-                if (caseIndex >= 0 && caseIndex < 6) {
-                    let v = _getOne(query);
+                    const caseIndex = CaseValues.indexOf(grCase);
 
-                    if (v) {
-                        const plural = v.split('-')[1];
-                        return _toResult(plural[caseIndex]);
-                    } else if ((query.getGender() === Gender.MASCULINE) &&
-                            (stressHashesA.has(query._hash) ||
-                                    (query.isAnimate() && stressHashesB.has(query._hash)))) {
-                        return _toResult('E');
+                    if (caseIndex >= 0 && caseIndex < 6) {
+                        let v = _getOne(query);
+
+                        if (v) {
+                            const plural = v.split('-')[1];
+                            return _toResult(plural[caseIndex]);
+                        } else if ((query.getGender() === Gender.MASCULINE) &&
+                                (stressHashesA.has(query._hash) ||
+                                        (query.isAnimate() && stressHashesB.has(query._hash)))) {
+                            return _toResult('E');
+                        }
                     }
                 }
 
