@@ -1,6 +1,5 @@
 
-    // http://dict.ruslang.ru/freq.php
-
+// http://dict.ruslang.ru/freq.php
 // <editor-fold defaultstate="collapsed" desc="const mostFrequent = new Set([ words ]);">
     const mostFrequent = new Set([
         'год',
@@ -12739,7 +12738,6 @@
         'скептический',
         'словарный'
     ]);
-
 // </editor-fold>
 
 

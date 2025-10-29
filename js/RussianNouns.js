@@ -107,6 +107,7 @@
         constructor(o) {
             if (o instanceof Lemma) {
                 this._txt = o._txt;
+                this._lc = o._lc;
                 this._hash = o._hash;
                 this._tail = o._tail;
                 this._flags = o._flags;
@@ -118,11 +119,10 @@
                     this._flags = 1 + GenderValues.indexOf(o.gender);
                 }
 
-                const lcWord = o.text.toLowerCase();
-
                 this._txt = o.text;
-                this._hash = calculateHash(lcWord);
-                this._tail = packEnding(lcWord);
+                this._lc = o.text.toLowerCase();
+                this._hash = calculateHash(this._lc);
+                this._tail = packEnding(this._lc);
 
                 this._flags |= (1 << 3) * (o.indeclinable&1);
                 this._flags |= (1 << 4) * (o.animate&1);
@@ -131,7 +131,7 @@
                 this._flags |= (1 << 7) * (o.transport&1);
 
                 this._flags |= (1 << 16) * (
-                    2 + calculateDeclension(lcWord, o.pluraleTantum, o.gender, o.indeclinable)
+                    2 + calculateDeclension(this._lc, o.pluraleTantum, o.gender, o.indeclinable)
                 );
             }
         }
@@ -142,6 +142,7 @@
         newText(provider) {
             const lemmaCopy = new Lemma(this);
             lemmaCopy._txt = provider(this);
+            lemmaCopy._lc = lemmaCopy._txt.toLowerCase();
             lemmaCopy._hash = calculateHash(lemmaCopy.lower());
             lemmaCopy._flags &= 0xFFFF;
             lemmaCopy._flags |= (1 << 16) * (
@@ -187,7 +188,7 @@
         }
 
         lower() {
-            return this._txt.toLowerCase();
+            return this._lc;
         }
 
         isPluraleTantum() {
@@ -1495,6 +1496,7 @@
     function fastClone(lemma, newText) {
         const lemmaCopy = new Lemma(lemma);
         lemmaCopy._txt = newText;
+        lemmaCopy._lc = newText.toLowerCase();
         lemmaCopy._hash = calculateHash(lemmaCopy.lower());
         // Здесь не обновляется склонение, потому что
         // везде, где я использую эту функцию, я уже знаю,
