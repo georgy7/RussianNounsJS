@@ -673,12 +673,13 @@
 
     function extractPreposition(locativeConfig) {
         const code = ((locativeConfig >> 3) & 0b111) + 1;
-        if (LocativePreposition.V === code) {
-            return "в"
-        } else if (LocativePreposition.VO === code) {
-            return "во"
-        } else if (LocativePreposition.NA === code) {
-            return "на"
+        switch (code) {
+            case LocativePreposition.V:
+                return "в";
+            case LocativePreposition.VO:
+                return "во";
+            case LocativePreposition.NA:
+                return "на";
         }
     }
 
@@ -2054,14 +2055,15 @@
     }
 
     function toLocativeSingular(engine, declension, lemma, declensionType) {
-        if (0 === declension) {
-            return decline0(engine, lemma, Case.PREPOSITIONAL);
-        } else if (1 === declension) {
-            return toLocativeSingular1(engine, lemma, declensionType);
-        } else if (2 === declension) {
-            return decline2(engine, lemma, Case.PREPOSITIONAL);
-        } else if (3 === declension) {
-            return decline3(engine, lemma, Case.PREPOSITIONAL);
+        switch (declension) {
+            case 0:
+                return decline0(engine, lemma, Case.PREPOSITIONAL);
+            case 1:
+                return toLocativeSingular1(engine, lemma, declensionType);
+            case 2:
+                return decline2(engine, lemma, Case.PREPOSITIONAL);
+            case 3:
+                return decline3(engine, lemma, Case.PREPOSITIONAL);
         }
     }
 
