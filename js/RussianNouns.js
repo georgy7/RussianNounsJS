@@ -99,9 +99,9 @@
     class Lemma {
 
         /**
-         * Не для внешнего использования.
-         * Пожалуйста, используйте {@link RussianNouns.createLemma}
-         * или {@link RussianNouns.createLemmaOrNull} вместо конструктора.
+         * Пожалуйста, используйте статические методы create
+         * и createOrNull вместо конструктора.
+         *
          * @param {RussianNouns.Lemma|Object} o
          */
         constructor(o) {
@@ -134,6 +134,38 @@
                     2 + calculateDeclension(this._lc, o.pluraleTantum, o.gender, o.indeclinable)
                 );
             }
+        }
+
+        /**
+         * Если параметр — уже лемма, вернет тот же объект, а не копию.
+         *
+         * @param {RussianNouns.Lemma|Object} o
+         * @throws {Error} Ошибки из конструктора леммы.
+         * @returns {RussianNouns.Lemma}
+         */
+        static create(o) {
+            if (o instanceof this) {
+                return o;
+            }
+
+            const err = validateCreateLemma(o);
+            if (err) {
+                throw new Error(err);
+            }
+
+            return Object.freeze(new this(o));
+        }
+
+        /**
+         * Создание леммы с минимальными накладными расходами.
+         *
+         * @param {Object} options
+         * @returns {RussianNouns.Lemma|null}
+         */
+        static createOrNull(options) {
+            return (null === validateCreateLemma(options)) ?
+                    Object.freeze(new this(options)) :
+                    null;
         }
 
         /**
@@ -269,23 +301,6 @@
         return (msb * 0x100000000) + lemma._hash;
     }
 
-    function createLemmaOrNull(options) {
-        return (null === validateCreateLemma(options)) ? Object.freeze(new Lemma(options)) : null;
-    }
-
-    function createLemma(o) {
-        if (o instanceof Lemma) {
-            return o;
-        }
-
-        const err = validateCreateLemma(o);
-        if (err) {
-            throw new Error(err);
-        }
-
-        return Object.freeze(new Lemma(o));
-    }
-
     // Without ё, the Russian alphabet consists of 32 letters.
     function lcBit(lcChar) {
         const x = lcChar.charCodeAt(0) - 1072;
@@ -406,16 +421,16 @@
 
     /**
      * @param {Uint8ClampedArray} filter - 256 bytes
-     * @param {number} hash11 - Eleven bits
+     * @param {number} index - Eleven bits
      * @returns {boolean}
      */
-    function inBloom(filter, hash11) {
-        return !!((filter[hash11 >>> 3] >>> (7 - (hash11 % 8))) & 1);
+    function inBloom(filter, index) {
+        return !!((filter[index >>> 3] >>> (7 - (index % 8))) & 1);
     }
 
-    function bloomAdd(filter, hash11) {
-        const index = hash11 >>> 3;
-        filter[index] = filter[index] | (1 << (7 - (hash11 % 8)));
+    function bloomAdd(filter, index) {
+        const byteIndex = index >>> 3;
+        filter[byteIndex] = filter[byteIndex] | (1 << (7 - (index % 8)));
     }
 
     function packEnding(lowerCaseUnicodeString) {
@@ -727,41 +742,33 @@
          * Объекты этого класса содержат также грамматическую и семантическую информацию,
          * позволяющую выбирать стратегии словоизменения и различать омонимы.
          *
-         * Пожалуйста, используйте {@link RussianNouns.createLemma}
-         * или {@link RussianNouns.createLemmaOrNull} вместо конструктора.
+         * Пожалуйста, используйте `Lemma.create`
+         * или `Lemma.createOrNull` вместо конструктора.
          */
         Lemma: Lemma,
 
         /**
-         * Интерфейс с именованными параметрами для создания лемм.
-         * Если параметр — уже лемма, вернет тот же объект, а не копию.
-         *
-         * @param {RussianNouns.Lemma|Object} o
-         * @throws {Error} Ошибки из конструктора леммы.
-         * @returns {RussianNouns.Lemma} Иммутабельный объект.
+         * То же, что Lemma.create
          */
-        createLemma: createLemma,
+        createLemma: o => Lemma.create(o),
 
         /**
-         * Безопасное создание леммы с минимальными накладными расходами.
-         *
-         * @param {Object} options
-         * @returns {RussianNouns.Lemma|null}
+         * То же, что Lemma.createOrNull
          */
-        createLemmaOrNull: createLemmaOrNull,
+        createLemmaOrNull: o => Lemma.createOrNull(o),
 
         /**
          * @deprecated since version 2.3.0
          */
         getDeclension: lemma => {
-            return API.createLemma(lemma).getDeclension();
+            return Lemma.create(lemma).getDeclension();
         },
 
         /**
          * @deprecated since version 2.3.0
          */
         getSchoolDeclension: lemma => {
-            return API.createLemma(lemma).getSchoolDeclension();
+            return Lemma.create(lemma).getSchoolDeclension();
         },
 
         /**
@@ -843,7 +850,7 @@
                     throw new Error('Bad settings format.');
                 }
 
-                const lemmaObject = createLemma(lemma);
+                const lemmaObject = Lemma.create(lemma);
                 const key = _getKey(lemmaObject);
 
                 let homonyms = _data.get(key);
@@ -949,7 +956,7 @@
              * Второй предложный падеж (местный падеж, локатив) не включен в предложный.
              */
             decline(lemma, grammaticalCase, pluralForm) {
-                const lemmaObject = (lemma instanceof API.Lemma) ? lemma : API.createLemma(lemma);
+                const lemmaObject = Lemma.create(lemma);
                 return declineAsList(this, lemmaObject, grammaticalCase, pluralForm);
             }
 
@@ -958,7 +965,7 @@
              * @returns {Array}
              */
             pluralize(lemma) {
-                const o = API.createLemma(lemma);
+                const o = Lemma.create(lemma);
 
                 if (o.isPluraleTantum()) {
                     return [o.text()];
@@ -989,7 +996,7 @@
              */
             getLocativeForms(lemma) {
                 const engine = this;
-                const o = API.createLemma(lemma);
+                const o = Lemma.create(lemma);
                 const declension = o.getDeclension();
 
                 if (declension && (declension >= 0)) {
@@ -1129,7 +1136,7 @@
                 const lemma = Object.assign({}, lemmaPrototype);
                 lemma.text = word;
 
-                const lemmaKey = toKey(createLemma(lemma));
+                const lemmaKey = toKey(Lemma.create(lemma));
 
                 let configArray = map.get(lemmaKey);
                 if (!configArray) {
