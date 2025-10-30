@@ -434,6 +434,10 @@
     }
 
     function packEnding(lowerCaseUnicodeString) {
+        // Подготовить строку для сопоставления через endingIn.
+        // Это не такое уж плохое решение, но оно подходит только
+        // для больших списков коротких окончаний (5 букв максимум).
+
         // В окончаниях важно отличать букву А от пустого места, так что 6 бит.
         // И, в качестве бонуса, так мы получаем возможность различать букву ё.
 
@@ -448,6 +452,67 @@
         }
 
         return state;
+    }
+
+    function toLetterTree(endingArray) {
+        // Это уже поинтереснее. Мы строим дерево объектов, в котором корень -
+        // конец всех строк массива. В качестве его ключей выступают последние буквы строк,
+        // а в качестве значений - другие объекты, ключами которых будут уже предпоследние буквы,
+        // и так далее. Значение 0 вместо объекта означает начало строки.
+
+        // При этом часть информации о строках теряется, поскольку она не нужна:
+        // если в исходном массиве есть строки "ый" и "итый", достаточно проверить две буквы,
+        // чтобы убедиться, что слово заканчивается на одно из перечисленных окончаний.
+        // Можно было бы придумать такую структуру, где все данные исходного списка сохраняются,
+        // но в контексте нашей задачи это пустая трата оперативной памяти.
+
+        // Результат используется в функции endsWithLeaf.
+
+        let result = new Map();
+
+        for (let ending of endingArray) {
+            let cursor = result;
+
+            for (let i = ending.length - 1; i >= 0; i--) {
+                const ch = ending.charCodeAt(i);
+
+                if (i > 0) {
+                    const previous = cursor.get(ch);
+
+                    if (previous === 0) {
+                        break;
+                    } else if (previous === undefined) {
+                        cursor.set(ch, new Map());
+                    }
+
+                    cursor = cursor.get(ch);
+                } else {
+                    cursor.set(ch, 0);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    function endsWithLeaf(word, tree) {
+        let cursor = tree;
+
+        for (let i = word.length - 1; i >= 0; i--) {
+            const ch = word.charCodeAt(i);
+
+            if (!cursor.has(ch)) {
+                return false;
+            } else {
+                const value = cursor.get(ch);
+                if (0 === value) {
+                    return true;
+                } else {
+                    cursor = value;
+                }
+            }
+
+        }
     }
 
     function extract(input) {
@@ -577,7 +642,7 @@
         'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
     ];
 
-    const egoSoftPlural = egoSoftM.map(x => nInit(x, 2) + 'ьи');
+    const egoSoftPlural = toLetterTree(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
 
     const endingsOfAdjectives = new Set([
         'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
@@ -2670,6 +2735,8 @@
         'суда', 'корм'
     ];
 
+    const explicitOv1Tree = toLetterTree(explicitOv1);
+
     const explicitOv = new Set(explicitOv1.concat([
         'аланы', 'бега', 'беглецы', 'близнецы', 'бойцы', 'бока', 'борта', 'борцы', 'бруствера', 'брюшки',
         'веера', 'века', 'венцы', 'верха', 'веса', 'весы', 'вечера', 'вороха',
@@ -2746,14 +2813,12 @@
         'плащи', 'прыщи', 'хрящи'
     ].map(packEnding));
 
-    const bratja = [
+    const bratja = toLetterTree([
         'братья', 'брусья', 'деревья', 'донья', 'звенья',
         'клинья', 'клочья', 'коленья', 'колосья', 'колья', 'комья', 'крылья', 'крючья',
         'листья', 'лоскутья', 'лохмотья', 'перья', 'платья', 'поводья', 'прутья',
         'стулья', 'сучья', 'хлопья', 'шилья'
-    ];
-
-    const bratjaEngings = new Set(bratja.map(packEnding));
+    ]);
 
     function declinePlural(engine, lemma, grCase, plural) {
         const lcPlural = plural.toLowerCase();
@@ -2803,7 +2868,7 @@
             return plural + declinePluralFlatEndings[flatEndingIndex];
         } else if (lcPlural.endsWith('ые')) {
             return nInit(plural, 2) + declinePluralFlatEndings[flatEndingIndex + 1];
-        } else if (lcPlural.endsWith('ие') || endsWithAny(lcPlural, egoSoftPlural)) {
+        } else if (lcPlural.endsWith('ие') || endsWithLeaf(lcPlural, egoSoftPlural)) {
             return stem + declinePluralFlatEndings[flatEndingIndex + 2];
 
         } else if ((grCaseNumber > 2) && (grCaseNumber !== 4)) {
@@ -2952,7 +3017,7 @@
                             }
                             return init(plural) + 'ов';
                         } else {
-                            if (endingIn(pluralEnding, bratjaEngings) && endsWithAny(lcPlural, bratja)) {
+                            if (endsWithLeaf(lcPlural, bratja)) {
                                 return init(plural) + 'ев';
                             } else if (endsWithAny(lcPlural, ['зятья', 'кумовья', 'деверья', 'края', 'острия'])) {
                                 return init(plural) + 'ёв';
@@ -2976,7 +3041,7 @@
                             return upperLike('яиц', init(plural));
                         } else if (lcPlural.endsWith('нца')) {
                             return [genitiveStem(), init(plural) + 'ев'];
-                        } else if (!endsWithAny(lcPlural, explicitOv1)) {
+                        } else if (!endsWithLeaf(lcPlural, explicitOv1Tree)) {
                             return genitiveStem();
                         }
 
