@@ -343,6 +343,13 @@
 
     const unYo = s => s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');
 
+    const eStem = (stressedEnding, stem, transform) => {
+        const x = stressedEnding.length ? stressedEnding : [false];
+        return x.map(isStressed => isStressed ?
+                    transform(unYo(stem), isStressed) :
+                    transform(stem, isStressed));
+    };
+
     function calculateHash(lowerCaseUnicodeString) {
         const preparedString = lowerCaseUnicodeString.replaceAll('ё', 'е');
 
@@ -1547,13 +1554,6 @@
 
         let lcStem = stem.toLowerCase();
 
-        const eStem = (s, f) => {
-            if (!stressedEnding.length) {
-                stressedEnding.push(false);
-            }
-            return stressedEnding.map(b => b ? f(unYo(s), b) : f(s, b));
-        };
-
         const soft = () => (half && lcWord.endsWith('я')) || softD1(lcWord);
 
         const iyWord = (lcLastChar === 'й')
@@ -1584,7 +1584,7 @@
                 if (lcLastChar === 'й') {
                     r.push(init(word) + upperLike('ю', last(word)));
                 } else {
-                    r = r.concat(eStem(stem, s => s + upperLike('у', last(s))));
+                    r = r.concat(eStem(stressedEnding, stem, s => s + upperLike('у', last(s))));
                 }
             }
             return r;
@@ -1643,7 +1643,7 @@
                 if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
                     r.push(stem + 'а');
                 } else {
-                    r = r.concat(eStem(stem, s => s + 'а'));
+                    r = r.concat(eStem(stressedEnding, stem, s => s + 'а'));
                 }
                 return addUForm(r);
 
@@ -1687,7 +1687,7 @@
                 if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
                     return stem + 'у';
                 }
-                return eStem(stem, s => s + 'у');
+                return eStem(stressedEnding, stem, s => s + 'у');
 
             case Case.ACCUSATIVE:
                 if ((gender === Gender.NEUTER) ||
@@ -1740,8 +1740,8 @@
                         break;
 
                     case 'ц':
-                        return eStem(word, (w, stressedEnding) => stressedEnding
-                            ? (tsStem(w, lemma) + 'цом') : (tsStem(w, lemma) + 'цем'));
+                        return eStem(stressedEnding, word, (w, b) =>
+                            b ? (tsStem(w, lemma) + 'цом') : (tsStem(w, lemma) + 'цем'));
 
                     case 'к':
                         if (okWord(lcWord)) {
@@ -1757,12 +1757,12 @@
                 }
 
                 if (soft() || ('жшчщ'.includes(last(lcStem)))) {
-                    return eStem(stem, (s, stressedEnding) => stressedEnding
-                        ? (s + 'ом') : (s + 'ем'));
+                    return eStem(stressedEnding, stem, (s, b) =>
+                        b ? (s + 'ом') : (s + 'ем'));
                 } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
                     return stem + 'ом';
                 }
-                return eStem(stem, s => s + 'ом');
+                return eStem(stressedEnding, stem, s => s + 'ом');
 
             case Case.PREPOSITIONAL:
                 switch (lcLastChar) {
@@ -1813,7 +1813,7 @@
                 if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
                     return stem + 'е';
                 }
-                return eStem(stem, s => s + 'е');
+                return eStem(stressedEnding, stem, s => s + 'е');
 
             case Case.LOCATIVE:
                 if ('полпути' === lcWord) {
@@ -2282,16 +2282,6 @@
             );
         };
 
-        const eStem = (s, f) => {
-            const stressedEndingCopy = stressedEnding.slice();
-
-            if (!stressedEndingCopy.length) {
-                stressedEndingCopy.push(false);
-            }
-
-            return stressedEndingCopy.map(b => b ? f(unYo(s)) : f(s));
-        };
-
         const gender = lemma.getGender();
         const declension = lemma.getDeclension();
 
@@ -2319,7 +2309,7 @@
                     result.push(simpleFirstPart + 'и');
                 } else {
                     Array.prototype.push.apply(result,
-                        eStem(simpleFirstPart, s => s + 'и'));
+                        eStem(stressedEnding, simpleFirstPart, s => s + 'и'));
                 }
 
             } else if (last(lcWord) === 'ц') {
@@ -2332,7 +2322,7 @@
                     result.push(simpleFirstPart + 'ы');
                 } else {
                     Array.prototype.push.apply(result,
-                        eStem(simpleFirstPart, s => s + 'ы'));
+                        eStem(stressedEnding, simpleFirstPart, s => s + 'ы'));
                 }
 
             }
