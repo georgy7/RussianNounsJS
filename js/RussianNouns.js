@@ -467,6 +467,10 @@
         // но в контексте нашей задачи это пустая трата оперативной памяти.
 
         // Результат используется в функции endsWithLeaf.
+        // Сложность поиска, конечно, O(n), только вот n здесь - не длина списка окончаний,
+        // а длина строки, которую мы проверяем (в худшем случае).
+        // Каждая буква ищется за логарифмическое или линейное время в зависимости
+        // от реализации Map (и там n не может превышать размер русского алфавита).
 
         let result = new Map();
 
@@ -641,6 +645,8 @@
         'божий', 'ажий', 'яжий', 'ужий', 'южий',
         'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
     ];
+
+    const egoSoftMTree = toLetterTree(egoSoftM);
 
     const egoSoftPlural = toLetterTree(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
 
@@ -1351,7 +1357,7 @@
         if (bincludes(vowels | 512, lcLastChar)) { // vowels + й
             if (bincludes(vowels, lastOfNInitial(lcWord, 1))) {
                 const head = nInit(word, 2);
-                if (endsWithAny(lcWord, egoSoftM)) {
+                if (endsWithLeaf(lcWord, egoSoftMTree)) {
                     return head + upperLike('ь', head);
                 }
                 return head;
@@ -2279,13 +2285,13 @@
 
     // То же самое, но мы проверяем их не по точному совпадению, а по концу слова.
     // Например, "чудо-остров", "мультипаспорт" распознаются как "остров", "паспорт".
-    const aYaWords2 = [
+    const aYaWords2 = toLetterTree([
         'округ', 'остров', 'отпуск',
         'паспорт', 'парус', 'поезд', 'повар', 'погреб',
         'рукав',
         'цех',
         'юнкер'
-    ];
+    ]);
 
     // Мы ступаем на скользкую территорию.
     // В этом массиве слова, которые могут оканчиваться и на -а/-я, и на -и/-ы,
@@ -2490,7 +2496,7 @@
 
                         result.push(softStemD1 + 'я');
 
-                    } else if (aYaWords.includes(lcWord) || endsWithAny(lcWord, aYaWords2)
+                    } else if (aYaWords.includes(lcWord) || endsWithLeaf(lcWord, aYaWords2)
                         || aYaWords3.includes(lcWord) || aYaWords4.includes(lcWord)) {
 
                         if (aYaWords4.includes(lcWord)) {
@@ -2712,6 +2718,8 @@
         'уродины'
     ];
 
+    const explicitZeroSurnameLikeTree = toLetterTree(explicitZeroEndingCommonGenderSurnameLike);
+
     // Очень много исключений. Наверно, это можно как-то отрефакторить.
 
     // Слова на "а", которые легко склеиваются с другими корнями.
@@ -2820,6 +2828,17 @@
         'стулья', 'сучья', 'хлопья', 'шилья'
     ]);
 
+    const mShki = toLetterTree([
+        'братишки', 'дружки', 'мальчишки', 'парнишки',
+        'сынишки', 'папочки', 'дедушки', 'дядюшки', 'батюшки',
+        'городишки', 'домишки'
+    ]);
+
+    // малышки
+    // рожки
+    // листья
+    // молодцы
+
     function declinePlural(engine, lemma, grCase, plural) {
         const lcPlural = plural.toLowerCase();
         const pluralEnding = packEnding(lcPlural);
@@ -2854,7 +2873,7 @@
         const isSurnameType1 = (lcLastChar === 'ы') &&
             (lemma.isASurname() || (gender === Gender.COMMON)) &&
             endsWithAny(lcPlural, ['овы', 'евы', 'ёвы', 'ины', 'ыны']) &&
-            !endsWithAny(lcPlural, explicitZeroEndingCommonGenderSurnameLike);
+            !endsWithLeaf(lcPlural, explicitZeroSurnameLikeTree);
 
         // Из-за ветвления вверху функции, здесь grCaseNumber >= 2.
         // Через Math.min локатив приравниваем к предложному падежу.
@@ -2945,17 +2964,6 @@
 
             if (Gender.FEMININE !== gender) {
 
-                const mShki = Object.freeze([
-                    'братишки', 'дружки', 'мальчишки', 'парнишки',
-                    'сынишки', 'папочки', 'дедушки', 'дядюшки', 'батюшки',
-                    'городишки', 'домишки'
-                ]);
-
-                // малышки
-                // рожки
-                // листья
-                // молодцы
-
                 if (explicitOv.has(lcPlural)) {
                     return init(plural) + 'ов';
                 } else if (explicitZeroEndingAndOv.has(lcPlural)) {
@@ -3011,7 +3019,7 @@
                             } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
                                 return init(plural) + 'ев';
                             } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки'])
-                                && ((Gender.MASCULINE !== gender) || endsWithAny(lcPlural, mShki))
+                                && ((Gender.MASCULINE !== gender) || endsWithLeaf(lcPlural, mShki))
                                 && !(lemma.lower().endsWith('ок'))) {
                                 return genitiveStem();
                             }
