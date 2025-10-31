@@ -2263,7 +2263,7 @@
     ];
 
     // Слова муж.р., которые оканчиваются на -а/-я в мн.ч.
-    const aYaWords = [
+    const aYaWords = new Set([
         'берег', 'бок', 'борт',
         'век', 'вес',
         'веер', // TODO: Это всё тоже вынести в настройку (в экземпляре движка).
@@ -2281,7 +2281,7 @@
         'терем',
         'том', // TODO неодушевленное (не имя).
         'холод', 'цвет', 'череп'
-    ];
+    ]);
 
     // То же самое, но мы проверяем их не по точному совпадению, а по концу слова.
     // Например, "чудо-остров", "мультипаспорт" распознаются как "остров", "паспорт".
@@ -2296,7 +2296,7 @@
     // Мы ступаем на скользкую территорию.
     // В этом массиве слова, которые могут оканчиваться и на -а/-я, и на -и/-ы,
     // и мы считаем окончание -а/-я более распространённым.
-    const aYaWords3 = [
+    const aYaWords3 = new Set([
         'адрес',
         'договор',
         'буфер',
@@ -2316,10 +2316,10 @@
         'хлеб',
         'юнкер', // 🤕
         'ястреб'
-    ];
+    ]);
 
     // То же самое, только мы считаем окончание -и/-ы более распространённым.
-    const aYaWords4 = [
+    const aYaWords4 = new Set([
         'бункер',
         'вымпел',
         'год',
@@ -2327,7 +2327,7 @@
         'омут',
         'токарь', 'тополь',
         'шторм', 'штуцер'
-    ];
+    ]);
 
     function pluralize(engine, lemma) {
         const result = [];
@@ -2496,10 +2496,10 @@
 
                         result.push(softStemD1 + 'я');
 
-                    } else if (aYaWords.includes(lcWord) || endsWithLeaf(lcWord, aYaWords2)
-                        || aYaWords3.includes(lcWord) || aYaWords4.includes(lcWord)) {
+                    } else if (aYaWords.has(lcWord) || endsWithLeaf(lcWord, aYaWords2)
+                        || aYaWords3.has(lcWord) || aYaWords4.has(lcWord)) {
 
-                        if (aYaWords4.includes(lcWord)) {
+                        if (aYaWords4.has(lcWord)) {
                             yeruOrI();
                         }
 
@@ -2511,7 +2511,7 @@
                             result.push(stem + 'а');
                         }
 
-                        if (aYaWords3.includes(lcWord)) {
+                        if (aYaWords3.has(lcWord)) {
                             yeruOrI();
                         }
 
