@@ -109,7 +109,6 @@
                 this._txt = o._txt;
                 this._lc = o._lc;
                 this._hash = o._hash;
-                this._tail = o._tail;
                 this._flags = o._flags;
 
             } else {
@@ -122,7 +121,6 @@
                 this._txt = o.text;
                 this._lc = o.text.toLowerCase();
                 this._hash = calculateHash(this._lc);
-                this._tail = packEnding(this._lc);
 
                 this._flags |= (1 << 3) * (o.indeclinable&1);
                 this._flags |= (1 << 4) * (o.animate&1);
@@ -344,16 +342,6 @@
     // This function has O(n) complexity in relation to the number of characters in the array.
     const endsWithAny = (w, arr) => arr.some(a => w.endsWith(a));
 
-    // This function five times slower than Set.prototype.has.
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set#description
-    function endingIn(ending, endingSet) {
-        return endingSet.has(ending & 0x3fffffff) ||
-            endingSet.has(ending & 0xffffff) ||
-            endingSet.has(ending & 0x3ffff) ||
-            endingSet.has(ending & 0xfff) ||
-            endingSet.has(ending & 0x3f);
-    }
-
     const unique = a => a.filter((item, index) => a.indexOf(item) === index);
 
     const unYo = s => s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');
@@ -433,31 +421,10 @@
         filter[byteIndex] = filter[byteIndex] | (1 << (7 - (index % 8)));
     }
 
-    function packEnding(lowerCaseUnicodeString) {
-        // Подготовить строку для сопоставления через endingIn.
-        // Это не такое уж плохое решение, но оно подходит только
-        // для больших списков коротких окончаний (5 букв максимум).
-
-        // В окончаниях важно отличать букву А от пустого места, так что 6 бит.
-        // И, в качестве бонуса, так мы получаем возможность различать букву ё.
-
-        let state = 0;
-        const len = Math.min(5, lowerCaseUnicodeString.length);
-        const lastIndex = lowerCaseUnicodeString.length - 1;
-
-        for (let i = 0; i < len; i++) {
-            const readyBits = 6 * i;
-            const chCode = (lowerCaseUnicodeString.charCodeAt(lastIndex-i) - 1071) & 0x3F;
-            state |= chCode << readyBits;
-        }
-
-        return state;
-    }
-
     function toLetterTree(endingArray) {
-        // Это уже поинтереснее. Мы строим дерево объектов, в котором корень -
-        // конец всех строк массива. В качестве его ключей выступают последние буквы строк,
-        // а в качестве значений - другие объекты, ключами которых будут уже предпоследние буквы,
+        // Мы строим дерево объектов, в котором корень — конец всех строк массива.
+        // В качестве его ключей выступают последние буквы строк,
+        // а в качестве значений — другие объекты, ключами которых будут уже предпоследние буквы,
         // и так далее. Значение 0 вместо объекта означает начало строки.
 
         // При этом часть информации о строках теряется, поскольку она не нужна:
@@ -595,12 +562,12 @@
         'ковер', 'овес', 'костер'
     ].map(calculateHash));
 
-    const mobileVowelB = new Set([
+    const mobileVowelB = toLetterTree([
         'овёс', 'ковёр', 'костёр',
         'шатер', 'шатёр', 'козел', 'козёл', 'котел', 'котёл',
         'орел', 'орёл', 'осел', 'осёл',
         'узел', 'уголь', 'чок', 'ешок', 'хол'
-    ].map(packEnding));
+    ]);
 
     const en2a2b = [
         'ясень', 'бюллетень', 'олень', 'тюлень',
@@ -636,18 +603,18 @@
         'шоколад,шорох,шум,яд'
     ).split(','));
 
-    const ogoEndings = new Set([
+    const ogoEndings = toLetterTree([
         'ое',
         'нький', 'ский', 'ской',
-        'лстой', 'отой', 'утой', 'евой', 'овой', 'живой'].map(packEnding));
-    const ogoEndings2 = new Set([
+        'лстой', 'отой', 'утой', 'евой', 'овой', 'живой']);
+    const ogoEndings2 = toLetterTree([
         'ее', 'ое',
         'нький', 'ский', 'ской',
-        'лстой', 'отой', 'утой'].map(packEnding));
-    const ogoEndings3 = new Set([
-        'евой', 'овой', 'отой', 'живой'].map(packEnding));
+        'лстой', 'отой', 'утой']);
+    const ogoEndings3 = toLetterTree([
+        'евой', 'овой', 'отой', 'живой']);
 
-    const egoEndings = new Set(['шний', 'жний', 'щий', 'ший', 'жий', 'чий'].map(packEnding));
+    const egoEndings = toLetterTree(['шний', 'жний', 'щий', 'ший', 'жий', 'чий']);
 
     const egoSoftM = [
         'божий', 'ажий', 'яжий', 'ужий', 'южий',
@@ -658,7 +625,7 @@
 
     const egoSoftPlural = toLetterTree(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
 
-    const endingsOfAdjectives = new Set([
+    const endingsOfAdjectives = toLetterTree([
         'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
         'латой', 'витой', 'литой', 'питой', 'житой', 'отой', 'утой', 'ятой',
         'лагой', 'рагой', 'огой', 'угой',
@@ -670,18 +637,19 @@
         'оркий', 'аркий', 'яркий', 'ький', 'ёкий',
         'бокий', 'оокий', 'cокий', 'токий', 'ликий', 'дикий', 'укий', 'ыкий',
         'який', 'пкий', 'дкий', 'бкий', 'нкий', 'жкий', 'чкий', 'гкий', 'овкий', 'авкий'
-    ].map(packEnding));
+    ]);
 
     const isAdjectiveLike = (lemma, lcWord) => (nLast(lcWord, 2) === 'ый') ||
-        ((lcWord.endsWith('кривой') || endingIn(lemma._tail, endingsOfAdjectives)) &&
+        ((lcWord.endsWith('кривой') || endsWithLeaf(lcWord, endingsOfAdjectives)) &&
             vowelCount(lcWord) >= 2);
 
-    const jeEndings = new Set([
+    const jeEndings = toLetterTree([
         'ий', 'ие', 'чье', 'тье', 'дье', 'вье', 'бье',
-        'енье', 'ружье', 'божье', 'верье', 'мужье'].map(packEnding));
+        'жалованье',
+        'енье', 'ружье', 'божье', 'верье', 'мужье']);
 
-    const ojeEngings = new Set([
-        'вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый'].map(packEnding));
+    const ojeEngings = toLetterTree([
+        'вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый']);
 
     const LocativeFormAttribute = Object.freeze({
         CONTAINER: 1,
@@ -1399,7 +1367,7 @@
     }
 
     function getStemSoftSign(lemma, word, lcWord) {
-        if (mobileVowelA.has(lemma._hash) || endingIn(lemma._tail, mobileVowelB)) {
+        if (mobileVowelA.has(lemma._hash) || endsWithLeaf(lcWord, mobileVowelB)) {
             return nInit(word, 3) + lastOfNInitial(word, 1);
         } else if (lcWord.endsWith('ень') &&
                 (lemma.getGender() === Gender.MASCULINE) &&
@@ -1415,7 +1383,7 @@
         // Case 2: бв клмн рст х
         return (
                 ((0b0000110000110000000000 & lcLastBit) !== 0) &&
-                endingIn(lemma._tail, mobileVowelB) &&
+                endsWithLeaf(lcWord, mobileVowelB) &&
                 !(['новосел', 'новосёл'].includes(lcWord))
             ) ||
             (
@@ -1694,9 +1662,9 @@
                     case 'е':
                         if ((iyWord && lemma.isASurname())
                             || isAdjectiveLike(lemma, lcWord)
-                            || endingIn(lemma._tail, ogoEndings)) {
+                            || endsWithLeaf(lcWord, ogoEndings)) {
                             return stem + 'ого';
-                        } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
+                        } else if (endsWithLeaf(lcWord, egoEndings) || lcWord.endsWith('ее')) {
                             return stem + 'его';
                         }
                     case 'ё':
@@ -1747,9 +1715,9 @@
                     case 'е':
                         if ((iyWord && lemma.isASurname())
                             || isAdjectiveLike(lemma, lcWord)
-                            || endingIn(lemma._tail, ogoEndings)) {
+                            || endsWithLeaf(lcWord, ogoEndings)) {
                             return stem + 'ому';
-                        } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
+                        } else if (endsWithLeaf(lcWord, egoEndings) || lcWord.endsWith('ее')) {
                             return stem + 'ему';
                         }
                     case 'ё':
@@ -1802,8 +1770,8 @@
                     case 'ё':
                     case 'я':
                     case 'ь':
-                        if ((iyWord && lemma.isASurname()) || endingIn(lemma._tail, ogoEndings2)) {
-                            if (endingIn(lemma._tail, ojeEngings)) {
+                        if ((iyWord && lemma.isASurname()) || endsWithLeaf(lcWord, ogoEndings2)) {
+                            if (endsWithLeaf(lcWord, ojeEngings)) {
                                 return stem + 'ым';
                             } else {
                                 return stem + 'им';
@@ -1815,9 +1783,9 @@
                             } else {
                                 return stem + 'ым';
                             }
-                        } else if (endingIn(lemma._tail, ogoEndings3)) {
+                        } else if (endsWithLeaf(lcWord, ogoEndings3)) {
                             return stem + 'ым';
-                        } else if (endingIn(lemma._tail, egoEndings)) {
+                        } else if (endsWithLeaf(lcWord, egoEndings)) {
                             return stem + 'им';
                         } else if (iyWord) {
                             return eiStem() + 'ем';
@@ -1870,14 +1838,14 @@
                     case 'ь':
                         if ((iyWord && lemma.isASurname())
                             || isAdjectiveLike(lemma, lcWord)
-                            || endingIn(lemma._tail, ogoEndings)) {
+                            || endsWithLeaf(lcWord, ogoEndings)) {
                             return stem + 'ом';
-                        } else if (endingIn(lemma._tail, egoEndings) || lcWord.endsWith('ее')) {
+                        } else if (endsWithLeaf(lcWord, egoEndings) || lcWord.endsWith('ее')) {
                             return stem + 'ем';
                         } else if (endsWithAny(lcWord, ['воробей'])) {
                             const i = init(head);
                             return i + upperLike('ье', last(i));
-                        } else if ((endingIn(lemma._tail, jeEndings) || lcWord.endsWith('жалованье')) &&
+                        } else if ((endsWithLeaf(lcWord, jeEndings)) &&
                             !endsWithAny(lcWord, [
                             'запястье', 'здоровье', 'изголовье',
                             'платье'
@@ -2555,7 +2523,7 @@
                         result.push(nInit(word, 4) + 'ата');
                     } else if (okWord(lcWord)) {
                         result.push(nInit(word, 2) + 'ки');
-                    } else if (endingIn(lemma._tail, egoEndings)) {
+                    } else if (endsWithLeaf(lcWord, egoEndings)) {
                         if (endsWithAny(lcWord, egoSoftM)) {
                             result.push(nInit(word, 2) + 'ьи');
                         } else {
@@ -2685,11 +2653,11 @@
     }
 
 
-    const declinePluralSoftEndings = new Set([
+    const declinePluralSoftEndings = toLetterTree([
         'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
         'ьи', 'ья', 'ия', 'ря', 'ля', 'ая',
         'аи', 'ои', 'уи', 'эи', 'ыи', 'яи', 'ёи', 'юи', 'еи', 'ии'
-    ].map(packEnding));
+    ]);
 
     const declinePluralEy = [
         'беготни',
@@ -2814,20 +2782,21 @@
         'ях', 'ах'
     ];
 
-    const dnaVtsa = new Set([
+    const dnaVtsa = toLetterTree([
         'вна', 'вца', 'вцы', 'пла', 'дца', 'дра', 'судна',
         'рки', 'рцы', 'тлы', 'рна', 'тна', 'енца',
         'десны', 'дёсны',
         'рёбра', 'ребра',
         'сосны'
-    ].map(packEnding));
+    ]);
 
-    const borschee = new Set([
+    const borschee = toLetterTree([
         'жи', 'ши', 'чи',
         'ля', 'ли', 'чи', 'ри', 'ти', 'ди',
         'борщи', 'клещи',
+        'товарищи',
         'плащи', 'прыщи', 'хрящи'
-    ].map(packEnding));
+    ]);
 
     const bratja = toLetterTree([
         'братья', 'брусья', 'деревья', 'донья', 'звенья',
@@ -2849,7 +2818,6 @@
 
     function declinePlural(engine, lemma, grCase, plural) {
         const lcPlural = plural.toLowerCase();
-        const pluralEnding = packEnding(lcPlural);
 
         const lcLastChar = last(lcPlural);
         const lcLastBit = lcBit(lcLastChar);
@@ -2905,7 +2873,7 @@
                 grCaseNumber - 3
             );
 
-            if (endingIn(pluralEnding, declinePluralSoftEndings)) {
+            if (endsWithLeaf(lcPlural, declinePluralSoftEndings)) {
                 return init(plural) + declinePluralEndings2[flatIndex2];
             } else if (engine.sd.hasStressedEndingPlural(lemma, grCase).includes(true)) {
                 return unYo(stem) + declinePluralEndings2[flatIndex2 + 1];
@@ -2933,7 +2901,7 @@
                     const end = last(stem);
                     return init(stem) + upperLike('о', end) + end;
                 } else if ((
-                    endingIn(pluralEnding, dnaVtsa) &&
+                    endsWithLeaf(lcPlural, dnaVtsa) &&
                     !lcPlural.endsWith('недра')
                 ) || (
                     endsWithAny(lcPlural, dependsOnStress)
@@ -2997,8 +2965,7 @@
                     case 'я':
 
                         if ((
-                                endingIn(pluralEnding, borschee)||
-                                lcPlural.endsWith('товарищи') ||
+                                endsWithLeaf(lcPlural, borschee) ||
                                 ('щи' === lcPlural) ||
                                 declinePluralEy.includes(lcPlural)) ||
                             (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), [
@@ -3128,7 +3095,7 @@
                 return nInit(stem, 2) + 'ек';
             }
 
-            if ((stem.length === lcPlural.length - 1) && endingIn(pluralEnding, declinePluralSoftEndings)) {
+            if ((stem.length === lcPlural.length - 1) && endsWithLeaf(lcPlural, declinePluralSoftEndings)) {
 
                 if ('ьй'.includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
                     const end = last(stem);

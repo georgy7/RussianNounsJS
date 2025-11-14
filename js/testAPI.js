@@ -419,7 +419,7 @@ const RussianNouns = require('./RussianNouns.js');
     })();
 
     (() => {
-        const k = RussianNouns.createLemma({
+        const k = RussianNouns.Lemma.create({
             text: 'ножницы',
             pluraleTantum: true
         });
@@ -427,7 +427,7 @@ const RussianNouns = require('./RussianNouns.js');
         assertEquals(k.isPluraleTantum(), true);
         assertEquals(k.getGender(), undefined);
         assertEquals(k.isIndeclinable(), false);
-        console.log('createLemma: valid (2)');
+        console.log('Lemma.create: valid (2)');
 
         const l = RussianNouns.createLemma(k);
         assertEquals(l, k);
@@ -438,6 +438,9 @@ const RussianNouns = require('./RussianNouns.js');
 
     assertEquals(null, RussianNouns.createLemmaOrNull(123));
     console.log('createLemmaOrNull: number');
+
+    assertEquals(null, RussianNouns.Lemma.createOrNull(123));
+    console.log('Lemma.createOrNull: number');
 
     assertEquals(null, RussianNouns.createLemmaOrNull('гора'));
     console.log('createLemmaOrNull: string');
@@ -500,7 +503,7 @@ const RussianNouns = require('./RussianNouns.js');
     assertEquals(x.isIndeclinable(), false);
     console.log('createLemmaOrNull: valid (1)');
 
-    x = RussianNouns.createLemmaOrNull({
+    x = RussianNouns.Lemma.createOrNull({
         text: 'ножницы',
         pluraleTantum: true
     });
@@ -509,7 +512,7 @@ const RussianNouns = require('./RussianNouns.js');
     assertEquals(x.isPluraleTantum(), true);
     assertEquals(x.getGender(), undefined);
     assertEquals(x.isIndeclinable(), false);
-    console.log('createLemmaOrNull: valid (2)');
+    console.log('Lemma.createOrNull: valid (2)');
 })();
 
 (() => {
