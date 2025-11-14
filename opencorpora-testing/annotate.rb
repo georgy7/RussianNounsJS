@@ -1,3 +1,11 @@
+# This script creates annotated_LETTER.txt for each
+# nouns_LETTER.json in the current folder.
+
+# Usage:
+# ruby annotate.rb
+
+# --------------------------------------------------
+
 require 'json'
 
 abc = [
