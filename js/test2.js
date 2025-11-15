@@ -8718,9 +8718,10 @@
         'свастика',
         'счастливец',
         'тюлень',
-        'хохолок',
+        'хохолок'
+    ]);
 
-        // Прилагательные и прочее:
+    const adjectivesEtc = [
         'новый',
         'большой',
         'должен',
@@ -12737,7 +12738,43 @@
         'светловолосый',
         'скептический',
         'словарный'
-    ]);
+    ];
+
+    adjectivesEtc.forEach(x => {
+        mostFrequent.add(x)
+
+        // В частотном словаре все прилагательные мужского рода,
+        // так что я добавляю женский и средний.
+        // Это почти ни на что не повлияет, пока в тестовые данные
+        // не будут добавлены прилагательные в большом количестве.
+
+        if (x.endsWith('ый') || x.endsWith('ой') || x.endsWith('кий')) {
+            mostFrequent.add(x.substring(0, x.length - 2) + 'ая');
+            mostFrequent.add(x.substring(0, x.length - 2) + 'ое');
+        }
+
+        if (x.endsWith('ний')) {
+            mostFrequent.add(x.substring(0, x.length - 3) + 'няя');
+            mostFrequent.add(x.substring(0, x.length - 3) + 'нее');
+        }
+
+        if (x.endsWith('щий')) {
+            mostFrequent.add(x.substring(0, x.length - 3) + 'щая');
+            mostFrequent.add(x.substring(0, x.length - 3) + 'щее');
+        }
+
+        // Краткие прилагательные (истов).
+        // В том числе притяжательные (дедов, колин).
+        if (x.endsWith('тов') || x.endsWith('дов') || x.endsWith('ин') || x.endsWith('ан') || x.endsWith('ен')) {
+            mostFrequent.add(x + 'а');
+            mostFrequent.add(x + 'о');
+        }
+
+        if (x.endsWith('ийся')) {
+            mostFrequent.add(x.substring(0, x.length - 4) + 'аяся');
+            mostFrequent.add(x.substring(0, x.length - 4) + 'ееся');
+        }
+    });
 // </editor-fold>
 
 
