@@ -368,10 +368,10 @@
                     <span class="d-inline d-lg-none">{{case[0]}}</span><span class="d-none d-lg-inline">{{case}}</span>
                 </th>
                 <td>
-                  {{result[case]}}
+                    <span ng-repeat="w in result[case]">{{w}}<span ng-if="!$last">, </span></span>
                 </td>
                 <td>
-                  {{plural[case]}}
+                    <span ng-repeat="w in plural[case]">{{w}}<span ng-if="!$last">, </span></span>
                 </td>
               </tr>
             </table>
