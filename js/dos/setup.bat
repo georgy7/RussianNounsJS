@@ -1,0 +1,2 @@
+JSH.EXE -t SETUP.JS
+
