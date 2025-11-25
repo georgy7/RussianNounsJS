@@ -20,21 +20,13 @@ function cp866(u) {
         result = u;
     } else if (0x410 <= u && u <= 0x43F) {
         result = u - 0x390;
-        // So, the character code appears in the range
-        // between 0x80 and 0xAF.
-        // !!!!!!!!!
-        // PutCh don't print it, with or without `fromCharCode`.
-        // The Print function also fails.
     } else if (0x440 <= u && u <= 0x44F) {
         result = u - 0x360;
-        // The character code appears in the range
-        // between 0xE0 and 0xEF.
-        // Same result.
     }
 
     // TODO
 
-    return String.fromCharCode(result);
+    return AsciiCharDef(result);
 }
 
 function puts(str) {
@@ -76,8 +68,6 @@ function yesNo(msg) {
 }
 
 function main() {
-    Println('Ну, это, очевидно, не работает.');
-
     Println("This check is only necessary if you want to output");
     Println("Cyrillic text to the console in MS-DOS (using jSH).");
     Println("In graphical mode (DOjS), code page is not important.");
@@ -85,7 +75,7 @@ function main() {
     Println();
 
     Print("Look: ");
-    puts("Привет! АБВ бвгде п ");
+    puts("Привет!");
     for (var i = 0; i < 5; i++) {
         switch (yesNo("Is that readable? (Y/N) ")) {
             case true:
