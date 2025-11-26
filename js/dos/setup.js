@@ -5,10 +5,6 @@
 // This script allows you to check that your computer or emulator
 // is configured to output text in CP866.
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!
-// The script is incomplete!
-// !!!!!!!!!!!!!!!!!!!!!!!!!
-
 // License: public domain or 0BSD
 // https://opensource.org/license/0bsd
 
@@ -128,7 +124,26 @@ function main() {
 }
 
 function explainCodePages() {
-    Println('TODO');
+    Println('_________________________________________________________');
+    Println();
+    Println('In DOSBox, you switch code tables like this:');
+    Println();
+    Println('    KEYB RU');
+    Println();
+    Println('You can also specify this in dosbox-VERSION.conf.');
+    Println('Just change `keyboardlayout=auto` to `keyboardlayout=ru`.');
+    Println();
+    Println('In MS-DOS, you need to add this line to CONFIG.SYS:');
+    Println();
+    Println('    device=C:\\DOS\\DISPLAY.SYS con=(ega,,1)');
+    Println();
+    Println('And something like this to AUTOEXEC.BAT:');
+    Println();
+    Println('    mode con codepage prepare=((866) C:\\DOS\\EGA3.CPI)');
+    Println('    mode con codepage select=866');
+    Println();
+    Println('Please read the manuals before doing anything.');
+    Println();
 }
 
 function helloWorld() {
