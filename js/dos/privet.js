@@ -7,40 +7,23 @@
 var cp866 = (function() {
     var codes = {};
 
-    codes[0] = 0;
+    function add(offset, chars) {
+        for (var i = 0; i < chars.length; i++) {
+            codes[chars.charCodeAt(i)] = offset + i;
+        }
+    }
+
     codes[0x2302] = 0x7F;   // ⌂
-
-    var top = '' +
-        '☺☻♥♦♣♠•◘○◙♂♀♪♫☼' +
-        '►◄↕‼¶§▬↨↑↓→←∟↔▲▼';
-
-    var frames = '' +
-        '░▒▓│┤╡╢╖╕╣║╗╝╜╛┐' +
-        '└┴┬├─┼╞╟╚╔╩╦╠═╬╧' +
-        '╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀';
-
-    var fx = 'ЁёЄєЇїЎў°∙·√№¤■\xA0';
+    add(0x01, '☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼');
+    add(0xB0, '░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀');
+    add(0xF0, 'ЁёЄєЇїЎў°∙·√№¤■\xA0');
     codes[0x0406] = 0x49;   // І (Cyrillic)
     codes[0x0456] = 0x69;   // і (Cyrillic)
-
-    var i;
-
-    for (i = 0; i < top.length; i++) {
-        codes[top.charCodeAt(i)] = 0x01 + i;
-    }
-
-    for (i = 0; i < frames.length; i++) {
-        codes[frames.charCodeAt(i)] = 0xB0 + i;
-    }
-
-    for (i = 0; i < fx.length; i++) {
-        codes[fx.charCodeAt(i)] = 0xF0 + i;
-    }
 
     return function (u) {
         var result = 0x04;
 
-        if (0x20 <= u && u <=0x7E) {
+        if (0x20 <= u && u <= 0x7E) {
             result = u;
         } else if (0x410 <= u && u <= 0x43F) {
             result = u - 0x390;
@@ -58,8 +41,7 @@ function puts(str) {
     for (var i = 0; i < str.length; i++) {
         PutCh(cp866(str.charCodeAt(i)));
     }
-    Print('\r');
-    Print('\n');
+    Print('\r\n');
 }
 
 puts('Привет, мир!');
