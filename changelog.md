@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.4.0] - 2025-11-14
 ### Added
 - Static methods `Lemma.create` and `Lemma.createOrNull`
+- Bloom filters before accessing the stress dictionary and before accessing plural exceptions
+- A fast algorithm for matching a word with a list of endings using a letter tree
 
 ## [2.3.0] - 2025-06-17
 ### Added

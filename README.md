@@ -25,24 +25,19 @@
 
 ## Installation
 
-### Frontend
+### Plain JS
 
 ```html
 <script src="RussianNouns.min.js"></script>
 ```
 
-or (without [AMD](https://en.wikipedia.org/wiki/Asynchronous_module_definition))
-
-```html
-<!-- from the same domain -->
-<script type="module" src="myscript.js"></script>
-```
+or (in a module)
 
 ```js
 import 'RussianNouns.min.js';
 ```
 
-or (in a Web Worker)
+or (in a Worker)
 
 ```js
 importScripts('RussianNouns.min.js');
