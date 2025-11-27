@@ -1,8 +1,5 @@
 // Boilerplate code: CP866 in jSH
 // License: public domain or 0BSD
-// https://opensource.org/license/0bsd
-
-"use strict";
 
 var cp866 = (function () {
     var codes = {};
@@ -17,8 +14,8 @@ var cp866 = (function () {
     add(0x01, '☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼');
     add(0xB0, '░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀');
     add(0xF0, 'ЁёЄєЇїЎў°∙·√№¤■\xA0');
-    codes[0x0406] = 0x49;   // І (Cyrillic)
-    codes[0x0456] = 0x69;   // і (Cyrillic)
+    codes[0x0406] = 0x49;   // І
+    codes[0x0456] = 0x69;   // і
 
     return function (u) {
         return AsciiCharDef((0x20 <= u && u <= 0x7E) ? u : (
