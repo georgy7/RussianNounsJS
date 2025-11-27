@@ -11,7 +11,7 @@
 
 "use strict";
 
-var cp866 = (function() {
+var cp866 = (function () {
     var codes = {};
 
     function add(offset, chars) {
@@ -28,19 +28,10 @@ var cp866 = (function() {
     codes[0x0456] = 0x69;   // і (Cyrillic)
 
     return function (u) {
-        var result = 0x04;
-
-        if (0x20 <= u && u <= 0x7E) {
-            result = u;
-        } else if (0x410 <= u && u <= 0x43F) {
-            result = u - 0x390;
-        } else if (0x440 <= u && u <= 0x44F) {
-            result = u - 0x360;
-        } else if (codes.hasOwnProperty(u)) {
-            result = codes[u];
-        }
-
-        return AsciiCharDef(result);
+        return AsciiCharDef((0x20 <= u && u <= 0x7E) ? u : (
+                (0x410 <= u && u <= 0x43F) ? u - 0x390 : (
+                (0x440 <= u && u <= 0x44F) ? u - 0x360 : (
+                codes.hasOwnProperty(u) ? codes[u] : 0x04))));
     };
 })();
 
