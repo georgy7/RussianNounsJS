@@ -43,7 +43,7 @@ or (in a Worker)
 importScripts('RussianNouns.min.js');
 ```
 
-### Backend
+### Bundlers, backend
 
 ```
 npm i --save russian-nouns-js
