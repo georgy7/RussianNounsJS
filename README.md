@@ -73,11 +73,14 @@ rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.GENITIVE);
 rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.INSTRUMENTAL);
 // ◂ [ "именем" ]
 
+// In these lines, each `decline` call implicitly creates a `Lemma`.
+// When processing the same lemma multiple times, it is much faster
+// to create it yourself once.
 
 // A number of loan words are not declined.
 // You should explicitly state this to prevent inflection.
 
-let coat = RussianNouns.createLemma({
+let coat = RussianNouns.Lemma.create({
     text: 'пальто',
     gender: Gender.NEUTER,
     indeclinable: true
@@ -90,12 +93,12 @@ RussianNouns.getDeclension(coat);
 // ◂ -1
 
 
-// Cases can be specified not only by name, but also by number.
-// In the usual order: NOM, GEN, DAT, ACC, INS, PREP.
+// Cases can be specified not only by name, but also by index.
+// There is a list of cases: NOM, GEN, DAT, ACC, INS, PREP.
 // And there is also the locative case as the seventh.
 // It usually matches the prepositional one.
 
-let mountain = RussianNouns.createLemma({
+let mountain = RussianNouns.Lemma.create({
     text: 'гора',
     gender: Gender.FEMININE
 });
@@ -144,7 +147,7 @@ RussianNouns.CASES.map(c => {
 // You should also explicitly state this.
 // The concept of grammatical gender doesn't make sense for such words.
 
-let scissors = RussianNouns.createLemma({
+let scissors = RussianNouns.Lemma.create({
     text: 'ножницы',
     pluraleTantum: true
 });
@@ -171,7 +174,7 @@ RussianNouns.CASES.map(c => {
 
 ```js
 const Gender = RussianNouns.Gender;
-const createLemma = RussianNouns.createLemma;
+const Lemma = RussianNouns.Lemma;
 
 const rne = new RussianNouns.Engine();
 
@@ -194,16 +197,16 @@ function cap(str) {
 // Николай Степанович Гумилев
 // Рассказ девушки (фрагмент)
 
-const ворота = createLemma({text: 'ворота', pluraleTantum: true});
-const тень = createLemma({text: 'тень', gender: Gender.FEMININE});
-const снег = createLemma({text: 'снег', gender: Gender.MASCULINE});
+const ворота = Lemma.create({text: 'ворота', pluraleTantum: true});
+const тень = Lemma.create({text: 'тень', gender: Gender.FEMININE});
+const снег = Lemma.create({text: 'снег', gender: Gender.MASCULINE});
 
-const милая = createLemma({text: 'милая', gender: Gender.FEMININE});
-const старая = createLemma({text: 'старая', gender: Gender.FEMININE});
-const ель = createLemma({text: 'ель', gender: Gender.FEMININE});
+const милая = Lemma.create({text: 'милая', gender: Gender.FEMININE});
+const старая = Lemma.create({text: 'старая', gender: Gender.FEMININE});
+const ель = Lemma.create({text: 'ель', gender: Gender.FEMININE});
 
-const неведомая = createLemma({text: 'неведомая', gender: Gender.FEMININE});
-const высота = createLemma({text: 'высота', gender: Gender.FEMININE});
+const неведомая = Lemma.create({text: 'неведомая', gender: Gender.FEMININE});
+const высота = Lemma.create({text: 'высота', gender: Gender.FEMININE});
 
 console.log(`* * *
 Я отдыхала у ${pl(ворота, 2)}
