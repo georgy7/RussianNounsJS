@@ -1,0 +1,2 @@
+JSH.EXE -t SIMPLE.JS
+
