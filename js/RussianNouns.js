@@ -2931,7 +2931,7 @@
 
                 if (explicitOv.has(lcPlural)) {
                     return init(plural) + 'ов';
-                } else if (explicitZeroEndingAndOv.has(lcPlural)) {
+                } else if (explicitZeroEndingAndOv.has(lcPlural) && !lemma.isAName()) {
                     return [
                         genitiveStem(),
                         init(plural) + 'ов'
