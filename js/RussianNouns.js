@@ -2945,6 +2945,7 @@
                         && !endsWithAny(lcPlural, declinePluralEy)
                         && !('жшч'.includes(lastOf2Initial)))
                     || explicitZeroEnding.has(lcPlural)
+                    || (lemma.isAName() && (gender === Gender.MASCULINE) && lemma.lower().endsWith('а'))
                     || (lemma.lower() === 'барин')) {
                     return genitiveStem();
                 }
