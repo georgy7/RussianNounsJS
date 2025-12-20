@@ -186,16 +186,15 @@
           <span style="font-weight: 200;">RussianNouns.js</span>
         </h1>
         <h2 style="padding-left: .1em;">
-          Алгоритм склонения с точностью ≈ 98%
+          Алгоритм склонения с точностью около 98% (при&nbsp;условии&nbsp;корректности&nbsp;исходных&nbsp;данных)
         </h2>
       </div>
       <div class="col-sm-4 text-sm-right pt-sm-2">
-        <a class="btn btn-lg btn-outline-dark"
+        <a class="btn btn-lg btn-outline-dark notranslate" translate="no"
            style="padding: .1rem 1.1rem .19rem .8rem;"
-           href="https://github.com/georgy7/RussianNounsJS"
-           title="Star RussianNounsJS on GitHub.">
-          <span style="vertical-align: -5%; font-size: 127%; line-height: 1;">★</span>
-          <span style="vertical-align: middle; font-size: 85%;">Star</span>
+           href="https://github.com/georgy7/RussianNounsJS">
+          <span style="vertical-align: -5%; line-height: 1;">★</span>
+          <span style="vertical-align: middle; font-size: 85%;">GitHub</span>
         </a>
       </div>
     </div>
@@ -361,12 +360,12 @@
             <table class="table table-hover">
               <tr ng-repeat="case in cases">
                 <th class="leftHeader notranslate" translate="no">
-                    <span class="d-inline d-lg-none">{{case[0]}}</span><span class="d-none d-lg-inline">{{case}}</span>
+                    <span class="d-inline d-lg-none mr-4">{{case[0]}}</span><span class="d-none d-lg-inline mr-4">{{case}}</span>
                 </th>
-                <td class="notranslate" translate="no">
+                <td class="notranslate" translate="no" style="width: 50%;">
                     <span ng-repeat="w in result[case]">{{w}}<span ng-if="!$last">, </span></span>
                 </td>
-                <td class="notranslate" translate="no">
+                <td class="notranslate" translate="no" style="width: 50%;">
                     <span ng-repeat="w in plural[case]">{{w}}<span ng-if="!$last">, </span></span>
                 </td>
               </tr>
