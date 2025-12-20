@@ -307,8 +307,10 @@
         <div class="row">
           <div class="col-12">
             <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="surnameCheckBox" ng-model="input.surname" ng-change="changed()">
-              <label class="form-check-label" for="surnameCheckBox">Фамилия</label>
+              <input type="checkbox" class="form-check-input" id="indeclinableCheckBox" ng-model="input.indeclinable" ng-change="changed()">
+              <label class="form-check-label" for="indeclinableCheckBox">
+                Несклоняемое
+              </label>
             </div>
           </div>
         </div>
@@ -320,9 +322,6 @@
               <label class="form-check-label" for="animateCheckBox">
                 Одушевленное
               </label>
-              <span class="text-info" ng-if="input.surname && !input.animate">
-                ignored
-              </span>
             </div>
           </div>
         </div>
@@ -330,10 +329,8 @@
         <div class="row">
           <div class="col-12">
             <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="indeclinableCheckBox" ng-model="input.indeclinable" ng-change="changed()">
-              <label class="form-check-label" for="indeclinableCheckBox">
-                Несклоняемое
-              </label>
+              <input type="checkbox" class="form-check-input" id="surnameCheckBox" ng-model="input.surname" ng-change="changed()">
+              <label class="form-check-label" for="surnameCheckBox">Фамилия</label>
             </div>
           </div>
         </div>
