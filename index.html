@@ -1,5 +1,5 @@
 ﻿<!doctype html>
-<html>
+<html lang="ru">
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -182,12 +182,11 @@
 
     <div class="row mb-4">
       <div class="col-sm-8">
-        <h1>
+        <h1 class="notranslate" translate="no">
           <span style="font-weight: 200;">RussianNouns.js</span>
-          <span style="font-weight: 100;">Demo</span>
         </h1>
         <h2 style="padding-left: .1em;">
-          98% accurate library
+          Алгоритм склонения с точностью ≈ 98%
         </h2>
       </div>
       <div class="col-sm-4 text-sm-right pt-sm-2">
@@ -202,7 +201,7 @@
     </div>
 
     <div class="row">
-      <div class="col-12">
+      <div class="col-12 notranslate" translate="no">
         <p id="examples">
           <a href ng-click="fillForm('мужской', 'арбуз')">арбуз</a>
           <a href ng-click="fillForm('средний', 'окно')">окно</a>
@@ -256,7 +255,7 @@
           <a href ng-click="fillForm('женский', 'муть')">муть</a>
           <a href ng-click="fillForm('женский', 'жуть')">жуть</a>
           <a href ng-click="fillForm('женский', 'нефть')">нефть</a>
-          <a href ng-click="fillForm('мужской', 'гений', null, true)">гений (человек)</a>
+          <a href ng-click="fillForm('мужской', 'гений', null, true)">гений (человек, дух)</a>
           <a href ng-click="fillForm('мужской', 'гений', null, false)">гений (дар)</a>
 
           <a href ng-click="fillForm('средний', 'λ-выражение')">λ-выражение</a>
@@ -275,7 +274,7 @@
         <div class="row">
           <div class="col-12">
             <h3>
-              Input
+              Исходные данные
             </h3>
           </div>
         </div>
@@ -296,11 +295,11 @@
                     ng-model="input.gender"
                     ng-change="changed()"
                     ng-required="true">
-              <option value="">grammatical gender</option>
-              <option value="мужской">мужской</option>
-              <option value="женский">женский</option>
-              <option value="средний">средний</option>
-              <option value="общий">общий</option>
+              <option value="">Выберите грамматический род</option>
+              <option value="мужской">мужской род</option>
+              <option value="женский">женский род</option>
+              <option value="средний">средний род</option>
+              <option value="общий">общий род</option>
             </select>
           </div>
         </div>
@@ -350,13 +349,13 @@
           </div>
         </div>
 
-        <div id="inputCode" class="p-2 p-xl-4"></div>
+        <div id="inputCode" class="p-2 p-xl-4 notranslate" translate="no"></div>
       </div>
       <div class="col-md-8">
         <div class="row" ng-if="result">
           <div class="col-12">
             <h3>
-              Output
+              Результат
             </h3>
           </div>
         </div>
@@ -364,13 +363,13 @@
           <div class="col-12">
             <table class="table table-hover">
               <tr ng-repeat="case in cases">
-                <th class="leftHeader">
+                <th class="leftHeader notranslate" translate="no">
                     <span class="d-inline d-lg-none">{{case[0]}}</span><span class="d-none d-lg-inline">{{case}}</span>
                 </th>
-                <td>
+                <td class="notranslate" translate="no">
                     <span ng-repeat="w in result[case]">{{w}}<span ng-if="!$last">, </span></span>
                 </td>
-                <td>
+                <td class="notranslate" translate="no">
                     <span ng-repeat="w in plural[case]">{{w}}<span ng-if="!$last">, </span></span>
                 </td>
               </tr>
