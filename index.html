@@ -1,8 +1,10 @@
 ﻿<!doctype html>
 <html lang="ru">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>RussianNouns.js Demo</title>
 
   <script src="js/RussianNouns.js"></script>
   <script src="js/third-party/angular.min.js"></script>
@@ -27,13 +29,14 @@
 
           const rne = new RussianNouns.Engine();
 
-          $scope.fillForm = (gender, word, surname, animate, indeclinable, transport) => {
-              $scope.input.text = word;
-              $scope.input.gender = gender;
-              $scope.input.surname = surname;
-              $scope.input.animate = animate;
-              $scope.input.indeclinable = indeclinable;
-              $scope.input.transport = transport;
+          $scope.fillForm = (gender, word, surname, animate, indeclinable, transport, firstname) => {
+              $scope.input["text"] = word;
+              $scope.input["gender"] = gender;
+              $scope.input["name"] = firstname;
+              $scope.input["surname"] = surname;
+              $scope.input["animate"] = animate;
+              $scope.input["indeclinable"] = indeclinable;
+              $scope.input["transport"] = transport;
               $scope.changed();
           };
 
@@ -138,6 +141,10 @@
 
     .row {
       margin-bottom: .7rem;
+    }
+
+    label {
+      user-select: none;
     }
 
     h2 {
@@ -269,7 +276,7 @@
     </div>
 
     <div class="row">
-      <div class="col-md-4">
+      <div class="col-12 col-md-4">
         <div class="row">
           <div class="col-12">
             <h3>
@@ -284,7 +291,7 @@
                    ng-model="input.text"
                    ng-change="changed()"
                    placeholder="a russian noun"
-                   ng-required="true"/>
+                   ng-required="true">
           </div>
         </div>
 
@@ -294,7 +301,7 @@
                     ng-model="input.gender"
                     ng-change="changed()"
                     ng-required="true">
-              <option value="">Выберите грамматический род</option>
+              <option value="">&nbsp;</option>
               <option value="мужской">мужской род</option>
               <option value="женский">женский род</option>
               <option value="средний">средний род</option>
@@ -304,7 +311,15 @@
         </div>
 
         <div class="row">
-          <div class="col-12">
+          <div class="col-6 col-md-12 col-lg-6">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="animateCheckBox" ng-model="input.animate" ng-change="changed()">
+              <label class="form-check-label" for="animateCheckBox">
+                Одушевленное
+              </label>
+            </div>
+          </div>
+          <div class="col-6 col-md-12 col-lg-6">
             <div class="form-check">
               <input type="checkbox" class="form-check-input" id="indeclinableCheckBox" ng-model="input.indeclinable" ng-change="changed()">
               <label class="form-check-label" for="indeclinableCheckBox">
@@ -314,28 +329,20 @@
           </div>
         </div>
 
-        <div class="row">
-          <div class="col-12">
+        <div class="row" style="opacity: 0.6;">
+          <div class="col-3 col-md-12 col-lg-3">
             <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="animateCheckBox" ng-model="input.animate" ng-change="changed()">
-              <label class="form-check-label" for="animateCheckBox">
-                Одушевленное
-              </label>
+              <input type="checkbox" class="form-check-input" id="nameCheckBox" ng-model="input.name" ng-change="changed()">
+              <label class="form-check-label" for="nameCheckBox">Имя</label>
             </div>
           </div>
-        </div>
-
-        <div class="row">
-          <div class="col-12">
+          <div class="col-4 col-md-12 col-lg-4">
             <div class="form-check">
               <input type="checkbox" class="form-check-input" id="surnameCheckBox" ng-model="input.surname" ng-change="changed()">
               <label class="form-check-label" for="surnameCheckBox">Фамилия</label>
             </div>
           </div>
-        </div>
-
-        <div class="row">
-          <div class="col-12">
+          <div class="col-5 col-md-12 col-lg-5">
             <div class="form-check">
               <input type="checkbox" class="form-check-input" id="transportCheckBox" ng-model="input.transport" ng-change="changed()">
               <label class="form-check-label" for="transportCheckBox">
@@ -347,7 +354,7 @@
 
         <div id="inputCode" class="p-2 p-xl-4 notranslate" translate="no"></div>
       </div>
-      <div class="col-md-8">
+      <div class="col-12 col-md-8">
         <div class="row" ng-if="result">
           <div class="col-12">
             <h3>
