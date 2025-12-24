@@ -29,9 +29,9 @@
 
           const rne = new RussianNouns.Engine();
 
-          $scope.fillForm = (gender, word, surname, animate, indeclinable, transport, firstname) => {
+          $scope.fillForm = (genderPt, word, surname, animate, indeclinable, transport, firstname) => {
               $scope.input["text"] = word;
-              $scope.input["gender"] = gender;
+              $scope.input["genderPt"] = genderPt;
               $scope.input["name"] = firstname;
               $scope.input["surname"] = surname;
               $scope.input["animate"] = animate;
@@ -40,38 +40,28 @@
               $scope.changed();
           };
 
-          $scope.clean = () => {
-              if (!$scope.input.gender) {
-                  delete $scope.input.gender;
+          $scope.clear = () => {
+              let r = {
+                  text: $scope.input["text"]
+              };
+
+              if ("мн." === $scope.input["genderPt"]) {
+                  r["pluraleTantum"] = true;
+              } else if (typeof $scope.input["genderPt"] === "string") {
+                  r["gender"] = $scope.input["genderPt"];
               }
 
-              if (!$scope.input.pluraleTantum) {
-                  delete $scope.input.pluraleTantum;
+              for (let fieldName of ['animate', 'indeclinable', 'name', 'surname', 'transport']) {
+                  if ($scope.input[fieldName]) {
+                      r[fieldName] = $scope.input[fieldName];
+                  }
               }
 
-              if (!$scope.input.surname) {
-                  delete $scope.input.surname;
-              }
-
-              if (!$scope.input.name) {
-                  delete $scope.input.name;
-              }
-
-              if (!$scope.input.animate) {
-                  delete $scope.input.animate;
-              }
-
-              if (!$scope.input.indeclinable) {
-                  delete $scope.input.indeclinable;
-              }
-
-              if (!$scope.input.transport) {
-                  delete $scope.input.transport;
-              }
+              return r;
           };
 
           $scope.getInputCode = (inputObject) => {
-              let lines = JSON.stringify($scope.input, null, "    ").split('\n');
+              let lines = JSON.stringify(inputObject, null, "    ").split('\n');
               let processed = lines.map(x => {
                   if (x.indexOf(':') >= 0) {
                       let parts = x.split(':');
@@ -84,12 +74,13 @@
           };
 
           $scope.changed = () => {
-              $scope.clean();
-              if ($scope.input.text && $scope.input.gender) {
+              let cleanInput = $scope.clear();
 
-                  document.getElementById('inputCode').textContent = $scope.getInputCode();
+              if (cleanInput.text && (cleanInput.gender || cleanInput.pluraleTantum)) {
 
-                  let lemma = RussianNouns.createLemma($scope.input);
+                  document.getElementById('inputCode').textContent = $scope.getInputCode(cleanInput);
+
+                  let lemma = RussianNouns.createLemma(cleanInput);
 
                   $scope.result = {};
                   $scope.plural = {};
@@ -112,6 +103,7 @@
 
               } else {
                   $scope.result = null;
+                  document.getElementById('inputCode').textContent = "";
               }
           };
 
@@ -145,6 +137,18 @@
 
     label {
       user-select: none;
+    }
+
+    /*
+        Устранение бага Bootstrap с неинтерактивной зоной между чекбоксом и лейблом.
+        https://github.com/twbs/bootstrap/issues/13003
+        Чекбокс намеренно сдвинут чуть вправо.
+    */
+    .form-check-input {
+      margin-left: -0.8rem;
+    }
+    .form-check-label {
+      padding-left: 0.45rem;
     }
 
     h2 {
@@ -209,25 +213,19 @@
     <div class="row">
       <div class="col-12 notranslate" translate="no">
         <p id="examples">
+          <a href ng-click="fillForm('средний', 'пальто', null, null, true)">пальто</a>
+
           <a href ng-click="fillForm('мужской', 'арбуз')">арбуз</a>
           <a href ng-click="fillForm('средний', 'окно')">окно</a>
           <a href ng-click="fillForm('мужской', 'кот', null, true)">кот</a>
           <a href ng-click="fillForm('женский', 'кошка', null, true)">кошка</a>
           <a href ng-click="fillForm('средний', 'дитя', null, true)">дитя</a>
-          <a href ng-click="fillForm('средний', 'знамя')">знамя</a>
           <a href ng-click="fillForm('средний', 'время')">время</a>
-          <a href ng-click="fillForm('средний', 'семя')">семя</a>
-          <a href ng-click="fillForm('средний', 'вымя')">вымя</a>
-          <a href ng-click="fillForm('средний', 'темя')">темя</a>
-          <a href ng-click="fillForm('средний', 'имя')">имя</a>
-          <a href ng-click="fillForm('средний', 'пламя')">пламя</a>
-          <a href ng-click="fillForm('средний', 'стремя')">стремя</a>
           <a href ng-click="fillForm('общий', 'задира', null, true)">задира</a>
           <a href ng-click="fillForm('общий', 'хитрюга', null, true)">хитрюга</a>
           <a href ng-click="fillForm('общий', 'нелюдь', null, true)">нелюдь</a>
           <a href ng-click="fillForm('мужской', 'паровоз')">паровоз</a>
 
-          <a href ng-click="fillForm('мужской', 'ад')">ад</a>
           <a href ng-click="fillForm('мужской', 'вид')">вид</a>
           <a href ng-click="fillForm('мужской', 'снег')">снег</a>
 
@@ -237,40 +235,24 @@
           <a href ng-click="fillForm('женский', 'дочь', null, true)">дочь</a>
           <a href ng-click="fillForm('мужской', 'зять', null, true)">зять</a>
 
-          <!--
-          <a href ng-click="fillForm('мужской', 'Георгий', null, true)">Георгий</a>
-          <a href ng-click="fillForm('мужской', 'Устинов', true, true)">Устинов</a>
-          -->
-
-          <a href ng-click="fillForm('мужской', 'кий')">кий</a>
-          <a href ng-click="fillForm('женский', 'елка')">елка</a>
-          <a href ng-click="fillForm('мужской', 'еж', null, true)">еж</a>
-          <a href ng-click="fillForm('мужской', 'ерш')">ерш</a>
           <a href ng-click="fillForm('мужской', 'морж', null, true)">морж</a>
 
-          <!--
-          <a href ng-click="fillForm('женский', 'Иордания')">Иордания</a>
-          <a href ng-click="fillForm('мужской', 'Будапешт', null, null, true)">Будапешт</a>
-          <a href ng-click="fillForm('мужской', 'Белозёрский', true, true)">Белозёрский</a>
-          <a href ng-click="fillForm('женский', 'Белозёрская', true, true)">Белозёрская</a>
-          -->
-
           <a href ng-click="fillForm('женский', 'ирония')">ирония</a>
-          <a href ng-click="fillForm('средний', 'пальто', null, null, true)">пальто</a>
+
           <a href ng-click="fillForm('мужской', 'путь')">путь</a>
-          <a href ng-click="fillForm('женский', 'муть')">муть</a>
           <a href ng-click="fillForm('женский', 'жуть')">жуть</a>
           <a href ng-click="fillForm('женский', 'нефть')">нефть</a>
-          <a href ng-click="fillForm('мужской', 'гений', null, true)">гений (человек, дух)</a>
-          <a href ng-click="fillForm('мужской', 'гений', null, false)">гений (дар)</a>
 
           <a href ng-click="fillForm('средний', 'λ-выражение')">λ-выражение</a>
           <a href ng-click="fillForm('женский', 'α-частица')">α-частица</a>
-          <a href ng-click="fillForm('мужской', 'рок-н-ролл')">рок-н-ролл</a>
+
           <a href ng-click="fillForm('женский', 'теле-пресс-конференция')">теле-пресс-конференция</a>
 
           <a href ng-click="fillForm('средний', 'судно', null, null, null, null)">судно (мед.)</a>
           <a href ng-click="fillForm('средний', 'судно', null, null, null, true)">судно (лодка)</a>
+
+          <a href ng-click="fillForm('мн.', 'ножницы')">ножницы</a>
+          <a href ng-click="fillForm('мн.', 'ворота')">ворота</a>
         </p>
       </div>
     </div>
@@ -298,7 +280,7 @@
         <div class="row">
           <div class="col-12">
             <select class="form-control"
-                    ng-model="input.gender"
+                    ng-model="input.genderPt"
                     ng-change="changed()"
                     ng-required="true">
               <option value="">&nbsp;</option>
@@ -306,6 +288,7 @@
               <option value="женский">женский род</option>
               <option value="средний">средний род</option>
               <option value="общий">общий род</option>
+              <option value="мн.">только множественное</option>
             </select>
           </div>
         </div>
