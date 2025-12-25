@@ -107,19 +107,26 @@
               }
           };
 
-          $scope.fillForm('мужской', 'тест');
+          $scope.fillForm('женский', 'демонстрация');
       }
   </script>
 
   <style>
     html, body {
-      background: #f5f5f5;
+      background: #ecf2ff;
       height: 100%;
     }
+
     .container {
       padding-top: 1em;
       background: #f9f9f9;
       min-height: 100%;
+    }
+
+    @media (max-width: 992px) {
+      .container {
+        max-width: 100%;
+      }
     }
 
     html, h1, h2, h3, p, .form-control {
@@ -178,6 +185,20 @@
         white-space: nowrap;
     }
 
+    @media (hover: none) and (pointer: coarse) {
+      #examples {
+        line-height: 2;
+      }
+      #examples a {
+        margin-right: .7em;
+      }
+    }
+    @media (hover: none) and (pointer: coarse) and (max-width: 576px) {
+      #ghButtonArea {
+        margin: 1rem 0;
+      }
+    }
+
     #inputCode {
         font-family : monospace;
         white-space : pre;
@@ -187,10 +208,29 @@
         overflow: auto;
     }
 
-    #inputData{
+    #inputData {
         background: #dcebf2;
         box-shadow: 0px -0.75rem 0px #dcebf2;
         margin-bottom: 2rem;
+        max-width: 400px;
+    }
+
+    @media (min-width: 404px) {
+      #inputData {
+        margin-top: 1rem;
+      }
+    }
+    @media (min-width: 480px) {
+      #inputData {
+        margin-left: 3rem;
+      }
+    }
+    @media (min-width: 768px) {
+      #inputData {
+        margin-left: 0;
+        margin-top: 0;
+        max-width: 33%; /* col-md-4 */
+      }
     }
   </style>
 </head>
@@ -206,7 +246,7 @@
           Алгоритм склонения с&nbsp;точностью 98% (если&nbsp;аргументы&nbsp;выбраны&nbsp;правильно)
         </h2>
       </div>
-      <div class="col-sm-4 text-sm-right pt-sm-2">
+      <div id="ghButtonArea" class="col-sm-4 text-sm-right pt-sm-2">
         <a class="btn btn-lg btn-outline-dark notranslate" translate="no"
            style="padding: .13rem 1.1rem .17rem .8rem;"
            href="https://github.com/georgy7/RussianNounsJS">
@@ -241,13 +281,11 @@
           <a href ng-click="fillForm('женский', 'дочь', null, true)">дочь</a>
           <a href ng-click="fillForm('мужской', 'зять', null, true)">зять</a>
 
-          <a href ng-click="fillForm('мужской', 'морж', null, true)">морж</a>
-
           <a href ng-click="fillForm('женский', 'ирония')">ирония</a>
 
           <a href ng-click="fillForm('мужской', 'путь')">путь</a>
           <a href ng-click="fillForm('женский', 'жуть')">жуть (только ед.ч.)</a>
-          <a href ng-click="fillForm('женский', 'нефть')">нефть (мн.ч. относится к профессионализмам)</a>
+          <a href ng-click="fillForm('женский', 'нефть')" style="white-space: normal;">нефть&nbsp;(мн.ч. относится к&nbsp;профессионализмам)</a>
 
           <a href ng-click="fillForm('средний', 'λ-выражение')">λ-выражение</a>
           <a href ng-click="fillForm('женский', 'α-частица')">α-частица</a>
@@ -354,7 +392,7 @@
         </div>
         <div class="row" ng-if="result">
           <div class="col-12">
-            <table class="table table-hover">
+            <table class="table table-hover" style="max-width: 38rem;">
               <tr ng-repeat="case in cases">
                 <th class="leftHeader notranslate" translate="no">
                     <span class="d-inline d-lg-none mr-4">{{case[0]}}</span><span class="d-none d-lg-inline mr-4">{{case}}</span>
