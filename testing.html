@@ -1,8 +1,10 @@
 <!doctype html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Тесты RussianNounsJS</title>
 
     <script src="js/third-party/angular.min.js"></script>
     <script src="js/third-party/ngtable202.js"></script>
@@ -10,8 +12,6 @@
 
     <link rel="stylesheet" href="js/third-party/bootstrap-3.3.7-dist/css/bootstrap.css"/>
     <link rel="stylesheet" href="js/third-party/ngtable202.css"/>
-</head>
-<body ng-app="testApp">
 
 <style>
     .container-fluid {
@@ -139,7 +139,19 @@
         width: 16px;
         height: 16px;
     }
+
+    .btn-gh-bootstrap3-hack {
+        border-color: #343a40;
+    }
+    .btn-gh-bootstrap3-hack:hover {
+        background: #343a40;
+        border-color: #343a40;
+        color: #fff;
+    }
 </style>
+
+</head>
+<body ng-app="testApp">
 
 <div class="container-fluid" ng-controller="TestRunnerController">
     <div>
@@ -211,16 +223,13 @@
                     </table>
                 </div>
                 <div class="col-xs-2 text-right">
-
-                    <a class="btn btn-lg btn-default"
-                       style="padding: .4rem 1.5rem .45rem 1.1rem; border-color: #575757;"
+                    <a class="btn btn-lg btn-default btn-gh-bootstrap3-hack notranslate" translate="no"
+                       style="padding: .1rem 1.4rem .5rem 1.1rem;"
                        href="https://github.com/georgy7/RussianNounsJS"
-                       target="_blank"
-                       title="Star RussianNounsJS on GitHub.">
-                        <span style="vertical-align: -5%; font-size: 127%; line-height: 1;">★</span>
-                        <span style="vertical-align: middle; font-size: 85%;">Star</span>
+                       target="_blank">
+                        <span style="vertical-align: -6%; line-height: 1;">★</span>
+                        <span style="vertical-align: middle; font-size: 85%;">GitHub</span>
                     </a>
-
                 </div>
             </div>
 

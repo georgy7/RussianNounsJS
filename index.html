@@ -182,22 +182,28 @@
         font-family : monospace;
         white-space : pre;
         font-size: 80%;
-        background: #f3f3f3;
-        margin: 2em 0 3em;
+        background: #fff;
+        margin: 1.5rem 0 1.3rem;
         overflow: auto;
+    }
+
+    #inputData{
+        background: #dcebf2;
+        box-shadow: 0px -0.75rem 0px #dcebf2;
+        margin-bottom: 2rem;
     }
   </style>
 </head>
 <body ng-app="demo">
   <div class="container" ng-controller="DemoController">
 
-    <div class="row mb-4">
+    <div class="row mb-2">
       <div class="col-sm-8">
         <h1 class="notranslate" translate="no">
           <span style="font-weight: 200;">RussianNouns.js</span>
         </h1>
         <h2 style="padding-left: .1em;">
-          Алгоритм склонения с точностью около 98% (при&nbsp;условии&nbsp;корректности&nbsp;исходных&nbsp;данных)
+          Алгоритм склонения с&nbsp;точностью 98% (если&nbsp;аргументы&nbsp;выбраны&nbsp;правильно)
         </h2>
       </div>
       <div class="col-sm-4 text-sm-right pt-sm-2">
@@ -240,8 +246,8 @@
           <a href ng-click="fillForm('женский', 'ирония')">ирония</a>
 
           <a href ng-click="fillForm('мужской', 'путь')">путь</a>
-          <a href ng-click="fillForm('женский', 'жуть')">жуть</a>
-          <a href ng-click="fillForm('женский', 'нефть')">нефть</a>
+          <a href ng-click="fillForm('женский', 'жуть')">жуть (только ед.ч.)</a>
+          <a href ng-click="fillForm('женский', 'нефть')">нефть (мн.ч. относится к профессионализмам)</a>
 
           <a href ng-click="fillForm('средний', 'λ-выражение')">λ-выражение</a>
           <a href ng-click="fillForm('женский', 'α-частица')">α-частица</a>
@@ -259,11 +265,11 @@
     </div>
 
     <div class="row">
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-4 pl-3" id="inputData">
         <div class="row">
           <div class="col-12">
             <h3>
-              Исходные данные
+              Аргументы
             </h3>
           </div>
         </div>
