@@ -573,6 +573,9 @@
         'ковер', 'овес', 'костер'
     ].map(calculateHash));
 
+    const mobileVowelABloom = new Uint8ClampedArray(256);
+    mobileVowelA.forEach(h => bloomAdd(mobileVowelABloom, to11BitHash(h)));
+
     const mobileVowelB = toLetterTree([
         'овёс', 'ковёр', 'костёр',
         'шатер', 'шатёр', 'козел', 'козёл', 'котел', 'котёл',
@@ -613,6 +616,9 @@
         'шиповник,' + // про отвар/сироп
         'шоколад,шорох,шум,яд'
     ).split(','));
+
+    const uFormBloom = new Uint8ClampedArray(256);
+    uForm.forEach(w => bloomAdd(uFormBloom, to11BitHash(calculateHash(w))));
 
     const ogoEndings = toLetterTree([
         'ое',
@@ -1399,7 +1405,10 @@
             ) ||
             (
                 ((0b1001110011110000000110 & lcLastBit) !== 0) &&
-                (mobileVowelA.has(lemma._hash) || (lemma.isAnimate() && lcWord.endsWith('посол')))
+                (
+                    (inBloom(mobileVowelABloom, to11BitHash(lemma._hash)) && mobileVowelA.has(lemma._hash)) ||
+                    (lemma.isAnimate() && lcWord.endsWith('посол'))
+                )
             );
     }
 
@@ -1592,6 +1601,14 @@
         }
     }
 
+    const iyWordEndings = toLetterTree(['й', 'ие', 'иё']);
+    const eiWord = toLetterTree(['воробей', 'муравей', 'ручей', 'соловей', 'улей']);
+
+    const surnameType1 = toLetterTree(['ов', 'ев', 'ёв', 'ин', 'ын']);
+
+    const surnameType1Plural = new Map();
+    surnameType1Plural.set('ы'.charCodeAt(0), surnameType1);
+
     /**
      * @param {RussianNouns.Engine} engine
      * @param {RussianNouns.Lemma} lemma
@@ -1620,15 +1637,10 @@
 
         const soft = () => (half && lcWord.endsWith('я')) || softD1(lcWord);
 
-        const iyWord = (lcLastChar === 'й')
-            || ['ий', 'ие', 'иё'].includes(nLast(lcWord, 2));
-
-        const eiWord = () => endsWithAny(lcWord, [
-            'воробей', 'муравей', 'ручей', 'соловей', 'улей'
-        ]);
+        const iyWord = endsWithLeaf(lcWord, iyWordEndings);
 
         const eiStem = () => {
-            if (eiWord()) {
+            if (endsWithLeaf(lcWord, eiWord)) {
                 return init(head) + upperLike('ь', last(head));
             } else {
                 return head;
@@ -1637,14 +1649,8 @@
 
         const schWord = () => 'чщ'.includes(last(lcStem));
 
-        const surnameType1 = () => lemma.isASurname()
-            && (
-                lcWord.endsWith('ын') || lcWord.endsWith('ин')
-                || lcWord.endsWith('ов') || lcWord.endsWith('ев') || lcWord.endsWith('ёв')
-            );
-
         function addUForm(r) {
-            if (!lemma.isAnimate() && uForm.has(lcWord)) {
+            if (!lemma.isAnimate() && inBloom(uFormBloom, to11BitHash(lemma._hash)) && uForm.has(lcWord)) {
                 if (lcLastChar === 'й') {
                     r.push(init(word) + upperLike('ю', last(word)));
                 } else {
@@ -1703,11 +1709,11 @@
                         break;
                 }
 
-                let r = [];
+                let r;
                 if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
-                    r.push(stem + 'а');
+                    r = [stem + 'а'];
                 } else {
-                    r = r.concat(eStem(stressedEnding, stem, s => s + 'а'));
+                    r = eStem(stressedEnding, stem, s => s + 'а');
                 }
                 return addUForm(r);
 
@@ -1815,7 +1821,7 @@
 
                     case 'н':
                     case 'в':
-                        if (surnameType1()) {
+                        if (lemma.isASurname() && endsWithLeaf(lcWord, surnameType1)) {
                             return word + 'ым';
                         }
                 }
@@ -2859,9 +2865,9 @@
         const gender = lemma.getGender();
         const stem = lcPlural.endsWith('цы') ? init(plural) : getNounStem0(plural, lcPlural);
 
-        const isSurnameType1 = (lcLastChar === 'ы') &&
+        const isSurnameType1 =
+            endsWithLeaf(lcPlural, surnameType1Plural) &&
             (lemma.isASurname() || (gender === Gender.COMMON)) &&
-            endsWithAny(lcPlural, ['овы', 'евы', 'ёвы', 'ины', 'ыны']) &&
             !endsWithLeaf(lcPlural, explicitZeroSurnameLikeTree);
 
         // Из-за ветвления вверху функции, здесь grCaseNumber >= 2.
