@@ -59,6 +59,30 @@
         "COMMON": GenderValues[3]
     });
 
+    function toLowerCaseRu(s) {
+        // Это на самом деле быстрее, чем нативный toLowerCase, во всяком случае в Chrome,
+        // поскольку нативный toLowerCase преобразует все алфавиты, а здесь только кириллица.
+
+        let codes = new Array(s.length);
+
+        for (let i = 0; i < s.length; i++) {
+            let ch = s.charCodeAt(i);
+
+            if ((ch >= 0x0410) && (ch <= 0x042F)) {
+                ch += 0x20;
+            } else if ((ch >= 0x0400) && (ch <= 0x040F)) {
+                ch += 0x50;
+            }
+
+            codes[i] = ch;
+        }
+
+        // Функция apply может вызвать RangeError при очень длинных
+        // массивах (лимит аргументов), но для слов — это не проблема.
+
+        return String.fromCharCode.apply(null, codes);
+    }
+
     /**
      * @param o A plain old JavaScript object.
      * @returns {string|null} Описание ошибки на английском или null.
@@ -312,7 +336,7 @@
     const vowels = 0b11101000000010000100000100100001;
 
     function isVowel(ch) {
-        return bincludes(vowels, ch.toLowerCase());
+        return bincludes(vowels, toLowerCaseRu(ch));
     }
 
     function isConsonantLc(lcChar) {
@@ -1592,7 +1616,7 @@
             head = 'полу' + head.substring(3);
         }
 
-        let lcStem = stem.toLowerCase();
+        let lcStem = toLowerCaseRu(stem);
 
         const soft = () => (half && lcWord.endsWith('я')) || softD1(lcWord);
 
@@ -1874,7 +1898,7 @@
         const lcWord = lemma.lower();
 
         const stem = getNounStem(lemma, lcWord);
-        const lcStem = stem.toLowerCase();
+        const lcStem = toLowerCaseRu(stem);
 
         const head = init(word);
         const lcHead = init(lcWord);
@@ -2302,7 +2326,7 @@
         Object.freeze(stressedEnding);
 
         const stem = getNounStem(lemma, lcWord, stressedEnding[0]);
-        const lcStem = stem.toLowerCase();
+        const lcStem = toLowerCaseRu(stem);
 
         if (lcWord.endsWith('яя')) {
             result.push(nInit(word, 2) + 'ие');
@@ -2335,7 +2359,7 @@
 
         function softPatronymicForm2() {
             const part = simpleFirstPart;
-            const index = part.toLowerCase().indexOf('ье');
+            const index = toLowerCaseRu(part).indexOf('ье');
             const r = upperLike('и', part[index]);
             return part.substring(0, index) + r + part.substring(index + 1);
         }
@@ -2806,7 +2830,7 @@
     // молодцы
 
     function declinePlural(engine, lemma, grCase, plural) {
-        const lcPlural = plural.toLowerCase();
+        const lcPlural = toLowerCaseRu(plural);
 
         const lcLastChar = last(lcPlural);
         const lcLastBit = lcBit(lcLastChar);
@@ -2874,7 +2898,7 @@
             const declension = lemma.getDeclension();
 
             const genitiveStem = () => {
-                const lcStem = stem.toLowerCase();
+                const lcStem = toLowerCaseRu(stem);
 
                 const dependsOnStress = ['жки', 'шки', 'чки', 'ножны'];
 
@@ -3081,13 +3105,13 @@
                 }
             }
 
-            if (stem.toLowerCase().endsWith('ийк')) {
+            if (toLowerCaseRu(stem).endsWith('ийк')) {
                 return nInit(stem, 2) + 'ек';
             }
 
             if ((stem.length === lcPlural.length - 1) && endsWithLeaf(lcPlural, declinePluralSoftEndings)) {
 
-                if ('ьй'.includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
+                if ('ьй'.includes(toLowerCaseRu(lastOfNInitial(stem, 1))) && !lemma.isAnimate()) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
                 } else if (endsWithAny(lcPlural, ['земли', 'петли', 'пли', 'вли'])) {
