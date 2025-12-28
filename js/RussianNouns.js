@@ -1424,25 +1424,30 @@
         const lcLastChar = last(lcWord);
         const lcLastBit = lcBit(lcLastChar);
 
-        if (((vowels | 512) & lcLastBit) !== 0) { // vowels + й
-            return getStemDefault(word, lcWord, lcLastChar);
-        } else if (lcLastChar === 'к') {
-            const kResult = getStemK(word, lcWord, stressedEnging);
-            if (kResult) {
-                return kResult;
+        let result;
+
+        if ((vowels | 512 | 1024 | 16 | 8192 | 4 | (1 << 28)) & lcLastBit) {    // vowels + йкднвь
+            if ((vowels | 512) & lcLastBit) {   // vowels + й
+                result = getStemDefault(word, lcWord, lcLastChar);
+            } else if ('к' === lcLastChar) {
+                result = getStemK(word, lcWord, stressedEnging);
+            } else if ('ь' === lcLastChar) {
+                result = getStemSoftSign(lemma, word, lcWord);
+            } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
+                    (('лев' === lcWord) && lemma.isAnimate())) {
+                result = nInit(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
             }
-        } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
-                (('лев' === lcWord) && lemma.isAnimate())) {
-            return nInit(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
-        } else if ('ь' === lcLastChar) {
-            return getStemSoftSign(lemma, word, lcWord);
         }
 
-        if (hasMobileVowel(lemma, lcWord, lcLastBit)) {
-            return nInit(word, 2) + last(word);
+        if (!result) {
+            if (hasMobileVowel(lemma, lcWord, lcLastBit)) {
+                result = nInit(word, 2) + last(word);
+            } else {
+                result = word;
+            }
         }
 
-        return word;
+        return result;
     }
 
     function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
