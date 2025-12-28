@@ -1981,6 +1981,7 @@
                 return [head + 'ой', head + 'ою'];
 
             case Case.PREPOSITIONAL:
+            case Case.LOCATIVE:
                 if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                     return stem + 'ей';
                 } else if (ayaWord()) {
@@ -1993,9 +1994,6 @@
                     return head + 'ей';
                 }
                 return head + 'е';
-
-            case Case.LOCATIVE:
-                return decline2(engine, lemma, Case.PREPOSITIONAL);
         }
     }
 
@@ -2024,39 +2022,31 @@
         if (nLast(lcWord, 2) === 'мя') {
             switch (grCase) {
                 case Case.NOMINATIVE:
-                    return word;
-                case Case.GENITIVE:
-                    return stem + 'ени';
-                case Case.DATIVE:
-                    return stem + 'ени';
                 case Case.ACCUSATIVE:
                     return word;
+                case Case.GENITIVE:
+                case Case.DATIVE:
+                case Case.PREPOSITIONAL:
+                case Case.LOCATIVE:
+                    return stem + 'ени';
                 case Case.INSTRUMENTAL:
                     return stem + 'енем';
-                case Case.PREPOSITIONAL:
-                    return stem + 'ени';
-                case Case.LOCATIVE:
-                    return decline3(engine, lemma, Case.PREPOSITIONAL);
             }
         } else {
             switch (grCase) {
                 case Case.NOMINATIVE:
-                    return word;
-                case Case.GENITIVE:
-                    return stem + 'и';
-                case Case.DATIVE:
-                    return stem + 'и';
                 case Case.ACCUSATIVE:
                     return word;
+                case Case.GENITIVE:
+                case Case.DATIVE:
+                case Case.PREPOSITIONAL:
+                case Case.LOCATIVE:
+                    return stem + 'и';
                 case Case.INSTRUMENTAL:
                     if (endsWithAny(lcWord, ['вошь', 'рожь', 'церковь'])) {
                         return word + 'ю';
                     }
                     return stem + 'ью';
-                case Case.PREPOSITIONAL:
-                    return stem + 'и';
-                case Case.LOCATIVE:
-                    return decline3(engine, lemma, Case.PREPOSITIONAL);
             }
         }
     }
