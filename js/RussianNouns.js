@@ -431,6 +431,13 @@
                 (hash & 0x7ff);
     }
 
+    function to11BitFakeHash(lcString) {
+        const prepared = lcString.padStart(3, 'а');
+        return ((prepared.charCodeAt(0) & 0x7) << 8) |
+                ((prepared.charCodeAt(1) & 0xF) << 4) |
+                (prepared.charCodeAt(2) & 0xF);
+    }
+
     /**
      * @param {Uint8ClampedArray} filter - 256 bytes
      * @param {number} index - Eleven bits
@@ -2743,16 +2750,21 @@
         'хлеба', 'штришки', 'юнцы'
     ]));
 
-    const explicitZeroEndingAndOv = new Set([
+    const explicitZeroAndOv = new Set([
         'авары',
         'аланы', 'аршины', 'баклажаны', 'буквы', 'гольфы', 'граммы', 'гусары',
         'дела', 'кадеты', 'килограммы', 'омы', 'помидоры', 'рентгены',
         'ботинки', 'человеки', 'чулки', 'шорты'
     ]);
 
-    const explicitOvAndZeroEnding = new Set([
+    const explicitOvAndZero = new Set([
         'гектары', 'рельсы'
     ]);
+
+    const ovBloom = new Uint8ClampedArray(256);
+    explicitOv.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
+    explicitZeroAndOv.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
+    explicitOvAndZero.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
 
     const explicitZeroEnding = new Set(explicitZeroEndingCommonGenderSurnameLike.concat([
         'абазины', 'авы', 'аввы',
@@ -2774,6 +2786,9 @@
         'дядьки', 'дяденьки', 'зайки', 'кроссовки', 'малютки', 'малолетки',
         'попки', 'турки', 'узы', 'хлопоты', 'шахматы'
     ]));
+
+    const zeroBloom = new Uint8ClampedArray(256);
+    explicitZeroEnding.forEach(s => bloomAdd(zeroBloom, to11BitFakeHash(s)));
 
     const declinePluralFlatEndings = [
         'х', 'ых', 'их',
@@ -2947,15 +2962,17 @@
             const lastOf2Initial = lastOfNInitial(lcPlural, 2);
 
             if (Gender.FEMININE !== gender) {
+                const pluralHash = to11BitFakeHash(lcPlural)
+                const inOvBloom = inBloom(ovBloom, pluralHash);
 
-                if (explicitOv.has(lcPlural)) {
+                if (inOvBloom && explicitOv.has(lcPlural)) {
                     return init(plural) + 'ов';
-                } else if (explicitZeroEndingAndOv.has(lcPlural) && !lemma.isAName()) {
+                } else if (inOvBloom && explicitZeroAndOv.has(lcPlural) && !lemma.isAName()) {
                     return [
                         genitiveStem(),
                         init(plural) + 'ов'
                     ];
-                } else if (explicitOvAndZeroEnding.has(lcPlural)) {
+                } else if (inOvBloom && explicitOvAndZero.has(lcPlural)) {
                     return [
                         init(plural) + 'ов',
                         genitiveStem()
@@ -2963,7 +2980,7 @@
                 } else if (((gender === Gender.COMMON)
                         && !endsWithAny(lcPlural, declinePluralEy)
                         && !('жшч'.includes(lastOf2Initial)))
-                    || explicitZeroEnding.has(lcPlural)
+                    || (inBloom(zeroBloom, pluralHash) && explicitZeroEnding.has(lcPlural))
                     || (lemma.isAName() && (gender === Gender.MASCULINE) && lemma.lower().endsWith('а'))
                     || (lemma.lower() === 'барин')) {
                     return genitiveStem();
