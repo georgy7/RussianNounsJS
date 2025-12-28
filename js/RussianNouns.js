@@ -1765,8 +1765,7 @@
                     return word;
                 }
 
-                const a = lemma.isAnimate();
-                if (a === true) {
+                if (lemma.isAnimate()) {
                     return decline1(engine, lemma, Case.GENITIVE);
                 }
                 return word;
@@ -1834,6 +1833,18 @@
                 }
                 return eStem(stressedEnding, stem, s => s + 'ом');
 
+            case Case.LOCATIVE:
+                if ('полпути' === lcWord) {
+                    return word;
+                }
+
+                const locativeConfigs = locativeDictionary.get(toKey(lemma));
+                if (locativeConfigs) {
+                    const declensionTypes = unique(locativeConfigs.map(x => extractDeclensionType(x)));
+                    return declensionTypes.map(dType => toLocativeSingular1(engine, lemma, dType));
+                }
+                // Fall through
+
             case Case.PREPOSITIONAL:
                 switch (lcLastChar) {
                     case 'и':
@@ -1884,18 +1895,6 @@
                     return stem + 'е';
                 }
                 return eStem(stressedEnding, stem, s => s + 'е');
-
-            case Case.LOCATIVE:
-                if ('полпути' === lcWord) {
-                    return word;
-                }
-
-                const locativeConfigs = locativeDictionary.get(toKey(lemma));
-                if (locativeConfigs) {
-                    const declensionTypes = unique(locativeConfigs.map(x => extractDeclensionType(x)));
-                    return declensionTypes.map(dType => toLocativeSingular1(engine, lemma, dType));
-                }
-                return decline1(engine, lemma, Case.PREPOSITIONAL);
         }
     }
 
