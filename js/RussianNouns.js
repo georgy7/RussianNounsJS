@@ -1281,7 +1281,7 @@
             'х' + String.fromCharCode(1091) + 'й'
         );
         addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, '' +
-            'крюк',
+            'крюк,болт',
             [LocativeDeclensionType.PREPOSITIONAL, LocativeDeclensionType.U_SUFFIX]
         );
 
