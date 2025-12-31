@@ -1247,7 +1247,7 @@
 
         // 2. пространства («в»)
         addConfig(m, LocativeFormAttribute.LOCATION, v,
-            'ад,бор,лес,порт,аэропорт,рай,сад,тыл,' +
+            'ад,бор,лес,порт,аэропорт,рай,сад,детсад,тыл,' +
             'низ,' +
             'хлев'  // по классификации Плунгяна, это вместилище (как и "цех")
         );
@@ -1305,14 +1305,14 @@
         addConfig(m, LocativeFormAttribute.EVENT, na, 'бал,пир');
         // Может быть "дух" когда-то и значило "исповедь",
         // сейчас это только всех запутает.
-        addConfig(m, LocativeFormAttribute.CONDITION, na, 'дух');
+        addConfig(m, LocativeFormAttribute.CONDITION, na, 'дух,плав');
         // На полном газу. Не уверен, как это сюда записать. Вроде, устойчивое выражение.
         addConfig(m, LocativeFormAttribute.MOTION|LocativeFormAttribute.WITH_ADJECTIVE, na, 'газ');
 
         // 1 и 5.
-        addConfig(m, LocativeFormAttribute.CONTAINER, v, 'глаз,нос,шкаф');
+        addConfig(m, LocativeFormAttribute.CONTAINER, v, 'глаз,зоб,нос,шкаф');
         addConfig(m, LocativeFormAttribute.CONTAINER, vo, 'лоб');
-        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, 'глаз,лоб,нос,шкаф');
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, 'глаз,лоб,нос,шкаф,холм');
 
         let two_and_five = 'бок,верх,зад,угол';
         addConfig(m, LocativeFormAttribute.LOCATION, v, two_and_five);
