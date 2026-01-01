@@ -2834,9 +2834,9 @@
     ]);
 
     const mascSimilarToCommon = toLetterTree([
-        'ишки', 'дружки',
+        'ишки', 'дружки', 'тки',
         'папочки', 'дедушки', 'дядюшки', 'батюшки',
-        'петрушки', 'шестерки'
+        'катанки', 'петрушки', 'шестерки'
     ]);
 
     // малышки
@@ -3024,9 +3024,9 @@
                                 return init(plural) + 'й';
                             } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
                                 return init(plural) + 'ев';
-                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки', 'мки'])
+                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки', 'ятки', 'етки', 'мки', 'нки', 'педки', 'илки'])
                                 && ((Gender.MASCULINE !== gender) || endsWithLeaf(unYo(lcPlural), mascSimilarToCommon))
-                                && !(lemma.lower().endsWith('ок'))) {
+                                && !endsWithAny(lemma.lower(), ['шок', 'щок', 'жок', 'зок', 'яток', 'еток'])) {
                                 return genitiveStem();
                             }
                             return init(plural) + 'ов';
