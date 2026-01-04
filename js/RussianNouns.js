@@ -1,6 +1,6 @@
 /*!
   RussianNounsJS v2.5.0-SNAPSHOT
-  Copyright (c) 2011-2025 Georgy Ustinov
+  Copyright (c) 2011-2026 Georgy Ustinov
   Released under the MIT license
 */
 
@@ -2639,7 +2639,7 @@
                     result.push('зори');
 
                 } else if (lcWord.endsWith('ая') && !lcWord.endsWith('свая')) {
-                    if ('жшх'.includes(last(lcStem)) || endsWithAny(lcStem, ['вк', 'ск', 'цк'])) {
+                    if ('жхчшщ'.includes(last(lcStem)) || endsWithAny(lcStem, ['вк', 'гк', 'ск', 'цк', 'ньк'])) {
                         result.push(stem + 'ие');
                     } else {
                         result.push(stem + 'ые');
