@@ -2839,6 +2839,17 @@
         'катанки', 'петрушки', 'шестерки'
     ]);
 
+    const kiWords = toLetterTree([
+        'жки', 'шки', 'чки', 'рки',
+        'натки', 'хатки', 'ятки', 'етки', 'чётки',
+        'мки', 'нки', 'педки', 'илки'
+    ]);
+
+    const kiExceptions = toLetterTree([
+        'шок', 'щок', 'жок', 'зок',
+        'аток', 'яток', 'еток'
+    ]);
+
     // малышки
     // рожки
     // листья
@@ -3024,9 +3035,9 @@
                                 return init(plural) + 'й';
                             } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
                                 return init(plural) + 'ев';
-                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки', 'натки', 'хатки', 'ятки', 'етки', 'чётки', 'мки', 'нки', 'педки', 'илки'])
+                            } else if (endsWithLeaf(lcPlural, kiWords)
                                 && ((Gender.MASCULINE !== gender) || endsWithLeaf(unYo(lcPlural), mascSimilarToCommon))
-                                && !endsWithAny(lemma.lower(), ['шок', 'щок', 'жок', 'зок', 'аток', 'яток', 'еток'])) {
+                                && !endsWithLeaf(lemma.lower(), kiExceptions)) {
                                 return genitiveStem();
                             }
                             return init(plural) + 'ов';
