@@ -3024,9 +3024,9 @@
                                 return init(plural) + 'й';
                             } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
                                 return init(plural) + 'ев';
-                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки', 'ятки', 'етки', 'мки', 'нки', 'педки', 'илки'])
+                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки', 'натки', 'хатки', 'ятки', 'етки', 'чётки', 'мки', 'нки', 'педки', 'илки'])
                                 && ((Gender.MASCULINE !== gender) || endsWithLeaf(unYo(lcPlural), mascSimilarToCommon))
-                                && !endsWithAny(lemma.lower(), ['шок', 'щок', 'жок', 'зок', 'яток', 'еток'])) {
+                                && !endsWithAny(lemma.lower(), ['шок', 'щок', 'жок', 'зок', 'аток', 'яток', 'еток'])) {
                                 return genitiveStem();
                             }
                             return init(plural) + 'ов';
