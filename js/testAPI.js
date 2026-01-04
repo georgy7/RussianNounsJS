@@ -72,7 +72,16 @@ function assertAllCases(results, values) {
 
 // </editor-fold>
 
-const RussianNouns = require('./RussianNouns.js');
+const library = process.argv[process.argv.length - 1];
+assertEquals(
+    0,
+    library.toUpperCase().indexOf('RussianNouns'.toUpperCase()),
+    "Last argument must be RussianNouns[*].js"
+);
+
+console.log(`Loading "${library}"\n`);
+
+const RussianNouns = require('./' + library);
 
 (() => {
     const rne = new RussianNouns.Engine();
