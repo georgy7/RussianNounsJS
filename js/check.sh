@@ -48,10 +48,20 @@ function minify_it {
     ls -l "$2"
 }
 
+function transpile_it {
+    npx babel "$1" -o "$2" --no-babelrc --presets="@babel/preset-env"
+    ls -l "$2"
+
+    unexpand -t 2 "$2" | expand -t 4 > es5-4spaces-temp.js
+    mv es5-4spaces-temp.js "$2"
+    ls -l "$2"
+}
+
 function check_it {
     npx es-check "$1" "$2"
     npx es-check "$1" "$2" --module
 }
+
 
 check_it es6 RussianNouns.js
 ls -l RussianNouns.js
@@ -64,13 +74,7 @@ echo
 node --trace-uncaught testAPI.js RussianNouns.js
 
 echo -e "\nTranspiling to ES5...\n"
-npx babel RussianNouns.js -o RussianNouns-es5.js --no-babelrc --presets="@babel/preset-env"
-ls -l RussianNouns-es5.js
-
-unexpand -t 2 RussianNouns-es5.js | expand -t 4 > RussianNouns-es5-4spaces.js
-mv RussianNouns-es5-4spaces.js RussianNouns-es5.js
-ls -l RussianNouns-es5.js
-
+transpile_it RussianNouns.js RussianNouns-es5.js
 check_it es5 RussianNouns-es5.js
 show_md5 RussianNouns-es5.js
 
