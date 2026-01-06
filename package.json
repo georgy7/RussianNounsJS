@@ -1,6 +1,6 @@
 {
   "name": "russian-nouns-js",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "Declension by cases. Pluralization.",
   "main": "RussianNouns.js",
   "scripts": {
@@ -21,5 +21,5 @@
   "bugs": {
     "url": "https://github.com/georgy7/RussianNounsJS/issues"
   },
-  "homepage": "https://github.com/georgy7/RussianNounsJS#readme"
+  "homepage": "https://georgy7.github.io/RussianNounsJS/"
 }

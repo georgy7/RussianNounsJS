@@ -1,6 +1,6 @@
 /*!
-  RussianNounsJS v2.4.0
-  Copyright (c) 2011-2025 Georgy Ustinov
+  RussianNounsJS v2.5.0
+  Copyright (c) 2011-2026 Georgy Ustinov
   Released under the MIT license
 */
 
@@ -58,6 +58,30 @@
         "NEUTER": GenderValues[2],
         "COMMON": GenderValues[3]
     });
+
+    function toLowerCaseRu(s) {
+        // Это на самом деле быстрее, чем нативный toLowerCase, во всяком случае в Chrome,
+        // поскольку нативный toLowerCase преобразует все алфавиты, а здесь только кириллица.
+
+        let codes = new Array(s.length);
+
+        for (let i = 0; i < s.length; i++) {
+            let ch = s.charCodeAt(i);
+
+            if ((ch >= 0x0410) && (ch <= 0x042F)) {
+                ch += 0x20;
+            } else if ((ch >= 0x0400) && (ch <= 0x040F)) {
+                ch += 0x50;
+            }
+
+            codes[i] = ch;
+        }
+
+        // Функция apply может вызвать RangeError при очень длинных
+        // массивах (лимит аргументов), но для слов — это не проблема.
+
+        return String.fromCharCode.apply(null, codes);
+    }
 
     /**
      * @param o A plain old JavaScript object.
@@ -312,7 +336,7 @@
     const vowels = 0b11101000000010000100000100100001;
 
     function isVowel(ch) {
-        return bincludes(vowels, ch.toLowerCase());
+        return bincludes(vowels, toLowerCaseRu(ch));
     }
 
     function isConsonantLc(lcChar) {
@@ -407,6 +431,13 @@
                 (hash & 0x7ff);
     }
 
+    function to11BitFakeHash(lcString) {
+        const prepared = lcString.padStart(3, 'а');
+        return ((prepared.charCodeAt(0) & 0x7) << 8) |
+                ((prepared.charCodeAt(1) & 0xF) << 4) |
+                (prepared.charCodeAt(2) & 0xF);
+    }
+
     /**
      * @param {Uint8ClampedArray} filter - 256 bytes
      * @param {number} index - Eleven bits
@@ -422,30 +453,17 @@
     }
 
     function toLetterTree(endingArray) {
-        // Мы строим дерево объектов, в котором корень — конец всех строк массива.
-        // В качестве его ключей выступают последние буквы строк,
-        // а в качестве значений — другие объекты, ключами которых будут уже предпоследние буквы,
-        // и так далее. Значение 0 вместо объекта означает начало строки.
+        // Корень — конец всех строк массива.
+        // В качестве ключей выступают последние буквы строк, а в качестве значений —
+        // объекты, ключами в которых будут уже предпоследние буквы, и так далее.
+        // Значение 0 вместо объекта означает начало строки.
 
-        // При этом часть информации о строках теряется, поскольку она не нужна:
-        // если в исходном массиве есть строки "ый" и "итый", достаточно проверить две буквы,
-        // чтобы убедиться, что слово заканчивается на одно из перечисленных окончаний.
-        // Можно было бы придумать такую структуру, где все данные исходного списка сохраняются,
-        // но в контексте нашей задачи это пустая трата оперативной памяти.
+        // При этом часть информации отбрасывается:
+        // если в исходном массиве есть строки "ый" и "итый", достаточно проверить
+        // две последние буквы, чтобы убедиться, что слово заканчивается на одно
+        // из перечисленных окончаний.
 
-        // Результат используется в функции endsWithLeaf.
-
-        // Число итераций при поиске зависит от глубины дерева, которая зависит не от количества
-        // окончаний, а от их длины. Еще увеличение числа окончаний даёт больше разнообразных букв
-        // на каждом уровне дерева, что в конечном итоге повышает нагрузку на Map.
-        // Так что сложность поиска в таком дереве равна сложности поиска в Map, умноженной
-        // на максимальную длину окончания.
-
-        // Назовём число окончаний в массиве n и число символов в самом длинном из них w.
-        // Тогда для Map на основе хэш-таблицы поиск будет стоить
-        // O(1)*w в среднем и O(n)*w в худшем случае, когда таблица заполнена.
-        // И поскольку w почти не меняется и как правило находится в пределах где-то от 2 до 10,
-        // можно рассматривать его как константу. Получается O(1) в среднем и O(n) в худшем случае.
+        // Деревья используются с функцией endsWithLeaf.
 
         let result = new Map();
 
@@ -562,6 +580,9 @@
         'ковер', 'овес', 'костер'
     ].map(calculateHash));
 
+    const mobileVowelABloom = new Uint8ClampedArray(256);
+    mobileVowelA.forEach(h => bloomAdd(mobileVowelABloom, to11BitHash(h)));
+
     const mobileVowelB = toLetterTree([
         'овёс', 'ковёр', 'костёр',
         'шатер', 'шатёр', 'козел', 'козёл', 'котел', 'котёл',
@@ -575,9 +596,9 @@
         'ячмень'
     ];
 
-    const ok1 = [
-        'лапоток', 'желток'
-    ];
+    const ok1 = toLetterTree([
+        'лапоток', 'желток', 'нишок', 'ришок', 'ишек'
+    ]);
     const ok2 = [
         'поток', 'приток', 'переток', 'проток', 'биоток', 'электроток',
         'восток', 'водосток', 'водоток', 'воток',
@@ -602,6 +623,9 @@
         'шиповник,' + // про отвар/сироп
         'шоколад,шорох,шум,яд'
     ).split(','));
+
+    const uFormBloom = new Uint8ClampedArray(256);
+    uForm.forEach(w => bloomAdd(uFormBloom, to11BitHash(calculateHash(w))));
 
     const ogoEndings = toLetterTree([
         'ое',
@@ -1223,7 +1247,7 @@
 
         // 2. пространства («в»)
         addConfig(m, LocativeFormAttribute.LOCATION, v,
-            'ад,бор,лес,порт,аэропорт,рай,сад,тыл,' +
+            'ад,бор,лес,порт,аэропорт,рай,сад,детсад,тыл,' +
             'низ,' +
             'хлев'  // по классификации Плунгяна, это вместилище (как и "цех")
         );
@@ -1257,7 +1281,7 @@
             'х' + String.fromCharCode(1091) + 'й'
         );
         addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, '' +
-            'крюк',
+            'крюк,болт',
             [LocativeDeclensionType.PREPOSITIONAL, LocativeDeclensionType.U_SUFFIX]
         );
 
@@ -1281,14 +1305,14 @@
         addConfig(m, LocativeFormAttribute.EVENT, na, 'бал,пир');
         // Может быть "дух" когда-то и значило "исповедь",
         // сейчас это только всех запутает.
-        addConfig(m, LocativeFormAttribute.CONDITION, na, 'дух');
+        addConfig(m, LocativeFormAttribute.CONDITION, na, 'дух,плав');
         // На полном газу. Не уверен, как это сюда записать. Вроде, устойчивое выражение.
         addConfig(m, LocativeFormAttribute.MOTION|LocativeFormAttribute.WITH_ADJECTIVE, na, 'газ');
 
         // 1 и 5.
-        addConfig(m, LocativeFormAttribute.CONTAINER, v, 'глаз,нос,шкаф');
+        addConfig(m, LocativeFormAttribute.CONTAINER, v, 'глаз,зоб,нос,шкаф');
         addConfig(m, LocativeFormAttribute.CONTAINER, vo, 'лоб');
-        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, 'глаз,лоб,нос,шкаф');
+        addConfig(m, LocativeFormAttribute.OBJECT_WITH_FUNCTIONAL_SURFACE, na, 'глаз,лоб,нос,шкаф,холм');
 
         let two_and_five = 'бок,верх,зад,угол';
         addConfig(m, LocativeFormAttribute.LOCATION, v, two_and_five);
@@ -1388,7 +1412,10 @@
             ) ||
             (
                 ((0b1001110011110000000110 & lcLastBit) !== 0) &&
-                (mobileVowelA.has(lemma._hash) || (lemma.isAnimate() && lcWord.endsWith('посол')))
+                (
+                    (inBloom(mobileVowelABloom, to11BitHash(lemma._hash)) && mobileVowelA.has(lemma._hash)) ||
+                    (lemma.isAnimate() && lcWord.endsWith('посол'))
+                )
             );
     }
 
@@ -1397,25 +1424,30 @@
         const lcLastChar = last(lcWord);
         const lcLastBit = lcBit(lcLastChar);
 
-        if (((vowels | 512) & lcLastBit) !== 0) { // vowels + й
-            return getStemDefault(word, lcWord, lcLastChar);
-        } else if (lcLastChar === 'к') {
-            const kResult = getStemK(word, lcWord, stressedEnging);
-            if (kResult) {
-                return kResult;
+        let result;
+
+        if ((vowels | 512 | 1024 | 16 | 8192 | 4 | (1 << 28)) & lcLastBit) {    // vowels + йкднвь
+            if ((vowels | 512) & lcLastBit) {   // vowels + й
+                result = getStemDefault(word, lcWord, lcLastChar);
+            } else if ('к' === lcLastChar) {
+                result = getStemK(word, lcWord, stressedEnging);
+            } else if ('ь' === lcLastChar) {
+                result = getStemSoftSign(lemma, word, lcWord);
+            } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
+                    (('лев' === lcWord) && lemma.isAnimate())) {
+                result = nInit(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
             }
-        } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
-                (('лев' === lcWord) && lemma.isAnimate())) {
-            return nInit(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
-        } else if ('ь' === lcLastChar) {
-            return getStemSoftSign(lemma, word, lcWord);
         }
 
-        if (hasMobileVowel(lemma, lcWord, lcLastBit)) {
-            return nInit(word, 2) + last(word);
+        if (!result) {
+            if (hasMobileVowel(lemma, lcWord, lcLastBit)) {
+                result = nInit(word, 2) + last(word);
+            } else {
+                result = word;
+            }
         }
 
-        return word;
+        return result;
     }
 
     function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
@@ -1487,15 +1519,13 @@
 
     function okWord(w) {
         return (endsWithAny(w, ['чек', 'шек']) && (w.length >= 6))
-            || (w.endsWith('ок') && (
-                endsWithAny(w, ok1)
-                || (
-                    !w.endsWith('шок') && !okExceptions.includes(w)
-                    && !endsWithAny(w, ok2)
-                    && !isVowel(lastOfNInitial(w, 2))
-                    && (isVowel(lastOfNInitial(w, 3)) || endsWithAny(nInit(w, 2), ['ст', 'рт']))
-                    && w.length >= 4
-                )));
+            || endsWithLeaf(w, ok1) || (w.endsWith('ок') && (
+                !w.endsWith('шок') && !okExceptions.includes(w)
+                && !endsWithAny(w, ok2)
+                && !isVowel(lastOfNInitial(w, 2))
+                && (isVowel(lastOfNInitial(w, 3)) || endsWithAny(nInit(w, 2), ['ст', 'рт']))
+                && w.length >= 4
+            ));
     }
 
     const softD1 = w => (last(w) === 'ь' && !w.endsWith('господь'))
@@ -1583,6 +1613,14 @@
         }
     }
 
+    const iyWordEndings = toLetterTree(['й', 'ие', 'иё']);
+    const eiWord = toLetterTree(['воробей', 'муравей', 'ручей', 'соловей', 'улей']);
+
+    const surnameType1 = toLetterTree(['ов', 'ев', 'ёв', 'ин', 'ын']);
+
+    const surnameType1Plural = new Map();
+    surnameType1Plural.set('ы'.charCodeAt(0), surnameType1);
+
     /**
      * @param {RussianNouns.Engine} engine
      * @param {RussianNouns.Lemma} lemma
@@ -1607,19 +1645,14 @@
             head = 'полу' + head.substring(3);
         }
 
-        let lcStem = stem.toLowerCase();
+        let lcStem = toLowerCaseRu(stem);
 
         const soft = () => (half && lcWord.endsWith('я')) || softD1(lcWord);
 
-        const iyWord = (lcLastChar === 'й')
-            || ['ий', 'ие', 'иё'].includes(nLast(lcWord, 2));
-
-        const eiWord = () => endsWithAny(lcWord, [
-            'воробей', 'муравей', 'ручей', 'соловей', 'улей'
-        ]);
+        const iyWord = endsWithLeaf(lcWord, iyWordEndings);
 
         const eiStem = () => {
-            if (eiWord()) {
+            if (endsWithLeaf(lcWord, eiWord)) {
                 return init(head) + upperLike('ь', last(head));
             } else {
                 return head;
@@ -1628,14 +1661,8 @@
 
         const schWord = () => 'чщ'.includes(last(lcStem));
 
-        const surnameType1 = () => lemma.isASurname()
-            && (
-                lcWord.endsWith('ын') || lcWord.endsWith('ин')
-                || lcWord.endsWith('ов') || lcWord.endsWith('ев') || lcWord.endsWith('ёв')
-            );
-
         function addUForm(r) {
-            if (!lemma.isAnimate() && uForm.has(lcWord)) {
+            if (!lemma.isAnimate() && inBloom(uFormBloom, to11BitHash(lemma._hash)) && uForm.has(lcWord)) {
                 if (lcLastChar === 'й') {
                     r.push(init(word) + upperLike('ю', last(word)));
                 } else {
@@ -1694,11 +1721,11 @@
                         break;
                 }
 
-                let r = [];
+                let r;
                 if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
-                    r.push(stem + 'а');
+                    r = [stem + 'а'];
                 } else {
-                    r = r.concat(eStem(stressedEnding, stem, s => s + 'а'));
+                    r = eStem(stressedEnding, stem, s => s + 'а');
                 }
                 return addUForm(r);
 
@@ -1750,8 +1777,7 @@
                     return word;
                 }
 
-                const a = lemma.isAnimate();
-                if (a === true) {
+                if (lemma.isAnimate()) {
                     return decline1(engine, lemma, Case.GENITIVE);
                 }
                 return word;
@@ -1806,7 +1832,7 @@
 
                     case 'н':
                     case 'в':
-                        if (surnameType1()) {
+                        if (lemma.isASurname() && endsWithLeaf(lcWord, surnameType1)) {
                             return word + 'ым';
                         }
                 }
@@ -1818,6 +1844,18 @@
                     return stem + 'ом';
                 }
                 return eStem(stressedEnding, stem, s => s + 'ом');
+
+            case Case.LOCATIVE:
+                if ('полпути' === lcWord) {
+                    return word;
+                }
+
+                const locativeConfigs = locativeDictionary.get(toKey(lemma));
+                if (locativeConfigs) {
+                    const declensionTypes = unique(locativeConfigs.map(x => extractDeclensionType(x)));
+                    return declensionTypes.map(dType => toLocativeSingular1(engine, lemma, dType));
+                }
+                // Fall through
 
             case Case.PREPOSITIONAL:
                 switch (lcLastChar) {
@@ -1869,18 +1907,6 @@
                     return stem + 'е';
                 }
                 return eStem(stressedEnding, stem, s => s + 'е');
-
-            case Case.LOCATIVE:
-                if ('полпути' === lcWord) {
-                    return word;
-                }
-
-                const locativeConfigs = locativeDictionary.get(toKey(lemma));
-                if (locativeConfigs) {
-                    const declensionTypes = unique(locativeConfigs.map(x => extractDeclensionType(x)));
-                    return declensionTypes.map(dType => toLocativeSingular1(engine, lemma, dType));
-                }
-                return decline1(engine, lemma, Case.PREPOSITIONAL);
         }
     }
 
@@ -1889,7 +1915,7 @@
         const lcWord = lemma.lower();
 
         const stem = getNounStem(lemma, lcWord);
-        const lcStem = stem.toLowerCase();
+        const lcStem = toLowerCaseRu(stem);
 
         const head = init(word);
         const lcHead = init(lcWord);
@@ -1967,6 +1993,7 @@
                 return [head + 'ой', head + 'ою'];
 
             case Case.PREPOSITIONAL:
+            case Case.LOCATIVE:
                 if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                     return stem + 'ей';
                 } else if (ayaWord()) {
@@ -1979,9 +2006,6 @@
                     return head + 'ей';
                 }
                 return head + 'е';
-
-            case Case.LOCATIVE:
-                return decline2(engine, lemma, Case.PREPOSITIONAL);
         }
     }
 
@@ -2010,39 +2034,31 @@
         if (nLast(lcWord, 2) === 'мя') {
             switch (grCase) {
                 case Case.NOMINATIVE:
-                    return word;
-                case Case.GENITIVE:
-                    return stem + 'ени';
-                case Case.DATIVE:
-                    return stem + 'ени';
                 case Case.ACCUSATIVE:
                     return word;
+                case Case.GENITIVE:
+                case Case.DATIVE:
+                case Case.PREPOSITIONAL:
+                case Case.LOCATIVE:
+                    return stem + 'ени';
                 case Case.INSTRUMENTAL:
                     return stem + 'енем';
-                case Case.PREPOSITIONAL:
-                    return stem + 'ени';
-                case Case.LOCATIVE:
-                    return decline3(engine, lemma, Case.PREPOSITIONAL);
             }
         } else {
             switch (grCase) {
                 case Case.NOMINATIVE:
-                    return word;
-                case Case.GENITIVE:
-                    return stem + 'и';
-                case Case.DATIVE:
-                    return stem + 'и';
                 case Case.ACCUSATIVE:
                     return word;
+                case Case.GENITIVE:
+                case Case.DATIVE:
+                case Case.PREPOSITIONAL:
+                case Case.LOCATIVE:
+                    return stem + 'и';
                 case Case.INSTRUMENTAL:
                     if (endsWithAny(lcWord, ['вошь', 'рожь', 'церковь'])) {
                         return word + 'ю';
                     }
                     return stem + 'ью';
-                case Case.PREPOSITIONAL:
-                    return stem + 'и';
-                case Case.LOCATIVE:
-                    return decline3(engine, lemma, Case.PREPOSITIONAL);
             }
         }
     }
@@ -2317,7 +2333,7 @@
         Object.freeze(stressedEnding);
 
         const stem = getNounStem(lemma, lcWord, stressedEnding[0]);
-        const lcStem = stem.toLowerCase();
+        const lcStem = toLowerCaseRu(stem);
 
         if (lcWord.endsWith('яя')) {
             result.push(nInit(word, 2) + 'ие');
@@ -2350,7 +2366,7 @@
 
         function softPatronymicForm2() {
             const part = simpleFirstPart;
-            const index = part.toLowerCase().indexOf('ье');
+            const index = toLowerCaseRu(part).indexOf('ье');
             const r = upperLike('и', part[index]);
             return part.substring(0, index) + r + part.substring(index + 1);
         }
@@ -2623,7 +2639,7 @@
                     result.push('зори');
 
                 } else if (lcWord.endsWith('ая') && !lcWord.endsWith('свая')) {
-                    if ('жшх'.includes(last(lcStem)) || endsWithAny(lcStem, ['вк', 'ск', 'цк'])) {
+                    if ('жхчшщ'.includes(last(lcStem)) || endsWithAny(lcStem, ['вк', 'гк', 'ск', 'цк', 'ньк'])) {
                         result.push(stem + 'ие');
                     } else {
                         result.push(stem + 'ые');
@@ -2678,7 +2694,6 @@
         'распри',
         'родни',
         'сакли',
-        'сани',
         'сени',
         'ступни',
         'судьи',
@@ -2722,11 +2737,13 @@
     const explicitOv1Tree = toLetterTree(explicitOv1);
 
     const explicitOv = new Set(explicitOv1.concat([
-        'аланы', 'бега', 'беглецы', 'близнецы', 'бойцы', 'бока', 'борта', 'борцы', 'бруствера', 'брюшки',
+        'бега', 'беглецы', 'близнецы', 'бойцы', 'бока', 'борта', 'борцы', 'бруствера', 'брюшки',
         'веера', 'века', 'венцы', 'верха', 'веса', 'весы', 'вечера', 'вороха',
         'глупцы', 'года', 'гонцы', 'дворцы', 'дельцы',
-        'детдома', 'детдомы', 'дома', 'жеребцы', 'жильцы', 'жрецы', 'зубцы', 'истцы', 'катера',
-        'концы', 'корма', 'кузнецы', 'купола', 'купцы', 'луга', 'мертвецы', 'меха', 'мудрецы',
+        'детдома', 'детдомы', 'дома', 'жеребцы', 'жильцы', 'жрецы',
+        'затишки', 'зубцы', 'излишки', 'истцы', 'катера',
+        'концы', 'корма', 'кузнецы', 'купола', 'купцы',
+        'лишки', 'луга', 'мертвецы', 'меха', 'мудрецы',
         'облака', 'образа', 'образцы', 'огурцы', 'округа', 'омута',
         'ордена', 'ордера', 'отцы', 'очки',
         'певцы', 'песцы', 'пловцы', 'подлецы',
@@ -2734,27 +2751,34 @@
         'свинцы', // есть такое слово?
         'сорта', 'соуса', 'спецы', 'стога', 'столбцы', 'стрельцы',
         'творцы', 'тельцы', 'тенора', 'терема', 'тома', 'тона', 'торцы',
-        'хлеба', 'юнцы'
+        'хлеба', 'штришки', 'юнцы'
     ]));
 
-    const explicitZeroEndingAndOv = new Set([
-        'аршины', 'баклажаны', 'буквы', 'гольфы', 'граммы', 'гусары',
+    const explicitZeroAndOv = new Set([
+        'авары',
+        'аланы', 'аршины', 'баклажаны', 'буквы', 'гольфы', 'граммы', 'гусары',
         'дела', 'кадеты', 'килограммы', 'омы', 'помидоры', 'рентгены',
         'ботинки', 'человеки', 'чулки', 'шорты'
     ]);
 
-    const explicitOvAndZeroEnding = new Set([
+    const explicitOvAndZero = new Set([
         'гектары', 'рельсы'
     ]);
 
+    const ovBloom = new Uint8ClampedArray(256);
+    explicitOv.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
+    explicitZeroAndOv.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
+    explicitOvAndZero.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
+
     const explicitZeroEnding = new Set(explicitZeroEndingCommonGenderSurnameLike.concat([
+        'абазины', 'авы', 'аввы',
         'бедняги', 'бедолаги', 'болгары', 'бродяги', 'брызги', 'брюки', 'брюхи', 'будды', 'бусы',
         'валенки', 'веки', 'вельможи', 'верзилы', 'вилы', 'владыки', 'воеводы', 'волосы', 'вояки',
         'главы', 'грузины', 'задворки', 'задиры',
         'железы', // желёз
         'жилы', 'зануды', 'зеваки',
         'именины', 'калеки', 'кальсоны', 'каникулы', 'колготки', 'коллеги', 'крохи', 'курицы', 'куры',
-        'ладоши', 'ламы', 'макароны', 'мужчины',
+        'ладоши', 'ламы', 'лыки', 'макароны', 'мужчины',
         'нападки', 'нары', 'непоседы', 'носилки', 'ножны',
         'папы', 'папаши', 'таты', 'падлы', 'партизаны', 'погоны', 'поминки', 'посиделки', 'похороны',
         'предтечи', 'работяги', 'разы', 'ребятки', 'румыны', 'самоубийцы', 'санки', 'убийцы',
@@ -2766,6 +2790,9 @@
         'дядьки', 'дяденьки', 'зайки', 'кроссовки', 'малютки', 'малолетки',
         'попки', 'турки', 'узы', 'хлопоты', 'шахматы'
     ]));
+
+    const zeroBloom = new Uint8ClampedArray(256);
+    explicitZeroEnding.forEach(s => bloomAdd(zeroBloom, to11BitFakeHash(s)));
 
     const declinePluralFlatEndings = [
         'х', 'ых', 'их',
@@ -2793,6 +2820,7 @@
     const borschee = toLetterTree([
         'жи', 'ши', 'чи',
         'ля', 'ли', 'чи', 'ри', 'ти', 'ди',
+        'сани',
         'борщи', 'клещи',
         'товарищи',
         'плащи', 'прыщи', 'хрящи'
@@ -2805,10 +2833,21 @@
         'стулья', 'сучья', 'хлопья', 'шилья'
     ]);
 
-    const mShki = toLetterTree([
-        'братишки', 'дружки', 'мальчишки', 'парнишки',
-        'сынишки', 'папочки', 'дедушки', 'дядюшки', 'батюшки',
-        'городишки', 'домишки'
+    const mascSimilarToCommon = toLetterTree([
+        'ишки', 'дружки', 'тки',
+        'папочки', 'дедушки', 'дядюшки', 'батюшки',
+        'катанки', 'петрушки', 'шестерки'
+    ]);
+
+    const kiWords = toLetterTree([
+        'жки', 'шки', 'чки', 'рки',
+        'натки', 'хатки', 'ятки', 'етки', 'чётки',
+        'мки', 'нки', 'педки', 'илки'
+    ]);
+
+    const kiExceptions = toLetterTree([
+        'шок', 'щок', 'жок', 'зок',
+        'аток', 'яток', 'еток'
     ]);
 
     // малышки
@@ -2817,7 +2856,7 @@
     // молодцы
 
     function declinePlural(engine, lemma, grCase, plural) {
-        const lcPlural = plural.toLowerCase();
+        const lcPlural = toLowerCaseRu(plural);
 
         const lcLastChar = last(lcPlural);
         const lcLastBit = lcBit(lcLastChar);
@@ -2846,9 +2885,9 @@
         const gender = lemma.getGender();
         const stem = lcPlural.endsWith('цы') ? init(plural) : getNounStem0(plural, lcPlural);
 
-        const isSurnameType1 = (lcLastChar === 'ы') &&
+        const isSurnameType1 =
+            endsWithLeaf(lcPlural, surnameType1Plural) &&
             (lemma.isASurname() || (gender === Gender.COMMON)) &&
-            endsWithAny(lcPlural, ['овы', 'евы', 'ёвы', 'ины', 'ыны']) &&
             !endsWithLeaf(lcPlural, explicitZeroSurnameLikeTree);
 
         // Из-за ветвления вверху функции, здесь grCaseNumber >= 2.
@@ -2885,7 +2924,7 @@
             const declension = lemma.getDeclension();
 
             const genitiveStem = () => {
-                const lcStem = stem.toLowerCase();
+                const lcStem = toLowerCaseRu(stem);
 
                 const dependsOnStress = ['жки', 'шки', 'чки', 'ножны'];
 
@@ -2939,15 +2978,17 @@
             const lastOf2Initial = lastOfNInitial(lcPlural, 2);
 
             if (Gender.FEMININE !== gender) {
+                const pluralHash = to11BitFakeHash(lcPlural)
+                const inOvBloom = inBloom(ovBloom, pluralHash);
 
-                if (explicitOv.has(lcPlural)) {
+                if (inOvBloom && explicitOv.has(lcPlural)) {
                     return init(plural) + 'ов';
-                } else if (explicitZeroEndingAndOv.has(lcPlural)) {
+                } else if (inOvBloom && explicitZeroAndOv.has(lcPlural) && !lemma.isAName()) {
                     return [
                         genitiveStem(),
                         init(plural) + 'ов'
                     ];
-                } else if (explicitOvAndZeroEnding.has(lcPlural)) {
+                } else if (inOvBloom && explicitOvAndZero.has(lcPlural)) {
                     return [
                         init(plural) + 'ов',
                         genitiveStem()
@@ -2955,7 +2996,8 @@
                 } else if (((gender === Gender.COMMON)
                         && !endsWithAny(lcPlural, declinePluralEy)
                         && !('жшч'.includes(lastOf2Initial)))
-                    || explicitZeroEnding.has(lcPlural)
+                    || (inBloom(zeroBloom, pluralHash) && explicitZeroEnding.has(lcPlural))
+                    || (lemma.isAName() && (gender === Gender.MASCULINE) && lemma.lower().endsWith('а'))
                     || (lemma.lower() === 'барин')) {
                     return genitiveStem();
                 }
@@ -2993,9 +3035,9 @@
                                 return init(plural) + 'й';
                             } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
                                 return init(plural) + 'ев';
-                            } else if (endsWithAny(lcPlural, ['жки', 'шки', 'чки', 'рки'])
-                                && ((Gender.MASCULINE !== gender) || endsWithLeaf(lcPlural, mShki))
-                                && !(lemma.lower().endsWith('ок'))) {
+                            } else if (endsWithLeaf(lcPlural, kiWords)
+                                && ((Gender.MASCULINE !== gender) || endsWithLeaf(unYo(lcPlural), mascSimilarToCommon))
+                                && !endsWithLeaf(lemma.lower(), kiExceptions)) {
                                 return genitiveStem();
                             }
                             return init(plural) + 'ов';
@@ -3091,13 +3133,13 @@
                 }
             }
 
-            if (stem.toLowerCase().endsWith('ийк')) {
+            if (toLowerCaseRu(stem).endsWith('ийк')) {
                 return nInit(stem, 2) + 'ек';
             }
 
             if ((stem.length === lcPlural.length - 1) && endsWithLeaf(lcPlural, declinePluralSoftEndings)) {
 
-                if ('ьй'.includes(lastOfNInitial(stem, 1).toLowerCase()) && !lemma.isAnimate()) {
+                if ('ьй'.includes(toLowerCaseRu(lastOfNInitial(stem, 1))) && !lemma.isAnimate()) {
                     const end = last(stem);
                     return nInit(stem, 2) + upperLike('е', end) + end;
                 } else if (endsWithAny(lcPlural, ['земли', 'петли', 'пли', 'вли'])) {

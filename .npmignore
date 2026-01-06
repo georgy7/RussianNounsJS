@@ -1,9 +1,12 @@
 .idea
 nbproject/
 js/
+dos/
 opencorpora-testing/
 changelog.md
 CHANGELOG.md
 CONTRIBUTING.RU.md
 RussianNouns.min.js
+RussianNouns-es5.js
+RussianNouns-es5.min.js
 .travis.yml
