@@ -1,12 +1,13 @@
 #!/bin/bash
 set -e
 
-# Before you run it for the first time, install this (as a non-root user):
+# Before you run it for the first time:
 # ------------------------
 # npm i es-check
 # npm i uglify-js
 # npm i @babel/cli
 # npm i @babel/preset-env
+# sudo apt-get install duktape
 
 
 function show_md5 {
@@ -75,6 +76,9 @@ show_md5 RussianNouns-es5.js
 
 echo
 node --trace-uncaught testAPI.js RussianNouns-es5.js
+
+echo -e "\nDuktape with core-js:"
+duk third-party/core-js-bundle/minified.js RussianNouns-es5.js dukTest.js
 
 echo
 show_md5 RussianNouns.js
