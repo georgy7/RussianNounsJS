@@ -53,6 +53,10 @@ function transpile_it {
     ls -l "$2"
 
     unexpand -t 2 "$2" | expand -t 4 > es5-4spaces-temp.js
+    sed -i 's/^    RussianNounsJS/  RussianNounsJS/' es5-4spaces-temp.js
+    sed -i 's/^    Copyright (c)/  Copyright (c)/' es5-4spaces-temp.js
+    sed -i 's/^    Released under/  Released under/' es5-4spaces-temp.js
+
     mv es5-4spaces-temp.js "$2"
     ls -l "$2"
 }
