@@ -12925,8 +12925,54 @@ let main = function () {
         }
     }
 
+    class Unpacker {
+        constructor(dictionary) {
+            this._dict = dictionary;
+            this._baseString = '';
+        }
+        
+        unpackLemma(compressedLemma) {
+            const singular = [];
+            const plural = [];
+
+            for (let i = 0, len = compressedLemma.cases.length; i < len; i++) {
+                singular[i] = this.decodeWordForm(compressedLemma.cases[i]);
+            }
+
+            for (let i = 0, len = compressedLemma.casesPlural.length; i < len; i++) {
+                plural[i] = this.decodeWordForm(compressedLemma.casesPlural[i]);
+            }
+
+            return {
+                cases: singular,
+                casesPlural: plural
+            };
+        }
+
+        decode(num) {
+            this._baseString = decodeIncremental(num, this._baseString, this._dict);
+            return this._baseString;
+        }
+
+        decodeWordForm(inputValue) {
+            if (typeof inputValue === "number") {
+                return [this.decode(inputValue)];
+            }
+
+            const result = [];
+
+            if (inputValue instanceof Array) {
+                for (let i = 0, len = inputValue.length; i < len; i++) {
+                    result.push(this.decode(inputValue[i]));
+                }
+            }
+
+            return result;
+        }
+    }
+
     function test(rne, data, dictionary, gender, loadingStepCompleted) {
-        let baseString = '';
+        let unpacker = new Unpacker(dictionary);
 
         for (let i = 0; i < data.length; i++) {
 
@@ -12944,32 +12990,9 @@ let main = function () {
             const pluraleTantum = (data[i].g.indexOf('Pltm') >= 0);
             const abbr = (data[i].g.indexOf('Abbr') >= 0);
 
-            const unpacked = {
-                cases: [],
-                casesPlural: []
-            };
-
-            function decodeWordForm(inputValue) {
-                if (typeof inputValue === "number") {
-                    baseString = decodeIncremental(inputValue, baseString, dictionary);
-                    return [baseString];
-                } else if (inputValue instanceof Array) {
-                    return inputValue.map(x => {
-                        baseString = decodeIncremental(x, baseString, dictionary);
-                        return baseString;
-                    });
-                } else {
-                    return [];
-                }
-            }
-
-            for (let ci = 0; ci < data[i].cases.length; ci++) {
-                unpacked.cases[ci] = decodeWordForm(data[i].cases[ci]);
-            }
-
-            for (let ci = 0; ci < data[i].casesPlural.length; ci++) {
-                unpacked.casesPlural[ci] = decodeWordForm(data[i].casesPlural[ci]);
-            }
+            // Хотелось бы избавиться от этого шага в будущем,
+            // чтобы уменьшить использование ОЗУ
+            const unpacked = unpacker.unpackLemma(data[i]);
 
             const word = pluraleTantum ? (unpacked.casesPlural[0][0]) : (unpacked.cases[0][0]); // Именительный падеж
             const expResults = unpacked.cases;
