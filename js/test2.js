@@ -13225,7 +13225,9 @@ let main = function () {
                 pluraleTantum
             });
 
-            if (!lemma) continue;
+            if (!lemma) {
+                throw `Could not create lemma ${word}.`;
+            }
 
             const lemmaUpperCase = lemma.newText(o => o.text().toUpperCase());
 
