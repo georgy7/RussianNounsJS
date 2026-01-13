@@ -12829,6 +12829,14 @@ let main = function () {
 
     const pushAll = (arr, other) => arr.push.apply(arr, other);
 
+    function pushUnique(arr, other) {
+        for (let x of other) {
+            if (!arr.includes(x)) {
+                arr.push(x);
+            }
+        }
+    }
+
     function arraysEqual(a, b) {
         if (a.length !== b.length) {
             return false;
@@ -12836,6 +12844,20 @@ let main = function () {
 
         for (var i = 0; i < a.length; i++) {
             if (a[i] !== b[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function arraysEqualCaseInsensitive(a, b) {
+        if (a.length !== b.length) {
+            return false;
+        }
+
+        for (var i = 0; i < a.length; i++) {
+            if ((a[i] !== b[i]) && (a[i].toLowerCase() !== b[i].toLowerCase())) {
                 return false;
             }
         }
@@ -12991,11 +13013,8 @@ let main = function () {
             actual = rne.decline(lemma, caseType);
             actualUpperCase = rne.decline(lemmaUpperCase, caseType);
 
-            const aString = actual.toString().toLowerCase();
-            const auString = actualUpperCase.toString().toLowerCase();
-
-            if (aString !== auString) {
-                throw `Different upper-case result: ${lemma.text()}, case: ${caseType}, "${aString} !== ${auString}".`;
+            if (!arraysEqualCaseInsensitive(actual, actualUpperCase)) {
+                throw `Different upper-case result: ${lemma.text()}, case: ${caseType}.`;
             }
         } catch (e) {
             if (e.message !== "unsupported") {
@@ -13008,19 +13027,28 @@ let main = function () {
         return actual;
     }
 
+    function unYoAll(list) {
+        const result = [];
+        for (let w of list) {
+            result.push(w.toLowerCase().replaceAll('ё', 'е'));
+        }
+        return result;
+    }
+
     function evaluateSingularCase(actual, expected, caseType, lemma) {
         const sameCount = uniq(actual).length === uniq(expected).length;
         const everyExpectedIsInActual = expected.every(e => actual.includes(e));
-        const actualWithoutYo = actual.map(w => w.toLowerCase().replaceAll('ё', 'е'));
 
-        const exactMatchIgnoringYo = sameCount && expected.every(word => {
-            const yoLess = word.toLowerCase().replaceAll('ё', 'е');
+        const actualWithoutYo = unYoAll(actual);
+        const expectedWithoutYo = unYoAll(expected);
+
+        const exactMatchIgnoringYo = sameCount && expectedWithoutYo.every(yoLess => {
             return actualWithoutYo.includes(yoLess);
         });
 
         const exactMatchIgnoringNjeNjiAndYo = sameCount && actual.length === 1 && (function () {
-            const yoLess = expected[0].toLowerCase().replaceAll('ё', 'е');
-            const actualYoLess = actual[0].toLowerCase().replaceAll('ё', 'е');
+            const yoLess = expectedWithoutYo[0];
+            const actualYoLess = actualWithoutYo[0];
             if (!(yoLess.endsWith('нье') || yoLess.endsWith('ньи'))) return false;
             if (!(actualYoLess.endsWith('нье') || actualYoLess.endsWith('ньи'))) return false;
             return yoLess.slice(0, -3) === actualYoLess.slice(0, -3);
@@ -13124,35 +13152,24 @@ let main = function () {
         const simple = rne.pluralize(lemma);
         const upper = rne.pluralize(lemmaUpperCase);
 
-        const aString = simple.toString().toLowerCase();
-        const auString = upper.toString().toLowerCase();
-
-        if (aString !== auString) {
-            throw `Different upper-case plurals (nominative): ${lemma.text()}, "${aString} !== ${auString}".`;
+        if (!arraysEqualCaseInsensitive(simple, upper)) {
+            throw `Different upper-case plurals (nominative): ${lemma.text()}.`;
         }
 
         return { simple, upper };
     }
 
     function declinePluralFormsWithCase(rne, lemma, lemmaUpperCase, pluralForms, pluralFormsUpper, caseType) {
-        const declined = [];
-        const declinedUpper = [];
+        const unique = [];
+        const uniqueUpper = [];
 
         for (let i = 0; i < pluralForms.length; i++) {
-            const form = pluralForms[i];
-            const formUpper = pluralFormsUpper[i];
-            pushAll(declined, rne.decline(lemma, caseType, form));
-            pushAll(declinedUpper, rne.decline(lemmaUpperCase, caseType, formUpper));
+            pushUnique(unique, rne.decline(lemma, caseType, pluralForms[i]));
+            pushUnique(uniqueUpper, rne.decline(lemmaUpperCase, caseType, pluralFormsUpper[i]));
         }
 
-        const unique = uniq(declined);
-        const uniqueUpper = uniq(declinedUpper);
-
-        const aString = unique.toString().toLowerCase();
-        const auString = uniqueUpper.toString().toLowerCase();
-
-        if (aString !== auString) {
-            throw `Different plurals (declined): ${lemma.text()}, case: ${caseType}, "${aString} !== ${auString}".`;
+        if (!arraysEqualCaseInsensitive(unique, uniqueUpper)) {
+            throw `Different plurals: ${lemma.text()}, case: ${caseType}.`;
         }
 
         return unique;
@@ -13162,11 +13179,11 @@ let main = function () {
         const actualSorted = actual.slice().sort();
         const expectedSorted = expected.slice().sort();
 
-        const failure = actualSorted.toString() !== expectedSorted.toString();
+        const failure = !arraysEqual(actualSorted, expectedSorted);
         let warning = false;
 
         if (!failure) {
-            warning = actual.toString() !== expected.toString();
+            warning = !arraysEqual(actual, expected);
         }
 
         // Обновляем глобальные счётчики
