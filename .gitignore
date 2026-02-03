@@ -1,4 +1,6 @@
 .idea
-/nbproject/
+package-lock.json
+nbproject/
+node_modules/
 js/
 opencorpora-testing/

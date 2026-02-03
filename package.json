@@ -1,9 +1,21 @@
 {
   "name": "russian-nouns-js",
-  "version": "2.5.0",
+  "version": "3.0.0-alpha.0",
   "description": "Declension by cases. Pluralization.",
-  "main": "RussianNouns.js",
+  "main": "dist/RussianNouns.cjs",
+  "module": "dist/RussianNouns.mjs",
+  "exports": {
+    "import": "./dist/RussianNouns.mjs",
+    "require": "./dist/RussianNouns.cjs",
+    "browser": "./dist/RussianNouns.umd.js"
+  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "prepublishOnly": "npm run build",
     "test": "node testAPI.js"
   },
   "repository": {
@@ -21,5 +33,13 @@
   "bugs": {
     "url": "https://github.com/georgy7/RussianNounsJS/issues"
   },
-  "homepage": "https://georgy7.github.io/RussianNounsJS/"
+  "homepage": "https://georgy7.github.io/RussianNounsJS/",
+  "devDependencies": {
+    "rollup": "^4.57.1",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-babel": "^6.1.0",
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.0",
+    "@rollup/plugin-terser": "^0.4.4"
+  }
 }
