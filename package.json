@@ -16,7 +16,7 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "prepublishOnly": "npm run build",
-    "test": "node testAPI.js"
+    "test": "node --test test/"
   },
   "repository": {
     "type": "git",

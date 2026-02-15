@@ -1,0 +1,532 @@
+
+const highPriorityBloomFilter = new Uint8ClampedArray(256);
+const highPriorityExceptions = Object.freeze([
+    [
+        [
+            Gender.MASCULINE,
+            undefined
+        ],
+        {
+            'болгарин': ['болгары'],
+            'господин': ['господа'],
+            'дядя': ['дяди', 'дядья'],
+            'зуб': ['зубы', 'зубья'], // TODO: омонимы, переделать
+            'клок': ['клочья', 'клоки'],
+            'князь': ['князи', 'князья'],
+            'кол': ['колы', 'колья'], // TODO: можно разделить на омонимы
+            'месяц': ['месяцы'],
+            'полдень': ['полдни', 'полудни'],
+            'татарин': ['татары'],
+            'хозяин': ['хозяева'],
+            'цветок': ['цветки', 'цветы'],
+            'черт': ['черти'],
+            'чёрт': ['черти']
+        }
+    ],
+    [
+        [
+            Gender.MASCULINE,
+            true
+        ],
+        {
+            'кондуктор': ['кондуктора', 'кондукторы'],
+            'кум': ['кумовья'],
+            'муж': ['мужья', 'мужи']
+        }
+    ],
+    [
+        [
+            Gender.FEMININE,
+            undefined
+        ],
+        {
+            'гроздь': ['грозди', 'гроздья'],
+            'курица': ['курицы', "куры"],
+            'стая': ['стаи'],
+            // И я решил зашить сюда даже случаи, когда итак слово норм обрабатывается,
+            // но в корпусе там буква Ё. И почему бы не выдавать так же букву Ё.
+            // В будущем это наверно надо отрефакторить.
+            'щека': ['щёки'],
+            'береста': ['берёсты'],
+            'верста': ['вёрсты'],
+            'десна': ['дёсны'],
+            'жена': ['жёны'],
+            'звезда': ['звёзды'],
+            'кинозвезда': ['кинозвёзды'],
+            'медсестра': ['медсёстры'],
+            'метла': ['мётлы'],
+            'пчела': ['пчёлы'],
+            'сестра': ['сёстры'],
+            'слеза': ['слёзы']
+        }
+    ],
+    [
+        [
+            Gender.NEUTER,
+            undefined
+        ],
+        {
+            'брюхо': ['брюхи'],
+            'колено': ['колена', 'колени', 'коленья'], // TODO: можно разделить на омонимы
+            'древо': ['древа', 'древеса'],
+            'ухо': ['уши'],
+            'око': ['очи'],
+            'дно': ['донья'],
+            'чудо': ['чудеса', 'чуда'],
+            'небо': ['небеса'],
+            // Буква Ё:
+            'бревно': ['брёвна'],
+            'ведро': ['вёдра'],
+            'веретено': ['веретёна'],
+            'весло': ['вёсла'],
+            'гнездо': ['гнёзда'],
+            'зерно': ['зёрна'],
+            'знамя': ['знамёна'],
+            'колесо': ['колёса'],
+            'облачко': ['облачка'],
+            'озеро': ['озёра'],
+            'полсотни': ['полусотни'],
+            'ребро': ['рёбра'],
+            'ремесло': ['ремёсла'],
+            'седло': ['сёдла'],
+            'село': ['сёла']
+        }
+    ]
+]);
+
+for (const rule of highPriorityExceptions) {
+    Object.keys(rule[1]).map(word =>
+        bloomAdd(highPriorityBloomFilter, to11BitHash(calculateHash(word))));
+}
+
+// Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
+// и у них нужно преобразовывать основу особым образом (мягкие знаки и т.п.)
+const yaD1 = [
+    'зять', 'деверь',
+    'друг',
+    'брат', 'собрат',
+    'стул',
+    'брус',
+    'обод', 'полоз',
+    'струп',
+    'подмастерье',
+    'якорь',
+
+    'перо',
+    'шило'
+];
+
+// Слова муж.р., которые оканчиваются на -а/-я в мн.ч.
+const aYaWords = new Set([
+    'берег', 'бок', 'борт',
+    'век', 'вес',
+    'веер', // TODO: Это всё тоже вынести в настройку (в экземпляре движка).
+    'вексель', // 😰
+    'вечер',
+    'глаз', 'голос', 'город',
+    'доктор', 'дом', 'детдом',
+    'егерь',
+    'жемчуг',
+    'катер', 'колокол', 'концлагерь', 'корм', 'короб', 'кузов', 'купол',
+    'лес', 'луг', 'мастер', 'номер',
+    'пояс', 'провод', 'рог',
+    'сахар', 'снег', 'сорт', 'стог', 'счет', 'счёт',
+    'спецсчет', 'спецсчёт', 'субсчет', 'субсчёт',
+    'терем',
+    'том', // TODO неодушевленное (не имя).
+    'холод', 'цвет', 'череп'
+]);
+
+// То же самое, но мы проверяем их не по точному совпадению, а по концу слова.
+// Например, "чудо-остров", "мультипаспорт" распознаются как "остров", "паспорт".
+const aYaWords2 = toLetterTree([
+    'округ', 'остров', 'отпуск',
+    'паспорт', 'парус', 'поезд', 'повар', 'погреб',
+    'рукав',
+    'цех',
+    'юнкер'
+]);
+
+// Мы ступаем на скользкую территорию.
+// В этом массиве слова, которые могут оканчиваться и на -а/-я, и на -и/-ы,
+// и мы считаем окончание -а/-я более распространённым.
+const aYaWords3 = new Set([
+    'адрес',
+    'договор',
+    'буфер',
+    'ворох',
+    'директор',
+    'инспектор', 'инструктор',
+    'корпус', // TODO омонимы
+    'крейсер',
+    'орден', 'ордер', 'прожектор', 'пропуск', 'род',
+    'свитер', 'сервер',
+    'тенор', 'тон', 'трактор',
+    'тормоз', // TODO наверно, ы только в одушевленной форме
+    'ветер',
+    'верх',
+    'китель',
+    'мех',
+    'хлеб',
+    'юнкер', // 🤕
+    'ястреб'
+]);
+
+// То же самое, только мы считаем окончание -и/-ы более распространённым.
+const aYaWords4 = new Set([
+    'бункер',
+    'вымпел',
+    'год',
+    'образ', // Разделить на омонимы?
+    'омут',
+    'токарь', 'тополь',
+    'шторм', 'штуцер'
+]);
+
+function pluralize(engine, lemma) {
+    const result = [];
+
+    const word = lemma.text();
+    const lcWord = lemma.lower();
+
+    const stressedEnding = engine.sd
+        .hasStressedEndingPlural(lemma, Case.NOMINATIVE);
+
+    Object.freeze(stressedEnding);
+
+    const stem = getNounStem(lemma, lcWord, stressedEnding[0]);
+    const lcStem = toLowerCaseRu(stem);
+
+    if (lcWord.endsWith('яя')) {
+        result.push(nInit(word, 2) + 'ие');
+        return unique(result);
+    }
+
+    const yoStem = (f) => {
+        const stressedStem = engine.sd
+            .hasStressedEndingPlural(lemma, Case.NOMINATIVE).map(x => !x);
+
+        if (!stressedStem.length) {
+            return [f(stem)];
+        }
+
+        return stressedStem.map(b => b
+            ? (singleEYo(lcStem) ? f(reYo(stem)) : f(stem))
+            : f(unYo(stem))
+        );
+    };
+
+    const gender = lemma.getGender();
+    const declension = lemma.getDeclension();
+
+    const simpleFirstPart = (('й' === last(lcWord) || isVowel(last(word))) && isVowel(last(init(word))))
+        ? init(word)
+        : stem;
+
+    const softPatronymic = () => (lcWord.endsWith('евич') || lcWord.endsWith('евна'))
+        && (lcWord.indexOf('ье') >= 0);
+
+    function softPatronymicForm2() {
+        const part = simpleFirstPart;
+        const index = toLowerCaseRu(part).indexOf('ье');
+        const r = upperLike('и', part[index]);
+        return part.substring(0, index) + r + part.substring(index + 1);
+    }
+
+    function yeruOrI() {
+        if (bincludes(0b11101000000000010001001000, last(lcStem))  // sibilant or velar
+            || 'яйь'.includes(last(lcWord))
+            || endsWithAny(lcWord, ['сосед'])) {
+
+            if (softPatronymic()) {
+                result.push(softPatronymicForm2() + 'и');
+                result.push(simpleFirstPart + 'и');
+            } else {
+                Array.prototype.push.apply(result,
+                    eStem(stressedEnding, simpleFirstPart, s => s + 'и'));
+            }
+
+        } else if (last(lcWord) === 'ц') {
+            result.push(tsStem(word, lemma) + 'цы');
+
+        } else {
+
+            if (softPatronymic()) {
+                result.push(softPatronymicForm2() + 'ы');
+                result.push(simpleFirstPart + 'ы');
+            } else {
+                Array.prototype.push.apply(result,
+                    eStem(stressedEnding, simpleFirstPart, s => s + 'ы'));
+            }
+
+        }
+    }
+
+    if (inBloom(highPriorityBloomFilter, to11BitHash(lemma._hash))) {
+        for (const [key, genderExceptions] of highPriorityExceptions) {
+
+            const keyGender = key[0];
+            const keyAnimate = key[1];
+
+            if ((gender === keyGender)
+                    && ((keyAnimate == null) || (keyAnimate === lemma.isAnimate()))
+                    && genderExceptions.hasOwnProperty(lcWord)) {
+
+                const v = genderExceptions[lcWord];
+
+                for (let x of v) {
+                    result.push(x);
+                }
+
+                return unique(result);
+            }
+        }
+    }
+
+    const softStemD1 = (last(lcStem) === 'ь')
+        ? stem
+        : (
+            (last(lcStem) === 'к') ? (init(stem) + 'чь') : (
+                (last(lcStem) === 'г') ? (init(stem) + 'зь') : (
+                    (last(lcWord) === 'й') ? init(word) : (
+                        (endsWithAny(lcWord, ['рь', 'ль'])) ? stem : (stem + 'ь')
+                    )
+                )
+            )
+        );
+
+    switch (declension) {
+        case -1:
+            result.push(word);
+            break;
+        case 0:
+            if (lcWord === 'путь') {
+                result.push('пути');
+            } else if (lcWord.endsWith('дитя')) {
+                result.push(nInit(word, 3) + 'ети');
+            } else {
+                throw new Error('unsupported');
+            }
+            break;
+        case 1:
+            if (yaD1.includes(lcWord)) {
+
+                result.push(softStemD1 + 'я');
+
+            } else if (Gender.MASCULINE === gender) {
+
+                const ya2 = [
+                    'крюк',
+                    'лист',
+                    'лоскут',
+                    'повод',
+                    'прут',
+                    'сук',
+                    'учитель',
+                    'флигель',
+                    'штабель'
+                ];
+
+                const ya3 = [
+                    'клин', 'колос', 'ком', 'край', 'соболь'
+                ];
+
+                if ('сын' === lcWord) {
+
+                    result.push('сыновья');
+                    yeruOrI();
+
+                } else if ('человек' === lcWord) {
+
+                    result.push('люди');
+                    yeruOrI();
+
+                } else if (ya2.includes(lcWord) || (lcWord === 'соболь' && lemma.isAnimate())) {
+
+                    yeruOrI();
+                    result.push(softStemD1 + 'я');
+
+                } else if (ya3.includes(lcWord)) {
+
+                    result.push(softStemD1 + 'я');
+
+                } else if (aYaWords.has(lcWord) || endsWithLeaf(lcWord, aYaWords2)
+                    || aYaWords3.has(lcWord) || aYaWords4.has(lcWord)) {
+
+                    if (aYaWords4.has(lcWord)) {
+                        yeruOrI();
+                    }
+
+                    if (softD1(lcWord)) {
+                        Array.prototype.push.apply(result, yoStem(s => s + 'я'));
+                    } else if (stressedEnding.includes(true)) {
+                        result.push(unYo(stem) + 'а');
+                    } else {
+                        result.push(stem + 'а');
+                    }
+
+                    if (aYaWords3.has(lcWord)) {
+                        yeruOrI();
+                    }
+
+                } else if (
+                    (((lcWord.endsWith('анин') && lcWord.length > 5) || lcWord.endsWith('янин')) && !lemma.isAName())
+                    || ['барин', 'боярин'].includes(lcWord)
+                ) {
+                    result.push(nInit(word, 2) + 'е');
+
+                    // В корпусе фигурирует
+                    if ('барин' === lcWord) {
+                        result.push(nInit(word, 2) + 'ы');
+                    }
+
+                } else if (['цыган'].includes(lcWord)) {
+                    result.push(word + 'е');
+                } else if ('щенок' === lcWord) {
+                    result.push(nInit(word, 2) + 'ки');
+                    result.push(nInit(word, 2) + 'ята');
+                } else if ((lcWord.endsWith('ребёнок') || lcWord.endsWith('ребенок'))
+                    && !(lcWord.endsWith('жеребёнок') || lcWord.endsWith('жеребенок'))
+                    && !(lcWord.endsWith('ястребёнок') || lcWord.endsWith('ястребенок'))) {
+                    result.push(nInit(word, 7) + 'дети');
+                } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
+                    && lemma.isAnimate()) {
+                    result.push(nInit(word, 4) + 'ята');
+                } else if (lcWord.endsWith('ёночек')
+                    && lemma.isAnimate()) {
+                    result.push(nInit(word, 6) + 'ятки');
+                } else if (lcWord.endsWith('онок')
+                    && 'жшч'.includes(lastOfNInitial(lcWord, 4))
+                    && lemma.isAnimate()) {
+                    result.push(nInit(word, 4) + 'ата');
+                } else if (okWord(lcWord)) {
+                    result.push(nInit(word, 2) + 'ки');
+                } else if (endsWithLeaf(lcWord, egoEndings)) {
+                    if (endsWithAny(lcWord, egoSoftM)) {
+                        result.push(nInit(word, 2) + 'ьи');
+                    } else {
+                        result.push(init(word) + 'е');
+                    }
+                } else if (isAdjectiveLike(lemma, lcWord)) {
+                    if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
+                        result.push(init(word) + 'е');
+                    } else if (lcWord.endsWith('ой') && !endsWithAny(lcWord, ['хой', 'ской'])) {
+                        result.push(nInit(word, 2) + 'ые');
+                    } else {
+                        result.push(nInit(word, 2) + 'ие');
+                    }
+                } else if (lcWord.endsWith('его')) {
+                    result.push(nInit(word, 3) + 'ие');
+                } else if ([
+                    'воробей', 'муравей', 'ручей', 'соловей', 'улей',
+                    'жеребей', // — жребий; доля поместья.
+                    'ирей', // Довольно бессмысленно в мн. ч.
+                    'репей', 'чирей' // Я бы сказал "-еи", но в словарях так.
+                ].includes(lcWord)) {
+                    result.push(nInit(word, 2) + 'ьи');
+                } else {
+                    yeruOrI();
+                }
+
+            } else if (Gender.NEUTER === gender) {
+
+                if (endsWithAny(lcWord, ['ко', 'чо'])
+                    && !endsWithAny(lcWord, ['войско', 'облако'])
+                ) {
+                    result.push(init(word) + 'и');
+                } else if (lcWord.endsWith('имое')) {
+                    result.push(stem + 'ые');
+
+                } else if (lcWord.endsWith('ее')) {
+                    result.push(stem + 'ие');
+
+                } else if (lcWord.endsWith('ое')) {
+
+                    if (endsWithAny(lcStem, ['г', 'к', 'ж', 'ш', 'х'])) {
+                        result.push(stem + 'ие');
+                    } else {
+                        result.push(stem + 'ые');
+                    }
+
+                } else if (endsWithAny(lcWord, ['ие', 'иё'])) {
+                    result.push(nInit(word, 2) + 'ия');
+
+                } else if (endsWithAny(lcWord, ['ье', 'ьё'])) {
+
+                    const w = nInit(word, 2);
+
+                    const softSignOnly = [
+                        'безделье', 'варенье', 'воскресенье',
+                        'жалованье',    // ИМХО, спорно
+                        'запястье', 'застолье', 'затишье', 'здоровье', 'зелье',
+                        'изголовье', 'новоселье', 'одночасье',
+                        // Я бы добавил сюда "ожерелье",
+                        // хотя форма "ожерелия" в гугле встречается.
+                        'печенье', 'платье', 'побережье', 'поголовье', 'подворье',
+                        'подземелье', 'подполье', 'поместье', 'предплечье', 'раздумье',
+                        'сиденье',  // место для сидения
+                        'средневековье', 'увечье', 'угодье', 'устье'
+                    ].includes(lcWord);
+
+                    if ((last(lcWord) === 'е') && !softSignOnly) {
+                        result.push(w + 'ия');
+                    }
+
+                    result.push(w + 'ья');
+
+                } else if (endsWithAny(lcWord, [
+                    'дерево', 'звено', 'крыло'
+                ])) {
+                    result.push(stem + 'ья');
+                } else if (endsWithAny(lcWord, ['ле', 'ре'])) {
+                    result.push(stem + 'я');
+                } else if (lcWord.endsWith('судно') && lemma.isATransport()) {
+                    result.push(nInit(word, 2) + 'а');
+                } else {
+                    Array.prototype.push.apply(result, yoStem(s => s + 'а'));
+
+                    if (endsWithAny(lcWord, [
+                        'щупальце'
+                    ])) {
+                        yeruOrI();
+                    }
+
+                }
+            } else {
+                result.push(stem + 'и');
+            }
+            break;
+        case 2:
+            if ('заря' === lcWord) {
+                result.push('зори');
+
+            } else if (lcWord.endsWith('ая') && !lcWord.endsWith('свая')) {
+                if ('жхчшщ'.includes(last(lcStem)) || endsWithAny(lcStem, ['вк', 'гк', 'ск', 'цк', 'ньк'])) {
+                    result.push(stem + 'ие');
+                } else {
+                    result.push(stem + 'ые');
+                }
+            } else {
+                yeruOrI();
+            }
+            break;
+        case 3:
+            if (nLast(lcWord, 2) === 'мя') {
+                result.push(stem + 'ена');
+            } else if (Object.keys(specialD3).includes(lcWord)) {
+                result.push(init(specialD3[lcWord]) + 'и');
+            } else if (Gender.FEMININE === gender) {
+                result.push(simpleFirstPart + 'и');
+            } else {
+                if (last(simpleFirstPart) === 'и') {
+                    result.push(simpleFirstPart + 'я');
+                } else {
+                    result.push(simpleFirstPart + 'а');
+                }
+            }
+            break;
+    }
+
+    return unique(result);
+}
+
