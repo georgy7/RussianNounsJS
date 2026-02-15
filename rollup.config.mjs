@@ -11,7 +11,7 @@ const getPlugins = (babelConfig) => [
     extensions: ['.js'],
     ...babelConfig
   }),
-  production && terser()
+  production && terser({ format: { max_line_len: 120 } })
 ];
 
 export default [
@@ -26,8 +26,7 @@ export default [
       presets: [
         ['@babel/preset-env', {
           targets: {
-            node: '12',
-            browsers: 'last 2 versions, > 1%'
+            node: '14', browsers: 'last 1 version, not dead'
           },
           modules: false // важно для tree-shaking
         }]
@@ -50,6 +49,8 @@ export default [
       ]
     })
   },
+
+  // Самодостаточный скрипт для браузеров
   {
     input: 'src/index.js',
     output: {
@@ -70,7 +71,8 @@ export default [
     })
   },
 
-  // Для Duktape, mujs и других движков EcmaScript 5
+  // Для Duktape, MuJS и других движков ECMAScript 5
+  // Используйте совместно с библиотекой полифилов core-js
   {
     input: 'src/index.js',
     output: {
