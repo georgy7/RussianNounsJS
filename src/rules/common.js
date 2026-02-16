@@ -4,7 +4,7 @@ export function getNounStem0(word, lcWord) {
     if (bincludes(vowels | 512, lcLastChar)) { // vowels + й
         if (bincludes(vowels, lastOfNInitial(lcWord, 1))) {
             const head = nInit(word, 2);
-            if (endsWithLeaf(lcWord, egoSoftMTree)) {
+            if (endsWithSuffix(lcWord, egoSoftMTree)) {
                 return head + upperLike('ь', head);
             }
             return head;
@@ -38,7 +38,7 @@ export function getStemK(word, lcWord, stressedEnging) {
 }
 
 export function getStemSoftSign(lemma, word, lcWord) {
-    if (mobileVowelA.has(lemma._hash) || endsWithLeaf(lcWord, mobileVowelB)) {
+    if (mobileVowelA.has(lemma._hash) || endsWithSuffix(lcWord, mobileVowelB)) {
         return nInit(word, 3) + lastOfNInitial(word, 1);
     } else if (lcWord.endsWith('ень') &&
             (lemma.getGender() === Gender.MASCULINE) &&
@@ -54,7 +54,7 @@ export function hasMobileVowel(lemma, lcWord, lcLastBit) {
     // Case 2: бв клмн рст х
     return (
             ((0b0000110000110000000000 & lcLastBit) !== 0) &&
-            endsWithLeaf(lcWord, mobileVowelB) &&
+            endsWithSuffix(lcWord, mobileVowelB) &&
             !(['новосел', 'новосёл'].includes(lcWord))
         ) ||
         (
@@ -130,7 +130,7 @@ export function tsStem(word, lemma) {
 
 export function okWord(w) {
     return (endsWithAny(w, ['чек', 'шек']) && (w.length >= 6))
-        || endsWithLeaf(w, ok1) || (w.endsWith('ок') && (
+        || endsWithSuffix(w, ok1) || (w.endsWith('ок') && (
             !w.endsWith('шок') && !okExceptions.includes(w)
             && !endsWithAny(w, ok2)
             && !isVowel(lastOfNInitial(w, 2))

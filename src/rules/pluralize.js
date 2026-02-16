@@ -139,7 +139,7 @@ const aYaWords = new Set([
 
 // То же самое, но мы проверяем их не по точному совпадению, а по концу слова.
 // Например, "чудо-остров", "мультипаспорт" распознаются как "остров", "паспорт".
-const aYaWords2 = toLetterTree([
+const aYaWords2 = createReversedTrie([
     'округ', 'остров', 'отпуск',
     'паспорт', 'парус', 'поезд', 'повар', 'погреб',
     'рукав',
@@ -350,7 +350,7 @@ function pluralize(engine, lemma) {
 
                     result.push(softStemD1 + 'я');
 
-                } else if (aYaWords.has(lcWord) || endsWithLeaf(lcWord, aYaWords2)
+                } else if (aYaWords.has(lcWord) || endsWithSuffix(lcWord, aYaWords2)
                     || aYaWords3.has(lcWord) || aYaWords4.has(lcWord)) {
 
                     if (aYaWords4.has(lcWord)) {
@@ -401,7 +401,7 @@ function pluralize(engine, lemma) {
                     result.push(nInit(word, 4) + 'ата');
                 } else if (okWord(lcWord)) {
                     result.push(nInit(word, 2) + 'ки');
-                } else if (endsWithLeaf(lcWord, egoEndings)) {
+                } else if (endsWithSuffix(lcWord, egoEndings)) {
                     if (endsWithAny(lcWord, egoSoftM)) {
                         result.push(nInit(word, 2) + 'ьи');
                     } else {

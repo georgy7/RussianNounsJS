@@ -1,4 +1,4 @@
-const declinePluralSoftEndings = toLetterTree([
+const declinePluralSoftEndings = createReversedTrie([
     'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
     'ьи', 'ья', 'ия', 'ря', 'ля', 'ая',
     'аи', 'ои', 'уи', 'эи', 'ыи', 'яи', 'ёи', 'юи', 'еи', 'ии'
@@ -38,7 +38,7 @@ const explicitZeroEndingCommonGenderSurnameLike = [
     'уродины'
 ];
 
-const explicitZeroSurnameLikeTree = toLetterTree(explicitZeroEndingCommonGenderSurnameLike);
+const explicitZeroSurnameLikeTree = createReversedTrie(explicitZeroEndingCommonGenderSurnameLike);
 
 // Очень много исключений. Наверно, это можно как-то отрефакторить.
 
@@ -63,7 +63,7 @@ const explicitOv1 = [
     'суда', 'корм'
 ];
 
-const explicitOv1Tree = toLetterTree(explicitOv1);
+const explicitOv1Tree = createReversedTrie(explicitOv1);
 
 const explicitOv = new Set(explicitOv1.concat([
     'бега', 'беглецы', 'близнецы', 'бойцы', 'бока', 'борта', 'борцы', 'бруствера', 'брюшки',
@@ -138,7 +138,7 @@ const declinePluralEndings2 = [
     'ях', 'ах'
 ];
 
-const dnaVtsa = toLetterTree([
+const dnaVtsa = createReversedTrie([
     'вна', 'вца', 'вцы', 'пла', 'дца', 'дра', 'судна',
     'рки', 'рцы', 'тлы', 'рна', 'тна', 'енца',
     'десны', 'дёсны',
@@ -146,7 +146,7 @@ const dnaVtsa = toLetterTree([
     'сосны'
 ]);
 
-const borschee = toLetterTree([
+const borschee = createReversedTrie([
     'жи', 'ши', 'чи',
     'ля', 'ли', 'чи', 'ри', 'ти', 'ди',
     'сани',
@@ -155,26 +155,26 @@ const borschee = toLetterTree([
     'плащи', 'прыщи', 'хрящи'
 ]);
 
-const bratja = toLetterTree([
+const bratja = createReversedTrie([
     'братья', 'брусья', 'деревья', 'донья', 'звенья',
     'клинья', 'клочья', 'коленья', 'колосья', 'колья', 'комья', 'крылья', 'крючья',
     'листья', 'лоскутья', 'лохмотья', 'перья', 'платья', 'поводья', 'прутья',
     'стулья', 'сучья', 'хлопья', 'шилья'
 ]);
 
-const mascSimilarToCommon = toLetterTree([
+const mascSimilarToCommon = createReversedTrie([
     'ишки', 'дружки', 'тки',
     'папочки', 'дедушки', 'дядюшки', 'батюшки',
     'катанки', 'петрушки', 'шестерки'
 ]);
 
-const kiWords = toLetterTree([
+const kiWords = createReversedTrie([
     'жки', 'шки', 'чки', 'рки',
     'натки', 'хатки', 'ятки', 'етки', 'чётки',
     'мки', 'нки', 'педки', 'илки'
 ]);
 
-const kiExceptions = toLetterTree([
+const kiExceptions = createReversedTrie([
     'шок', 'щок', 'жок', 'зок',
     'аток', 'яток', 'еток'
 ]);
@@ -211,9 +211,9 @@ export function declinePlural(engine, lemma, grCase, plural) {
     const stem = lcPlural.endsWith('цы') ? init(plural) : getNounStem0(plural, lcPlural);
 
     const isSurnameType1 =
-        endsWithLeaf(lcPlural, surnameType1Plural) &&
+        endsWithSuffix(lcPlural, surnameType1Plural) &&
         (lemma.isASurname() || (gender === Gender.COMMON)) &&
-        !endsWithLeaf(lcPlural, explicitZeroSurnameLikeTree);
+        !endsWithSuffix(lcPlural, explicitZeroSurnameLikeTree);
 
     // Из-за ветвления вверху функции, здесь grCaseNumber >= 2.
     // Через Math.min локатив приравниваем к предложному падежу.
@@ -227,7 +227,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
         return plural + declinePluralFlatEndings[flatEndingIndex];
     } else if (lcPlural.endsWith('ые')) {
         return nInit(plural, 2) + declinePluralFlatEndings[flatEndingIndex + 1];
-    } else if (lcPlural.endsWith('ие') || endsWithLeaf(lcPlural, egoSoftPlural)) {
+    } else if (lcPlural.endsWith('ие') || endsWithSuffix(lcPlural, egoSoftPlural)) {
         return stem + declinePluralFlatEndings[flatEndingIndex + 2];
 
     } else if ((grCaseNumber > 2) && (grCaseNumber !== 4)) {
@@ -237,7 +237,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
             grCaseNumber - 3
         );
 
-        if (endsWithLeaf(lcPlural, declinePluralSoftEndings)) {
+        if (endsWithSuffix(lcPlural, declinePluralSoftEndings)) {
             return init(plural) + declinePluralEndings2[flatIndex2];
         } else if (engine.sd.hasStressedEndingPlural(lemma, grCase).includes(true)) {
             return unYo(stem) + declinePluralEndings2[flatIndex2 + 1];
@@ -265,7 +265,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                 const end = last(stem);
                 return init(stem) + upperLike('о', end) + end;
             } else if ((
-                endsWithLeaf(lcPlural, dnaVtsa) &&
+                endsWithSuffix(lcPlural, dnaVtsa) &&
                 !lcPlural.endsWith('недра')
             ) || (
                 endsWithAny(lcPlural, dependsOnStress)
@@ -332,7 +332,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                 case 'я':
 
                     if ((
-                            endsWithLeaf(lcPlural, borschee) ||
+                            endsWithSuffix(lcPlural, borschee) ||
                             ('щи' === lcPlural) ||
                             declinePluralEy.includes(lcPlural)) ||
                         (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), [
@@ -360,14 +360,14 @@ export function declinePlural(engine, lemma, grCase, plural) {
                             return init(plural) + 'й';
                         } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
                             return init(plural) + 'ев';
-                        } else if (endsWithLeaf(lcPlural, kiWords)
-                            && ((Gender.MASCULINE !== gender) || endsWithLeaf(unYo(lcPlural), mascSimilarToCommon))
-                            && !endsWithLeaf(lemma.lower(), kiExceptions)) {
+                        } else if (endsWithSuffix(lcPlural, kiWords)
+                            && ((Gender.MASCULINE !== gender) || endsWithSuffix(unYo(lcPlural), mascSimilarToCommon))
+                            && !endsWithSuffix(lemma.lower(), kiExceptions)) {
                             return genitiveStem();
                         }
                         return init(plural) + 'ов';
                     } else {
-                        if (endsWithLeaf(lcPlural, bratja)) {
+                        if (endsWithSuffix(lcPlural, bratja)) {
                             return init(plural) + 'ев';
                         } else if (endsWithAny(lcPlural, ['зятья', 'кумовья', 'деверья', 'края', 'острия'])) {
                             return init(plural) + 'ёв';
@@ -391,7 +391,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                         return upperLike('яиц', init(plural));
                     } else if (lcPlural.endsWith('нца')) {
                         return [genitiveStem(), init(plural) + 'ев'];
-                    } else if (!endsWithLeaf(lcPlural, explicitOv1Tree)) {
+                    } else if (!endsWithSuffix(lcPlural, explicitOv1Tree)) {
                         return genitiveStem();
                     }
 
@@ -462,7 +462,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
             return nInit(stem, 2) + 'ек';
         }
 
-        if ((stem.length === lcPlural.length - 1) && endsWithLeaf(lcPlural, declinePluralSoftEndings)) {
+        if ((stem.length === lcPlural.length - 1) && endsWithSuffix(lcPlural, declinePluralSoftEndings)) {
 
             if ('ьй'.includes(toLowerCaseRu(lastOfNInitial(stem, 1))) && !lemma.isAnimate()) {
                 const end = last(stem);

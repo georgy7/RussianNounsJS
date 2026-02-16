@@ -57,7 +57,7 @@
     const mobileVowelABloom = new Uint8ClampedArray(256);
     mobileVowelA.forEach(h => bloomAdd(mobileVowelABloom, to11BitHash(h)));
 
-    const mobileVowelB = toLetterTree([
+    const mobileVowelB = createReversedTrie([
         'овёс', 'ковёр', 'костёр',
         'шатер', 'шатёр', 'козел', 'козёл', 'котел', 'котёл',
         'орел', 'орёл', 'осел', 'осёл',
@@ -70,7 +70,7 @@
         'ячмень'
     ];
 
-    const ok1 = toLetterTree([
+    const ok1 = createReversedTrie([
         'лапоток', 'желток', 'нишок', 'ришок', 'ишек'
     ]);
     const ok2 = [
@@ -101,29 +101,29 @@
     const uFormBloom = new Uint8ClampedArray(256);
     uForm.forEach(w => bloomAdd(uFormBloom, to11BitHash(calculateHash(w))));
 
-    const ogoEndings = toLetterTree([
+    const ogoEndings = createReversedTrie([
         'ое',
         'нький', 'ский', 'ской',
         'лстой', 'отой', 'утой', 'евой', 'овой', 'живой']);
-    const ogoEndings2 = toLetterTree([
+    const ogoEndings2 = createReversedTrie([
         'ее', 'ое',
         'нький', 'ский', 'ской',
         'лстой', 'отой', 'утой']);
-    const ogoEndings3 = toLetterTree([
+    const ogoEndings3 = createReversedTrie([
         'евой', 'овой', 'отой', 'живой']);
 
-    const egoEndings = toLetterTree(['шний', 'жний', 'щий', 'ший', 'жий', 'чий']);
+    const egoEndings = createReversedTrie(['шний', 'жний', 'щий', 'ший', 'жий', 'чий']);
 
     const egoSoftM = [
         'божий', 'ажий', 'яжий', 'ужий', 'южий',
         'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
     ];
 
-    const egoSoftMTree = toLetterTree(egoSoftM);
+    const egoSoftMTree = createReversedTrie(egoSoftM);
 
-    const egoSoftPlural = toLetterTree(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
+    const egoSoftPlural = createReversedTrie(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
 
-    const endingsOfAdjectives = toLetterTree([
+    const endingsOfAdjectives = createReversedTrie([
         'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
         'латой', 'витой', 'литой', 'питой', 'житой', 'отой', 'утой', 'ятой',
         'лагой', 'рагой', 'огой', 'угой',
@@ -138,15 +138,15 @@
     ]);
 
     const isAdjectiveLike = (lemma, lcWord) => (nLast(lcWord, 2) === 'ый') ||
-        ((lcWord.endsWith('кривой') || endsWithLeaf(lcWord, endingsOfAdjectives)) &&
+        ((lcWord.endsWith('кривой') || endsWithSuffix(lcWord, endingsOfAdjectives)) &&
             vowelCount(lcWord) >= 2);
 
-    const jeEndings = toLetterTree([
+    const jeEndings = createReversedTrie([
         'ий', 'ие', 'чье', 'тье', 'дье', 'вье', 'бье',
         'жалованье',
         'енье', 'ружье', 'божье', 'верье', 'мужье']);
 
-    const ojeEngings = toLetterTree([
+    const ojeEngings = createReversedTrie([
         'вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый']);
 
     const locativeDictionary = Object.freeze(makeDefaultLocativeDictionary());
@@ -252,13 +252,12 @@
 
 
 
-    const iyWordEndings = toLetterTree(['й', 'ие', 'иё']);
-    const eiWord = toLetterTree(['воробей', 'муравей', 'ручей', 'соловей', 'улей']);
+    const iyWordEndings = createReversedTrie(['й', 'ие', 'иё']);
+    const eiWord = createReversedTrie(['воробей', 'муравей', 'ручей', 'соловей', 'улей']);
 
-    const surnameType1 = toLetterTree(['ов', 'ев', 'ёв', 'ин', 'ын']);
+    const surnameType1 = createReversedTrie(['ов', 'ев', 'ёв', 'ин', 'ын']);
 
-    const surnameType1Plural = new Map();
-    surnameType1Plural.set('ы'.charCodeAt(0), surnameType1);
+    const surnameType1Plural = extendAllSuffixes('ы', surnameType1);
 
 
 

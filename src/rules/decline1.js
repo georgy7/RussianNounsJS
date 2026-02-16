@@ -26,10 +26,10 @@ export function decline1(engine, lemma, grCase) {
 
     const soft = () => (half && lcWord.endsWith('я')) || softD1(lcWord);
 
-    const iyWord = endsWithLeaf(lcWord, iyWordEndings);
+    const iyWord = endsWithSuffix(lcWord, iyWordEndings);
 
     const eiStem = () => {
-        if (endsWithLeaf(lcWord, eiWord)) {
+        if (endsWithSuffix(lcWord, eiWord)) {
             return init(head) + upperLike('ь', last(head));
         } else {
             return head;
@@ -66,9 +66,9 @@ export function decline1(engine, lemma, grCase) {
                 case 'е':
                     if ((iyWord && lemma.isASurname())
                         || isAdjectiveLike(lemma, lcWord)
-                        || endsWithLeaf(lcWord, ogoEndings)) {
+                        || endsWithSuffix(lcWord, ogoEndings)) {
                         return stem + 'ого';
-                    } else if (endsWithLeaf(lcWord, egoEndings) || lcWord.endsWith('ее')) {
+                    } else if (endsWithSuffix(lcWord, egoEndings) || lcWord.endsWith('ее')) {
                         return stem + 'его';
                     }
                 case 'ё':
@@ -119,9 +119,9 @@ export function decline1(engine, lemma, grCase) {
                 case 'е':
                     if ((iyWord && lemma.isASurname())
                         || isAdjectiveLike(lemma, lcWord)
-                        || endsWithLeaf(lcWord, ogoEndings)) {
+                        || endsWithSuffix(lcWord, ogoEndings)) {
                         return stem + 'ому';
-                    } else if (endsWithLeaf(lcWord, egoEndings) || lcWord.endsWith('ее')) {
+                    } else if (endsWithSuffix(lcWord, egoEndings) || lcWord.endsWith('ее')) {
                         return stem + 'ему';
                     }
                 case 'ё':
@@ -173,8 +173,8 @@ export function decline1(engine, lemma, grCase) {
                 case 'ё':
                 case 'я':
                 case 'ь':
-                    if ((iyWord && lemma.isASurname()) || endsWithLeaf(lcWord, ogoEndings2)) {
-                        if (endsWithLeaf(lcWord, ojeEngings)) {
+                    if ((iyWord && lemma.isASurname()) || endsWithSuffix(lcWord, ogoEndings2)) {
+                        if (endsWithSuffix(lcWord, ojeEngings)) {
                             return stem + 'ым';
                         } else {
                             return stem + 'им';
@@ -186,9 +186,9 @@ export function decline1(engine, lemma, grCase) {
                         } else {
                             return stem + 'ым';
                         }
-                    } else if (endsWithLeaf(lcWord, ogoEndings3)) {
+                    } else if (endsWithSuffix(lcWord, ogoEndings3)) {
                         return stem + 'ым';
-                    } else if (endsWithLeaf(lcWord, egoEndings)) {
+                    } else if (endsWithSuffix(lcWord, egoEndings)) {
                         return stem + 'им';
                     } else if (iyWord) {
                         return eiStem() + 'ем';
@@ -209,7 +209,7 @@ export function decline1(engine, lemma, grCase) {
 
                 case 'н':
                 case 'в':
-                    if (lemma.isASurname() && endsWithLeaf(lcWord, surnameType1)) {
+                    if (lemma.isASurname() && endsWithSuffix(lcWord, surnameType1)) {
                         return word + 'ым';
                     }
             }
@@ -253,14 +253,14 @@ export function decline1(engine, lemma, grCase) {
                 case 'ь':
                     if ((iyWord && lemma.isASurname())
                         || isAdjectiveLike(lemma, lcWord)
-                        || endsWithLeaf(lcWord, ogoEndings)) {
+                        || endsWithSuffix(lcWord, ogoEndings)) {
                         return stem + 'ом';
-                    } else if (endsWithLeaf(lcWord, egoEndings) || lcWord.endsWith('ее')) {
+                    } else if (endsWithSuffix(lcWord, egoEndings) || lcWord.endsWith('ее')) {
                         return stem + 'ем';
                     } else if (endsWithAny(lcWord, ['воробей'])) {
                         const i = init(head);
                         return i + upperLike('ье', last(i));
-                    } else if ((endsWithLeaf(lcWord, jeEndings)) &&
+                    } else if ((endsWithSuffix(lcWord, jeEndings)) &&
                         !endsWithAny(lcWord, [
                         'запястье', 'здоровье', 'изголовье',
                         'платье'
