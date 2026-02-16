@@ -95,9 +95,9 @@ const explicitOvAndZero = new Set([
 ]);
 
 const ovBloom = new Uint8ClampedArray(256);
-explicitOv.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
-explicitZeroAndOv.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
-explicitOvAndZero.forEach(s => bloomAdd(ovBloom, to11BitFakeHash(s)));
+explicitOv.forEach(s => bloomAdd(ovBloom, toFakeHash(s)));
+explicitZeroAndOv.forEach(s => bloomAdd(ovBloom, toFakeHash(s)));
+explicitOvAndZero.forEach(s => bloomAdd(ovBloom, toFakeHash(s)));
 
 const explicitZeroEnding = new Set(explicitZeroEndingCommonGenderSurnameLike.concat([
     'абазины', 'авы', 'аввы',
@@ -121,7 +121,7 @@ const explicitZeroEnding = new Set(explicitZeroEndingCommonGenderSurnameLike.con
 ]));
 
 const zeroBloom = new Uint8ClampedArray(256);
-explicitZeroEnding.forEach(s => bloomAdd(zeroBloom, to11BitFakeHash(s)));
+explicitZeroEnding.forEach(s => bloomAdd(zeroBloom, toFakeHash(s)));
 
 const declinePluralFlatEndings = [
     'х', 'ых', 'их',
@@ -303,7 +303,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
         const lastOf2Initial = lastOfNInitial(lcPlural, 2);
 
         if (Gender.FEMININE !== gender) {
-            const pluralHash = to11BitFakeHash(lcPlural)
+            const pluralHash = toFakeHash(lcPlural)
             const inOvBloom = inBloom(ovBloom, pluralHash);
 
             if (inOvBloom && explicitOv.has(lcPlural)) {
