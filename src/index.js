@@ -4,17 +4,17 @@
   Released under the MIT license
 */
 
-(function (root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        // AMD
-        define([], factory);
-    } else if (typeof module === 'object' && module.exports) {
-        // CommonJS
-        module.exports = factory();
-    } else {
-        root.RussianNouns = factory();
-    }
-}(typeof self !== 'undefined' ? self : this, function () {
+
+export { Case, CaseValues as CASES } from "./Case.js";
+export { Gender } from "./Gender.js";
+export { LocativeFormAttribute, LocativeForm } from "./LocativeForm.js";
+export { Lemma, createLemma, createLemmaOrNull } from "./Lemma.js";
+export { Engine } from "./Engine.js";
+export { StressDictionary } from "./StressDictionary.js";
+
+
+
+function removeLater() {
     'use strict';
 
     // Ссылки:
@@ -150,41 +150,6 @@
         'вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый']);
 
     const locativeDictionary = Object.freeze(makeDefaultLocativeDictionary());
-
-    const API = {
-        Case: Case,
-        Gender: Gender,
-
-        CASES: CaseValues,
-
-
-        LocativeFormAttribute: LocativeFormAttribute,
-
-        LocativeForm: LocativeForm,
-
-        /**
-         * Нормальная форма слова.
-         * Объекты этого класса содержат также грамматическую и семантическую информацию,
-         * позволяющую выбирать стратегии словоизменения и различать омонимы.
-         *
-         * Пожалуйста, используйте `Lemma.create`
-         * или `Lemma.createOrNull` вместо конструктора.
-         */
-        Lemma: Lemma,
-
-        /**
-         * То же, что Lemma.create
-         */
-        createLemma: o => Lemma.create(o),
-
-        /**
-         * То же, что Lemma.createOrNull
-         */
-        createLemmaOrNull: o => Lemma.createOrNull(o),
-
-        StressDictionary: StressDictionary,
-        Engine: Engine
-    };
 
     const reYo = s => {
         const index = Math.max(
@@ -334,6 +299,4 @@
                 return decline3(engine, lemma, Case.PREPOSITIONAL);
         }
     }
-
-    return Object.freeze(API);
-}));
+}

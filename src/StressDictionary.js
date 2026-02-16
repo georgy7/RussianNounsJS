@@ -1,6 +1,11 @@
-// Базовые слова решил фильтровать по хэшам на уровне фильтра Блума,
-// чтобы не раздувать исходный код и увеличить скорость работы библиотеки.
+import { deltaDecodeToSet } from "./utils/decompress.js";
+import { BloomFilter } from "./utils/bloom.js";
+import { Lemma } from "./Lemma.js";
 
+// Значительную часть слов решил фильтровать по хэшам, чтобы не раздувать
+// исходный код и увеличить скорость работы библиотеки.
+
+// Слова вроде "багаж", "кругляш", "свинец"
 const stressHashesA = deltaDecodeToSet([
     11720389, 548, 1024, 1479, 2622, 2867, 1222, 2642, 264, 1328, 137, 123, 397,
     65542229, 212447047, 31729170, 8094836, 1056, 21701789, 35520559, 40358, 21819,
@@ -21,6 +26,8 @@ const stressHashesA = deltaDecodeToSet([
     3709, 61381, 17424, 30158, 80591, 11218, 44099, 260487
 ]);
 
+// Слова вроде "усач", "истец", "малыш" —
+// отличаются в винительном падеже
 const stressHashesB = deltaDecodeToSet([
     11720389, 548, 1024, 1060, 4, 5904, 1848, 4404, 330555234, 4691346, 3365076,
     1045362, 7414584, 960432, 10564312, 253286, 16178203, 4357, 4355, 11350, 31120,
@@ -41,9 +48,9 @@ const stressHashesB = deltaDecodeToSet([
     126869, 23630, 11218
 ]);
 
-const stressBloomAB = new Uint8ClampedArray(256);
-stressHashesA.forEach(h => bloomAdd(stressBloomAB, to11BitHash(h)));
-stressHashesB.forEach(h => bloomAdd(stressBloomAB, to11BitHash(h)));
+const stressBloomAB = new BloomFilter();
+stressHashesA.forEach(h => stressBloomAB.addInteger(h));
+stressHashesB.forEach(h => stressBloomAB.addInteger(h));
 
 
 /**
@@ -54,7 +61,7 @@ stressHashesB.forEach(h => bloomAdd(stressBloomAB, to11BitHash(h)));
 export function StressDictionary() {
 
     const _data = new Map();
-    const _bloomFilter = Uint8ClampedArray.from(stressBloomAB);
+    const _bloomFilter = stressBloomAB.clone();
 
     const _getKey = function (lemma) {
         // Если убрать информацию о склонении из флагов, находящуюся в старших 16 битах,
@@ -144,7 +151,7 @@ export function StressDictionary() {
             homonyms.push([extendedFlags, settings]);
         }
 
-        bloomAdd(_bloomFilter, to11BitHash(lemmaObject._hash));
+        _bloomFilter.addInteger(lemmaObject._hash);
     };
 
     const _toResult = ch => {
@@ -162,7 +169,7 @@ export function StressDictionary() {
     }
 
     this.hasStressedEndingSingular = function (query, grCase) {
-        if (inBloom(_bloomFilter, to11BitHash(query._hash))) {
+        if (_bloomFilter.hasInteger(query._hash)) {
 
             const caseIndex = CaseValues.indexOf(grCase);
 
@@ -186,7 +193,7 @@ export function StressDictionary() {
     };
 
     this.hasStressedEndingPlural = function (query, grCase) {
-        if (inBloom(_bloomFilter, to11BitHash(query._hash))) {
+        if (_bloomFilter.hasInteger(query._hash)) {
 
             const caseIndex = CaseValues.indexOf(grCase);
 

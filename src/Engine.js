@@ -1,4 +1,6 @@
-class Engine {
+import { makeDefaultStressDictionary } from "./settings/defaultStressDictionary.js";
+
+export class Engine {
 
     constructor() {
 

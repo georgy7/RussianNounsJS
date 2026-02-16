@@ -1,10 +1,18 @@
+import { GenderValues, Gender } from "./Gender.js";
+
+/**
+ * Нормальная форма слова.
+ * Объекты этого класса содержат также грамматическую и семантическую информацию,
+ * позволяющую выбирать стратегии словоизменения и различать омонимы.
+ *
+ * Пожалуйста, используйте `Lemma.create`
+ * или `Lemma.createOrNull` вместо конструктора.
+ */
 export class Lemma {
 
     /**
      * Пожалуйста, используйте статические методы create
      * и createOrNull вместо конструктора.
-     *
-     * @param {RussianNouns.Lemma|Object} o
      */
     constructor(o) {
         if (o instanceof Lemma) {
@@ -220,5 +228,14 @@ function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
         default:
             return -2; // Error
     }
+}
+
+
+export function createLemma(o) {
+    return Lemma.create(o);
+}
+
+export function createLemmaOrNull(o) {
+    return Lemma.createOrNull(o);
 }
 

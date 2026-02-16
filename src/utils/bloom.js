@@ -21,6 +21,16 @@ export class BloomFilter {
         const index = x & 0x7ff;
         return !!((this._filter[index >>> 3] >>> (7 - (index % 8))) & 1);
     }
+
+    clone() {
+        return cloneFilter(this._filter);
+    }
+}
+
+function cloneFilter(filter) {
+    const result = new BloomFilter();
+    result._filter = Uint8ClampedArray.from(filter);
+    return result;
 }
 
 function to11Bit(intValue) {

@@ -1,3 +1,6 @@
+import { StressDictionary } from "../StressDictionary.js";
+import { Gender } from "../Gender.js";
+
 export function makeDefaultStressDictionary() {
     function putAll(dictionary, lemmaPrototype, value, joinedWordList) {
         const list = joinedWordList.split(',');
@@ -8,7 +11,7 @@ export function makeDefaultStressDictionary() {
         }
     }
 
-    const d = new API.StressDictionary();
+    const d = new StressDictionary();
     const m = Object.freeze({gender: Gender.MASCULINE});
     const ma = Object.freeze({gender: Gender.MASCULINE, animate: true});
     const f = Object.freeze({gender: Gender.FEMININE});

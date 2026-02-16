@@ -31,3 +31,23 @@ test("bloom filter with cyrillic words", () => {
     assert.ok(!(x.hasRaw(toFakeHash(words[3]))));
 });
 
+test("bloom filter clone", () => {
+    const x = new BloomFilter();
+    x.addInteger(1);
+    x.addInteger(2);
+
+    const y = x.clone();
+    y.addInteger(3);
+    y.addInteger(4);
+
+    assert.ok(y.hasInteger(1));
+    assert.ok(y.hasInteger(2));
+    assert.ok(y.hasInteger(3));
+    assert.ok(y.hasInteger(4));
+
+    assert.ok(x.hasInteger(1));
+    assert.ok(x.hasInteger(2));
+    assert.ok(!(x.hasInteger(3)));
+    assert.ok(!(x.hasInteger(4)));
+});
+

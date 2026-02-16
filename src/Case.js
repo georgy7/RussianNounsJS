@@ -1,4 +1,4 @@
-const CaseValues = Object.freeze([
+export const CaseValues = Object.freeze([
     "именительный",
     "родительный",
     "дательный",
@@ -8,7 +8,7 @@ const CaseValues = Object.freeze([
     "местный"
 ]);
 
-const Case = Object.freeze({
+export const Case = Object.freeze({
     NOMINATIVE: CaseValues[0],
     GENITIVE: CaseValues[1],
     DATIVE: CaseValues[2],

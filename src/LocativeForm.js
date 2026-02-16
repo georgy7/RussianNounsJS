@@ -12,8 +12,7 @@ export function LocativeForm(preposition, word, attributes) {
     this.preposition = preposition;
     this.word = word;
     this.attributes = attributes;
-},
-
+}
 
 /**
  * Это еще не стабилизированная часть API.
