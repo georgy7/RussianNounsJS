@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert"
 
-import { createReversedTrie, endsWithSuffix, extendAllSuffixes } from "../src/utils/trie.js"
+import { createReversedTrie, endsWithSuffix, extendAllSuffixes } from "../../src/utils/trie.js"
 
 test("reversed trie basic usage", () => {
     const x = createReversedTrie(['еший', 'ый', 'лая']);

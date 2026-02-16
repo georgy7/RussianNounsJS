@@ -1,87 +1,13 @@
-// <editor-fold defaultstate="collapsed" desc="Assertion functions">
+import { test } from "node:test"
+import assert from "node:assert"
 
-function assertEquals(a, b, msg) {
-    if (a !== b) {
-        console.log(`${a} !== ${b}`);
-
-        if (msg) {
-            console.log(msg);
-        }
-
-        process.exit(1);
-    }
-}
-
-function assertIsArray(a) {
-    if (!(a instanceof Array)) {
-        console.log(`${a} is not an array`);
-        process.exit(1);
-    }
-}
-
-function itShouldThrow(exceptionClass, f) {
-    let raised = false;
-    try {
-        f();
-    } catch (e) {
-        if (e instanceof exceptionClass) {
-            raised = true;
-        } else {
-            throw e;
-        }
-    }
-    assertEquals(raised, true, `It should throw a ${exceptionClass.name}.`);
-}
-
-function assertEqualsSingleValue(array, value) {
-    assertIsArray(array);
-    assertEquals(array.length, 1, [array, value]);
-    assertEquals(array[0], value);
-}
-
-/**
- * @param results Массив массивов результатов.
- * @param values Массив ожидаемых значений. Разрешено использовать как строки, так и массивы.
- */
-function assertAllCases(results, values) {
-    assertIsArray(results);
-    assertIsArray(values);
-
-    assertEquals(results.length, 7);
-    assertEquals(values.length, 7);
-
-    for (let i = 0; i < 7; i++) {
-        const result = results[i];
-        const value = values[i];
-
-        assertIsArray(result);
-
-        if (typeof value === 'string') {
-            assertEqualsSingleValue(result, value);
-        } else if (value instanceof Array) {
-            assertEquals(result.length, value.length, [result, value]);
-            for (let j = 0; j < value.length; j++) {
-                assertEquals(result[j], value[j]);
-            }
-        } else {
-            console.log(`${value} is neither an array nor a string.`);
-            process.exit(1);
-        }
-    }
-}
-
-// </editor-fold>
-
-const RussianNouns = require('./RussianNouns.js');
+import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute, createLemma, createLemmaOrNull } from "../src/index.js"
 
 (() => {
-    const rne = new RussianNouns.Engine();
+    const rne = new Engine();
 
     // Контрольная группа для проверки локальности настроек внутри движка
-    const rneControl = new RussianNouns.Engine();
-
-    const Gender = RussianNouns.Gender;
-    const Case = RussianNouns.Case;
+    const rneControl = new Engine();
 
     let result, control;
 
@@ -93,7 +19,7 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 1 ----------------');
 
-    let coat = RussianNouns.createLemma({
+    let coat = createLemma({
         text: 'пальто',
         gender: Gender.NEUTER,
         indeclinable: true
@@ -102,18 +28,14 @@ const RussianNouns = require('./RussianNouns.js');
     result = rne.decline(coat, Case.GENITIVE);
     assertEqualsSingleValue(result, "пальто");
 
-    // deprecated
-    result = RussianNouns.getDeclension(coat);
-    assertEquals(result, -1);
-
     assertEquals(coat.getDeclension(), -1);
 
-    let mountain = RussianNouns.createLemma({
+    let mountain = createLemma({
         text: 'гора',
         gender: Gender.FEMININE
     });
 
-    result = RussianNouns.CASES.map(c => {
+    result = CASES.map(c => {
         return rne.decline(mountain, c);
     });
 
@@ -127,7 +49,7 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 3 ----------------');
 
-    result = RussianNouns.CASES.map(c => {
+    result = CASES.map(c => {
         return rne.decline(mountain, c, pluralMountain);
     });
 
@@ -135,28 +57,21 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 4 ----------------');
 
-    // deprecated
-    assertEquals(RussianNouns.getDeclension(mountain), 2);
-    assertEquals(RussianNouns.getSchoolDeclension(mountain), 1);
-
     assertEquals(mountain.getDeclension(), 2);
     assertEquals(mountain.getSchoolDeclension(), 1);
 
     console.log('--------------- 5 ----------------');
 
-    let way = RussianNouns.createLemma({
+    let way = createLemma({
         text: 'путь',
         gender: Gender.MASCULINE
     });
-
-    // deprecated
-    assertEquals(RussianNouns.getDeclension(way), 0);
 
     assertEquals(way.getDeclension(), 0);
 
     console.log('--------------- 6 ----------------');
 
-    const scissors = RussianNouns.createLemma({
+    const scissors = createLemma({
         text: 'ножницы',
         pluraleTantum: true
     });
@@ -167,7 +82,7 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 7 ----------------');
 
-    result = RussianNouns.CASES.map(c => {
+    result = CASES.map(c => {
         return rne.decline(scissors, c);
     });
 
@@ -175,7 +90,7 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 8 ----------------');
 
-    let cringe = RussianNouns.createLemma({
+    let cringe = createLemma({
         text: 'кринж',
         gender: Gender.MASCULINE
     });
@@ -224,8 +139,6 @@ const RussianNouns = require('./RussianNouns.js');
 
     console.log('--------------- 9 ----------------');
 
-    const LocativeFormAttribute = RussianNouns.LocativeFormAttribute;
-
     (() => {
         const values = Object.values(LocativeFormAttribute);
 
@@ -254,12 +167,12 @@ const RussianNouns = require('./RussianNouns.js');
         assertEquals(true, values.reduce((a, b) => Math.max(a, b)) <= (1 << 25));
     })();
 
-    let row = RussianNouns.createLemma({
+    let row = createLemma({
         text: 'ряд',
         gender: Gender.MASCULINE
     });
 
-    result = RussianNouns.CASES.map(c => {
+    result = CASES.map(c => {
         return rne.decline(row, c);
     });
 
@@ -285,19 +198,19 @@ const RussianNouns = require('./RussianNouns.js');
     assertIsArray(rne.getLocativeForms(way), 'getLocativeForms(x) type (a way)');
     assertEquals(rne.getLocativeForms(way).length, 0, 'locative forms count (a way)');
 
-    const ball = RussianNouns.createLemma({
+    const ball = createLemma({
         text: 'мяч',
         gender: Gender.MASCULINE
     });
     assertIsArray(rne.getLocativeForms(ball), 'getLocativeForms(x) type (a ball)');
     assertEquals(rne.getLocativeForms(ball).length, 0, 'locative forms count (a ball)');
 
-    const steam = RussianNouns.createLemma({
+    const steam = createLemma({
         text: 'пар',
         gender: Gender.MASCULINE
     });
 
-    result = RussianNouns.CASES.map(c => {
+    result = CASES.map(c => {
         return rne.decline(steam, c);
     });
 
@@ -334,39 +247,39 @@ const RussianNouns = require('./RussianNouns.js');
 
 (() => {
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma(123);
+        createLemma(123);
     });
     console.log('createLemma: number');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma('гора');
+        createLemma('гора');
     });
     console.log('createLemma: string');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma(null);
+        createLemma(null);
     });
     console.log('createLemma: null');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma(undefined);
+        createLemma(undefined);
     });
     console.log('createLemma: undefined');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma({});
+        createLemma({});
     });
     console.log('createLemma: {}');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma({
+        createLemma({
             text: 'гора'
         });
     });
     console.log('createLemma: gender undefined');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma({
+        createLemma({
             text: 'гора',
             gender: 'fgsfds'
         });
@@ -374,7 +287,7 @@ const RussianNouns = require('./RussianNouns.js');
     console.log('createLemma: gender fgsfds');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma({
+        createLemma({
             text: 'ножницы',
             pluraleTantum: 123
         });
@@ -382,44 +295,44 @@ const RussianNouns = require('./RussianNouns.js');
     console.log('createLemma: pluraleTantum 123');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma({
+        createLemma({
             text: 'пальто',
-            gender: RussianNouns.Gender.NEUTER,
+            gender: Gender.NEUTER,
             indeclinable: 'fgsfds'
         });
     });
     console.log('createLemma: indeclinable fgsfds');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma({
+        createLemma({
             text: 'трактор',
-            gender: RussianNouns.Gender.MASCULINE,
+            gender: Gender.MASCULINE,
             transport: 'наземный'
         });
     });
     console.log('createLemma: transport fgsfds');
 
     itShouldThrow(Error, () => {
-        RussianNouns.createLemma({
-            gender: RussianNouns.Gender.MASCULINE
+        createLemma({
+            gender: Gender.MASCULINE
         });
     });
     console.log('createLemma: text undefined');
 
     (() => {
-        const k = RussianNouns.createLemma({
+        const k = createLemma({
             text: 'гора',
-            gender: RussianNouns.Gender.FEMININE
+            gender: Gender.FEMININE
         });
         assertEquals(k.text(), 'гора');
-        assertEquals(k.getGender(), RussianNouns.Gender.FEMININE);
+        assertEquals(k.getGender(), Gender.FEMININE);
         assertEquals(k.isPluraleTantum(), false);
         assertEquals(k.isIndeclinable(), false);
         console.log('createLemma: valid (1)');
     })();
 
     (() => {
-        const k = RussianNouns.Lemma.create({
+        const k = Lemma.create({
             text: 'ножницы',
             pluraleTantum: true
         });
@@ -429,85 +342,85 @@ const RussianNouns = require('./RussianNouns.js');
         assertEquals(k.isIndeclinable(), false);
         console.log('Lemma.create: valid (2)');
 
-        const l = RussianNouns.createLemma(k);
+        const l = createLemma(k);
         assertEquals(l, k);
         console.log('createLemma: the same object');
     })();
 
     // ----------------------
 
-    assertEquals(null, RussianNouns.createLemmaOrNull(123));
+    assertEquals(null, createLemmaOrNull(123));
     console.log('createLemmaOrNull: number');
 
-    assertEquals(null, RussianNouns.Lemma.createOrNull(123));
+    assertEquals(null, Lemma.createOrNull(123));
     console.log('Lemma.createOrNull: number');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull('гора'));
+    assertEquals(null, createLemmaOrNull('гора'));
     console.log('createLemmaOrNull: string');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull(null));
+    assertEquals(null, createLemmaOrNull(null));
     console.log('createLemmaOrNull: null');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull(undefined));
+    assertEquals(null, createLemmaOrNull(undefined));
     console.log('createLemmaOrNull: undefined');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull({}));
+    assertEquals(null, createLemmaOrNull({}));
     console.log('createLemmaOrNull: {}');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull({
+    assertEquals(null, createLemmaOrNull({
         text: 'гора'
     }));
     console.log('createLemmaOrNull: gender undefined');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull({
+    assertEquals(null, createLemmaOrNull({
         text: 'гора',
         gender: 'fgsfds'
     }));
     console.log('createLemmaOrNull: gender fgsfds');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull({
+    assertEquals(null, createLemmaOrNull({
         text: 'ножницы',
         pluraleTantum: 123
     }));
     console.log('createLemmaOrNull: pluraleTantum 123');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull({
+    assertEquals(null, createLemmaOrNull({
         text: 'пальто',
-        gender: RussianNouns.Gender.NEUTER,
+        gender: Gender.NEUTER,
         indeclinable: 'fgsfds'
     }));
     console.log('createLemmaOrNull: indeclinable fgsfds');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull({
+    assertEquals(null, createLemmaOrNull({
         text: 'трактор',
-        gender: RussianNouns.Gender.MASCULINE,
+        gender: Gender.MASCULINE,
         transport: 'наземный'
     }));
     console.log('createLemmaOrNull: transport fgsfds');
 
-    assertEquals(null, RussianNouns.createLemmaOrNull({
-        gender: RussianNouns.Gender.MASCULINE
+    assertEquals(null, createLemmaOrNull({
+        gender: Gender.MASCULINE
     }));
     console.log('createLemmaOrNull: text undefined');
 
     let x;
 
-    x = RussianNouns.createLemmaOrNull({
+    x = createLemmaOrNull({
         text: 'гора',
-        gender: RussianNouns.Gender.FEMININE
+        gender: Gender.FEMININE
     });
-    assertEquals(x instanceof RussianNouns.Lemma, true);
+    assertEquals(x instanceof Lemma, true);
     assertEquals(x.text(), 'гора');
-    assertEquals(x.getGender(), RussianNouns.Gender.FEMININE);
+    assertEquals(x.getGender(), Gender.FEMININE);
     assertEquals(x.isPluraleTantum(), false);
     assertEquals(x.isIndeclinable(), false);
     console.log('createLemmaOrNull: valid (1)');
 
-    x = RussianNouns.Lemma.createOrNull({
+    x = Lemma.createOrNull({
         text: 'ножницы',
         pluraleTantum: true
     });
-    assertEquals(x instanceof RussianNouns.Lemma, true);
+    assertEquals(x instanceof Lemma, true);
     assertEquals(x.text(), 'ножницы');
     assertEquals(x.isPluraleTantum(), true);
     assertEquals(x.getGender(), undefined);
@@ -516,26 +429,22 @@ const RussianNouns = require('./RussianNouns.js');
 })();
 
 (() => {
-
-    const Gender = RussianNouns.Gender;
-    const createLemma = RussianNouns.createLemma;
-
-    const rne = new RussianNouns.Engine();
+    const rne = new Engine();
 
     function usual(lemma, caseNumber) {
-        const c = RussianNouns.CASES[caseNumber - 1];
+        const c = CASES[caseNumber - 1];
         return rne.decline(lemma, c)[0];
     }
 
     // To get a little-used or older form.
     function unusual(lemma, caseNumber) {
-        const c = RussianNouns.CASES[caseNumber - 1];
+        const c = CASES[caseNumber - 1];
         const result = rne.decline(lemma, c);
         return result[result.length - 1];
     }
 
     function plural(lemma, caseNumber) {
-        const c = RussianNouns.CASES[caseNumber - 1];
+        const c = CASES[caseNumber - 1];
         const pluralForm = rne.pluralize(lemma)[0];
         return rne.decline(lemma, c, pluralForm)[0];
     }
@@ -771,7 +680,7 @@ const RussianNouns = require('./RussianNouns.js');
     console.log('Testing dev branch index.html words...');
 
     const checkSingularAndPlural = (lemma, expectedSingular, expectedPlural) => {
-        const singular = RussianNouns.CASES.map(c => {
+        const singular = CASES.map(c => {
             return rne.decline(lemma, c);
         });
 
@@ -780,7 +689,7 @@ const RussianNouns = require('./RussianNouns.js');
         const p = rne.pluralize(lemma);
         assertEqualsSingleValue(p, expectedPlural[0]);
 
-        const plural = RussianNouns.CASES.map(c => {
+        const plural = CASES.map(c => {
             return rne.decline(lemma, c, p[0]);
         });
 
@@ -790,7 +699,7 @@ const RussianNouns = require('./RussianNouns.js');
     };
 
     const checkSingular = (lemma, expectedSingular) => {
-        const singular = RussianNouns.CASES.map(c => {
+        const singular = CASES.map(c => {
             return rne.decline(lemma, c);
         });
 
@@ -1039,7 +948,7 @@ const RussianNouns = require('./RussianNouns.js');
     const адаптировавший = createLemma({text: 'адаптировавший', gender: Gender.MASCULINE, animate: true});
 
     (() => {
-        const result = RussianNouns.CASES.map(c => {
+        const result = CASES.map(c => {
             return rne.decline(адаптировавший, c);
         });
 
@@ -1059,7 +968,7 @@ const RussianNouns = require('./RussianNouns.js');
     const адаптировавшее = createLemma({text: 'адаптировавшее', gender: Gender.NEUTER});
 
     (() => {
-        const result = RussianNouns.CASES.map(c => {
+        const result = CASES.map(c => {
             return rne.decline(адаптировавшее, c);
         });
 
@@ -1079,7 +988,7 @@ const RussianNouns = require('./RussianNouns.js');
     const адаптировавшая = createLemma({text: 'адаптировавшая', gender: Gender.FEMININE});
 
     (() => {
-        const result = RussianNouns.CASES.map(c => {
+        const result = CASES.map(c => {
             return rne.decline(адаптировавшая, c);
         });
 
@@ -1118,7 +1027,7 @@ const RussianNouns = require('./RussianNouns.js');
         assertEqualsSingleValue(n, expectedPlural);
 
         function checkCases(lemma) {
-            const result = RussianNouns.CASES.map(c => {
+            const result = CASES.map(c => {
                 return rne.decline(lemma, c, expectedPlural);
             });
 
@@ -1440,7 +1349,7 @@ const RussianNouns = require('./RussianNouns.js');
     console.log('Rarely used parts of API.');
 
     (() => {
-        let x = RussianNouns.createLemma({
+        let x = createLemma({
             text: 'абв',
             gender: Gender.FEMININE
         });
@@ -1489,27 +1398,21 @@ const RussianNouns = require('./RussianNouns.js');
         assertEquals(x.lower(), 'абво');
         assertEquals(x.getGender(), Gender.FEMININE);
 
-        x = RussianNouns.createLemma({
+        x = createLemma({
             text: 'сын',
             gender: Gender.MASCULINE
         });
         y = x.newText(() => 'юноша');
-        // deprecated
-        assertEquals(RussianNouns.getDeclension(x), 1);
-        assertEquals(RussianNouns.getDeclension(y), 2);
-        // new API
+
         assertEquals(x.getDeclension(), 1);
         assertEquals(y.getDeclension(), 2);
 
-        x = RussianNouns.createLemma({
+        x = createLemma({
             text: 'абвгдеёжзиклмя',
             gender: Gender.NEUTER
         });
         y = x.newGender(() => Gender.FEMININE);
-        // deprecated
-        assertEquals(RussianNouns.getDeclension(x), 3);
-        assertEquals(RussianNouns.getDeclension(y), 2);
-        // new API
+
         assertEquals(x.getDeclension(), 3);
         assertEquals(y.getDeclension(), 2);
     })();
