@@ -117,4 +117,3 @@ function extractPreposition(locativeConfig) {
 function extractAttributes(locativeConfig) {
     return locativeConfig >> 6;
 }
-

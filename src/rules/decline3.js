@@ -61,4 +61,3 @@ function halfSomethingLight(lcWord) {
         && bincludes(0b00001000000000000000000100000000, last(lcWord))
         && (vowelCount(lcWord) >= 2));
 }
-

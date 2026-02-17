@@ -536,4 +536,3 @@ export function pluralize(engine, lemma) {
 
     return unique(result);
 }
-

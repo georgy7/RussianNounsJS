@@ -17,4 +17,3 @@ export const Case = Object.freeze({
     PREPOSITIONAL: CaseValues[5],
     LOCATIVE: CaseValues[6]
 });
-

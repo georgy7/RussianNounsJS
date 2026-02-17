@@ -45,4 +45,3 @@ export function toFakeHash(lcString) {
             ((prepared.charCodeAt(1) & 0xF) << 4) |
             (prepared.charCodeAt(2) & 0xF);
 }
-

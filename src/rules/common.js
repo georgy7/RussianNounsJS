@@ -1,4 +1,27 @@
-import { init, last, nLast, lastOfNInitial, bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/strings.js";
+import { createReversedTrie } from "../utils/trie.js";
+import { init, last, nInit, nLast, lastOfNInitial, bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/strings.js";
+
+export const ogoEndings = createReversedTrie([
+    'ое',
+    'нький', 'ский', 'ской',
+    'лстой', 'отой', 'утой', 'евой', 'овой', 'живой']);
+export const ogoEndings2 = createReversedTrie([
+    'ее', 'ое',
+    'нький', 'ский', 'ской',
+    'лстой', 'отой', 'утой']);
+export const ogoEndings3 = createReversedTrie([
+    'евой', 'овой', 'отой', 'живой']);
+
+export const egoEndings = createReversedTrie(['шний', 'жний', 'щий', 'ший', 'жий', 'чий']);
+
+export const egoSoftM = [
+    'божий', 'ажий', 'яжий', 'ужий', 'южий',
+    'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
+];
+
+export const egoSoftMTree = createReversedTrie(egoSoftM);
+
+export const egoSoftPlural = createReversedTrie(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
 
 export function getNounStem0(word, lcWord) {
     const lcLastChar = last(lcWord);

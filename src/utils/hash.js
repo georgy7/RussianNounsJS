@@ -44,4 +44,3 @@ export function calculateHash(lowerCaseUnicodeString) {
     const start = preparedString.charCodeAt(0) % 2;
     return ((0x7fffffff & hash) * 2) + start;
 }
-

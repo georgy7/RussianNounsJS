@@ -86,27 +86,6 @@ function removeLater() {
     const uFormBloom = new Uint8ClampedArray(256);
     uForm.forEach(w => bloomAdd(uFormBloom, to11BitHash(calculateHash(w))));
 
-    const ogoEndings = createReversedTrie([
-        'ое',
-        'нький', 'ский', 'ской',
-        'лстой', 'отой', 'утой', 'евой', 'овой', 'живой']);
-    const ogoEndings2 = createReversedTrie([
-        'ее', 'ое',
-        'нький', 'ский', 'ской',
-        'лстой', 'отой', 'утой']);
-    const ogoEndings3 = createReversedTrie([
-        'евой', 'овой', 'отой', 'живой']);
-
-    const egoEndings = createReversedTrie(['шний', 'жний', 'щий', 'ший', 'жий', 'чий']);
-
-    const egoSoftM = [
-        'божий', 'ажий', 'яжий', 'ужий', 'южий',
-        'бульдожий', 'кабарожий', 'медвежий', 'носорожий', 'миножий'
-    ];
-
-    const egoSoftMTree = createReversedTrie(egoSoftM);
-
-    const egoSoftPlural = createReversedTrie(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
 
     const endingsOfAdjectives = createReversedTrie([
         'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
@@ -200,16 +179,8 @@ function removeLater() {
         }
     }
 
-
-
     const iyWordEndings = createReversedTrie(['й', 'ие', 'иё']);
     const eiWord = createReversedTrie(['воробей', 'муравей', 'ручей', 'соловей', 'улей']);
-
-    const surnameType1 = createReversedTrie(['ов', 'ев', 'ёв', 'ин', 'ын']);
-
-    const surnameType1Plural = extendAllSuffixes('ы', surnameType1);
-
-
 
     function toLocativeSingular1(engine, lemma, declensionType) {
         if (LocativeDeclensionType.U_SUFFIX === declensionType) {

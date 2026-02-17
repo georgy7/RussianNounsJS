@@ -1,3 +1,7 @@
+import { Case } from "../Case.js";
+import { getNounStem } from "./common.js";
+import { toLowerCaseRu, init, last, lastOfNInitial, endsWithAny } from "../utils/strings.js";
+
 /**
  * @param {RussianNouns.Engine} engine
  * @param {RussianNouns.Lemma} lemma
@@ -6,7 +10,8 @@
  */
 export function decline1(engine, lemma, grCase) {
     const word = lemma.text();
-    const lcWord = lemma.lower();
+    const lcWord = toLowerCaseRu(word);
+
     const lcLastChar = last(lcWord);
     const gender = lemma.getGender();
 
@@ -314,4 +319,3 @@ function decline1Half(engine, lemma, grCase, lcWord) {
         return decline2(engine, lemmaCopy, grCase);
     }
 }
-

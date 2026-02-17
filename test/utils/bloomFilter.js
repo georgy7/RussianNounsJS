@@ -50,4 +50,3 @@ test("bloom filter clone", () => {
     assert.ok(!(x.hasInteger(3)));
     assert.ok(!(x.hasInteger(4)));
 });
-

@@ -161,4 +161,3 @@ export function toLocativeDictionaryKey(lemma) {
     const msb = ((lemma._flags & 0xFFFF) << 1) | hasYo;
     return (msb * 0x100000000) + lemma._hash;
 }
-

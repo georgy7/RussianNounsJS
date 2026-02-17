@@ -240,4 +240,3 @@ export function createLemma(o) {
 export function createLemmaOrNull(o) {
     return Lemma.createOrNull(o);
 }
-

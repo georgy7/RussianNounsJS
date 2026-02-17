@@ -68,4 +68,3 @@ export function extendAllSuffixes(withString, trie) {
 
     return result;
 }
-

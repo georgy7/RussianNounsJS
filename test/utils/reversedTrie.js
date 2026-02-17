@@ -53,4 +53,3 @@ test("reversed trie extension", () => {
     assert.ok(!endsWithSuffix('заковырный', y));
     assert.ok(endsWithSuffix('заковырный', z));
 });
-

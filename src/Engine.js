@@ -120,4 +120,3 @@ function decline(engine, lemma, grCase, pluralForm) {
             return decline3(engine, lemma, grCase);
     }
 }
-

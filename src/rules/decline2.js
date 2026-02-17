@@ -100,4 +100,3 @@ export function decline2(engine, lemma, grCase) {
             return head + 'е';
     }
 }
-

@@ -1,8 +1,10 @@
 import { CaseValues } from "../Case.js";
-import { getNounStem0 } from "./common.js";
+import { Gender } from "../Gender.js";
+import { getNounStem0, egoSoftPlural } from "./common.js";
+import { surnameType1Plural } from "./names.js";
 import { BloomFilter, toFakeHash } from "../utils/bloom.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
-import { toLowerCaseRu, init, last, bincludes, lcBit, vowels, endsWithAny } from "../utils/strings.js";
+import { toLowerCaseRu, init, last, lastOfNInitial, bincludes, lcBit, vowels, endsWithAny } from "../utils/strings.js";
 
 const declinePluralSoftEndings = createReversedTrie([
     'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
@@ -487,4 +489,3 @@ export function declinePlural(engine, lemma, grCase, plural) {
 
     return plural;
 }
-

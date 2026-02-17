@@ -102,4 +102,3 @@ export function makeDefaultStressDictionary() {
 
     return d;
 }
-

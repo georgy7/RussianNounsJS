@@ -7,4 +7,3 @@ export function deltaDecodeToSet(inputArray) {
     }
     return resultSet;
 }
-
