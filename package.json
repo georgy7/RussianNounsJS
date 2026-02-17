@@ -19,6 +19,9 @@
     "prepublishOnly": "npm run build",
     "test": "node --test test/"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/georgy7/RussianNounsJS.git"

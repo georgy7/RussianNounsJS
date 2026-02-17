@@ -25,20 +25,7 @@ function removeLater() {
     // - Открытый корпус http://opencorpora.org/
     // - Национальный корпус русского языка https://ruscorpora.ru/
 
-
-    // This function has O(n) complexity in relation to the number of characters in the array.
-    const endsWithAny = (w, arr) => arr.some(a => w.endsWith(a));
-
     const unique = a => a.filter((item, index) => a.indexOf(item) === index);
-
-    const unYo = s => s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');
-
-    const eStem = (stressedEnding, stem, transform) => {
-        const x = stressedEnding.length ? stressedEnding : [false];
-        return x.map(isStressed => isStressed ?
-                    transform(unYo(stem), isStressed) :
-                    transform(stem, isStressed));
-    };
 
     // Stemmer data
     const mobileVowelA = new Set(['бубен', 'бугор',
@@ -225,43 +212,6 @@ function removeLater() {
     const surnameType1Plural = extendAllSuffixes('ы', surnameType1);
 
 
-
-    function declineAsList(engine, lemma, grCase, pluralForm) {
-        const r = decline(engine, lemma, grCase, pluralForm);
-        if (r instanceof Array) {
-            return r;
-        }
-        return [r];
-    }
-
-    function decline(engine, lemma, grCase, pluralForm) {
-        const word = lemma.text();
-
-        if (lemma.isIndeclinable()) {
-            return word;
-        }
-
-        if (lemma.isPluraleTantum()) {
-            return declinePlural(engine, lemma, grCase, word);
-        } else if (pluralForm) {
-            return declinePlural(engine, lemma, grCase, pluralForm);
-        }
-
-        const declension = lemma.getDeclension();
-
-        switch (declension) {
-            case -1:
-                return word;
-            case 0:
-                return decline0(engine, lemma, grCase);
-            case 1:
-                return decline1(engine, lemma, grCase);
-            case 2:
-                return decline2(engine, lemma, grCase);
-            case 3:
-                return decline3(engine, lemma, grCase);
-        }
-    }
 
     function toLocativeSingular1(engine, lemma, declensionType) {
         if (LocativeDeclensionType.U_SUFFIX === declensionType) {

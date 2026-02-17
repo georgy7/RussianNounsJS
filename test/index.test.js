@@ -3,6 +3,7 @@ import assert from "node:assert"
 
 import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute, createLemma, createLemmaOrNull } from "../src/index.js"
 
+
 (() => {
     const rne = new Engine();
 
@@ -12,10 +13,10 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     let result, control;
 
     result = rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.GENITIVE);
-    assertEqualsSingleValue(result, "имени");
+    assertHasOneItem(result, "имени");
 
     result = rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(result, "именем");
+    assertHasOneItem(result, "именем");
 
     console.log('--------------- 1 ----------------');
 
@@ -26,9 +27,9 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
 
     result = rne.decline(coat, Case.GENITIVE);
-    assertEqualsSingleValue(result, "пальто");
+    assertHasOneItem(result, "пальто");
 
-    assertEquals(coat.getDeclension(), -1);
+    assert.strictEqual(coat.getDeclension(), -1);
 
     let mountain = createLemma({
         text: 'гора',
@@ -39,12 +40,12 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         return rne.decline(mountain, c);
     });
 
-    assertAllCases(result, ['гора', 'горы', 'горе', 'гору', ['горой', 'горою'], 'горе', 'горе']);
+    assertAllEqual(result, ['гора', 'горы', 'горе', 'гору', ['горой', 'горою'], 'горе', 'горе']);
 
     console.log('--------------- 2 ----------------');
 
     result = rne.pluralize(mountain);
-    assertEqualsSingleValue(result, "горы");
+    assertHasOneItem(result, "горы");
     const pluralMountain = result[0];
 
     console.log('--------------- 3 ----------------');
@@ -53,12 +54,12 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         return rne.decline(mountain, c, pluralMountain);
     });
 
-    assertAllCases(result, ['горы', 'гор', 'горам', 'горы', 'горами', 'горах', 'горах']);
+    assertAllEqual(result, ['горы', 'гор', 'горам', 'горы', 'горами', 'горах', 'горах']);
 
     console.log('--------------- 4 ----------------');
 
-    assertEquals(mountain.getDeclension(), 2);
-    assertEquals(mountain.getSchoolDeclension(), 1);
+    assert.strictEqual(mountain.getDeclension(), 2);
+    assert.strictEqual(mountain.getSchoolDeclension(), 1);
 
     console.log('--------------- 5 ----------------');
 
@@ -67,7 +68,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         gender: Gender.MASCULINE
     });
 
-    assertEquals(way.getDeclension(), 0);
+    assert.strictEqual(way.getDeclension(), 0);
 
     console.log('--------------- 6 ----------------');
 
@@ -77,8 +78,8 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
 
     result = rne.pluralize(scissors);
-    assertIsArray(result);
-    assertEqualsSingleValue(result, 'ножницы');
+    assert.ok(result instanceof Array);
+    assertHasOneItem(result, 'ножницы');
 
     console.log('--------------- 7 ----------------');
 
@@ -86,7 +87,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         return rne.decline(scissors, c);
     });
 
-    assertAllCases(result, ['ножницы', 'ножниц', 'ножницам', 'ножницы', 'ножницами', 'ножницах', 'ножницах']);
+    assertAllEqual(result, ['ножницы', 'ножниц', 'ножницам', 'ножницы', 'ножницами', 'ножницах', 'ножницах']);
 
     console.log('--------------- 8 ----------------');
 
@@ -96,46 +97,46 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
 
     result = rne.decline(cringe, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(result, "кринжем");
+    assertHasOneItem(result, "кринжем");
     control = rneControl.decline(cringe, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(control, "кринжем");
+    assertHasOneItem(control, "кринжем");
 
     rne.sd.put(cringe, 'SEESESE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(result, "кринжом");
+    assertHasOneItem(result, "кринжом");
 
     control = rneControl.decline(cringe, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(control, "кринжем");
+    assertHasOneItem(control, "кринжем");
 
     rne.sd.put(cringe, 'SEESbSE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
-    assertIsArray(result);
-    assertEquals(result.length, 2);
-    assertEquals(result[0], "кринжем");
-    assertEquals(result[1], "кринжом");
+    assert.ok(result instanceof Array);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0], "кринжем");
+    assert.strictEqual(result[1], "кринжом");
 
     control = rneControl.decline(cringe, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(control, "кринжем");
+    assertHasOneItem(control, "кринжем");
 
     rne.sd.put(cringe, 'SEESsSE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
-    assertIsArray(result);
-    assertEquals(result.length, 2);
-    assertEquals(result[0], "кринжем");
-    assertEquals(result[1], "кринжом");
+    assert.ok(result instanceof Array);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0], "кринжем");
+    assert.strictEqual(result[1], "кринжом");
 
     control = rneControl.decline(cringe, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(control, "кринжем");
+    assertHasOneItem(control, "кринжем");
 
     rne.sd.put(cringe, 'SEESeSE-EEEEEE');
     result = rne.decline(cringe, Case.INSTRUMENTAL);
-    assertIsArray(result);
-    assertEquals(result.length, 2);
-    assertEquals(result[0], "кринжом");
-    assertEquals(result[1], "кринжем");
+    assert.ok(result instanceof Array);
+    assert.strictEqual(result.length, 2);
+    assert.strictEqual(result[0], "кринжом");
+    assert.strictEqual(result[1], "кринжем");
 
     control = rneControl.decline(cringe, Case.INSTRUMENTAL);
-    assertEqualsSingleValue(control, "кринжем");
+    assertHasOneItem(control, "кринжем");
 
     console.log('--------------- 9 ----------------');
 
@@ -147,7 +148,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             uniqueLocativeFormAttributes.add(sc);
         }
 
-        assertEquals(
+        assert.strictEqual(
             Object.keys(LocativeFormAttribute).length,
             uniqueLocativeFormAttributes.size,
             'Enum values must be unique.'
@@ -160,11 +161,11 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         // Будем не преобразовывать их во флаги в рантайме, а сразу работать с ними
         // как с флагами. Бинарные представления значений не должны пересекаться.
 
-        assertEquals(true, values.every(x => Math.round(x) === x));
-        assertEquals(true, values.reduce((a, b) => a|b) === values.reduce((a, b) => a^b));
+        assert.strictEqual(true, values.every(x => Math.round(x) === x));
+        assert.strictEqual(true, values.reduce((a, b) => a|b) === values.reduce((a, b) => a^b));
 
-        assertEquals(true, values.reduce((a, b) => Math.min(a, b)) === 1);
-        assertEquals(true, values.reduce((a, b) => Math.max(a, b)) <= (1 << 25));
+        assert.strictEqual(true, values.reduce((a, b) => Math.min(a, b)) === 1);
+        assert.strictEqual(true, values.reduce((a, b) => Math.max(a, b)) <= (1 << 25));
     })();
 
     let row = createLemma({
@@ -176,34 +177,34 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         return rne.decline(row, c);
     });
 
-    assertAllCases(result, ['ряд', 'ряда', 'ряду', 'ряд', 'рядом', 'ряде', 'ряду']);
+    assertAllEqual(result, ['ряд', 'ряда', 'ряду', 'ряд', 'рядом', 'ряде', 'ряду']);
 
     console.log('.');
-    assertIsArray(rne.getLocativeForms(row), 'getLocativeForms(x) type');
-    assertEquals(rne.getLocativeForms(row).length, 1, 'locative forms count');
-    assertEquals(rne.getLocativeForms(row)[0].preposition, 'в', 'lf.preposition');
-    assertEquals(rne.getLocativeForms(row)[0].word, 'ряду', 'lf.word');
+    assert.ok(rne.getLocativeForms(row) instanceof Array);
+    assert.strictEqual(rne.getLocativeForms(row).length, 1, 'locative forms count');
+    assert.strictEqual(rne.getLocativeForms(row)[0].preposition, 'в', 'lf.preposition');
+    assert.strictEqual(rne.getLocativeForms(row)[0].word, 'ряду', 'lf.word');
 
     console.log('..');
-    assertEquals(
+    assert.strictEqual(
         rne.getLocativeForms(row)[0].attributes,
         LocativeFormAttribute.STRUCTURE,
         'lf.semantics'
     );
 
     console.log('...');
-    assertIsArray(rne.getLocativeForms(mountain), 'getLocativeForms(x) type (a mountain)');
-    assertEquals(rne.getLocativeForms(mountain).length, 0, 'locative forms count (a mountain)');
+    assert.ok(rne.getLocativeForms(mountain) instanceof Array);
+    assert.strictEqual(rne.getLocativeForms(mountain).length, 0, 'locative forms count (a mountain)');
 
-    assertIsArray(rne.getLocativeForms(way), 'getLocativeForms(x) type (a way)');
-    assertEquals(rne.getLocativeForms(way).length, 0, 'locative forms count (a way)');
+    assert.ok(rne.getLocativeForms(way) instanceof Array);
+    assert.strictEqual(rne.getLocativeForms(way).length, 0, 'locative forms count (a way)');
 
     const ball = createLemma({
         text: 'мяч',
         gender: Gender.MASCULINE
     });
-    assertIsArray(rne.getLocativeForms(ball), 'getLocativeForms(x) type (a ball)');
-    assertEquals(rne.getLocativeForms(ball).length, 0, 'locative forms count (a ball)');
+    assert.ok(rne.getLocativeForms(ball) instanceof Array);
+    assert.strictEqual(rne.getLocativeForms(ball).length, 0, 'locative forms count (a ball)');
 
     const steam = createLemma({
         text: 'пар',
@@ -215,11 +216,11 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
 
     console.log('....');
-    assertIsArray(result);
-    assertEqualsSingleValue(result[5], 'паре');
-    assertEqualsSingleValue(result[6], 'пару');
+    assert.ok(result instanceof Array);
+    assertHasOneItem(result[5], 'паре');
+    assertHasOneItem(result[6], 'пару');
     const steamLocativeForms = rne.getLocativeForms(steam);
-    assertIsArray(steamLocativeForms, 'getLocativeForms(x) type (steam)');
+    assert.ok(steamLocativeForms instanceof Array);
 
     console.log('.....');
     function findFormWithSingleAttribute(locativeForms, attribute) {
@@ -231,15 +232,15 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     const steamSurface = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SURFACE);
 
     console.log('......');
-    assertEquals(steamSubstance.length, 1, 'Steam as a substance must have a locative form.');
-    assertEquals(steamResource.length, 1, 'Steam as a resource must have a locative form.');
-    assertEquals(steamSurface.length, 0, 'Steam as a surface must not have a locative form.');
+    assert.strictEqual(steamSubstance.length, 1, 'Steam as a substance must have a locative form.');
+    assert.strictEqual(steamResource.length, 1, 'Steam as a resource must have a locative form.');
+    assert.strictEqual(steamSurface.length, 0, 'Steam as a surface must not have a locative form.');
 
-    assertEquals(steamSubstance[0].preposition, 'в', 'Steam as a substance has incorrect preposition.');
-    assertEquals(steamResource[0].preposition, 'на', 'Steam as a resource has incorrect preposition.');
+    assert.strictEqual(steamSubstance[0].preposition, 'в', 'Steam as a substance has incorrect preposition.');
+    assert.strictEqual(steamResource[0].preposition, 'на', 'Steam as a resource has incorrect preposition.');
 
-    assertEquals(steamSubstance[0].word, 'пару', 'Steam as a substance has incorrect word form.');
-    assertEquals(steamResource[0].word, 'пару', 'Steam as a resource has incorrect word form.');
+    assert.strictEqual(steamSubstance[0].word, 'пару', 'Steam as a substance has incorrect word form.');
+    assert.strictEqual(steamResource[0].word, 'пару', 'Steam as a resource has incorrect word form.');
 
     console.log('--------------- 10 ---------------');
 
@@ -324,10 +325,10 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             text: 'гора',
             gender: Gender.FEMININE
         });
-        assertEquals(k.text(), 'гора');
-        assertEquals(k.getGender(), Gender.FEMININE);
-        assertEquals(k.isPluraleTantum(), false);
-        assertEquals(k.isIndeclinable(), false);
+        assert.strictEqual(k.text(), 'гора');
+        assert.strictEqual(k.getGender(), Gender.FEMININE);
+        assert.strictEqual(k.isPluraleTantum(), false);
+        assert.strictEqual(k.isIndeclinable(), false);
         console.log('createLemma: valid (1)');
     })();
 
@@ -336,69 +337,69 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             text: 'ножницы',
             pluraleTantum: true
         });
-        assertEquals(k.text(), 'ножницы');
-        assertEquals(k.isPluraleTantum(), true);
-        assertEquals(k.getGender(), undefined);
-        assertEquals(k.isIndeclinable(), false);
+        assert.strictEqual(k.text(), 'ножницы');
+        assert.strictEqual(k.isPluraleTantum(), true);
+        assert.strictEqual(k.getGender(), undefined);
+        assert.strictEqual(k.isIndeclinable(), false);
         console.log('Lemma.create: valid (2)');
 
         const l = createLemma(k);
-        assertEquals(l, k);
+        assert.strictEqual(l, k);
         console.log('createLemma: the same object');
     })();
 
     // ----------------------
 
-    assertEquals(null, createLemmaOrNull(123));
+    assert.strictEqual(null, createLemmaOrNull(123));
     console.log('createLemmaOrNull: number');
 
-    assertEquals(null, Lemma.createOrNull(123));
+    assert.strictEqual(null, Lemma.createOrNull(123));
     console.log('Lemma.createOrNull: number');
 
-    assertEquals(null, createLemmaOrNull('гора'));
+    assert.strictEqual(null, createLemmaOrNull('гора'));
     console.log('createLemmaOrNull: string');
 
-    assertEquals(null, createLemmaOrNull(null));
+    assert.strictEqual(null, createLemmaOrNull(null));
     console.log('createLemmaOrNull: null');
 
-    assertEquals(null, createLemmaOrNull(undefined));
+    assert.strictEqual(null, createLemmaOrNull(undefined));
     console.log('createLemmaOrNull: undefined');
 
-    assertEquals(null, createLemmaOrNull({}));
+    assert.strictEqual(null, createLemmaOrNull({}));
     console.log('createLemmaOrNull: {}');
 
-    assertEquals(null, createLemmaOrNull({
+    assert.strictEqual(null, createLemmaOrNull({
         text: 'гора'
     }));
     console.log('createLemmaOrNull: gender undefined');
 
-    assertEquals(null, createLemmaOrNull({
+    assert.strictEqual(null, createLemmaOrNull({
         text: 'гора',
         gender: 'fgsfds'
     }));
     console.log('createLemmaOrNull: gender fgsfds');
 
-    assertEquals(null, createLemmaOrNull({
+    assert.strictEqual(null, createLemmaOrNull({
         text: 'ножницы',
         pluraleTantum: 123
     }));
     console.log('createLemmaOrNull: pluraleTantum 123');
 
-    assertEquals(null, createLemmaOrNull({
+    assert.strictEqual(null, createLemmaOrNull({
         text: 'пальто',
         gender: Gender.NEUTER,
         indeclinable: 'fgsfds'
     }));
     console.log('createLemmaOrNull: indeclinable fgsfds');
 
-    assertEquals(null, createLemmaOrNull({
+    assert.strictEqual(null, createLemmaOrNull({
         text: 'трактор',
         gender: Gender.MASCULINE,
         transport: 'наземный'
     }));
     console.log('createLemmaOrNull: transport fgsfds');
 
-    assertEquals(null, createLemmaOrNull({
+    assert.strictEqual(null, createLemmaOrNull({
         gender: Gender.MASCULINE
     }));
     console.log('createLemmaOrNull: text undefined');
@@ -409,22 +410,22 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         text: 'гора',
         gender: Gender.FEMININE
     });
-    assertEquals(x instanceof Lemma, true);
-    assertEquals(x.text(), 'гора');
-    assertEquals(x.getGender(), Gender.FEMININE);
-    assertEquals(x.isPluraleTantum(), false);
-    assertEquals(x.isIndeclinable(), false);
+    assert.strictEqual(x instanceof Lemma, true);
+    assert.strictEqual(x.text(), 'гора');
+    assert.strictEqual(x.getGender(), Gender.FEMININE);
+    assert.strictEqual(x.isPluraleTantum(), false);
+    assert.strictEqual(x.isIndeclinable(), false);
     console.log('createLemmaOrNull: valid (1)');
 
     x = Lemma.createOrNull({
         text: 'ножницы',
         pluraleTantum: true
     });
-    assertEquals(x instanceof Lemma, true);
-    assertEquals(x.text(), 'ножницы');
-    assertEquals(x.isPluraleTantum(), true);
-    assertEquals(x.getGender(), undefined);
-    assertEquals(x.isIndeclinable(), false);
+    assert.strictEqual(x instanceof Lemma, true);
+    assert.strictEqual(x.text(), 'ножницы');
+    assert.strictEqual(x.isPluraleTantum(), true);
+    assert.strictEqual(x.getGender(), undefined);
+    assert.strictEqual(x.isIndeclinable(), false);
     console.log('Lemma.createOrNull: valid (2)');
 })();
 
@@ -472,42 +473,42 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     const запоздалый = createLemma({text: 'запоздалый', gender: Gender.MASCULINE, animate: true});
     const путник = createLemma({text: 'путник', gender: Gender.MASCULINE, animate: true});
 
-    assertEquals(
+    assert.strictEqual(
         `${cap(usual(буря, 1))} ${unusual(мгла, 5)} ${usual(небо, 4)} кроет,`,
         'Буря мглою небо кроет,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `${cap(plural(вихрь, 4))} ${plural(снежный, 4)} крутя;`,
         'Вихри снежные крутя;'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `То, как ${usual(зверь, 1)}, она завоет,`,
         'То, как зверь, она завоет,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `То заплачет, как ${usual(дитя, 1)},`,
         'То заплачет, как дитя,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `То по ${usual(кровля, 3)} ${usual(обветшалая, 3)}`,
         'То по кровле обветшалой'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Вдруг ${usual(солома, 5)} зашумит,`,
         'Вдруг соломой зашумит,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `То, как ${usual(путник, 1)} ${usual(запоздалый, 1)},`,
         'То, как путник запоздалый,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `К нам в ${usual(окошко, 4)} застучит.`,
         'К нам в окошко застучит.'
     );
@@ -527,24 +528,24 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     const неведомая = createLemma({text: 'неведомая', gender: Gender.FEMININE});
     const высота = createLemma({text: 'высота', gender: Gender.FEMININE});
 
-    assertEquals(true, ворота.isPluraleTantum());
+    assert.strictEqual(true, ворота.isPluraleTantum());
 
-    assertEquals(
+    assert.strictEqual(
         `Я отдыхала у ${plural(ворота, 2)}`,
         'Я отдыхала у ворот'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Под ${usual(тень, 5)} ${usual(милая, 2)}, ${usual(старая, 2)} ${usual(ель, 2)},`,
         'Под тенью милой, старой ели,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `А надо мною пламенели`,
         'А надо мною пламенели'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `${cap(plural(снег, 1))} ${plural(неведомая, 2)} ${plural(высота, 2)}.`,
         'Снега неведомых высот.'
     );
@@ -584,62 +585,62 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     const звездная = createLemma({text: 'звездная', gender: Gender.FEMININE});
     const твердь = createLemma({text: 'твердь', gender: Gender.FEMININE});
 
-    assertEquals(
+    assert.strictEqual(
         `Пускай ${usual(орел, 1)} за ${plural(облако, 5)}`,
         'Пускай орел за облаками'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Встречает ${usual(молния, 2)} ${usual(полет, 4)}`,
         'Встречает молнии полет'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `И ${plural(неподвижное, 5)} ${plural(око, 5)}`,
         'И неподвижными очами'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `В себя впивает ${usual(солнце, 2)} ${usual(свет, 4)}.`,
         'В себя впивает солнца свет.'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Но нет завиднее ${usual(удел, 2)},`,
         'Но нет завиднее удела,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `О, ${usual(лебедь, 1)} ${usual(чистый, 1)}, твоего!`,
         'О, лебедь чистый, твоего!'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `И ${usual(чистая, 5)}, как ты сам, одело`,
         'И чистой, как ты сам, одело'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Тебя ${usual(стихия, 5)} ${cap(usual(божество, 1))}.`,
         'Тебя стихией Божество.'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Она между ${unusual(двойная, 5)} ${usual(бездна, 5)}`,
         'Она между двойною бездной'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Лелеет твой ${usual(всезрящий, 4)} ${usual(сон, 4)},`,
         'Лелеет твой всезрящий сон,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `И ${usual(полная, 5)} ${usual(слава, 5)} ${usual(твердь, 2)} ${usual(звездная, 2)}`,
         'И полной славой тверди звездной'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Ты отовсюду окружен.`,
         'Ты отовсюду окружен.'
     );
@@ -655,22 +656,22 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     const подкова = createLemma({text: 'подкова', gender: Gender.FEMININE});
     const жар = createLemma({text: 'жар', gender: Gender.MASCULINE});
 
-    assertEquals(
+    assert.strictEqual(
         `Несутся ${plural(лошадь, 1)} как ${plural(волна, 1)},`,
         'Несутся лошади как волны,'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Стучат ${plural(подкова, 1)}.`,
         'Стучат подковы.'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Лихие ${plural(конь, 1)} ${usual(жар, 5)} полны.`,
         'Лихие кони жаром полны.'
     );
 
-    assertEquals(
+    assert.strictEqual(
         `Исчезнув скачут.`,
         'Исчезнув скачут.'
     );
@@ -684,16 +685,16 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             return rne.decline(lemma, c);
         });
 
-        assertAllCases(singular, expectedSingular);
+        assertAllEqual(singular, expectedSingular);
 
         const p = rne.pluralize(lemma);
-        assertEqualsSingleValue(p, expectedPlural[0]);
+        assertHasOneItem(p, expectedPlural[0]);
 
         const plural = CASES.map(c => {
             return rne.decline(lemma, c, p[0]);
         });
 
-        assertAllCases(plural, expectedPlural);
+        assertAllEqual(plural, expectedPlural);
 
         // console.log(lemma.text());
     };
@@ -703,7 +704,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             return rne.decline(lemma, c);
         });
 
-        assertAllCases(singular, expectedSingular);
+        assertAllEqual(singular, expectedSingular);
 
         // console.log(lemma.text());
     };
@@ -938,7 +939,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 
     const лихой = createLemma({text: 'лихой', gender: Gender.MASCULINE, animate: true});
 
-    assertEquals(
+    assert.strictEqual(
         `${cap(plural(лихой, 1))} ${plural(конь, 1)} ${usual(жар, 5)} полны.`,
         'Лихие кони жаром полны.'
     );
@@ -952,7 +953,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             return rne.decline(адаптировавший, c);
         });
 
-        assertAllCases(result, [
+        assertAllEqual(result, [
             'адаптировавший',
             'адаптировавшего',
             'адаптировавшему',
@@ -972,7 +973,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             return rne.decline(адаптировавшее, c);
         });
 
-        assertAllCases(result, [
+        assertAllEqual(result, [
             'адаптировавшее',
             'адаптировавшего',
             'адаптировавшему',
@@ -992,26 +993,26 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             return rne.decline(адаптировавшая, c);
         });
 
-        assertIsArray(result);
-        assertEquals(result.length, 7);
+        assert.ok(result instanceof Array);
+        assert.strictEqual(result.length, 7);
 
         for (let i = 0; i < 7; i++) {
-            assertIsArray(result[i]);
+            assert.ok(result[i] instanceof Array);
         }
 
-        assertEqualsSingleValue(result[0], 'адаптировавшая');
-        assertEqualsSingleValue(result[1], 'адаптировавшей');
-        assertEqualsSingleValue(result[2], 'адаптировавшей');
-        assertEqualsSingleValue(result[3], 'адаптировавшую');
+        assertHasOneItem(result[0], 'адаптировавшая');
+        assertHasOneItem(result[1], 'адаптировавшей');
+        assertHasOneItem(result[2], 'адаптировавшей');
+        assertHasOneItem(result[3], 'адаптировавшую');
 
         // TODO
-        // assertEquals(result[4].length, 2);
-        // assertEquals(result[4][0], 'адаптировавшей');
-        // assertEquals(result[4][1], 'адаптировавшею');
-        assertEquals(result[4][0], 'адаптировавшею');
+        // assert.strictEqual(result[4].length, 2);
+        // assert.strictEqual(result[4][0], 'адаптировавшей');
+        // assert.strictEqual(result[4][1], 'адаптировавшею');
+        assert.strictEqual(result[4][0], 'адаптировавшею');
 
-        assertEqualsSingleValue(result[5], 'адаптировавшей');
-        assertEqualsSingleValue(result[6], 'адаптировавшей');
+        assertHasOneItem(result[5], 'адаптировавшей');
+        assertHasOneItem(result[6], 'адаптировавшей');
 
         console.log('--------------- 4 ----------------');
     })();
@@ -1022,28 +1023,28 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         const n = rne.pluralize(адаптировавшее);
         const expectedPlural = 'адаптировавшие';
 
-        assertEqualsSingleValue(k, expectedPlural);
-        assertEqualsSingleValue(m, expectedPlural);
-        assertEqualsSingleValue(n, expectedPlural);
+        assertHasOneItem(k, expectedPlural);
+        assertHasOneItem(m, expectedPlural);
+        assertHasOneItem(n, expectedPlural);
 
         function checkCases(lemma) {
             const result = CASES.map(c => {
                 return rne.decline(lemma, c, expectedPlural);
             });
 
-            assertEqualsSingleValue(result[0], expectedPlural);
-            assertEqualsSingleValue(result[1], 'адаптировавших');
-            assertEqualsSingleValue(result[2], 'адаптировавшим');
+            assertHasOneItem(result[0], expectedPlural);
+            assertHasOneItem(result[1], 'адаптировавших');
+            assertHasOneItem(result[2], 'адаптировавшим');
 
             if (lemma.isAnimate()) {
-                assertEqualsSingleValue(result[3], 'адаптировавших');
+                assertHasOneItem(result[3], 'адаптировавших');
             } else {
-                assertEqualsSingleValue(result[3], 'адаптировавшие');
+                assertHasOneItem(result[3], 'адаптировавшие');
             }
 
-            assertEqualsSingleValue(result[4], 'адаптировавшими');
-            assertEqualsSingleValue(result[5], 'адаптировавших');
-            assertEqualsSingleValue(result[6], 'адаптировавших');
+            assertHasOneItem(result[4], 'адаптировавшими');
+            assertHasOneItem(result[5], 'адаптировавших');
+            assertHasOneItem(result[6], 'адаптировавших');
         }
 
         checkCases(адаптировавший);
@@ -1354,49 +1355,49 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             gender: Gender.FEMININE
         });
 
-        assertEquals(x.text(), 'абв');
-        assertEquals(x.lower(), 'абв');
-        assertEquals(x.isPluraleTantum(), false);
-        assertEquals(x.getGender(), Gender.FEMININE);
+        assert.strictEqual(x.text(), 'абв');
+        assert.strictEqual(x.lower(), 'абв');
+        assert.strictEqual(x.isPluraleTantum(), false);
+        assert.strictEqual(x.getGender(), Gender.FEMININE);
 
         let y = x.newText(o => o.text() + 'г');
-        assertEquals(x.text(), 'абв');
-        assertEquals(x.lower(), 'абв');
-        assertEquals(y.text(), 'абвг');
-        assertEquals(y.lower(), 'абвг');
+        assert.strictEqual(x.text(), 'абв');
+        assert.strictEqual(x.lower(), 'абв');
+        assert.strictEqual(y.text(), 'абвг');
+        assert.strictEqual(y.lower(), 'абвг');
         // Пожалуйста, не используйте поле _hash в пользовательском коде.
         // Тест просто проверяет, что внутренний хэш пересчитывается.
-        assertEquals(true, x._hash != y._hash);
-        assertEquals(y.getGender(), Gender.FEMININE);
+        assert.strictEqual(true, x._hash != y._hash);
+        assert.strictEqual(y.getGender(), Gender.FEMININE);
 
         y = x.newText(() => 'Александр');
-        assertEquals(x.text(), 'абв');
-        assertEquals(x.lower(), 'абв');
-        assertEquals(y.text(), 'Александр');
-        assertEquals(y.lower(), 'александр');
+        assert.strictEqual(x.text(), 'абв');
+        assert.strictEqual(x.lower(), 'абв');
+        assert.strictEqual(y.text(), 'Александр');
+        assert.strictEqual(y.lower(), 'александр');
         // Пожалуйста, не используйте поле _hash в пользовательском коде.
-        assertEquals(true, x._hash != y._hash);
-        assertEquals(y.getGender(), Gender.FEMININE);
+        assert.strictEqual(true, x._hash != y._hash);
+        assert.strictEqual(y.getGender(), Gender.FEMININE);
 
         y = x.newGender(() => Gender.MASCULINE);
-        assertEquals(x.isPluraleTantum(), false);
-        assertEquals(x.getGender(), Gender.FEMININE);
-        assertEquals(y.isPluraleTantum(), false);
-        assertEquals(y.getGender(), Gender.MASCULINE);
-        assertEquals(x.text(), y.text());
-        assertEquals(x.lower(), y.lower());
+        assert.strictEqual(x.isPluraleTantum(), false);
+        assert.strictEqual(x.getGender(), Gender.FEMININE);
+        assert.strictEqual(y.isPluraleTantum(), false);
+        assert.strictEqual(y.getGender(), Gender.MASCULINE);
+        assert.strictEqual(x.text(), y.text());
+        assert.strictEqual(x.lower(), y.lower());
 
         y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
-        assertEquals(y.getGender(), Gender.MASCULINE);
+        assert.strictEqual(y.getGender(), Gender.MASCULINE);
 
         x = x.newText(o => o.text() + 'о');
         y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
-        assertEquals(y.getGender(), Gender.NEUTER);
+        assert.strictEqual(y.getGender(), Gender.NEUTER);
 
         x = x.newText(o => o.text().toUpperCase());
-        assertEquals(x.text(), 'АБВО');
-        assertEquals(x.lower(), 'абво');
-        assertEquals(x.getGender(), Gender.FEMININE);
+        assert.strictEqual(x.text(), 'АБВО');
+        assert.strictEqual(x.lower(), 'абво');
+        assert.strictEqual(x.getGender(), Gender.FEMININE);
 
         x = createLemma({
             text: 'сын',
@@ -1404,8 +1405,8 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         });
         y = x.newText(() => 'юноша');
 
-        assertEquals(x.getDeclension(), 1);
-        assertEquals(y.getDeclension(), 2);
+        assert.strictEqual(x.getDeclension(), 1);
+        assert.strictEqual(y.getDeclension(), 2);
 
         x = createLemma({
             text: 'абвгдеёжзиклмя',
@@ -1413,8 +1414,42 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         });
         y = x.newGender(() => Gender.FEMININE);
 
-        assertEquals(x.getDeclension(), 3);
-        assertEquals(y.getDeclension(), 2);
+        assert.strictEqual(x.getDeclension(), 3);
+        assert.strictEqual(y.getDeclension(), 2);
     })();
 
 })();
+
+function assertHasOneItem(actualArray, expectedItem) {
+    const arrayAsString = '' + actualArray;
+    assert.ok(actualArray instanceof Array, arrayAsString);
+    assert.strictEqual(actualArray.length, 1, `[${arrayAsString}] (expected ${expectedItem})`);
+    assert.strictEqual(actualArray[0], expectedItem);
+}
+
+function assertAllEqual(results, expectedValues) {
+    assert.ok(results instanceof Array);
+    assert.ok(expectedValues instanceof Array);
+
+    assert.strictEqual(results.length, 7);
+    assert.strictEqual(expectedValues.length, 7);
+
+    for (let i = 0; i < 7; i++) {
+        const actual = results[i];
+        const expected = expectedValues[i];
+
+        assert.ok(actual instanceof Array);
+
+        if (typeof expected === 'string') {
+            assertHasOneItem(actual, expected);
+        } else if (expected instanceof Array) {
+            assert.strictEqual(actual.length, expected.length, [actual, expected].toString());
+            for (let j = 0; j < expected.length; j++) {
+                assert.strictEqual(actual[j], expected[j]);
+            }
+        } else {
+            assert.fail(`Bad expected value: ${expected} is neither an array nor a string.`);
+        }
+    }
+}
+

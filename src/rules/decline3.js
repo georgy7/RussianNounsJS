@@ -1,3 +1,7 @@
+import { Case } from "../Case.js";
+import { getNounStem } from "./common.js";
+import { last, nLast, bincludes } from "../utils/strings.js";
+
 const specialD3 = {
     'дочь': 'дочерь',
     'мать': 'матерь'

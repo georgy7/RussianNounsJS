@@ -1,4 +1,4 @@
-function calculateHash(lowerCaseUnicodeString) {
+export function calculateHash(lowerCaseUnicodeString) {
     const preparedString = lowerCaseUnicodeString.replaceAll('ё', 'е');
 
     // Дело в том, что когда данные так плотно упакованы, и у нас

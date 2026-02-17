@@ -1,16 +1,17 @@
+import { Lemma } from "./Lemma.js";
 import { makeDefaultStressDictionary } from "./settings/defaultStressDictionary.js";
+import { decline1 } from "./rules/decline1.js";
+import { decline2 } from "./rules/decline2.js";
+import { decline3 } from "./rules/decline3.js";
+import { pluralize } from "./rules/pluralize.js";
 
 export class Engine {
 
-    constructor() {
-
-        /**
-         * @description Словарь ударений. Его можно редактировать в рантайме.
-         * @type {API.StressDictionary}
-         */
-        this.sd = makeDefaultStressDictionary();
-
-    }
+    /**
+     * @description Словарь ударений. Его можно редактировать в рантайме.
+     * @type {API.StressDictionary}
+     */
+    sd = makeDefaultStressDictionary();
 
     /**
      *
@@ -79,6 +80,43 @@ export class Engine {
         }
 
         return [];
+    }
+}
+
+function declineAsList(engine, lemma, grCase, pluralForm) {
+    const r = decline(engine, lemma, grCase, pluralForm);
+    if (r instanceof Array) {
+        return r;
+    }
+    return [r];
+}
+
+function decline(engine, lemma, grCase, pluralForm) {
+    const word = lemma.text();
+
+    if (lemma.isIndeclinable()) {
+        return word;
+    }
+
+    if (lemma.isPluraleTantum()) {
+        return declinePlural(engine, lemma, grCase, word);
+    } else if (pluralForm) {
+        return declinePlural(engine, lemma, grCase, pluralForm);
+    }
+
+    const declension = lemma.getDeclension();
+
+    switch (declension) {
+        case -1:
+            return word;
+        case 0:
+            return decline0(engine, lemma, grCase);
+        case 1:
+            return decline1(engine, lemma, grCase);
+        case 2:
+            return decline2(engine, lemma, grCase);
+        case 3:
+            return decline3(engine, lemma, grCase);
     }
 }
 

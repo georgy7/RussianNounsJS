@@ -1,3 +1,5 @@
+import { init, last, nLast, lastOfNInitial, bincludes, lcBit, vowels } from "../utils/strings.js";
+
 export function getNounStem0(word, lcWord) {
     const lcLastChar = last(lcWord);
 

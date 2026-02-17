@@ -58,6 +58,10 @@ const upperLike = (str, pattern) =>
 
 const vowelCount = s => s.split('').filter(isVowel).length;
 
+export function unYo(s) {
+    return s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');
+}
+
 
 // -------------------------------------------------
 
@@ -82,3 +86,24 @@ export function lastOfNInitial(str, n) {
     return str.substring(index, index+1);
 }
 
+// Attention!
+// It has O(n) complexity,
+// where n is the number of characters in the array
+export function endsWithAny(w, arr) {
+    return arr.some(a => w.endsWith(a));
+}
+
+/**
+ * В русском языке практически не бывает безударных букв Ё.
+ * Поэтому при ударном окончании, буква Ё должна исчезать из основы слова.
+ * Данная функция подготавливает несколько вариантов основы слова, в зависимости от ударения.
+ *
+ * @param {Array} stressedEnding Булевые значения, означающие ударное окончание
+ * @param {string} stem Основа слова (может содержать ё)
+ * @param {function} transform Функция постобработки получившихся строк (принимает флаг ударного окончания вторым аргументом)
+ * @return {Array} Список основ, зависящих от ударения — в том порядке, в котором идут булевые значения в аргументах
+ */
+export function eStem(stressedEnding, stem, transform) {
+    const stressList = stressedEnding.length ? stressedEnding : [false];
+    return stressList.map(ending => ending ? transform(unYo(stem), ending) : transform(stem, ending));
+}

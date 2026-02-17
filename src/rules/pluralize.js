@@ -1,5 +1,12 @@
+import { Case } from "../Case.js";
+import { Gender } from "../Gender.js";
+import { getNounStem } from "./common.js";
+import { BloomFilter } from "../utils/bloom.js";
+import { calculateHash } from "../utils/hash.js";
+import { createReversedTrie } from "../utils/trie.js";
+import { toLowerCaseRu, init, last, nLast, isVowel, bincludes, endsWithAny, eStem } from "../utils/strings.js";
 
-const highPriorityBloomFilter = new Uint8ClampedArray(256);
+const highPriorityBloomFilter = new BloomFilter();
 const highPriorityExceptions = Object.freeze([
     [
         [
@@ -95,8 +102,7 @@ const highPriorityExceptions = Object.freeze([
 ]);
 
 for (const rule of highPriorityExceptions) {
-    Object.keys(rule[1]).map(word =>
-        bloomAdd(highPriorityBloomFilter, to11BitHash(calculateHash(word))));
+    Object.keys(rule[1]).map(word => highPriorityBloomFilter.addInteger(calculateHash(word)));
 }
 
 // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
@@ -183,7 +189,7 @@ const aYaWords4 = new Set([
     'шторм', 'штуцер'
 ]);
 
-function pluralize(engine, lemma) {
+export function pluralize(engine, lemma) {
     const result = [];
 
     const word = lemma.text();
@@ -262,7 +268,7 @@ function pluralize(engine, lemma) {
         }
     }
 
-    if (inBloom(highPriorityBloomFilter, to11BitHash(lemma._hash))) {
+    if (highPriorityBloomFilter.hasInteger(lemma._hash)) {
         for (const [key, genderExceptions] of highPriorityExceptions) {
 
             const keyGender = key[0];
