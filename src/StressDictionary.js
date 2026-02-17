@@ -1,6 +1,7 @@
 import { stressHashesA, stressHashesB } from "./settings/stressHashes.js";
 import { BloomFilter } from "./utils/bloom.js";
 import { Lemma } from "./Lemma.js";
+import { CaseValues } from "./Case.js";
 
 const stressBloomAB = (function () {
     const hashes = new BloomFilter();
@@ -122,7 +123,7 @@ export function StressDictionary() {
             default:
                 return [false];
         }
-    }
+    };
 
     this.hasStressedEndingSingular = function (query, grCase) {
         if (_bloomFilter.hasInteger(query._hash)) {

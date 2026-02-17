@@ -92,17 +92,17 @@ export const LocativePreposition = Object.freeze({
  * @param {number} attributes - флаги LocativeFormAttribute.
  * @returns {number}
  */
-function encodeLocativeConfig(preposition, declensionType, attributes) {
+export function encodeLocativeConfig(preposition, declensionType, attributes) {
     const dcCode = (declensionType - 1) & 0b111;
     const prCode = (preposition - 1) & 0b111;
     return (attributes << 6) | (prCode << 3) | dcCode;
 }
 
-function extractDeclensionType(locativeConfig) {
+export function extractDeclensionType(locativeConfig) {
     return (locativeConfig & 0b111) + 1;
 }
 
-function extractPreposition(locativeConfig) {
+export function extractPreposition(locativeConfig) {
     const code = ((locativeConfig >> 3) & 0b111) + 1;
     switch (code) {
         case LocativePreposition.V:
@@ -114,6 +114,6 @@ function extractPreposition(locativeConfig) {
     }
 }
 
-function extractAttributes(locativeConfig) {
+export function extractAttributes(locativeConfig) {
     return locativeConfig >> 6;
 }

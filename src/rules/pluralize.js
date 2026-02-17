@@ -1,6 +1,7 @@
 import { Case } from "../Case.js";
 import { Gender } from "../Gender.js";
 import { getNounStem } from "./common.js";
+import { softD1 } from "./decline1.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 import { createReversedTrie } from "../utils/trie.js";
@@ -226,7 +227,7 @@ export function pluralize(engine, lemma) {
     const gender = lemma.getGender();
     const declension = lemma.getDeclension();
 
-    const simpleFirstPart = (('й' === last(lcWord) || bincludes(vowels, last(word))) && bincludes(vowels, last(init(word))))
+    const simpleFirstPart = (('й' === last(lcWord) || bincludes(vowels, last(lcWord))) && bincludes(vowels, last(init(lcWord))))
         ? init(word)
         : stem;
 

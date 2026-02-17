@@ -1,6 +1,33 @@
 import { Case } from "../Case.js";
-import { getNounStem } from "./common.js";
-import { toLowerCaseRu, init, last, lastOfNInitial, endsWithAny } from "../utils/strings.js";
+import { Gender } from "../Gender.js";
+import { getNounStem, okWord } from "./common.js";
+import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
+import { BloomFilter } from "../utils/bloom.js";
+import { calculateHash } from "../utils/hash.js";
+import { unique } from "../utils/lists.js";
+import { toLowerCaseRu, init, last, lastOfNInitial, endsWithAny, eStem, unYo } from "../utils/strings.js";
+import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
+import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
+
+const uForm = new Set((
+    'клей,чай,' +
+    'дом,дух,дым,дымок,газ,год,горошек,' +
+    'жар,жир,квас,' +
+    'пар,пыл,род,рост,' +
+    'сахар,свет,сироп,смех,снег,снежок,сок,сор,спор,срок,соус,спирт,страх,суп,сыр,' +
+    'табак,творог,толк,торф,туман,' +
+    'убыток,укроп,уксус,ход,' +
+    'цемент,чеснок,' +
+    'шаг,шик,' +
+    'шиповник,' + // про отвар/сироп
+    'шоколад,шорох,шум,яд'
+).split(','));
+
+const uFormBloom = new BloomFilter();
+uForm.forEach(w => uFormBloom.addInteger(calculateHash(w)));
+
+const iyWordEndings = createReversedTrie(['й', 'ие', 'иё']);
+const eiWord = createReversedTrie(['воробей', 'муравей', 'ручей', 'соловей', 'улей']);
 
 /**
  * @param {RussianNouns.Engine} engine
@@ -44,7 +71,7 @@ export function decline1(engine, lemma, grCase) {
     const schWord = () => 'чщ'.includes(last(lcStem));
 
     function addUForm(r) {
-        if (!lemma.isAnimate() && inBloom(uFormBloom, to11BitHash(lemma._hash)) && uForm.has(lcWord)) {
+        if (!lemma.isAnimate() && uFormBloom.hasInteger(lemma._hash) && uForm.has(lcWord)) {
             if (lcLastChar === 'й') {
                 r.push(init(word) + upperLike('ю', last(word)));
             } else {
@@ -318,4 +345,54 @@ function decline1Half(engine, lemma, grCase, lcWord) {
             ((nLast(lcWord, 2) === 'ни') ? 'я' : 'а'));
         return decline2(engine, lemmaCopy, grCase);
     }
+}
+
+function halfSomething(lcWord) {
+    if (lcWord.startsWith('пол')
+        && bincludes(0b10011000000000000000000100000001, last(lcWord))
+        && (lcWord[3] !== 'л')
+        && (vowelCount(lcWord) >= 2)) {
+
+        let subWord = lcWord.substring(3);
+
+        // На случай дефисов.
+        let offset = subWord.search(/[а-яё]/);
+
+        // Сюда не должны попадать как минимум
+        // мягкий и твердый знаки помимо гласных.
+
+        return (offset >= 0) && bincludes(consonants, subWord[offset]);
+
+    } else {
+        return false;
+    }
+}
+
+export function toLocativeSingular1(engine, lemma, declensionType) {
+    if (LocativeDeclensionType.U_SUFFIX === declensionType) {
+        const word = lemma.text();
+        const lcWord = lemma.lower();
+        let stem = getNounStem(lemma, lcWord);
+        let head = init(word);
+
+        const half = halfSomething(lcWord);
+        const soft = (half && lcWord.endsWith('я')) || softD1(lcWord);
+
+        if (last(lcWord) === 'й') {
+            return unYo(head) + 'ю';
+        } else if (soft) {
+            return unYo(stem) + 'ю';
+        } else if (okWord(lcWord)) {
+            return unYo(init(head)) + 'ку';
+        } else {
+            return unYo(stem) + 'у';
+        }
+    } else if (LocativeDeclensionType.PREPOSITIONAL === declensionType) {
+        return decline1(engine, lemma, Case.PREPOSITIONAL);
+    }
+}
+
+export function softD1(lcWord) {
+    return (last(lcWord) === 'ь' && !lcWord.endsWith('господь'))
+            || ('её'.includes(last(lcWord)) && !endsWithAny(lcWord, ['це', 'же']));
 }

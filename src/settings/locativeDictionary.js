@@ -1,4 +1,8 @@
-export function makeDefaultLocativeDictionary() {
+import { Gender } from "../Gender.js";
+import { LocativePreposition, LocativeFormAttribute, LocativeDeclensionType, encodeLocativeConfig } from "../LocativeForm.js";
+import { Lemma } from "../Lemma.js";
+
+function makeDefaultLocativeDictionary() {
     const map = new Map();
 
     const m = Object.freeze({gender: Gender.MASCULINE});
@@ -161,3 +165,5 @@ export function toLocativeDictionaryKey(lemma) {
     const msb = ((lemma._flags & 0xFFFF) << 1) | hasYo;
     return (msb * 0x100000000) + lemma._hash;
 }
+
+export const locativeDictionary = Object.freeze(makeDefaultLocativeDictionary());

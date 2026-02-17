@@ -1,5 +1,7 @@
-import { createReversedTrie } from "../utils/trie.js";
-import { init, last, nInit, nLast, lastOfNInitial, bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/strings.js";
+import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
+import { BloomFilter } from "../utils/bloom.js";
+import { calculateHash } from "../utils/hash.js";
+import { init, last, nInit, nLast, lastOfNInitial, bincludes, lcBit, vowels, consonantsExceptJ, endsWithAny } from "../utils/strings.js";
 
 export const ogoEndings = createReversedTrie([
     'ое',
@@ -22,6 +24,30 @@ export const egoSoftM = [
 export const egoSoftMTree = createReversedTrie(egoSoftM);
 
 export const egoSoftPlural = createReversedTrie(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
+
+// Stemmer data
+const mobileVowelA = new Set(['бубен', 'бугор',
+    'ветер', 'вошь', 'вымысел', 'горшок',
+    'деготь', 'дёготь',
+    'дятел', 'домысел', 'замысел',
+    'кашель', 'коготь',
+    'лапоть', 'лоб', 'локоть', 'ломоть', 'молебен', 'мох', 'ноготь', 'овен',
+    'пепел', 'пес', 'пёс', 'петушок', 'помысел', 'порошок',
+    'промысел', 'псалом', 'пушок', 'ров', 'рожь', 'рот',
+    'сон', 'стебель', 'стишок',
+    'угол', 'умысел', 'хребет', 'церковь', 'шов',
+    'ковер', 'овес', 'костер'
+].map(calculateHash));
+
+const mobileVowelABloom = new BloomFilter();
+mobileVowelA.forEach(hash => mobileVowelABloom.addInteger(hash));
+
+const mobileVowelB = createReversedTrie([
+    'овёс', 'ковёр', 'костёр',
+    'шатер', 'шатёр', 'козел', 'козёл', 'котел', 'котёл',
+    'орел', 'орёл', 'осел', 'осёл',
+    'узел', 'уголь', 'чок', 'ешок', 'хол'
+]);
 
 export function getNounStem0(word, lcWord) {
     const lcLastChar = last(lcWord);
@@ -85,7 +111,7 @@ export function hasMobileVowel(lemma, lcWord, lcLastBit) {
         (
             ((0b1001110011110000000110 & lcLastBit) !== 0) &&
             (
-                (inBloom(mobileVowelABloom, to11BitHash(lemma._hash)) && mobileVowelA.has(lemma._hash)) ||
+                (mobileVowelABloom.hasInteger(lemma._hash) && mobileVowelA.has(lemma._hash)) ||
                 (lemma.isAnimate() && lcWord.endsWith('посол'))
             )
         );
@@ -152,6 +178,19 @@ export function tsStem(word, lemma) {
         return head;
     }
 }
+
+const ok1 = createReversedTrie([
+    'лапоток', 'желток', 'нишок', 'ришок', 'ишек'
+]);
+const ok2 = [
+    'поток', 'приток', 'переток', 'проток', 'биоток', 'электроток',
+    'восток', 'водосток', 'водоток', 'воток',
+    'знаток'
+];
+const okExceptions = [
+    'инок', 'исток',
+    'обморок', 'порок', 'пророк', 'сток', 'урок'
+];
 
 export function okWord(lcWord) {
     return (endsWithAny(lcWord, ['чек', 'шек']) && (lcWord.length >= 6))
