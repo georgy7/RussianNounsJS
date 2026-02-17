@@ -4,6 +4,7 @@ import { decline1 } from "./rules/decline1.js";
 import { decline2 } from "./rules/decline2.js";
 import { decline3 } from "./rules/decline3.js";
 import { pluralize } from "./rules/pluralize.js";
+import { declinePlural } from "./rules/declinePlural.js";
 
 export class Engine {
 

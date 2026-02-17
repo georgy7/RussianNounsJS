@@ -36,21 +36,12 @@ export function bincludes(mask, lcChar) {
     return (mask & lcBit(lcChar)) !== 0;
 }
 
-
-// -------------------------------------------------
-
 export const vowels = 0b11101000000010000100000100100001;
+export const consonants = (~vowels) & ((1 << 26) - 1);
+export const consonantsExceptJ = consonants ^ (1 << 9);
 
-export function isVowel(ch) {
+function isVowel(ch) {
     return bincludes(vowels, toLowerCaseRu(ch));
-}
-
-export function isConsonantLc(lcChar) {
-    return bincludes(0b00000011111101111011111011011110, lcChar);
-}
-
-export function isConsonantNotJ(lcChar) {
-    return bincludes(0b00000011111101111011110011011110, lcChar);
 }
 
 const upperLike = (str, pattern) =>

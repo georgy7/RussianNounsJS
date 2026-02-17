@@ -4,7 +4,8 @@ import { getNounStem } from "./common.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 import { createReversedTrie } from "../utils/trie.js";
-import { toLowerCaseRu, init, last, nLast, isVowel, bincludes, endsWithAny, eStem } from "../utils/strings.js";
+import { unique } from "../utils/lists.js";
+import { toLowerCaseRu, init, last, nLast, bincludes, vowels, endsWithAny, eStem } from "../utils/strings.js";
 
 const highPriorityBloomFilter = new BloomFilter();
 const highPriorityExceptions = Object.freeze([
@@ -193,7 +194,7 @@ export function pluralize(engine, lemma) {
     const result = [];
 
     const word = lemma.text();
-    const lcWord = lemma.lower();
+    const lcWord = toLowerCaseRu(word);
 
     const stressedEnding = engine.sd
         .hasStressedEndingPlural(lemma, Case.NOMINATIVE);
@@ -225,7 +226,7 @@ export function pluralize(engine, lemma) {
     const gender = lemma.getGender();
     const declension = lemma.getDeclension();
 
-    const simpleFirstPart = (('й' === last(lcWord) || isVowel(last(word))) && isVowel(last(init(word))))
+    const simpleFirstPart = (('й' === last(lcWord) || bincludes(vowels, last(word))) && bincludes(vowels, last(init(word))))
         ? init(word)
         : stem;
 

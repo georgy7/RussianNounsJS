@@ -1,3 +1,9 @@
+import { CaseValues } from "../Case.js";
+import { getNounStem0 } from "./common.js";
+import { BloomFilter, toFakeHash } from "../utils/bloom.js";
+import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
+import { toLowerCaseRu, init, last, bincludes, lcBit, vowels, endsWithAny } from "../utils/strings.js";
+
 const declinePluralSoftEndings = createReversedTrie([
     'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
     'ьи', 'ья', 'ия', 'ря', 'ля', 'ая',
@@ -94,10 +100,10 @@ const explicitOvAndZero = new Set([
     'гектары', 'рельсы'
 ]);
 
-const ovBloom = new Uint8ClampedArray(256);
-explicitOv.forEach(s => bloomAdd(ovBloom, toFakeHash(s)));
-explicitZeroAndOv.forEach(s => bloomAdd(ovBloom, toFakeHash(s)));
-explicitOvAndZero.forEach(s => bloomAdd(ovBloom, toFakeHash(s)));
+const ovBloom = new BloomFilter();
+explicitOv.forEach(s => ovBloom.addRaw(toFakeHash(s)));
+explicitZeroAndOv.forEach(s => ovBloom.addRaw(toFakeHash(s)));
+explicitOvAndZero.forEach(s => ovBloom.addRaw(toFakeHash(s)));
 
 const explicitZeroEnding = new Set(explicitZeroEndingCommonGenderSurnameLike.concat([
     'абазины', 'авы', 'аввы',
@@ -120,8 +126,8 @@ const explicitZeroEnding = new Set(explicitZeroEndingCommonGenderSurnameLike.con
     'попки', 'турки', 'узы', 'хлопоты', 'шахматы'
 ]));
 
-const zeroBloom = new Uint8ClampedArray(256);
-explicitZeroEnding.forEach(s => bloomAdd(zeroBloom, toFakeHash(s)));
+const zeroBloom = new BloomFilter();
+explicitZeroEnding.forEach(s => zeroBloom.addRaw(toFakeHash(s)));
 
 const declinePluralFlatEndings = [
     'х', 'ых', 'их',
@@ -303,8 +309,8 @@ export function declinePlural(engine, lemma, grCase, plural) {
         const lastOf2Initial = lastOfNInitial(lcPlural, 2);
 
         if (Gender.FEMININE !== gender) {
-            const pluralHash = toFakeHash(lcPlural)
-            const inOvBloom = inBloom(ovBloom, pluralHash);
+            const pluralHash = toFakeHash(lcPlural);
+            const inOvBloom = ovBloom.hasRaw(pluralHash);
 
             if (inOvBloom && explicitOv.has(lcPlural)) {
                 return init(plural) + 'ов';
@@ -321,7 +327,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
             } else if (((gender === Gender.COMMON)
                     && !endsWithAny(lcPlural, declinePluralEy)
                     && !('жшч'.includes(lastOf2Initial)))
-                || (inBloom(zeroBloom, pluralHash) && explicitZeroEnding.has(lcPlural))
+                || (zeroBloom.hasRaw(pluralHash) && explicitZeroEnding.has(lcPlural))
                 || (lemma.isAName() && (gender === Gender.MASCULINE) && lemma.lower().endsWith('а'))
                 || (lemma.lower() === 'барин')) {
                 return genitiveStem();
@@ -358,7 +364,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                             return genitiveStem();
                         } else if (lcPlural.endsWith('мессии')) {
                             return init(plural) + 'й';
-                        } else if (isVowel(lastOfNInitial(lcPlural, 1))) {
+                        } else if (bincludes(vowels, lastOfNInitial(lcPlural, 1))) {
                             return init(plural) + 'ев';
                         } else if (endsWithSuffix(lcPlural, kiWords)
                             && ((Gender.MASCULINE !== gender) || endsWithSuffix(unYo(lcPlural), mascSimilarToCommon))
@@ -421,7 +427,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                 return nInit(plural, 3) + upperLike('е', end) + end;
             } else if ('жшч'.includes(lastOf2Initial)) {
                 return genitiveStem();
-            } else if (isConsonantNotJ(lastOf2Initial)) {
+            } else if (bincludes(consonantsExceptJ, lastOf2Initial)) {
                 return nInit(plural, 2) + 'ок';
             }
         }
@@ -446,7 +452,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
             }
         }
 
-        if (lcPlural.endsWith('ни') && isConsonantNotJ(lastOfNInitial(lcPlural, 2))) {
+        if (lcPlural.endsWith('ни') && bincludes(consonantsExceptJ, lastOfNInitial(lcPlural, 2))) {
             if (['барышни', 'боярышни', 'деревни'].includes(lcPlural)) {
                 return nInit(plural, 2) + 'ень';
             } else if (lcPlural.endsWith('кухни')) {

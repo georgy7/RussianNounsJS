@@ -1,6 +1,6 @@
 import { GenderValues, Gender } from "./Gender.js";
 import { calculateHash } from "./utils/hash.js";
-import { last, nLast } from "./utils/strings.js";
+import { last, nLast, bincludes, consonants } from "./utils/strings.js";
 
 /**
  * Нормальная форма слова.
@@ -209,7 +209,7 @@ function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
     switch (gender) {
         case Gender.FEMININE:
             return t === "а" || t === "я" ? 2 :
-                isConsonantLc(t) ? -1 : 3;
+                bincludes(consonants, t) ? -1 : 3;
 
         case Gender.MASCULINE:
             return t === "а" || t === "я" ? 2 :

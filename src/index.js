@@ -25,8 +25,6 @@ function removeLater() {
     // - Открытый корпус http://opencorpora.org/
     // - Национальный корпус русского языка https://ruscorpora.ru/
 
-    const unique = a => a.filter((item, index) => a.indexOf(item) === index);
-
     // Stemmer data
     const mobileVowelA = new Set(['бубен', 'бугор',
         'ветер', 'вошь', 'вымысел', 'горшок',
@@ -168,7 +166,7 @@ function removeLater() {
             // Сюда не должны попадать как минимум
             // мягкий и твердый знаки помимо гласных.
 
-            return (offset >= 0) && isConsonantLc(subWord[offset]);
+            return (offset >= 0) && bincludes(consonants, subWord[offset]);
 
         } else {
             return false;
