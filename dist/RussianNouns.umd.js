@@ -1,4 +1,6 @@
-var RussianNouns=function(e){"use strict"
+!function(e,r){
+"object"==typeof exports&&"undefined"!=typeof module?r(exports):"function"==typeof define&&define.amd?define(["exports"],r):r((e="undefined"!=typeof globalThis?globalThis:e||self).RussianNouns={})
+}(this,function(e){"use strict"
 ;var r=Object.freeze(["именительный","родительный","дательный","винительный","творительный","предложный","местный"]),n=Object.freeze({
 NOMINATIVE:r[0],GENITIVE:r[1],DATIVE:r[2],ACCUSATIVE:r[3],INSTRUMENTAL:r[4],PREPOSITIONAL:r[5],LOCATIVE:r[6]
 }),t=Object.freeze(["женский","мужской","средний","общий"]),i=Object.freeze({FEMININE:t[0],MASCULINE:t[1],NEUTER:t[2],
@@ -316,7 +318,7 @@ var r=this,n=P.create(e),t=n.getDeclension();if(t&&t>=0){var i=Oe.get(pe(n))
 }(r,t,n,o(e)),e>>6)})}return[]}}])}();function Sr(e,r,n,t){var i=function(e,r,n,t){var i=r.text()
 ;if(r.isIndeclinable())return i;if(r.isPluraleTantum())return Er(e,r,n,i);if(t)return Er(e,r,n,t)
 ;switch(r.getDeclension()){case-1:return i;case 0:return Ie(e,r,n);case 1:return We(e,r,n);case 2:return Me(e,r,n)
-;case 3:return ve(e,r,n)}}(e,r,n,t);return i instanceof Array?i:[i]}return e.CASES=r,e.Case=n,e.Engine=dr,e.Gender=i,
-e.Lemma=P,e.LocativeForm=u,e.LocativeFormAttribute=a,e.StressDictionary=Y,e.createLemma=function(e){return P.create(e)},
-e.createLemmaOrNull=function(e){return P.createOrNull(e)},e}({});
-//# sourceMappingURL=RussianNouns.es5.js.map
+;case 3:return ve(e,r,n)}}(e,r,n,t);return i instanceof Array?i:[i]}e.CASES=r,e.Case=n,e.Engine=dr,e.Gender=i,e.Lemma=P,
+e.LocativeForm=u,e.LocativeFormAttribute=a,e.StressDictionary=Y,e.createLemma=function(e){return P.create(e)},
+e.createLemmaOrNull=function(e){return P.createOrNull(e)}});
+//# sourceMappingURL=RussianNouns.umd.js.map
