@@ -28,19 +28,19 @@
 ### Plain JS
 
 ```html
-<script src="RussianNouns.min.js"></script>
+<script src="RussianNouns.umd.js"></script>
 ```
 
 or (in a module)
 
 ```js
-import 'RussianNouns.min.js';
+import 'RussianNouns.umd.js';
 ```
 
 or (in a Worker)
 
 ```js
-importScripts('RussianNouns.min.js');
+importScripts('RussianNouns.umd.js');
 ```
 
 ### Bundlers, backend
@@ -50,7 +50,7 @@ npm i --save russian-nouns-js
 ```
 
 ```js
-const RussianNouns = require('russian-nouns-js');
+import { Case, Gender, Lemma, Engine } from "russian-nouns-js";
 ```
 
 ## Usage
@@ -58,14 +58,10 @@ const RussianNouns = require('russian-nouns-js');
 ### The basics
 
 ```js
-const rne = new RussianNouns.Engine();
+const rne = new Engine();
 
 // Grammatical gender is a sort of noun class, related primarily to their sound.
 // Although mostly native speakers just remember them.
-
-const Gender = RussianNouns.Gender;
-const Case = RussianNouns.Case;
-
 
 rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.GENITIVE);
 // ◂ [ "имени" ]
@@ -80,7 +76,7 @@ rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.INSTRUMENTAL);
 // A number of loan words are not declined.
 // You should explicitly state this to prevent inflection.
 
-let coat = RussianNouns.Lemma.create({
+let coat = Lemma.create({
     text: 'пальто',
     gender: Gender.NEUTER,
     indeclinable: true
@@ -89,7 +85,7 @@ let coat = RussianNouns.Lemma.create({
 rne.decline(coat, Case.GENITIVE);
 // ◂ [ "пальто" ]
 
-RussianNouns.getDeclension(coat);
+getDeclension(coat);
 // ◂ -1
 
 
@@ -98,12 +94,12 @@ RussianNouns.getDeclension(coat);
 // And there is also the locative case as the seventh.
 // It usually matches the prepositional one.
 
-let mountain = RussianNouns.Lemma.create({
+let mountain = Lemma.create({
     text: 'гора',
     gender: Gender.FEMININE
 });
 
-RussianNouns.CASES.map(c => {
+CASES.map(c => {
     return rne.decline(mountain, c);
 });
 
@@ -127,7 +123,7 @@ rne.pluralize(mountain);
 // When you have the plural form in the nominative case, pass it
 // as the third argument of the decline function to decline in plural.
 
-RussianNouns.CASES.map(c => {
+CASES.map(c => {
     return rne.decline(mountain, c, 'горы');
 });
 
@@ -147,7 +143,7 @@ RussianNouns.CASES.map(c => {
 // You should also explicitly state this.
 // The concept of grammatical gender doesn't make sense for such words.
 
-let scissors = RussianNouns.Lemma.create({
+let scissors = Lemma.create({
     text: 'ножницы',
     pluraleTantum: true
 });
@@ -155,7 +151,7 @@ let scissors = RussianNouns.Lemma.create({
 rne.pluralize(scissors);
 // ◂ [ 'ножницы' ]
 
-RussianNouns.CASES.map(c => {
+CASES.map(c => {
     return rne.decline(scissors, c);
 });
 
@@ -173,18 +169,15 @@ RussianNouns.CASES.map(c => {
 ### A complex example
 
 ```js
-const Gender = RussianNouns.Gender;
-const Lemma = RussianNouns.Lemma;
-
-const rne = new RussianNouns.Engine();
+const rne = new Engine();
 
 function sg(lemma, caseNumber) {
-    const c = RussianNouns.CASES[caseNumber - 1];
+    const c = CASES[caseNumber - 1];
     return rne.decline(lemma, c)[0];
 }
 
 function pl(lemma, caseNumber) {
-    const c = RussianNouns.CASES[caseNumber - 1];
+    const c = CASES[caseNumber - 1];
     const pluralForm = rne.pluralize(lemma)[0];
     return rne.decline(lemma, c, pluralForm)[0];
 }
