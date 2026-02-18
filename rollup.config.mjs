@@ -1,8 +1,18 @@
 import terser from '@rollup/plugin-terser';
 import babel from '@rollup/plugin-babel';
 import resolve from '@rollup/plugin-node-resolve';
+import fs from 'fs';
 
 const production = !process.env.ROLLUP_WATCH;
+
+const packageVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
+
+const licenseComment = "" +
+    "/*!\n" +
+    `  RussianNounsJS v${packageVersion}\n` +
+    "  Copyright (c) 2011-2026 Georgy Ustinov\n" +
+    "  Released under the MIT license\n" +
+    "*/";
 
 const getPlugins = (babelConfig) => [
   resolve(),
@@ -11,7 +21,12 @@ const getPlugins = (babelConfig) => [
     extensions: ['.js'],
     ...babelConfig
   }),
-  production && terser({ format: { max_line_len: 120 } })
+  production && terser({
+    format: {
+      max_line_len: 120,
+      preamble: licenseComment
+    }
+  })
 ];
 
 export default [

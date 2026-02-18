@@ -1,3 +1,8 @@
+/*!
+  RussianNounsJS v3.0.0-alpha.0
+  Copyright (c) 2011-2026 Georgy Ustinov
+  Released under the MIT license
+*/
 const e=Object.freeze(["именительный","родительный","дательный","винительный","творительный","предложный","местный"]),t=Object.freeze({
 NOMINATIVE:e[0],GENITIVE:e[1],DATIVE:e[2],ACCUSATIVE:e[3],INSTRUMENTAL:e[4],PREPOSITIONAL:e[5],LOCATIVE:e[6]
 }),n=Object.freeze(["женский","мужской","средний","общий"]),r=Object.freeze({FEMININE:n[0],MASCULINE:n[1],NEUTER:n[2],

@@ -1,3 +1,8 @@
+/*!
+  RussianNounsJS v3.0.0-alpha.0
+  Copyright (c) 2011-2026 Georgy Ustinov
+  Released under the MIT license
+*/
 !function(e,r){
 "object"==typeof exports&&"undefined"!=typeof module?r(exports):"function"==typeof define&&define.amd?define(["exports"],r):r((e="undefined"!=typeof globalThis?globalThis:e||self).RussianNouns={})
 }(this,function(e){"use strict"

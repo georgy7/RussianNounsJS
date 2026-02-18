@@ -1,3 +1,8 @@
+/*!
+  RussianNounsJS v3.0.0-alpha.0
+  Copyright (c) 2011-2026 Georgy Ustinov
+  Released under the MIT license
+*/
 var RussianNouns=function(e){"use strict"
 ;var r=Object.freeze(["именительный","родительный","дательный","винительный","творительный","предложный","местный"]),n=Object.freeze({
 NOMINATIVE:r[0],GENITIVE:r[1],DATIVE:r[2],ACCUSATIVE:r[3],INSTRUMENTAL:r[4],PREPOSITIONAL:r[5],LOCATIVE:r[6]
