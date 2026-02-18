@@ -1,13 +1,14 @@
 import { Case } from "../Case.js";
 import { Gender } from "../Gender.js";
-import { getNounStem, okWord } from "./common.js";
+import { getNounStem, okWord, ogoEndings, ogoEndings2, ogoEndings3, egoEndings, tsStem } from "./common.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 import { unique } from "../utils/lists.js";
-import { toLowerCaseRu, init, last, lastOfNInitial, endsWithAny, eStem, unYo } from "../utils/strings.js";
+import { toLowerCaseRu, init, last, nLast, lastOfNInitial, bincludes, vowelCount, endsWithAny, eStem, unYo, upperLike } from "../utils/strings.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
 import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
+import { fastClone } from "../Lemma.js";
 
 const uForm = new Set((
     'клей,чай,' +
@@ -28,6 +29,34 @@ uForm.forEach(w => uFormBloom.addInteger(calculateHash(w)));
 
 const iyWordEndings = createReversedTrie(['й', 'ие', 'иё']);
 const eiWord = createReversedTrie(['воробей', 'муравей', 'ручей', 'соловей', 'улей']);
+
+const endingsOfAdjectives = createReversedTrie([
+    'мой', 'ной', 'дой', 'шой', 'жой', 'рзой', 'осой', 'хой',
+    'латой', 'витой', 'литой', 'питой', 'житой', 'отой', 'утой', 'ятой',
+    'лагой', 'рагой', 'огой', 'угой',
+    'лубой', 'любой',
+    'илой', 'ылой', 'злой', 'малой',
+    'овой', 'евой', 'живой', 'ской', 'акой', 'укой',
+    'нний',
+    'ский', 'йкий', 'цкий', 'зкий', 'ткий', 'лкий', 'мкий', 'хкий',
+    'оркий', 'аркий', 'яркий', 'ький', 'ёкий',
+    'бокий', 'оокий', 'cокий', 'токий', 'ликий', 'дикий', 'укий', 'ыкий',
+    'який', 'пкий', 'дкий', 'бкий', 'нкий', 'жкий', 'чкий', 'гкий', 'овкий', 'авкий'
+]);
+
+export function isAdjectiveLike(lemma, lcWord) {
+    return (nLast(lcWord, 2) === 'ый') ||
+            ((lcWord.endsWith('кривой') || endsWithSuffix(lcWord, endingsOfAdjectives)) &&
+                    vowelCount(lcWord) >= 2);
+}
+
+const jeEndings = createReversedTrie([
+    'ий', 'ие', 'чье', 'тье', 'дье', 'вье', 'бье',
+    'жалованье',
+    'енье', 'ружье', 'божье', 'верье', 'мужье']);
+
+const ojeEngings = createReversedTrie([
+    'вое', 'лое', 'мое', 'ное', 'рое', 'тое', 'той', 'ый']);
 
 /**
  * @param {RussianNouns.Engine} engine
@@ -317,17 +346,6 @@ export function decline1(engine, lemma, grCase) {
             }
             return eStem(stressedEnding, stem, s => s + 'е');
     }
-}
-
-function fastClone(lemma, newText) {
-    const lemmaCopy = new Lemma(lemma);
-    lemmaCopy._txt = newText;
-    lemmaCopy._lc = newText.toLowerCase();
-    lemmaCopy._hash = calculateHash(lemmaCopy.lower());
-    // Здесь не обновляется склонение, потому что
-    // везде, где я использую эту функцию, я уже знаю,
-    // какое склонение получится.
-    return Object.freeze(lemmaCopy);
 }
 
 function decline1Half(engine, lemma, grCase, lcWord) {

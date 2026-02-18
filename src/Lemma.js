@@ -158,6 +158,18 @@ export class Lemma {
 }
 
 
+export function fastClone(lemma, newText) {
+    const lemmaCopy = new Lemma(lemma);
+    lemmaCopy._txt = newText;
+    lemmaCopy._lc = newText.toLowerCase();
+    lemmaCopy._hash = calculateHash(lemmaCopy.lower());
+    // Здесь не обновляется склонение, потому что
+    // везде, где я использую эту функцию, я уже знаю,
+    // какое склонение получится.
+    return Object.freeze(lemmaCopy);
+}
+
+
 /**
  * @param o A plain old JavaScript object.
  * @returns {string|null} Описание ошибки на английском или null.

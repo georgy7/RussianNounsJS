@@ -1,8 +1,9 @@
 import { Case } from "../Case.js";
+import { fastClone } from "../Lemma.js";
 import { getNounStem } from "./common.js";
-import { last, nLast, bincludes } from "../utils/strings.js";
+import { last, nLast, bincludes, endsWithAny } from "../utils/strings.js";
 
-const specialD3 = {
+export const specialD3 = {
     'дочь': 'дочерь',
     'мать': 'матерь'
 };

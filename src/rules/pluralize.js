@@ -1,12 +1,13 @@
 import { Case } from "../Case.js";
 import { Gender } from "../Gender.js";
-import { getNounStem } from "./common.js";
-import { softD1 } from "./decline1.js";
+import { getNounStem, okWord, egoEndings, egoSoftM, tsStem } from "./common.js";
+import { softD1, isAdjectiveLike } from "./decline1.js";
+import { specialD3 } from "./decline3.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
-import { createReversedTrie } from "../utils/trie.js";
+import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { unique } from "../utils/lists.js";
-import { toLowerCaseRu, init, last, nLast, bincludes, vowels, endsWithAny, eStem } from "../utils/strings.js";
+import { toLowerCaseRu, init, last, nInit, nLast, bincludes, vowels, endsWithAny, eStem, unYo } from "../utils/strings.js";
 
 const highPriorityBloomFilter = new BloomFilter();
 const highPriorityExceptions = Object.freeze([
@@ -190,6 +191,17 @@ const aYaWords4 = new Set([
     'токарь', 'тополь',
     'шторм', 'штуцер'
 ]);
+
+const reYo = s => {
+    const index = Math.max(
+        s.toLowerCase().lastIndexOf('е'),
+        s.toLowerCase().lastIndexOf('ё')
+    );
+    const r = upperLike('ё', s[index]);
+    return s.substring(0, index) + r + s.substring(index + 1);
+};
+
+const singleEYo = s => (s.replace(/[^её]/g, '').length === 1);
 
 export function pluralize(engine, lemma) {
     const result = [];

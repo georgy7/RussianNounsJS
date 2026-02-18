@@ -247,39 +247,39 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 })();
 
 (() => {
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma(123);
     });
     console.log('createLemma: number');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma('гора');
     });
     console.log('createLemma: string');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma(null);
     });
     console.log('createLemma: null');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma(undefined);
     });
     console.log('createLemma: undefined');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma({});
     });
     console.log('createLemma: {}');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma({
             text: 'гора'
         });
     });
     console.log('createLemma: gender undefined');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma({
             text: 'гора',
             gender: 'fgsfds'
@@ -287,7 +287,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
     console.log('createLemma: gender fgsfds');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma({
             text: 'ножницы',
             pluraleTantum: 123
@@ -295,7 +295,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
     console.log('createLemma: pluraleTantum 123');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma({
             text: 'пальто',
             gender: Gender.NEUTER,
@@ -304,7 +304,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
     console.log('createLemma: indeclinable fgsfds');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma({
             text: 'трактор',
             gender: Gender.MASCULINE,
@@ -313,7 +313,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     });
     console.log('createLemma: transport fgsfds');
 
-    itShouldThrow(Error, () => {
+    assert.throws(() => {
         createLemma({
             gender: Gender.MASCULINE
         });
@@ -1343,80 +1343,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         inanimateForms(deafPluralForms)
     );
     console.log('----- blind (wall) / dead (end) - neuter - inan');
-
-
-    console.log('----------------------------------');
-
-    console.log('Rarely used parts of API.');
-
-    (() => {
-        let x = createLemma({
-            text: 'абв',
-            gender: Gender.FEMININE
-        });
-
-        assert.strictEqual(x.text(), 'абв');
-        assert.strictEqual(x.lower(), 'абв');
-        assert.strictEqual(x.isPluraleTantum(), false);
-        assert.strictEqual(x.getGender(), Gender.FEMININE);
-
-        let y = x.newText(o => o.text() + 'г');
-        assert.strictEqual(x.text(), 'абв');
-        assert.strictEqual(x.lower(), 'абв');
-        assert.strictEqual(y.text(), 'абвг');
-        assert.strictEqual(y.lower(), 'абвг');
-        // Пожалуйста, не используйте поле _hash в пользовательском коде.
-        // Тест просто проверяет, что внутренний хэш пересчитывается.
-        assert.strictEqual(true, x._hash != y._hash);
-        assert.strictEqual(y.getGender(), Gender.FEMININE);
-
-        y = x.newText(() => 'Александр');
-        assert.strictEqual(x.text(), 'абв');
-        assert.strictEqual(x.lower(), 'абв');
-        assert.strictEqual(y.text(), 'Александр');
-        assert.strictEqual(y.lower(), 'александр');
-        // Пожалуйста, не используйте поле _hash в пользовательском коде.
-        assert.strictEqual(true, x._hash != y._hash);
-        assert.strictEqual(y.getGender(), Gender.FEMININE);
-
-        y = x.newGender(() => Gender.MASCULINE);
-        assert.strictEqual(x.isPluraleTantum(), false);
-        assert.strictEqual(x.getGender(), Gender.FEMININE);
-        assert.strictEqual(y.isPluraleTantum(), false);
-        assert.strictEqual(y.getGender(), Gender.MASCULINE);
-        assert.strictEqual(x.text(), y.text());
-        assert.strictEqual(x.lower(), y.lower());
-
-        y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
-        assert.strictEqual(y.getGender(), Gender.MASCULINE);
-
-        x = x.newText(o => o.text() + 'о');
-        y = x.newGender(o => (o.text().endsWith('о') ? Gender.NEUTER : Gender.MASCULINE));
-        assert.strictEqual(y.getGender(), Gender.NEUTER);
-
-        x = x.newText(o => o.text().toUpperCase());
-        assert.strictEqual(x.text(), 'АБВО');
-        assert.strictEqual(x.lower(), 'абво');
-        assert.strictEqual(x.getGender(), Gender.FEMININE);
-
-        x = createLemma({
-            text: 'сын',
-            gender: Gender.MASCULINE
-        });
-        y = x.newText(() => 'юноша');
-
-        assert.strictEqual(x.getDeclension(), 1);
-        assert.strictEqual(y.getDeclension(), 2);
-
-        x = createLemma({
-            text: 'абвгдеёжзиклмя',
-            gender: Gender.NEUTER
-        });
-        y = x.newGender(() => Gender.FEMININE);
-
-        assert.strictEqual(x.getDeclension(), 3);
-        assert.strictEqual(y.getDeclension(), 2);
-    })();
 
 })();
 

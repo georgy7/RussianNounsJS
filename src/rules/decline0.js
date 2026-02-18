@@ -1,3 +1,7 @@
+import { Case } from "../Case.js";
+import { decline3 } from "./decline3.js";
+import { init } from "../utils/strings.js";
+
 export function decline0(engine, lemma, grCase) {
     const word = lemma.text();
     const lcWord = lemma.lower();

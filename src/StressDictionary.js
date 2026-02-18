@@ -2,6 +2,7 @@ import { stressHashesA, stressHashesB } from "./settings/stressHashes.js";
 import { BloomFilter } from "./utils/bloom.js";
 import { Lemma } from "./Lemma.js";
 import { CaseValues } from "./Case.js";
+import { Gender } from "./Gender.js";
 
 const stressBloomAB = (function () {
     const hashes = new BloomFilter();

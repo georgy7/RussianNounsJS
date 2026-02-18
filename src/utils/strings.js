@@ -44,10 +44,13 @@ function isVowel(ch) {
     return bincludes(vowels, toLowerCaseRu(ch));
 }
 
-const upperLike = (str, pattern) =>
-    (pattern === pattern.toUpperCase()) ? str.toUpperCase() : str;
+export function upperLike(str, pattern) {
+    return (pattern === pattern.toUpperCase()) ? str.toUpperCase() : str;
+}
 
-const vowelCount = s => s.split('').filter(isVowel).length;
+export function vowelCount(s) {
+    return s.split('').filter(isVowel).length;
+}
 
 export function unYo(s) {
     return s.replaceAll('ё', 'е').replaceAll('Ё', 'Е');

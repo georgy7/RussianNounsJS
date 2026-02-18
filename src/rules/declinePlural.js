@@ -4,7 +4,7 @@ import { getNounStem0, egoSoftPlural } from "./common.js";
 import { surnameType1Plural } from "./names.js";
 import { BloomFilter, toFakeHash } from "../utils/bloom.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
-import { toLowerCaseRu, init, last, lastOfNInitial, bincludes, lcBit, vowels, endsWithAny } from "../utils/strings.js";
+import { toLowerCaseRu, init, last, nInit, lastOfNInitial, bincludes, lcBit, vowels, endsWithAny, unYo, upperLike } from "../utils/strings.js";
 
 const declinePluralSoftEndings = createReversedTrie([
     'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',

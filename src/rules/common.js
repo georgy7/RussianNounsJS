@@ -1,7 +1,8 @@
+import { Gender } from "../Gender.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
-import { init, last, nInit, nLast, lastOfNInitial, bincludes, lcBit, vowels, consonantsExceptJ, endsWithAny } from "../utils/strings.js";
+import { init, last, nInit, nLast, lastOfNInitial, bincludes, lcBit, vowels, consonantsExceptJ, endsWithAny, upperLike } from "../utils/strings.js";
 
 export const ogoEndings = createReversedTrie([
     'ое',
@@ -87,6 +88,12 @@ export function getStemK(word, lcWord, stressedEnging) {
         return nInit(word, 2) + 'йк';
     }
 }
+
+const en2a2b = [
+    'ясень', 'бюллетень', 'олень', 'тюлень',
+    'гордень', 'пельмень',
+    'ячмень'
+];
 
 export function getStemSoftSign(lemma, word, lcWord) {
     if (mobileVowelA.has(lemma._hash) || endsWithSuffix(lcWord, mobileVowelB)) {
