@@ -7,7 +7,7 @@ import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { unique } from "../utils/lists.js";
-import { toLowerCaseRu, init, last, nInit, nLast, bincludes, vowels, endsWithAny, eStem, unYo } from "../utils/strings.js";
+import { toLowerCaseRu, init, last, nInit, nLast, lastOfNInitial, bincludes, vowels, endsWithAny, eStem, unYo, upperLike } from "../utils/strings.js";
 
 const highPriorityBloomFilter = new BloomFilter();
 const highPriorityExceptions = Object.freeze([
