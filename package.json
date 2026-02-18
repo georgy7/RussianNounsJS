@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "postbuild": "duk node_modules/core-js-bundle/minified.js dist/RussianNouns.es5.js dukTest.js",
     "dev": "rollup -c -w",
     "prepublishOnly": "npm run build",
     "test": "node --test test/"
@@ -44,6 +45,7 @@
     "@rollup/plugin-babel": "^6.1.0",
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",
-    "@rollup/plugin-terser": "^0.4.4"
+    "@rollup/plugin-terser": "^0.4.4",
+    "core-js-bundle": "^3.48.0"
   }
 }
