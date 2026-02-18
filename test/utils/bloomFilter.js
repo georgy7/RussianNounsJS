@@ -1,7 +1,7 @@
-import { test } from "node:test"
-import assert from "node:assert"
+import { test } from "node:test";
+import assert from "node:assert";
 
-import { BloomFilter, toFakeHash } from "../../src/utils/bloom.js"
+import { BloomFilter, toFakeHash } from "../../src/utils/bloom.js";
 
 test("bloom filter with positive integers", () => {
     const x = new BloomFilter();

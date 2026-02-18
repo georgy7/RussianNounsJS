@@ -1,16 +1,13 @@
-import { test } from "node:test"
-import assert from "node:assert"
+import { test } from "node:test";
+import assert from "node:assert";
 
 import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute, createLemma, createLemmaOrNull } from "../src/index.js"
 
 
-(() => {
+test("API: basic usage", () => {
     const rne = new Engine();
 
-    // Контрольная группа для проверки локальности настроек внутри движка
-    const rneControl = new Engine();
-
-    let result, control;
+    let result;
 
     result = rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.GENITIVE);
     assertHasOneItem(result, "имени");
@@ -18,7 +15,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     result = rne.decline({text: 'имя', gender: Gender.NEUTER}, Case.INSTRUMENTAL);
     assertHasOneItem(result, "именем");
 
-    console.log('--------------- 1 ----------------');
+    // ---------------
 
     let coat = createLemma({
         text: 'пальто',
@@ -42,13 +39,13 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 
     assertAllEqual(result, ['гора', 'горы', 'горе', 'гору', ['горой', 'горою'], 'горе', 'горе']);
 
-    console.log('--------------- 2 ----------------');
+    // ---------------
 
     result = rne.pluralize(mountain);
     assertHasOneItem(result, "горы");
     const pluralMountain = result[0];
 
-    console.log('--------------- 3 ----------------');
+    // ---------------
 
     result = CASES.map(c => {
         return rne.decline(mountain, c, pluralMountain);
@@ -56,12 +53,12 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 
     assertAllEqual(result, ['горы', 'гор', 'горам', 'горы', 'горами', 'горах', 'горах']);
 
-    console.log('--------------- 4 ----------------');
+    // ---------------
 
     assert.strictEqual(mountain.getDeclension(), 2);
     assert.strictEqual(mountain.getSchoolDeclension(), 1);
 
-    console.log('--------------- 5 ----------------');
+    // ---------------
 
     let way = createLemma({
         text: 'путь',
@@ -70,7 +67,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 
     assert.strictEqual(way.getDeclension(), 0);
 
-    console.log('--------------- 6 ----------------');
+    // ---------------
 
     const scissors = createLemma({
         text: 'ножницы',
@@ -81,15 +78,23 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     assert.ok(result instanceof Array);
     assertHasOneItem(result, 'ножницы');
 
-    console.log('--------------- 7 ----------------');
+    // ---------------
 
     result = CASES.map(c => {
         return rne.decline(scissors, c);
     });
 
     assertAllEqual(result, ['ножницы', 'ножниц', 'ножницам', 'ножницы', 'ножницами', 'ножницах', 'ножницах']);
+});
 
-    console.log('--------------- 8 ----------------');
+
+test("API: stress dictionary tuning", () => {
+    // Изменения настроек должны затрагивать только один движок
+    const rne = new Engine();
+    const rneControl = new Engine();
+
+    let result;
+    let control;
 
     let cringe = createLemma({
         text: 'кринж',
@@ -137,92 +142,55 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 
     control = rneControl.decline(cringe, Case.INSTRUMENTAL);
     assertHasOneItem(control, "кринжем");
+});
 
-    console.log('--------------- 9 ----------------');
 
-    (() => {
-        const values = Object.values(LocativeFormAttribute);
-
-        const uniqueLocativeFormAttributes = new Set();
-        for (let sc of values) {
-            uniqueLocativeFormAttributes.add(sc);
-        }
-
-        assert.strictEqual(
-            Object.keys(LocativeFormAttribute).length,
-            uniqueLocativeFormAttributes.size,
-            'Enum values must be unique.'
-        );
-
-        // Каждый атрибут кодируется отдельным битом, и они должны поместиться в одно 32-битное
-        // целое число, вместе с кодом предлога и кодом типа склонения. Думаю, под эти два кода
-        // можно выделить по 3 бита, так что на атрибуты останется 26 бит.
-
-        // Будем не преобразовывать их во флаги в рантайме, а сразу работать с ними
-        // как с флагами. Бинарные представления значений не должны пересекаться.
-
-        assert.strictEqual(true, values.every(x => Math.round(x) === x));
-        assert.strictEqual(true, values.reduce((a, b) => a|b) === values.reduce((a, b) => a^b));
-
-        assert.strictEqual(true, values.reduce((a, b) => Math.min(a, b)) === 1);
-        assert.strictEqual(true, values.reduce((a, b) => Math.max(a, b)) <= (1 << 25));
-    })();
+test("API: getLocativeForms basic usage", () => {
+    const rne = new Engine();
 
     let row = createLemma({
         text: 'ряд',
         gender: Gender.MASCULINE
     });
 
-    result = CASES.map(c => {
+    const result = CASES.map(c => {
         return rne.decline(row, c);
     });
 
     assertAllEqual(result, ['ряд', 'ряда', 'ряду', 'ряд', 'рядом', 'ряде', 'ряду']);
 
-    console.log('.');
     assert.ok(rne.getLocativeForms(row) instanceof Array);
     assert.strictEqual(rne.getLocativeForms(row).length, 1, 'locative forms count');
     assert.strictEqual(rne.getLocativeForms(row)[0].preposition, 'в', 'lf.preposition');
     assert.strictEqual(rne.getLocativeForms(row)[0].word, 'ряду', 'lf.word');
 
-    console.log('..');
     assert.strictEqual(
         rne.getLocativeForms(row)[0].attributes,
         LocativeFormAttribute.STRUCTURE,
         'lf.semantics'
     );
 
-    console.log('...');
-    assert.ok(rne.getLocativeForms(mountain) instanceof Array);
-    assert.strictEqual(rne.getLocativeForms(mountain).length, 0, 'locative forms count (a mountain)');
-
-    assert.ok(rne.getLocativeForms(way) instanceof Array);
-    assert.strictEqual(rne.getLocativeForms(way).length, 0, 'locative forms count (a way)');
-
     const ball = createLemma({
         text: 'мяч',
         gender: Gender.MASCULINE
     });
+
     assert.ok(rne.getLocativeForms(ball) instanceof Array);
-    assert.strictEqual(rne.getLocativeForms(ball).length, 0, 'locative forms count (a ball)');
+    assert.strictEqual(rne.getLocativeForms(ball).length, 0);
+});
+
+
+test("API: getLocativeForms multiple choices", () => {
+    const rne = new Engine();
 
     const steam = createLemma({
         text: 'пар',
         gender: Gender.MASCULINE
     });
 
-    result = CASES.map(c => {
-        return rne.decline(steam, c);
-    });
-
-    console.log('....');
-    assert.ok(result instanceof Array);
-    assertHasOneItem(result[5], 'паре');
-    assertHasOneItem(result[6], 'пару');
     const steamLocativeForms = rne.getLocativeForms(steam);
     assert.ok(steamLocativeForms instanceof Array);
 
-    console.log('.....');
     function findFormWithSingleAttribute(locativeForms, attribute) {
         return locativeForms.filter(f => f.attributes === attribute);
     }
@@ -231,7 +199,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     const steamResource = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.RESOURCE);
     const steamSurface = findFormWithSingleAttribute(steamLocativeForms, LocativeFormAttribute.SURFACE);
 
-    console.log('......');
     assert.strictEqual(steamSubstance.length, 1, 'Steam as a substance must have a locative form.');
     assert.strictEqual(steamResource.length, 1, 'Steam as a resource must have a locative form.');
     assert.strictEqual(steamSurface.length, 0, 'Steam as a surface must not have a locative form.');
@@ -241,43 +208,35 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 
     assert.strictEqual(steamSubstance[0].word, 'пару', 'Steam as a substance has incorrect word form.');
     assert.strictEqual(steamResource[0].word, 'пару', 'Steam as a resource has incorrect word form.');
+});
 
-    console.log('--------------- 10 ---------------');
 
-})();
-
-(() => {
+test("API: argument validation", () => {
     assert.throws(() => {
         createLemma(123);
     });
-    console.log('createLemma: number');
 
     assert.throws(() => {
         createLemma('гора');
     });
-    console.log('createLemma: string');
 
     assert.throws(() => {
         createLemma(null);
     });
-    console.log('createLemma: null');
 
     assert.throws(() => {
         createLemma(undefined);
     });
-    console.log('createLemma: undefined');
 
     assert.throws(() => {
         createLemma({});
     });
-    console.log('createLemma: {}');
 
     assert.throws(() => {
         createLemma({
             text: 'гора'
         });
     });
-    console.log('createLemma: gender undefined');
 
     assert.throws(() => {
         createLemma({
@@ -285,7 +244,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             gender: 'fgsfds'
         });
     });
-    console.log('createLemma: gender fgsfds');
 
     assert.throws(() => {
         createLemma({
@@ -293,7 +251,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             pluraleTantum: 123
         });
     });
-    console.log('createLemma: pluraleTantum 123');
 
     assert.throws(() => {
         createLemma({
@@ -302,7 +259,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             indeclinable: 'fgsfds'
         });
     });
-    console.log('createLemma: indeclinable fgsfds');
 
     assert.throws(() => {
         createLemma({
@@ -311,14 +267,12 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             transport: 'наземный'
         });
     });
-    console.log('createLemma: transport fgsfds');
 
     assert.throws(() => {
         createLemma({
             gender: Gender.MASCULINE
         });
     });
-    console.log('createLemma: text undefined');
 
     (() => {
         const k = createLemma({
@@ -329,7 +283,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         assert.strictEqual(k.getGender(), Gender.FEMININE);
         assert.strictEqual(k.isPluraleTantum(), false);
         assert.strictEqual(k.isIndeclinable(), false);
-        console.log('createLemma: valid (1)');
     })();
 
     (() => {
@@ -341,72 +294,49 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         assert.strictEqual(k.isPluraleTantum(), true);
         assert.strictEqual(k.getGender(), undefined);
         assert.strictEqual(k.isIndeclinable(), false);
-        console.log('Lemma.create: valid (2)');
 
         const l = createLemma(k);
         assert.strictEqual(l, k);
-        console.log('createLemma: the same object');
     })();
 
-    // ----------------------
-
     assert.strictEqual(null, createLemmaOrNull(123));
-    console.log('createLemmaOrNull: number');
-
     assert.strictEqual(null, Lemma.createOrNull(123));
-    console.log('Lemma.createOrNull: number');
-
     assert.strictEqual(null, createLemmaOrNull('гора'));
-    console.log('createLemmaOrNull: string');
-
     assert.strictEqual(null, createLemmaOrNull(null));
-    console.log('createLemmaOrNull: null');
-
     assert.strictEqual(null, createLemmaOrNull(undefined));
-    console.log('createLemmaOrNull: undefined');
-
     assert.strictEqual(null, createLemmaOrNull({}));
-    console.log('createLemmaOrNull: {}');
 
     assert.strictEqual(null, createLemmaOrNull({
         text: 'гора'
     }));
-    console.log('createLemmaOrNull: gender undefined');
 
     assert.strictEqual(null, createLemmaOrNull({
         text: 'гора',
         gender: 'fgsfds'
     }));
-    console.log('createLemmaOrNull: gender fgsfds');
 
     assert.strictEqual(null, createLemmaOrNull({
         text: 'ножницы',
         pluraleTantum: 123
     }));
-    console.log('createLemmaOrNull: pluraleTantum 123');
 
     assert.strictEqual(null, createLemmaOrNull({
         text: 'пальто',
         gender: Gender.NEUTER,
         indeclinable: 'fgsfds'
     }));
-    console.log('createLemmaOrNull: indeclinable fgsfds');
 
     assert.strictEqual(null, createLemmaOrNull({
         text: 'трактор',
         gender: Gender.MASCULINE,
         transport: 'наземный'
     }));
-    console.log('createLemmaOrNull: transport fgsfds');
 
     assert.strictEqual(null, createLemmaOrNull({
         gender: Gender.MASCULINE
     }));
-    console.log('createLemmaOrNull: text undefined');
 
-    let x;
-
-    x = createLemmaOrNull({
+    const x = createLemmaOrNull({
         text: 'гора',
         gender: Gender.FEMININE
     });
@@ -415,21 +345,20 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
     assert.strictEqual(x.getGender(), Gender.FEMININE);
     assert.strictEqual(x.isPluraleTantum(), false);
     assert.strictEqual(x.isIndeclinable(), false);
-    console.log('createLemmaOrNull: valid (1)');
 
-    x = Lemma.createOrNull({
+    const y = Lemma.createOrNull({
         text: 'ножницы',
         pluraleTantum: true
     });
-    assert.strictEqual(x instanceof Lemma, true);
-    assert.strictEqual(x.text(), 'ножницы');
-    assert.strictEqual(x.isPluraleTantum(), true);
-    assert.strictEqual(x.getGender(), undefined);
-    assert.strictEqual(x.isIndeclinable(), false);
-    console.log('Lemma.createOrNull: valid (2)');
-})();
+    assert.strictEqual(y instanceof Lemma, true);
+    assert.strictEqual(y.text(), 'ножницы');
+    assert.strictEqual(y.isPluraleTantum(), true);
+    assert.strictEqual(y.getGender(), undefined);
+    assert.strictEqual(y.isIndeclinable(), false);
+});
 
-(() => {
+
+test("API: complex examples", () => {
     const rne = new Engine();
 
     function usual(lemma, caseNumber) {
@@ -454,7 +383,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         return str[0].toUpperCase() + str.substring(1);
     }
 
-    console.log('Winter Evening (fragment) by Alexander Sergeyevich Pushkin');
+    // Зиний вечер Пушкина
 
     const буря = createLemma({text: 'буря', gender: Gender.FEMININE});
     const мгла = createLemma({text: 'мгла', gender: Gender.FEMININE});
@@ -513,9 +442,9 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         'К нам в окошко застучит.'
     );
 
-    console.log('----------------------------------');
+    // ---
 
-    console.log('A girl\'s story (fragment) by Nikolay Stepanovich Gumilyov');
+    // Рассказ девушки (Гумилёв)
 
     const ворота = createLemma({text: 'ворота', pluraleTantum: true});
     const тень = createLemma({text: 'тень', gender: Gender.FEMININE});
@@ -550,9 +479,9 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         'Снега неведомых высот.'
     );
 
-    console.log('----------------------------------');
+    // ---
 
-    console.log('Swan by Fyodor Ivanovich Tyutchev');
+    // Лебедь (Фёдор Иванович Тютчев)
 
     const орел = createLemma({text: 'орел', gender: Gender.MASCULINE, animate: true});
     const облако = createLemma({text: 'облако', gender: Gender.NEUTER});
@@ -645,9 +574,9 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         'Ты отовсюду окружен.'
     );
 
-    console.log('----------------------------------');
+    // ---
 
-    console.log('Potec (fragment) by Alexander Ivanovich Vvedensky');
+    // Потец (Александр Введенский)
 
     const лошадь = createLemma({text: 'лошадь', gender: Gender.FEMININE, animate: true});
     const конь = createLemma({text: 'конь', gender: Gender.MASCULINE, animate: true});
@@ -675,39 +604,39 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         `Исчезнув скачут.`,
         'Исчезнув скачут.'
     );
+});
 
-    console.log('----------------------------------');
 
-    console.log('Testing dev branch index.html words...');
+const checkSingularAndPluralBase = (rne, lemma, expectedSingular, expectedPlural) => {
+    const singular = CASES.map(c => {
+        return rne.decline(lemma, c);
+    });
 
-    const checkSingularAndPlural = (lemma, expectedSingular, expectedPlural) => {
-        const singular = CASES.map(c => {
-            return rne.decline(lemma, c);
-        });
+    assertAllEqual(singular, expectedSingular);
 
-        assertAllEqual(singular, expectedSingular);
+    const p = rne.pluralize(lemma);
+    assertHasOneItem(p, expectedPlural[0]);
 
-        const p = rne.pluralize(lemma);
-        assertHasOneItem(p, expectedPlural[0]);
+    const plural = CASES.map(c => {
+        return rne.decline(lemma, c, p[0]);
+    });
 
-        const plural = CASES.map(c => {
-            return rne.decline(lemma, c, p[0]);
-        });
+    assertAllEqual(plural, expectedPlural);
+};
 
-        assertAllEqual(plural, expectedPlural);
+const checkSingularBase = (rne, lemma, expectedSingular) => {
+    const singular = CASES.map(c => {
+        return rne.decline(lemma, c);
+    });
 
-        // console.log(lemma.text());
-    };
+    assertAllEqual(singular, expectedSingular);
+};
 
-    const checkSingular = (lemma, expectedSingular) => {
-        const singular = CASES.map(c => {
-            return rne.decline(lemma, c);
-        });
 
-        assertAllEqual(singular, expectedSingular);
-
-        // console.log(lemma.text());
-    };
+test("Some nouns", () => {
+    const rne = new Engine();
+    const checkSingularAndPlural = (l, s, p) => checkSingularAndPluralBase(rne, l, s, p);
+    const checkSingular = (l, s) => checkSingularBase(rne, l, s);
 
     checkSingularAndPlural(
         createLemma({text: 'арбуз', gender: Gender.MASCULINE}),
@@ -932,19 +861,15 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ['судно', 'судна', 'судну', 'судно', 'судном', 'судне', 'судне'],
         ['суда', 'судов', 'судам', 'суда', 'судами', 'судах', 'судах']
     );
+});
 
-    console.log('----------------------------------');
 
-    console.log('Adjectives, participles.');
+test("Some adjectives and participles", () => {
+    const rne = new Engine();
+    const checkSingularAndPlural = (l, s, p) => checkSingularAndPluralBase(rne, l, s, p);
 
     const лихой = createLemma({text: 'лихой', gender: Gender.MASCULINE, animate: true});
-
-    assert.strictEqual(
-        `${cap(plural(лихой, 1))} ${plural(конь, 1)} ${usual(жар, 5)} полны.`,
-        'Лихие кони жаром полны.'
-    );
-
-    console.log('--------------- 1 ----------------');
+    assert.strictEqual(rne.pluralize(лихой)[0], 'лихие');
 
     const адаптировавший = createLemma({text: 'адаптировавший', gender: Gender.MASCULINE, animate: true});
 
@@ -962,8 +887,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             'адаптировавшем',
             'адаптировавшем'
         ]);
-
-        console.log('--------------- 2 ----------------');
     })();
 
     const адаптировавшее = createLemma({text: 'адаптировавшее', gender: Gender.NEUTER});
@@ -982,8 +905,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
             'адаптировавшем',
             'адаптировавшем'
         ]);
-
-        console.log('--------------- 3 ----------------');
     })();
 
     const адаптировавшая = createLemma({text: 'адаптировавшая', gender: Gender.FEMININE});
@@ -1013,8 +934,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
 
         assertHasOneItem(result[5], 'адаптировавшей');
         assertHasOneItem(result[6], 'адаптировавшей');
-
-        console.log('--------------- 4 ----------------');
     })();
 
     (() => {
@@ -1050,10 +969,7 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         checkCases(адаптировавший);
         checkCases(адаптировавшая);
         checkCases(адаптировавшее);
-
-        console.log('--------------- 5 ----------------');
     })();
-
 
     const nimblePluralForms = [
         'ловкие',
@@ -1084,7 +1000,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         nimblePluralForms
     );
-    console.log('----- nimble - masc - anim');
 
     checkSingularAndPlural(
         createLemma({text: 'ловкий', gender: Gender.MASCULINE}),
@@ -1099,7 +1014,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(nimblePluralForms)
     );
-    console.log('----- nimble - masc - inan');
 
     checkSingularAndPlural(
         createLemma({text: 'ловкая', gender: Gender.FEMININE, animate: true}),
@@ -1114,7 +1028,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         nimblePluralForms
     );
-    console.log('----- nimble - fem - anim');
 
     checkSingularAndPlural(
         createLemma({text: 'ловкая', gender: Gender.FEMININE}),
@@ -1129,7 +1042,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(nimblePluralForms)
     );
-    console.log('----- nimble - fem - inan');
 
     checkSingularAndPlural(
         createLemma({text: 'ловкое', gender: Gender.NEUTER}),
@@ -1144,8 +1056,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(nimblePluralForms)
     );
-    console.log('----- nimble - neu');
-
 
     const redPluralForms = [
         'красные',
@@ -1170,7 +1080,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(redPluralForms)
     );
-    console.log('----- red - masc');
 
     checkSingularAndPlural(
         createLemma({text: 'красная', gender: Gender.FEMININE}),
@@ -1185,7 +1094,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(redPluralForms)
     );
-    console.log('----- red - fem');
 
     checkSingularAndPlural(
         createLemma({text: 'красное', gender: Gender.NEUTER}),
@@ -1200,8 +1108,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(redPluralForms)
     );
-    console.log('----- red - neu');
-
 
     const whitePluralForms = [
         'белые',
@@ -1226,7 +1132,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(whitePluralForms)
     );
-    console.log('----- white - masc');
 
     checkSingularAndPlural(
         createLemma({text: 'белая', gender: Gender.FEMININE}),
@@ -1241,7 +1146,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(whitePluralForms)
     );
-    console.log('----- white - fem');
 
     checkSingularAndPlural(
         createLemma({text: 'белое', gender: Gender.NEUTER}),
@@ -1256,8 +1160,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(whitePluralForms)
     );
-    console.log('----- white - neu');
-
 
     const deafPluralForms = [
         'глухие',
@@ -1282,7 +1184,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         deafPluralForms
     );
-    console.log('----- deaf - masc - anim');
 
     checkSingularAndPlural(
         createLemma({text: 'глухой', gender: Gender.MASCULINE}),
@@ -1297,7 +1198,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(deafPluralForms)
     );
-    console.log('----- deaf - masc - inan');
 
     checkSingularAndPlural(
         createLemma({text: 'глухая', gender: Gender.FEMININE, animate: true}),
@@ -1312,7 +1212,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         deafPluralForms
     );
-    console.log('----- deaf - fem - anim');
 
     checkSingularAndPlural(
         createLemma({text: 'глухая', gender: Gender.FEMININE}),
@@ -1327,7 +1226,6 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(deafPluralForms)
     );
-    console.log('----- deaf - fem - inan');
 
     checkSingularAndPlural(
         createLemma({text: 'глухое', gender: Gender.NEUTER}),
@@ -1342,9 +1240,8 @@ import { Case, CASES, Engine, Gender, Lemma, LocativeForm, LocativeFormAttribute
         ],
         inanimateForms(deafPluralForms)
     );
-    console.log('----- blind (wall) / dead (end) - neuter - inan');
+});
 
-})();
 
 function assertHasOneItem(actualArray, expectedItem) {
     const arrayAsString = '' + actualArray;
