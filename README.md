@@ -25,22 +25,10 @@
 
 ## Installation
 
-### Plain JS
+### Browser, plain JS
 
 ```html
 <script src="RussianNouns.umd.js"></script>
-```
-
-or (in a module)
-
-```js
-import 'RussianNouns.umd.js';
-```
-
-or (in a Worker)
-
-```js
-importScripts('RussianNouns.umd.js');
 ```
 
 ### Bundlers, backend
@@ -220,8 +208,9 @@ This library does not prevent you from misusing [singularia tantum](https://en.w
 
 ## References
 - Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
-- [Russian grammar (English Wikipedia)](http://en.wikipedia.org/wiki/Russian_grammar)
-- [OpenCorpora (Russian text corpus)](http://opencorpora.org/)
+- [Russian grammar — Wikipedia](http://en.wikipedia.org/wiki/Russian_grammar)
+- [OpenCorpora](http://opencorpora.org/)
+- [Russian National Corpus](https://ruscorpora.ru/)
 - К семантике русского локатива ("второго предложного" падежа) - Плунгян В. А., Семиотика и информатика. - Вып. 37. - М., 2002. - С. 229-254
 
 
