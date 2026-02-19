@@ -77,7 +77,7 @@
                     }
                 };
 
-                await import('./RussianNouns.js');
+                await import('./dist/RussianNouns.umd.js');
                 await import("./test2.js");
             }
 

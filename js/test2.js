@@ -12781,7 +12781,7 @@
 var window = self;
 
 if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
-    importScripts('RussianNouns.js');
+    importScripts('dist/RussianNouns.umd.js');
 }
 
 const post = (typeof postCall === "function") ? postCall : postMessage;
@@ -13345,7 +13345,15 @@ let main = function () {
                 throw `Could not create lemma ${word}.`;
             }
 
-            const lemmaUpperCase = lemma.newText(o => o.text().toUpperCase());
+            const lemmaUpperCase = RussianNouns.createLemmaOrNull({
+                text: word.toUpperCase(),
+                gender: gender,
+                animate: animate,
+                surname: surname,
+                name: name,
+                indeclinable: fixed,
+                pluraleTantum: pluraleTantum
+            });
 
             // Обработка единственного числа
             const { resultWordForms, wordIsWrongSingular, wordHasWarningSingular } =
@@ -13364,7 +13372,7 @@ let main = function () {
             // Получение склонения
             let declension = '';
             try {
-                declension = RussianNouns.getDeclension(lemma);
+                declension = lemma.getDeclension();
             } catch (e) {}
 
             // Добавление результата
