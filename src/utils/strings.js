@@ -15,12 +15,11 @@ export function init(str) {
 }
 
 export function last(str) {
-    return takeLast(str, 1);
+    return charFromEnd(str, 1);
 }
 
-export function lastOfNInitial(str, n) {
-    const index = str.length - n - 1;
-    return str.substring(index, index+1);
+export function charFromEnd(str, n) {
+    return str[str.length - n] || '';
 }
 
 // Attention!

@@ -11,7 +11,7 @@ import { calculateHash } from "../utils/hash.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, consonants, vowelCount } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, takeLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, takeLast, charFromEnd, endsWithAny, unYo } from "../utils/strings.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
 import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
 import { fastClone } from "../Lemma.js";
@@ -247,7 +247,7 @@ export function decline1(engine, lemma, grCase) {
                             return stem + 'им';
                         }
                     } else if (isAdjectiveLike(lemma, lcWord)) {
-                        if ((lastOfNInitial(lcWord, 1) === 'и') || lcWord.endsWith('хой')) {
+                        if ((charFromEnd(lcWord, 2) === 'и') || lcWord.endsWith('хой')) {
                             // TODO добавить прилагательные в testing.html, выяснить, какая тут закономерность
                             return stem + 'им';
                         } else {

@@ -6,7 +6,7 @@ import { BloomFilter, toFakeHash } from "../utils/bloom.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, dropLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, dropLast, charFromEnd, endsWithAny, unYo } from "../utils/strings.js";
 
 const declinePluralSoftEndings = createReversedTrie([
     'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
@@ -280,15 +280,15 @@ export function declinePlural(engine, lemma, grCase, plural) {
             ) || (
                 endsWithAny(lcPlural, dependsOnStress)
             )) {
-                const end = lastOfNInitial(plural, 1);
+                const end = charFromEnd(plural, 2);
                 return dropLast(plural, 2) + upperLike('е', end) + end;
             } else if (
                 endsWithAny(lcPlural, [
                     'сестры', 'сёстры', 'серьги'
                 ])
             ) {
-                const end = lastOfNInitial(plural, 1);
-                const h = (lastOfNInitial(lcPlural, 2) === 'ь')
+                const end = charFromEnd(plural, 2);
+                const h = (charFromEnd(lcPlural, 3) === 'ь')
                     ? unYo(dropLast(plural, 3))
                     : unYo(dropLast(plural, 2));
                 return h + upperLike('ё', end) + end;
@@ -310,7 +310,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
             }
         }
 
-        const lastOf2Initial = lastOfNInitial(lcPlural, 2);
+        const lastOf2Initial = charFromEnd(lcPlural, 3);
 
         if (Gender.FEMININE !== gender) {
             const pluralHash = toFakeHash(lcPlural);
@@ -368,7 +368,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                             return genitiveStem();
                         } else if (lcPlural.endsWith('мессии')) {
                             return init(plural) + 'й';
-                        } else if (bincludes(vowels, lastOfNInitial(lcPlural, 1))) {
+                        } else if (bincludes(vowels, charFromEnd(lcPlural, 2))) {
                             return init(plural) + 'ев';
                         } else if (endsWithSuffix(lcPlural, kiWords)
                             && ((Gender.MASCULINE !== gender) || endsWithSuffix(unYo(lcPlural), mascSimilarToCommon))
@@ -456,7 +456,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
             }
         }
 
-        if (lcPlural.endsWith('ни') && bincludes(consonantsExceptJ, lastOfNInitial(lcPlural, 2))) {
+        if (lcPlural.endsWith('ни') && bincludes(consonantsExceptJ, charFromEnd(lcPlural, 3))) {
             if (['барышни', 'боярышни', 'деревни'].includes(lcPlural)) {
                 return dropLast(plural, 2) + 'ень';
             } else if (lcPlural.endsWith('кухни')) {
@@ -474,7 +474,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
 
         if ((stem.length === lcPlural.length - 1) && endsWithSuffix(lcPlural, declinePluralSoftEndings)) {
 
-            if ('ьй'.includes(toLowerCaseRu(lastOfNInitial(stem, 1))) && !lemma.isAnimate()) {
+            if ('ьй'.includes(toLowerCaseRu(charFromEnd(stem, 2))) && !lemma.isAnimate()) {
                 const end = last(stem);
                 return dropLast(stem, 2) + upperLike('е', end) + end;
             } else if (endsWithAny(lcPlural, ['земли', 'петли', 'пли', 'вли'])) {

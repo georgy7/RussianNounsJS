@@ -7,7 +7,7 @@ import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, vowels } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, takeLast, dropLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, takeLast, dropLast, charFromEnd, endsWithAny, unYo } from "../utils/strings.js";
 import { getPluralForms } from "../settings/irregularNouns.js";
 
 // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
@@ -302,7 +302,7 @@ export function pluralize(engine, lemma) {
                     && lemma.isAnimate()) {
                     result.push(dropLast(word, 6) + 'ятки');
                 } else if (lcWord.endsWith('онок')
-                    && 'жшч'.includes(lastOfNInitial(lcWord, 4))
+                    && 'жшч'.includes(charFromEnd(lcWord, 5))
                     && lemma.isAnimate()) {
                     result.push(dropLast(word, 4) + 'ата');
                 } else if (okWord(lcWord)) {
