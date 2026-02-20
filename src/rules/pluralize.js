@@ -7,7 +7,7 @@ import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, vowels } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, nInit, nLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, takeLast, dropLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
 import { getPluralForms } from "../settings/irregularNouns.js";
 
 // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
@@ -120,7 +120,7 @@ export function pluralize(engine, lemma) {
     const lcStem = toLowerCaseRu(stem);
 
     if (lcWord.endsWith('яя')) {
-        result.push(nInit(word, 2) + 'ие');
+        result.push(dropLast(word, 2) + 'ие');
         return unique(result);
     }
 
@@ -209,7 +209,7 @@ export function pluralize(engine, lemma) {
             if (lcWord === 'путь') {
                 result.push('пути');
             } else if (lcWord.endsWith('дитя')) {
-                result.push(nInit(word, 3) + 'ети');
+                result.push(dropLast(word, 3) + 'ети');
             } else {
                 throw new Error('unsupported');
             }
@@ -279,37 +279,37 @@ export function pluralize(engine, lemma) {
                     (((lcWord.endsWith('анин') && lcWord.length > 5) || lcWord.endsWith('янин')) && !lemma.isAName())
                     || ['барин', 'боярин'].includes(lcWord)
                 ) {
-                    result.push(nInit(word, 2) + 'е');
+                    result.push(dropLast(word, 2) + 'е');
 
                     // В корпусе фигурирует
                     if ('барин' === lcWord) {
-                        result.push(nInit(word, 2) + 'ы');
+                        result.push(dropLast(word, 2) + 'ы');
                     }
 
                 } else if (['цыган'].includes(lcWord)) {
                     result.push(word + 'е');
                 } else if ('щенок' === lcWord) {
-                    result.push(nInit(word, 2) + 'ки');
-                    result.push(nInit(word, 2) + 'ята');
+                    result.push(dropLast(word, 2) + 'ки');
+                    result.push(dropLast(word, 2) + 'ята');
                 } else if ((lcWord.endsWith('ребёнок') || lcWord.endsWith('ребенок'))
                     && !(lcWord.endsWith('жеребёнок') || lcWord.endsWith('жеребенок'))
                     && !(lcWord.endsWith('ястребёнок') || lcWord.endsWith('ястребенок'))) {
-                    result.push(nInit(word, 7) + 'дети');
+                    result.push(dropLast(word, 7) + 'дети');
                 } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
                     && lemma.isAnimate()) {
-                    result.push(nInit(word, 4) + 'ята');
+                    result.push(dropLast(word, 4) + 'ята');
                 } else if (lcWord.endsWith('ёночек')
                     && lemma.isAnimate()) {
-                    result.push(nInit(word, 6) + 'ятки');
+                    result.push(dropLast(word, 6) + 'ятки');
                 } else if (lcWord.endsWith('онок')
                     && 'жшч'.includes(lastOfNInitial(lcWord, 4))
                     && lemma.isAnimate()) {
-                    result.push(nInit(word, 4) + 'ата');
+                    result.push(dropLast(word, 4) + 'ата');
                 } else if (okWord(lcWord)) {
-                    result.push(nInit(word, 2) + 'ки');
+                    result.push(dropLast(word, 2) + 'ки');
                 } else if (endsWithSuffix(lcWord, egoEndings)) {
                     if (endsWithAny(lcWord, egoSoftM)) {
-                        result.push(nInit(word, 2) + 'ьи');
+                        result.push(dropLast(word, 2) + 'ьи');
                     } else {
                         result.push(init(word) + 'е');
                     }
@@ -317,19 +317,19 @@ export function pluralize(engine, lemma) {
                     if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
                         result.push(init(word) + 'е');
                     } else if (lcWord.endsWith('ой') && !endsWithAny(lcWord, ['хой', 'ской'])) {
-                        result.push(nInit(word, 2) + 'ые');
+                        result.push(dropLast(word, 2) + 'ые');
                     } else {
-                        result.push(nInit(word, 2) + 'ие');
+                        result.push(dropLast(word, 2) + 'ие');
                     }
                 } else if (lcWord.endsWith('его')) {
-                    result.push(nInit(word, 3) + 'ие');
+                    result.push(dropLast(word, 3) + 'ие');
                 } else if ([
                     'воробей', 'муравей', 'ручей', 'соловей', 'улей',
                     'жеребей', // — жребий; доля поместья.
                     'ирей', // Довольно бессмысленно в мн. ч.
                     'репей', 'чирей' // Я бы сказал "-еи", но в словарях так.
                 ].includes(lcWord)) {
-                    result.push(nInit(word, 2) + 'ьи');
+                    result.push(dropLast(word, 2) + 'ьи');
                 } else {
                     yeruOrI();
                 }
@@ -355,11 +355,11 @@ export function pluralize(engine, lemma) {
                     }
 
                 } else if (endsWithAny(lcWord, ['ие', 'иё'])) {
-                    result.push(nInit(word, 2) + 'ия');
+                    result.push(dropLast(word, 2) + 'ия');
 
                 } else if (endsWithAny(lcWord, ['ье', 'ьё'])) {
 
-                    const w = nInit(word, 2);
+                    const w = dropLast(word, 2);
 
                     const softSignOnly = [
                         'безделье', 'варенье', 'воскресенье',
@@ -387,7 +387,7 @@ export function pluralize(engine, lemma) {
                 } else if (endsWithAny(lcWord, ['ле', 'ре'])) {
                     result.push(stem + 'я');
                 } else if (lcWord.endsWith('судно') && lemma.isATransport()) {
-                    result.push(nInit(word, 2) + 'а');
+                    result.push(dropLast(word, 2) + 'а');
                 } else {
                     Array.prototype.push.apply(result, yoStem(s => s + 'а'));
 
@@ -417,7 +417,7 @@ export function pluralize(engine, lemma) {
             }
             break;
         case 3:
-            if (nLast(lcWord, 2) === 'мя') {
+            if (takeLast(lcWord, 2) === 'мя') {
                 result.push(stem + 'ена');
             } else if (Object.keys(specialD3).includes(lcWord)) {
                 result.push(init(specialD3[lcWord]) + 'и');

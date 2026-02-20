@@ -2,7 +2,7 @@ import { Case } from "../Case.js";
 import { fastClone } from "../Lemma.js";
 import { getNounStem } from "./common.js";
 import { bincludes, vowelCount } from "../utils/alphabet.js";
-import { last, nLast, endsWithAny } from "../utils/strings.js";
+import { last, takeLast, endsWithAny } from "../utils/strings.js";
 
 export const specialD3 = {
     'дочь': 'дочерь',
@@ -26,7 +26,7 @@ export function decline3(engine, lemma, grCase) {
         stem = 'полу' + stem.substring(3);
     }
 
-    if (nLast(lcWord, 2) === 'мя') {
+    if (takeLast(lcWord, 2) === 'мя') {
         switch (grCase) {
             case Case.NOMINATIVE:
             case Case.ACCUSATIVE:

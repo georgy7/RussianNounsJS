@@ -2,7 +2,7 @@ import { Case } from "../Case.js";
 import { getNounStem } from "./common.js";
 import { bincludes, vowels, vowelCount } from "../utils/alphabet.js";
 import { toLowerCaseRu } from "../utils/letterCase.js";
-import { init, last, nLast, endsWithAny } from "../utils/strings.js";
+import { init, last, takeLast, endsWithAny } from "../utils/strings.js";
 
 export function decline2(engine, lemma, grCase) {
     const word = lemma.text();
@@ -53,7 +53,7 @@ export function decline2(engine, lemma, grCase) {
                 return stem + 'ой';
             } else if (lemma.isASurname() && !lcWord.endsWith('да')) {
                 return head + 'ой';
-            } else if (nLast(lcWord, 2) === 'ия') {
+            } else if (takeLast(lcWord, 2) === 'ия') {
                 return head + 'и';
             } else if (lcWord.endsWith('ничья')) {
                 return head + 'ей';
@@ -94,7 +94,7 @@ export function decline2(engine, lemma, grCase) {
                 return stem + 'ой';
             } else if (lemma.isASurname() && !lcWord.endsWith('да')) {
                 return head + 'ой';
-            } else if (nLast(lcWord, 2) === 'ия') {
+            } else if (takeLast(lcWord, 2) === 'ия') {
                 return head + 'и';
             } else if (lcWord.endsWith('ничья')) {
                 return head + 'ей';

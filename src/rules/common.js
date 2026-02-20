@@ -4,7 +4,7 @@ import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 import { bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/alphabet.js";
 import { upperLike } from "../utils/letterCase.js";
-import { init, last, nInit, nLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, takeLast, dropLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
 
 export const ogoEndings = createReversedTrie([
     'ое',
@@ -26,7 +26,7 @@ export const egoSoftM = [
 
 export const egoSoftMTree = createReversedTrie(egoSoftM);
 
-export const egoSoftPlural = createReversedTrie(egoSoftM.map(x => nInit(x, 2) + 'ьи'));
+export const egoSoftPlural = createReversedTrie(egoSoftM.map(x => dropLast(x, 2) + 'ьи'));
 
 // Stemmer data
 const mobileVowelA = new Set(['бубен', 'бугор',
@@ -57,7 +57,7 @@ export function getNounStem0(word, lcWord) {
 
     if (bincludes(vowels | 512, lcLastChar)) { // vowels + й
         if (bincludes(vowels, lastOfNInitial(lcWord, 1))) {
-            const head = nInit(word, 2);
+            const head = dropLast(word, 2);
             if (endsWithSuffix(lcWord, egoSoftMTree)) {
                 return head + upperLike('ь', head);
             }
@@ -85,9 +85,9 @@ export function getStemK(word, lcWord, stressedEnging) {
     if ((word.length >= 4) && 
         (endsWithAny(lcWord, ['рёк', 'нёк', 'лёк']) && stressedEnging !== false)
     ) {
-        return nInit(word, 2) + 'ьк';
+        return dropLast(word, 2) + 'ьк';
     } else if (lcWord.endsWith('ёк') && bincludes(vowels, lastOfNInitial(lcWord, 2))) {
-        return nInit(word, 2) + 'йк';
+        return dropLast(word, 2) + 'йк';
     }
 }
 
@@ -99,11 +99,11 @@ const en2a2b = [
 
 export function getStemSoftSign(lemma, word, lcWord) {
     if (mobileVowelA.has(lemma._hash) || endsWithSuffix(lcWord, mobileVowelB)) {
-        return nInit(word, 3) + lastOfNInitial(word, 1);
+        return dropLast(word, 3) + lastOfNInitial(word, 1);
     } else if (lcWord.endsWith('ень') &&
             (lemma.getGender() === Gender.MASCULINE) &&
             !endsWithAny(lcWord, en2a2b)) {
-        return nInit(word, 3) + 'н';
+        return dropLast(word, 3) + 'н';
     } else {
         return init(word);
     }
@@ -142,13 +142,13 @@ export function getNounStem(lemma, lcWord, stressedEnging) {
             result = getStemSoftSign(lemma, word, lcWord);
         } else if (['лёд', 'лед', 'лён'].includes(lcWord) ||
                 (('лев' === lcWord) && lemma.isAnimate())) {
-            result = nInit(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
+            result = dropLast(word, 2) + upperLike('ь', lastOfNInitial(word, 1)) + last(word);
         }
     }
 
     if (!result) {
         if (hasMobileVowel(lemma, lcWord, lcLastBit)) {
-            result = nInit(word, 2) + last(word);
+            result = dropLast(word, 2) + last(word);
         } else {
             result = word;
         }
@@ -163,12 +163,12 @@ export function tsStem(word, lemma) {
     if ('а' === last(lcHead)) {
         return head;
     } else if (endsWithAny(lcHead, ['зне', 'жне', 'гре', 'спе', 'мудре'])
-        || nLast(init(lcHead), 3).split('')
+        || takeLast(init(lcHead), 3).split('')
             .every(l => bincludes(consonantsExceptJ, l))
         || lemma.isAName()
     ) {
         return head;
-    } else if (nLast(lcHead, 2) === 'ле') {
+    } else if (takeLast(lcHead, 2) === 'ле') {
         const beforeLe = lastOfNInitial(lcHead, 2);
         if (bincludes(vowels, beforeLe) || ('л' === beforeLe)) {
             return init(head) + 'ь';
@@ -177,11 +177,11 @@ export function tsStem(word, lemma) {
         }
     } else if (bincludes(vowels, last(lcHead)) && (last(lcHead) !== 'и')) {
         if (bincludes(vowels, last(init(lcHead)))) {
-            return nInit(word, 2) + 'й';
+            return dropLast(word, 2) + 'й';
         } else if (endsWithAny(lemma.lower(), ['месяц'])) {
             return head;
         } else {
-            return nInit(word, 2);
+            return dropLast(word, 2);
         }
     } else {
         return head;
@@ -207,7 +207,7 @@ export function okWord(lcWord) {
             !lcWord.endsWith('шок') && !okExceptions.includes(lcWord)
             && !endsWithAny(lcWord, ok2)
             && !bincludes(vowels, lastOfNInitial(lcWord, 2))
-            && (bincludes(vowels, lastOfNInitial(lcWord, 3)) || endsWithAny(nInit(lcWord, 2), ['ст', 'рт']))
+            && (bincludes(vowels, lastOfNInitial(lcWord, 3)) || endsWithAny(dropLast(lcWord, 2), ['ст', 'рт']))
             && lcWord.length >= 4
         ));
 }

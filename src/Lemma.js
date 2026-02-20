@@ -1,7 +1,7 @@
 import { GenderValues, Gender } from "./Gender.js";
 import { calculateHash } from "./utils/hash.js";
 import { bincludes, consonants } from "./utils/alphabet.js";
-import { last, nLast } from "./utils/strings.js";
+import { last, takeLast } from "./utils/strings.js";
 
 /**
  * Нормальная форма слова.
@@ -230,7 +230,7 @@ function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
 
         case Gender.NEUTER:
             return ['дитя', 'полудитя'].includes(lcWord) ? 0 :
-                nLast(lcWord, 2) === "мя" ? 3 : 1;
+                takeLast(lcWord, 2) === "мя" ? 3 : 1;
 
         case Gender.COMMON:
             if (t === 'а' || t === 'я') {

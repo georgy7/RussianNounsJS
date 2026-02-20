@@ -11,7 +11,7 @@ import { calculateHash } from "../utils/hash.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, consonants, vowelCount } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, nLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, takeLast, lastOfNInitial, endsWithAny, unYo } from "../utils/strings.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
 import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
 import { fastClone } from "../Lemma.js";
@@ -51,7 +51,7 @@ const endingsOfAdjectives = createReversedTrie([
 ]);
 
 export function isAdjectiveLike(lemma, lcWord) {
-    return (nLast(lcWord, 2) === 'ый') ||
+    return (takeLast(lcWord, 2) === 'ый') ||
             ((lcWord.endsWith('кривой') || endsWithSuffix(lcWord, endingsOfAdjectives)) &&
                     vowelCount(lcWord) >= 2);
 }
@@ -333,7 +333,7 @@ export function decline1(engine, lemma, grCase) {
                         'платье'
                     ])) {
                         return head + 'и';
-                    } else if ((lcLastChar === 'й') || ('иё' === nLast(lcWord, 2))) {
+                    } else if ((lcLastChar === 'й') || ('иё' === takeLast(lcWord, 2))) {
                         return eiStem() + 'е';
                     }
                     break;
@@ -366,7 +366,7 @@ function decline1Half(engine, lemma, grCase, lcWord) {
         return decline3(engine, lemmaCopy, grCase);
     } else {
         let lemmaCopy = fastClone(lemma, init(h()) +
-            ((nLast(lcWord, 2) === 'ни') ? 'я' : 'а'));
+            ((takeLast(lcWord, 2) === 'ни') ? 'я' : 'а'));
         return decline2(engine, lemmaCopy, grCase);
     }
 }
