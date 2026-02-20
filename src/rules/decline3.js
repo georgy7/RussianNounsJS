@@ -1,7 +1,7 @@
 import { Case } from "../Case.js";
 import { fastClone } from "../Lemma.js";
 import { getNounStem } from "./common.js";
-import { bincludes, vowelCount } from "../utils/letters.js";
+import { bincludes, vowelCount } from "../utils/alphabet.js";
 import { last, nLast, endsWithAny } from "../utils/strings.js";
 
 export const specialD3 = {

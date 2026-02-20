@@ -1,6 +1,6 @@
 import { GenderValues, Gender } from "./Gender.js";
 import { calculateHash } from "./utils/hash.js";
-import { bincludes, consonants } from "./utils/letters.js";
+import { bincludes, consonants } from "./utils/alphabet.js";
 import { last, nLast } from "./utils/strings.js";
 
 /**

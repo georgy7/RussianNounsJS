@@ -1,7 +1,8 @@
 import { Case } from "../Case.js";
 import { getNounStem } from "./common.js";
-import { bincludes, vowels, vowelCount } from "../utils/letters.js";
-import { toLowerCaseRu, init, last, nLast, endsWithAny } from "../utils/strings.js";
+import { bincludes, vowels, vowelCount } from "../utils/alphabet.js";
+import { toLowerCaseRu } from "../utils/letterCase.js";
+import { init, last, nLast, endsWithAny } from "../utils/strings.js";
 
 export function decline2(engine, lemma, grCase) {
     const word = lemma.text();

@@ -1,0 +1,28 @@
+export function toLowerCaseRu(s) {
+
+    // Это на самом деле быстрее, чем нативный toLowerCase, во всяком случае в Chrome,
+    // поскольку нативный toLowerCase преобразует все алфавиты, а здесь только кириллица.
+
+    let codes = new Array(s.length);
+
+    for (let i = 0; i < s.length; i++) {
+        let ch = s.charCodeAt(i);
+
+        if ((ch >= 0x0410) && (ch <= 0x042F)) {
+            ch += 0x20;
+        } else if ((ch >= 0x0400) && (ch <= 0x040F)) {
+            ch += 0x50;
+        }
+
+        codes[i] = ch;
+    }
+
+    // Функция apply может вызвать RangeError при очень длинных
+    // массивах (лимит аргументов), но для слов — это не проблема.
+
+    return String.fromCharCode.apply(null, codes);
+}
+
+export function upperLike(str, pattern) {
+    return (pattern === pattern.toUpperCase()) ? str.toUpperCase() : str;
+}
