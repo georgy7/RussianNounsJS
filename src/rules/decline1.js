@@ -11,7 +11,7 @@ import { calculateHash } from "../utils/hash.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, consonants, vowelCount } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, takeLast, charFromEnd, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, takeLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
 import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
 import { fastClone } from "../Lemma.js";
@@ -103,7 +103,7 @@ export function decline1(engine, lemma, grCase) {
         }
     };
 
-    const schWord = () => 'чщ'.includes(last(lcStem));
+    const schWord = () => hasChar('чщ', last(lcStem));
 
     function addUForm(r) {
         if (!lemma.isAnimate() && uFormBloom.hasInteger(lemma._hash) && uForm.has(lcWord)) {
@@ -217,7 +217,7 @@ export function decline1(engine, lemma, grCase) {
 
         case Case.ACCUSATIVE:
             if ((gender === Gender.NEUTER) ||
-                    ('иы'.includes(lcLastChar) && half)) {
+                    (hasChar('иы', lcLastChar) && half)) {
                 return word;
             }
 
@@ -281,7 +281,7 @@ export function decline1(engine, lemma, grCase) {
                     }
             }
 
-            if (soft() || ('жшчщ'.includes(last(lcStem)))) {
+            if (soft() || hasChar('жшчщ', last(lcStem))) {
                 return eStem(stressedEnding, stem, (s, b) =>
                     b ? (s + 'ом') : (s + 'ем'));
             } else if (lemma.isASurname() || (lcStem.indexOf('ё') === -1)) {
@@ -418,5 +418,5 @@ export function toLocativeSingular1(engine, lemma, declensionType) {
 
 export function softD1(lcWord) {
     return (last(lcWord) === 'ь' && !lcWord.endsWith('господь'))
-            || ('её'.includes(last(lcWord)) && !endsWithAny(lcWord, ['це', 'же']));
+            || (hasChar('её', last(lcWord)) && !endsWithAny(lcWord, ['це', 'же']));
 }

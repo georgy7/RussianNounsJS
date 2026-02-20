@@ -7,7 +7,7 @@ import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, vowels } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, takeLast, dropLast, charFromEnd, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, takeLast, dropLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
 import { getPluralForms } from "../settings/irregularNouns.js";
 
 // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
@@ -157,7 +157,7 @@ export function pluralize(engine, lemma) {
 
     function yeruOrI() {
         if (bincludes(0b11101000000000010001001000, last(lcStem))  // sibilant or velar
-            || 'яйь'.includes(last(lcWord))
+            || hasChar('яйь', last(lcWord))
             || endsWithAny(lcWord, ['сосед'])) {
 
             if (softPatronymic()) {
@@ -302,7 +302,7 @@ export function pluralize(engine, lemma) {
                     && lemma.isAnimate()) {
                     result.push(dropLast(word, 6) + 'ятки');
                 } else if (lcWord.endsWith('онок')
-                    && 'жшч'.includes(charFromEnd(lcWord, 5))
+                    && hasChar('жшч', charFromEnd(lcWord, 5))
                     && lemma.isAnimate()) {
                     result.push(dropLast(word, 4) + 'ата');
                 } else if (okWord(lcWord)) {
@@ -407,7 +407,7 @@ export function pluralize(engine, lemma) {
                 result.push('зори');
 
             } else if (lcWord.endsWith('ая') && !lcWord.endsWith('свая')) {
-                if ('жхчшщ'.includes(last(lcStem)) || endsWithAny(lcStem, ['вк', 'гк', 'ск', 'цк', 'ньк'])) {
+                if (hasChar('жхчшщ', last(lcStem)) || endsWithAny(lcStem, ['вк', 'гк', 'ск', 'цк', 'ньк'])) {
                     result.push(stem + 'ие');
                 } else {
                     result.push(stem + 'ые');

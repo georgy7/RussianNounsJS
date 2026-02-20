@@ -2,7 +2,7 @@ import { Case } from "../Case.js";
 import { getNounStem } from "./common.js";
 import { bincludes, vowels, vowelCount } from "../utils/alphabet.js";
 import { toLowerCaseRu } from "../utils/letterCase.js";
-import { init, last, takeLast, endsWithAny } from "../utils/strings.js";
+import { init, last, takeLast, hasChar, endsWithAny } from "../utils/strings.js";
 
 export function decline2(engine, lemma, grCase) {
     const word = lemma.text();
@@ -76,7 +76,7 @@ export function decline2(engine, lemma, grCase) {
             } else if (ayaWord()) {
                 return [stem + 'ой', stem + 'ою'];
             } else if (soft() ||
-                    ('жшчщц'.includes(last(lcStem)) &&
+                    (hasChar('жшчщц', last(lcStem)) &&
                         !(engine.sd.hasStressedEndingSingular(lemma, grCase).includes(true)))) {
                 if ('и' === last(lcHead)) {
                     return head + 'ей';

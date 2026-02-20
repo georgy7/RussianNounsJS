@@ -6,7 +6,7 @@ import { BloomFilter, toFakeHash } from "../utils/bloom.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, dropLast, charFromEnd, endsWithAny, unYo } from "../utils/strings.js";
+import { init, last, dropLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
 
 const declinePluralSoftEndings = createReversedTrie([
     'ли', 'си', 'би', 'ви', 'ди', 'ти', 'пи', 'ри', 'ни', 'фи', 'зи',
@@ -330,7 +330,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                 ];
             } else if (((gender === Gender.COMMON)
                     && !endsWithAny(lcPlural, declinePluralEy)
-                    && !('жшч'.includes(lastOf2Initial)))
+                    && !hasChar('жшч', lastOf2Initial))
                 || (zeroBloom.hasRaw(pluralHash) && explicitZeroEnding.has(lcPlural))
                 || (lemma.isAName() && (gender === Gender.MASCULINE) && lemma.lower().endsWith('а'))
                 || (lemma.lower() === 'барин')) {
@@ -429,7 +429,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
             if (lastOf2Initial === 'ь') {
                 const end = last(init(plural));
                 return dropLast(plural, 3) + upperLike('е', end) + end;
-            } else if ('жшч'.includes(lastOf2Initial)) {
+            } else if (hasChar('жшч', lastOf2Initial)) {
                 return genitiveStem();
             } else if (bincludes(consonantsExceptJ, lastOf2Initial)) {
                 return dropLast(plural, 2) + 'ок';
@@ -474,7 +474,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
 
         if ((stem.length === lcPlural.length - 1) && endsWithSuffix(lcPlural, declinePluralSoftEndings)) {
 
-            if ('ьй'.includes(toLowerCaseRu(charFromEnd(stem, 2))) && !lemma.isAnimate()) {
+            if (hasChar('ьй', toLowerCaseRu(charFromEnd(stem, 2))) && !lemma.isAnimate()) {
                 const end = last(stem);
                 return dropLast(stem, 2) + upperLike('е', end) + end;
             } else if (endsWithAny(lcPlural, ['земли', 'петли', 'пли', 'вли'])) {
