@@ -1,6 +1,6 @@
 import { Case } from "../Case.js";
 import { Gender } from "../Gender.js";
-import { getNounStem, okWord, ogoEndings, ogoEndings2, ogoEndings3, egoEndings, tsStem } from "./common.js";
+import { getNounStem, okWord, ogoEndings, ogoEndings2, ogoEndings3, egoEndings, tsStem, eStem } from "./common.js";
 import { decline0 } from "./decline0.js";
 import { decline2 } from "./decline2.js";
 import { decline3 } from "./decline3.js";
@@ -10,7 +10,7 @@ import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, consonants, vowelCount } from "../utils/letters.js";
-import { toLowerCaseRu, init, last, nLast, lastOfNInitial, endsWithAny, eStem, unYo, upperLike } from "../utils/strings.js";
+import { toLowerCaseRu, init, last, nLast, lastOfNInitial, endsWithAny, unYo, upperLike } from "../utils/strings.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
 import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
 import { fastClone } from "../Lemma.js";

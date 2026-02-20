@@ -210,3 +210,18 @@ export function okWord(lcWord) {
             && lcWord.length >= 4
         ));
 }
+
+/**
+ * В русском языке практически не бывает безударных букв Ё.
+ * Поэтому при ударном окончании, буква Ё должна исчезать из основы слова.
+ * Данная функция подготавливает несколько вариантов основы слова, в зависимости от ударения.
+ *
+ * @param {Array} stressedEnding Булевые значения, означающие ударное окончание
+ * @param {string} stem Основа слова (может содержать ё)
+ * @param {function} transform Функция постобработки получившихся строк (принимает флаг ударного окончания вторым аргументом)
+ * @return {Array} Список основ, зависящих от ударения — в том порядке, в котором идут булевые значения в аргументах
+ */
+export function eStem(stressedEnding, stem, transform) {
+    const stressList = stressedEnding.length ? stressedEnding : [false];
+    return stressList.map(ending => ending ? transform(unYo(stem), ending) : transform(stem, ending));
+}

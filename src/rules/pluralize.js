@@ -1,12 +1,12 @@
 import { Case } from "../Case.js";
 import { Gender } from "../Gender.js";
-import { getNounStem, okWord, egoEndings, egoSoftM, tsStem } from "./common.js";
+import { getNounStem, okWord, egoEndings, egoSoftM, tsStem, eStem } from "./common.js";
 import { softD1, isAdjectiveLike } from "./decline1.js";
 import { specialD3 } from "./decline3.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, vowels } from "../utils/letters.js";
-import { toLowerCaseRu, init, last, nInit, nLast, lastOfNInitial, endsWithAny, eStem, unYo, upperLike } from "../utils/strings.js";
+import { toLowerCaseRu, init, last, nInit, nLast, lastOfNInitial, endsWithAny, unYo, upperLike } from "../utils/strings.js";
 import { getPluralForms } from "../settings/irregularNouns.js";
 
 // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
