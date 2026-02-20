@@ -12,21 +12,22 @@
 
     const Gender = RussianNouns.Gender;
     const Case = RussianNouns.Case;
+    const Lemma = RussianNouns.Lemma;
 
-    let coat = {
+    let coat = Lemma.create({
         text: 'пальто',
         gender: Gender.NEUTER,
         indeclinable: true
-    };
+    });
 
     console.log(rne.decline(coat, Case.GENITIVE));
 
-    console.log(RussianNouns.getDeclension(coat));
+    console.log(coat.getDeclension());
 
-    let mountain = {
+    let mountain = Lemma.create({
         text: 'гора',
         gender: Gender.FEMININE
-    };
+    });
 
     console.log(RussianNouns.CASES.map(c => {
         return rne.decline(mountain, c);
@@ -34,16 +35,16 @@
 
     console.log(rne.pluralize(mountain));
 
-    console.log(RussianNouns.getDeclension(mountain));
+    console.log(mountain.getDeclension());
 
-    console.log(RussianNouns.getSchoolDeclension(mountain));
+    console.log(mountain.getSchoolDeclension());
 
-    let way = {
+    let way = Lemma.create({
         text: 'путь',
         gender: Gender.MASCULINE
-    };
+    });
 
-    console.log(RussianNouns.getDeclension(way));
+    console.log(way.getDeclension());
 
     let кринж = {
         text: 'кринж',
