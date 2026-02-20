@@ -3,111 +3,11 @@ import { Gender } from "../Gender.js";
 import { getNounStem, okWord, egoEndings, egoSoftM, tsStem } from "./common.js";
 import { softD1, isAdjectiveLike } from "./decline1.js";
 import { specialD3 } from "./decline3.js";
-import { BloomFilter } from "../utils/bloom.js";
-import { calculateHash } from "../utils/hash.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { unique } from "../utils/lists.js";
 import { bincludes, vowels } from "../utils/letters.js";
 import { toLowerCaseRu, init, last, nInit, nLast, lastOfNInitial, endsWithAny, eStem, unYo, upperLike } from "../utils/strings.js";
-
-const highPriorityBloomFilter = new BloomFilter();
-const highPriorityExceptions = Object.freeze([
-    [
-        [
-            Gender.MASCULINE,
-            undefined
-        ],
-        {
-            'болгарин': ['болгары'],
-            'господин': ['господа'],
-            'дядя': ['дяди', 'дядья'],
-            'зуб': ['зубы', 'зубья'], // TODO: омонимы, переделать
-            'клок': ['клочья', 'клоки'],
-            'князь': ['князи', 'князья'],
-            'кол': ['колы', 'колья'], // TODO: можно разделить на омонимы
-            'месяц': ['месяцы'],
-            'полдень': ['полдни', 'полудни'],
-            'татарин': ['татары'],
-            'хозяин': ['хозяева'],
-            'цветок': ['цветки', 'цветы'],
-            'черт': ['черти'],
-            'чёрт': ['черти']
-        }
-    ],
-    [
-        [
-            Gender.MASCULINE,
-            true
-        ],
-        {
-            'кондуктор': ['кондуктора', 'кондукторы'],
-            'кум': ['кумовья'],
-            'муж': ['мужья', 'мужи']
-        }
-    ],
-    [
-        [
-            Gender.FEMININE,
-            undefined
-        ],
-        {
-            'гроздь': ['грозди', 'гроздья'],
-            'курица': ['курицы', "куры"],
-            'стая': ['стаи'],
-            // И я решил зашить сюда даже случаи, когда итак слово норм обрабатывается,
-            // но в корпусе там буква Ё. И почему бы не выдавать так же букву Ё.
-            // В будущем это наверно надо отрефакторить.
-            'щека': ['щёки'],
-            'береста': ['берёсты'],
-            'верста': ['вёрсты'],
-            'десна': ['дёсны'],
-            'жена': ['жёны'],
-            'звезда': ['звёзды'],
-            'кинозвезда': ['кинозвёзды'],
-            'медсестра': ['медсёстры'],
-            'метла': ['мётлы'],
-            'пчела': ['пчёлы'],
-            'сестра': ['сёстры'],
-            'слеза': ['слёзы']
-        }
-    ],
-    [
-        [
-            Gender.NEUTER,
-            undefined
-        ],
-        {
-            'брюхо': ['брюхи'],
-            'колено': ['колена', 'колени', 'коленья'], // TODO: можно разделить на омонимы
-            'древо': ['древа', 'древеса'],
-            'ухо': ['уши'],
-            'око': ['очи'],
-            'дно': ['донья'],
-            'чудо': ['чудеса', 'чуда'],
-            'небо': ['небеса'],
-            // Буква Ё:
-            'бревно': ['брёвна'],
-            'ведро': ['вёдра'],
-            'веретено': ['веретёна'],
-            'весло': ['вёсла'],
-            'гнездо': ['гнёзда'],
-            'зерно': ['зёрна'],
-            'знамя': ['знамёна'],
-            'колесо': ['колёса'],
-            'облачко': ['облачка'],
-            'озеро': ['озёра'],
-            'полсотни': ['полусотни'],
-            'ребро': ['рёбра'],
-            'ремесло': ['ремёсла'],
-            'седло': ['сёдла'],
-            'село': ['сёла']
-        }
-    ]
-]);
-
-for (const rule of highPriorityExceptions) {
-    Object.keys(rule[1]).map(word => highPriorityBloomFilter.addInteger(calculateHash(word)));
-}
+import { getPluralForms } from "../settings/irregularNouns.js";
 
 // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
 // и у них нужно преобразовывать основу особым образом (мягкие знаки и т.п.)
@@ -283,25 +183,9 @@ export function pluralize(engine, lemma) {
         }
     }
 
-    if (highPriorityBloomFilter.hasInteger(lemma._hash)) {
-        for (const [key, genderExceptions] of highPriorityExceptions) {
-
-            const keyGender = key[0];
-            const keyAnimate = key[1];
-
-            if ((gender === keyGender)
-                    && ((keyAnimate == null) || (keyAnimate === lemma.isAnimate()))
-                    && genderExceptions.hasOwnProperty(lcWord)) {
-
-                const v = genderExceptions[lcWord];
-
-                for (let x of v) {
-                    result.push(x);
-                }
-
-                return unique(result);
-            }
-        }
+    const irregularPluralForms = getPluralForms(lemma, lcWord);
+    if (irregularPluralForms) {
+        return irregularPluralForms;
     }
 
     const softStemD1 = (last(lcStem) === 'ь')
