@@ -26,30 +26,10 @@ export function toLowerCaseRu(s) {
 
 // -------------------------------------------------
 
-// Without ё, the Russian alphabet consists of 32 letters.
-export function lcBit(lcChar) {
-    const x = lcChar.charCodeAt(0) - 1072;
-    return (x === 33) ? 0b100000 : ((x === (0x1F & x)) ? (1 << x) : 0);
-}
 
-export function bincludes(mask, lcChar) {
-    return (mask & lcBit(lcChar)) !== 0;
-}
-
-export const vowels = 0b11101000000010000100000100100001;
-export const consonants = (~vowels) & ((1 << 26) - 1);
-export const consonantsExceptJ = consonants ^ (1 << 9);
-
-function isVowel(ch) {
-    return bincludes(vowels, toLowerCaseRu(ch));
-}
 
 export function upperLike(str, pattern) {
     return (pattern === pattern.toUpperCase()) ? str.toUpperCase() : str;
-}
-
-export function vowelCount(s) {
-    return s.split('').filter(isVowel).length;
 }
 
 export function unYo(s) {

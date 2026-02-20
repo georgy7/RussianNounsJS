@@ -1,6 +1,7 @@
 import { Case } from "../Case.js";
 import { getNounStem } from "./common.js";
-import { toLowerCaseRu, init, last, nLast, bincludes, vowels, vowelCount, endsWithAny } from "../utils/strings.js";
+import { bincludes, vowels, vowelCount } from "../utils/letters.js";
+import { toLowerCaseRu, init, last, nLast, endsWithAny } from "../utils/strings.js";
 
 export function decline2(engine, lemma, grCase) {
     const word = lemma.text();
@@ -16,10 +17,10 @@ export function decline2(engine, lemma, grCase) {
         return last(lcWord) === 'я';
     };
     const ayaWord = () => {
-        return lcWord.endsWith('ая') && !((vowelCount(word) === 2) || bincludes(vowels, last(lcStem)));
+        return lcWord.endsWith('ая') && !((vowelCount(lcWord) === 2) || bincludes(vowels, last(lcStem)));
     };
     const yayaWord = () => {
-        return lcWord.endsWith('яя') && !((vowelCount(word) === 2) || bincludes(vowels, last(lcStem)));
+        return lcWord.endsWith('яя') && !((vowelCount(lcWord) === 2) || bincludes(vowels, last(lcStem)));
     };
     const ayaExceptions = [
         'жая', 'шая'

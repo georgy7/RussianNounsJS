@@ -2,7 +2,8 @@ import { Gender } from "../Gender.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
-import { init, last, nInit, nLast, lastOfNInitial, bincludes, lcBit, vowels, consonantsExceptJ, endsWithAny, upperLike } from "../utils/strings.js";
+import { bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/letters.js";
+import { init, last, nInit, nLast, lastOfNInitial, endsWithAny, upperLike } from "../utils/strings.js";
 
 export const ogoEndings = createReversedTrie([
     'ое',

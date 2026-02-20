@@ -1,6 +1,7 @@
 import { GenderValues, Gender } from "./Gender.js";
 import { calculateHash } from "./utils/hash.js";
-import { last, nLast, bincludes, consonants } from "./utils/strings.js";
+import { bincludes, consonants } from "./utils/letters.js";
+import { last, nLast } from "./utils/strings.js";
 
 /**
  * Нормальная форма слова.
