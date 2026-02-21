@@ -633,7 +633,7 @@ const checkSingularBase = (rne, lemma, expectedSingular) => {
 };
 
 
-test("Some nouns", () => {
+test("some nouns", () => {
     const rne = new Engine();
     const checkSingularAndPlural = (l, s, p) => checkSingularAndPluralBase(rne, l, s, p);
     const checkSingular = (l, s) => checkSingularBase(rne, l, s);
@@ -864,7 +864,7 @@ test("Some nouns", () => {
 });
 
 
-test("Some adjectives and participles", () => {
+test("some adjectives and participles", () => {
     const rne = new Engine();
     const checkSingularAndPlural = (l, s, p) => checkSingularAndPluralBase(rne, l, s, p);
 
