@@ -17,3 +17,7 @@ export const Case = Object.freeze({
     PREPOSITIONAL: CaseValues[5],
     LOCATIVE: CaseValues[6]
 });
+
+export function toCaseIndex(grCase) {
+    return (typeof grCase === "number") ? grCase : CaseValues.indexOf(grCase);
+}

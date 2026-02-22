@@ -1,7 +1,7 @@
 import { stressHashesA, stressHashesB } from "./settings/stressHashes.js";
 import { BloomFilter } from "./utils/bloom.js";
 import { Lemma } from "./Lemma.js";
-import { CaseValues } from "./Case.js";
+import { toCaseIndex } from "./Case.js";
 import { Gender } from "./Gender.js";
 
 const stressBloomAB = (function () {
@@ -129,7 +129,7 @@ export function StressDictionary() {
     this.hasStressedEndingSingular = function (query, grCase) {
         if (_bloomFilter.hasInteger(query._hash)) {
 
-            const caseIndex = CaseValues.indexOf(grCase);
+            const caseIndex = toCaseIndex(grCase);
 
             if (caseIndex >= 0) {
                 let v = _getOne(query);
@@ -153,7 +153,7 @@ export function StressDictionary() {
     this.hasStressedEndingPlural = function (query, grCase) {
         if (_bloomFilter.hasInteger(query._hash)) {
 
-            const caseIndex = CaseValues.indexOf(grCase);
+            const caseIndex = toCaseIndex(grCase);
 
             if (caseIndex >= 0 && caseIndex < 6) {
                 let v = _getOne(query);

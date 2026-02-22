@@ -1,4 +1,3 @@
-import { Case } from "../Case.js";
 import { Gender } from "../Gender.js";
 import { getNounStem, okWord, egoEndings, egoSoftM, tsStem, eStem } from "./common.js";
 import { softD1, isAdjectiveLike } from "./decline1.js";
@@ -9,6 +8,8 @@ import { bincludes, vowels } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
 import { init, last, takeLast, dropLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
 import { getPluralForms } from "../settings/irregularNouns.js";
+
+const NOMINATIVE = 0;
 
 // Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
 // и у них нужно преобразовывать основу особым образом (мягкие знаки и т.п.)
@@ -112,7 +113,7 @@ export function pluralize(engine, lemma) {
     const lcWord = toLowerCaseRu(word);
 
     const stressedEnding = engine.sd
-        .hasStressedEndingPlural(lemma, Case.NOMINATIVE);
+        .hasStressedEndingPlural(lemma, NOMINATIVE);
 
     Object.freeze(stressedEnding);
 
@@ -126,7 +127,7 @@ export function pluralize(engine, lemma) {
 
     const yoStem = (f) => {
         const stressedStem = engine.sd
-            .hasStressedEndingPlural(lemma, Case.NOMINATIVE).map(x => !x);
+            .hasStressedEndingPlural(lemma, NOMINATIVE).map(x => !x);
 
         if (!stressedStem.length) {
             return [f(stem)];

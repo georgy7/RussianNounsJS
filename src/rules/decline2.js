@@ -1,10 +1,17 @@
-import { Case } from "../Case.js";
 import { getNounStem } from "./common.js";
 import { bincludes, vowels, vowelCount } from "../utils/alphabet.js";
 import { toLowerCaseRu } from "../utils/letterCase.js";
 import { init, last, takeLast, hasChar, endsWithAny } from "../utils/strings.js";
 
-export function decline2(engine, lemma, grCase) {
+const NOM = 0;
+const GEN = 1;
+const DAT = 2;
+const ACC = 3;
+const INS = 4;
+const PREP = 5;
+const LOC = 6;
+
+export function decline2(engine, lemma, caseIndex) {
     const word = lemma.text();
     const lcWord = lemma.lower();
 
@@ -26,11 +33,11 @@ export function decline2(engine, lemma, grCase) {
     const ayaExceptions = [
         'жая', 'шая'
     ];
-    switch (grCase) {
-        case Case.NOMINATIVE:
+    switch (caseIndex) {
+        case NOM:
             return word;
 
-        case Case.GENITIVE:
+        case GEN:
             if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                 return stem + 'ей';
             } else if (ayaWord()) {
@@ -46,7 +53,7 @@ export function decline2(engine, lemma, grCase) {
             }
             return head + 'ы';
 
-        case Case.DATIVE:
+        case DAT:
             if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                 return stem + 'ей';
             } else if (ayaWord()) {
@@ -60,7 +67,7 @@ export function decline2(engine, lemma, grCase) {
             }
             return head + 'е';
 
-        case Case.ACCUSATIVE:
+        case ACC:
             if (ayaWord()) {
                 return stem + 'ую';
             } else if (yayaWord()) {
@@ -70,14 +77,14 @@ export function decline2(engine, lemma, grCase) {
             }
             return head + 'у';
 
-        case Case.INSTRUMENTAL:
+        case INS:
             if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                 return stem + 'ею';
             } else if (ayaWord()) {
                 return [stem + 'ой', stem + 'ою'];
             } else if (soft() ||
                     (hasChar('жшчщц', last(lcStem)) &&
-                        !(engine.sd.hasStressedEndingSingular(lemma, grCase).includes(true)))) {
+                        !(engine.sd.hasStressedEndingSingular(lemma, caseIndex).includes(true)))) {
                 if ('и' === last(lcHead)) {
                     return head + 'ей';
                 } else {
@@ -86,8 +93,8 @@ export function decline2(engine, lemma, grCase) {
             }
             return [head + 'ой', head + 'ою'];
 
-        case Case.PREPOSITIONAL:
-        case Case.LOCATIVE:
+        case PREP:
+        case LOC:
             if (yayaWord() || endsWithAny(lcWord, ayaExceptions)) {
                 return stem + 'ей';
             } else if (ayaWord()) {

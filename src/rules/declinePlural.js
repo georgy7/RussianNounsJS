@@ -190,13 +190,13 @@ const kiExceptions = createReversedTrie([
 ]);
 
 
-export function declinePlural(engine, lemma, grCase, plural) {
+export function declinePlural(engine, lemma, caseIndex, plural) {
     const lcPlural = toLowerCaseRu(plural);
 
     const lcLastChar = last(lcPlural);
     const lcLastBit = lcBit(lcLastChar);
 
-    const grCaseNumber = CaseValues.indexOf(grCase) + 1;
+    const grCaseNumber = caseIndex + 1;
 
     if ((grCaseNumber === 1) || ((grCaseNumber === 4) && !lemma.isAnimate())) {
         return plural;
@@ -249,7 +249,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
 
         if (endsWithSuffix(lcPlural, declinePluralSoftEndings)) {
             return init(plural) + declinePluralEndings2[flatIndex2];
-        } else if (engine.sd.hasStressedEndingPlural(lemma, grCase).includes(true)) {
+        } else if (engine.sd.hasStressedEndingPlural(lemma, caseIndex).includes(true)) {
             return unYo(stem) + declinePluralEndings2[flatIndex2 + 1];
         } else {
             return stem + declinePluralEndings2[flatIndex2 + 1];
@@ -270,7 +270,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
                 lcStem === 'зл'
             ) || (
                 endsWithAny(lcPlural, dependsOnStress) &&
-                engine.sd.hasStressedEndingPlural(lemma, grCase).includes(true)
+                engine.sd.hasStressedEndingPlural(lemma, caseIndex).includes(true)
             )) {
                 const end = last(stem);
                 return init(stem) + upperLike('о', end) + end;
@@ -449,7 +449,7 @@ export function declinePlural(engine, lemma, grCase, plural) {
         }
 
         if (endsWithAny(lcPlural, ['ьи', 'ии'])) {
-            if (engine.sd.hasStressedEndingSingular(lemma, grCase).includes(true)) {
+            if (engine.sd.hasStressedEndingSingular(lemma, caseIndex).includes(true)) {
                 return dropLast(plural, 2) + 'ей';
             } else {
                 return dropLast(plural, 2) + 'ий';

@@ -1,22 +1,29 @@
-import { Case } from "../Case.js";
 import { fastClone } from "../Lemma.js";
 import { getNounStem } from "./common.js";
 import { bincludes, vowelCount } from "../utils/alphabet.js";
 import { last, takeLast, endsWithAny } from "../utils/strings.js";
+
+const NOM = 0;
+const GEN = 1;
+const DAT = 2;
+const ACC = 3;
+const INS = 4;
+const PREP = 5;
+const LOC = 6;
 
 export const specialD3 = {
     'дочь': 'дочерь',
     'мать': 'матерь'
 };
 
-export function decline3(engine, lemma, grCase) {
+export function decline3(engine, lemma, caseIndex) {
     const word = lemma.text();
     const lcWord = lemma.lower();
 
-    if (![Case.NOMINATIVE, Case.ACCUSATIVE].includes(grCase)) {
+    if (![NOM, ACC].includes(caseIndex)) {
         if (Object.keys(specialD3).includes(lcWord)) {
             const lemmaCopy = fastClone(lemma, specialD3[lcWord]);
-            return decline3(engine, lemmaCopy, grCase);
+            return decline3(engine, lemmaCopy, caseIndex);
         }
     }
 
@@ -27,29 +34,29 @@ export function decline3(engine, lemma, grCase) {
     }
 
     if (takeLast(lcWord, 2) === 'мя') {
-        switch (grCase) {
-            case Case.NOMINATIVE:
-            case Case.ACCUSATIVE:
+        switch (caseIndex) {
+            case NOM:
+            case ACC:
                 return word;
-            case Case.GENITIVE:
-            case Case.DATIVE:
-            case Case.PREPOSITIONAL:
-            case Case.LOCATIVE:
+            case GEN:
+            case DAT:
+            case PREP:
+            case LOC:
                 return stem + 'ени';
-            case Case.INSTRUMENTAL:
+            case INS:
                 return stem + 'енем';
         }
     } else {
-        switch (grCase) {
-            case Case.NOMINATIVE:
-            case Case.ACCUSATIVE:
+        switch (caseIndex) {
+            case NOM:
+            case ACC:
                 return word;
-            case Case.GENITIVE:
-            case Case.DATIVE:
-            case Case.PREPOSITIONAL:
-            case Case.LOCATIVE:
+            case GEN:
+            case DAT:
+            case PREP:
+            case LOC:
                 return stem + 'и';
-            case Case.INSTRUMENTAL:
+            case INS:
                 if (endsWithAny(lcWord, ['вошь', 'рожь', 'церковь'])) {
                     return word + 'ю';
                 }

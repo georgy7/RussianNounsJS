@@ -1,4 +1,3 @@
-import { Case } from "../Case.js";
 import { Gender } from "../Gender.js";
 import { getNounStem, okWord, ogoEndings, ogoEndings2, ogoEndings3, egoEndings, tsStem, eStem } from "./common.js";
 import { decline0 } from "./decline0.js";
@@ -15,6 +14,14 @@ import { init, last, takeLast, charFromEnd, hasChar, endsWithAny, unYo } from ".
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
 import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
 import { fastClone } from "../Lemma.js";
+
+const NOM = 0;
+const GEN = 1;
+const DAT = 2;
+const ACC = 3;
+const INS = 4;
+const PREP = 5;
+const LOC = 6;
 
 const uForm = new Set((
     'клей,чай,' +
@@ -67,17 +74,17 @@ const ojeEngings = createReversedTrie([
 /**
  * @param {RussianNouns.Engine} engine
  * @param {RussianNouns.Lemma} lemma
- * @param {string} grCase
+ * @param {number} caseIndex
  * @returns {Array|string}
  */
-export function decline1(engine, lemma, grCase) {
+export function decline1(engine, lemma, caseIndex) {
     const word = lemma.text();
     const lcWord = toLowerCaseRu(word);
 
     const lcLastChar = last(lcWord);
     const gender = lemma.getGender();
 
-    const stressedEnding = engine.sd.hasStressedEndingSingular(lemma, grCase);
+    const stressedEnding = engine.sd.hasStressedEndingSingular(lemma, caseIndex);
 
     let stem = getNounStem(lemma, lcWord, stressedEnding[0]);
     let head = init(word);
@@ -116,16 +123,16 @@ export function decline1(engine, lemma, grCase) {
         return r;
     }
 
-    switch (grCase) {
-        case Case.NOMINATIVE:
+    switch (caseIndex) {
+        case NOM:
             return word;
 
-        case Case.GENITIVE:
+        case GEN:
             switch (lcLastChar) {
                 case 'и':
                 case 'ы':
                     if (half) {
-                        return decline1Half(engine, lemma, grCase, lcWord);
+                        return decline1Half(engine, lemma, caseIndex, lcWord);
                     }
                     break;
 
@@ -173,12 +180,12 @@ export function decline1(engine, lemma, grCase) {
             }
             return addUForm(r);
 
-        case Case.DATIVE:
+        case DAT:
             switch (lcLastChar) {
                 case 'и':
                 case 'ы':
                     if (half) {
-                        return decline1Half(engine, lemma, grCase, lcWord);
+                        return decline1Half(engine, lemma, caseIndex, lcWord);
                     }
                     break;
 
@@ -215,23 +222,23 @@ export function decline1(engine, lemma, grCase) {
             }
             return eStem(stressedEnding, stem, s => s + 'у');
 
-        case Case.ACCUSATIVE:
+        case ACC:
             if ((gender === Gender.NEUTER) ||
                     (hasChar('иы', lcLastChar) && half)) {
                 return word;
             }
 
             if (lemma.isAnimate()) {
-                return decline1(engine, lemma, Case.GENITIVE);
+                return decline1(engine, lemma, GEN);
             }
             return word;
 
-        case Case.INSTRUMENTAL:
+        case INS:
             switch (lcLastChar) {
                 case 'и':
                 case 'ы':
                     if (half) {
-                        return decline1Half(engine, lemma, grCase, lcWord);
+                        return decline1Half(engine, lemma, caseIndex, lcWord);
                     }
                     break;
                 
@@ -289,7 +296,7 @@ export function decline1(engine, lemma, grCase) {
             }
             return eStem(stressedEnding, stem, s => s + 'ом');
 
-        case Case.LOCATIVE:
+        case LOC:
             if ('полпути' === lcWord) {
                 return word;
             }
@@ -301,7 +308,7 @@ export function decline1(engine, lemma, grCase) {
             }
             // Fall through
 
-        case Case.PREPOSITIONAL:
+        case PREP:
             switch (lcLastChar) {
                 case 'и':
                     if ('полпути' === lcWord) {
@@ -309,7 +316,7 @@ export function decline1(engine, lemma, grCase) {
                     }
                 case 'ы':
                     if (half) {
-                        return decline1Half(engine, lemma, grCase, lcWord);
+                        return decline1Half(engine, lemma, caseIndex, lcWord);
                     }
                     break;
                 
@@ -354,20 +361,20 @@ export function decline1(engine, lemma, grCase) {
     }
 }
 
-function decline1Half(engine, lemma, grCase, lcWord) {
+function decline1Half(engine, lemma, caseIndex, lcWord) {
     const h = () => (lcWord !== 'полминуты') ?
         ('полу' + lemma.text().substring(3)) : lemma.text();
 
     if ('полпути' === lcWord) {
         let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
-        return decline0(engine, lemmaCopy, grCase);
+        return decline0(engine, lemmaCopy, caseIndex);
     } else if (lcWord.endsWith('зни') || lcWord.endsWith('сти')) {
         let lemmaCopy = fastClone(lemma, init(h()) + 'ь');
-        return decline3(engine, lemmaCopy, grCase);
+        return decline3(engine, lemmaCopy, caseIndex);
     } else {
         let lemmaCopy = fastClone(lemma, init(h()) +
             ((takeLast(lcWord, 2) === 'ни') ? 'я' : 'а'));
-        return decline2(engine, lemmaCopy, grCase);
+        return decline2(engine, lemmaCopy, caseIndex);
     }
 }
 
@@ -412,7 +419,7 @@ export function toLocativeSingular1(engine, lemma, declensionType) {
             return unYo(stem) + 'у';
         }
     } else if (LocativeDeclensionType.PREPOSITIONAL === declensionType) {
-        return decline1(engine, lemma, Case.PREPOSITIONAL);
+        return decline1(engine, lemma, PREP);
     }
 }
 

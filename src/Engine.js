@@ -1,3 +1,4 @@
+import { CaseValues } from "./Case.js";
 import { Lemma } from "./Lemma.js";
 import { makeDefaultStressDictionary } from "./settings/defaultStressDictionary.js";
 import { decline0 } from "./rules/decline0.js";
@@ -97,15 +98,16 @@ function declineAsList(engine, lemma, grCase, pluralForm) {
 
 function decline(engine, lemma, grCase, pluralForm) {
     const word = lemma.text();
+    const caseIndex = CaseValues.indexOf(grCase);
 
     if (lemma.isIndeclinable()) {
         return word;
     }
 
     if (lemma.isPluraleTantum()) {
-        return declinePlural(engine, lemma, grCase, word);
+        return declinePlural(engine, lemma, caseIndex, word);
     } else if (pluralForm) {
-        return declinePlural(engine, lemma, grCase, pluralForm);
+        return declinePlural(engine, lemma, caseIndex, pluralForm);
     }
 
     const declension = lemma.getDeclension();
@@ -114,25 +116,26 @@ function decline(engine, lemma, grCase, pluralForm) {
         case -1:
             return word;
         case 0:
-            return decline0(engine, lemma, grCase);
+            return decline0(engine, lemma, caseIndex);
         case 1:
-            return decline1(engine, lemma, grCase);
+            return decline1(engine, lemma, caseIndex);
         case 2:
-            return decline2(engine, lemma, grCase);
+            return decline2(engine, lemma, caseIndex);
         case 3:
-            return decline3(engine, lemma, grCase);
+            return decline3(engine, lemma, caseIndex);
     }
 }
 
 function toLocativeSingular(engine, declension, lemma, declensionType) {
+    const PREPOSITIONAL = 5;
     switch (declension) {
         case 0:
-            return decline0(engine, lemma, Case.PREPOSITIONAL);
+            return decline0(engine, lemma, PREPOSITIONAL);
         case 1:
             return toLocativeSingular1(engine, lemma, declensionType);
         case 2:
-            return decline2(engine, lemma, Case.PREPOSITIONAL);
+            return decline2(engine, lemma, PREPOSITIONAL);
         case 3:
-            return decline3(engine, lemma, Case.PREPOSITIONAL);
+            return decline3(engine, lemma, PREPOSITIONAL);
     }
 }
