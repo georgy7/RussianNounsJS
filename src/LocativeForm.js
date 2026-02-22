@@ -42,24 +42,24 @@ export const LFA_RELIGIOUS = 14;
  * Затем к ним еще добавлены синтаксические особенности употребления.
  */
 export const LocativeFormAttribute = Object.freeze({
-    CONTAINER: leftShift(LFA_CONTAINER),
-    LOCATION: leftShift(LFA_LOCATION),
-    STRUCTURE: leftShift(LFA_STRUCTURE),
-    SURFACE: leftShift(LFA_SURFACE),
+    CONTAINER: (1 << LFA_CONTAINER),
+    LOCATION: (1 << LFA_LOCATION),
+    STRUCTURE: (1 << LFA_STRUCTURE),
+    SURFACE: (1 << LFA_SURFACE),
 
     // Метафорический путь. Луч времени, на (или в) котором лежат события.
-    WAY: leftShift(LFA_WAY),
+    WAY: (1 << LFA_WAY),
 
     // Объект с функциональной (не обязательно плоской) поверхностью.
-    OBJECT_WITH_FUNCTIONAL_SURFACE: leftShift(LFA_OBJ_W_SURFACE),
+    OBJECT_WITH_FUNCTIONAL_SURFACE: (1 << LFA_OBJ_W_SURFACE),
 
     // Вещество (обволакивающее или покрывающее).
-    SUBSTANCE: leftShift(LFA_SUBSTANCE),
+    SUBSTANCE: (1 << LFA_SUBSTANCE),
     // Материал, средство изготовления, приготовления (еды), ремонта.
-    RESOURCE: leftShift(LFA_RESOURCE),
+    RESOURCE: (1 << LFA_RESOURCE),
 
     // Состояние, свойство, положение дел.
-    CONDITION: leftShift(LFA_CONDITION),
+    CONDITION: (1 << LFA_CONDITION),
 
     // Испытываемое воздействие (стихии или внимания/отношения человека).
     EXPOSURE: leftShift(LFA_EXPOSURE),

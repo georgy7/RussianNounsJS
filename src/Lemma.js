@@ -2,6 +2,7 @@ import { GenderValues, Gender } from "./Gender.js";
 import { calculateHash } from "./utils/hash.js";
 import { bincludes, consonants } from "./utils/alphabet.js";
 import { last, takeLast } from "./utils/strings.js";
+import { leftShift } from "./utils/decompress.js";
 
 /**
  * Нормальная форма слова.
@@ -41,7 +42,7 @@ export class Lemma {
             this._flags |= (1 << 6) * (o.name&1);
             this._flags |= (1 << 7) * (o.transport&1);
 
-            this._flags |= (1 << 16) * (
+            this._flags |= leftShift(16) * (
                 2 + calculateDeclension(this._lc, o.pluraleTantum, o.gender, o.indeclinable)
             );
         }
