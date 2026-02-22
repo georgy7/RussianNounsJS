@@ -7,3 +7,9 @@ export function deltaDecodeToSet(inputArray) {
     }
     return resultSet;
 }
+
+// Minifiers usually evaluate expressions with constants to move the evaluation to the assembly phase.
+// In the case of left shift, this is often completely pointless and results in larger bundles.
+export function leftShift(operand) {
+    return 1 << operand;
+}

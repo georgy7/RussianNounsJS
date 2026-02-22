@@ -1,3 +1,5 @@
+import { leftShift } from "./utils/decompress.js";
+
 /**
  * Форма слова в местном падеже (ед. ч.) с предлогом
  * и списком условий применения, которые складываются через логическое И.
@@ -14,6 +16,22 @@ export function LocativeForm(preposition, word, attributes) {
     this.attributes = attributes;
 }
 
+export const LFA_CONTAINER = 0;
+export const LFA_LOCATION = 1;
+export const LFA_STRUCTURE = 2;
+export const LFA_SURFACE = 3;
+export const LFA_WAY = 4;
+export const LFA_OBJ_W_SURFACE = 5;
+export const LFA_SUBSTANCE = 6;
+export const LFA_RESOURCE = 7;
+export const LFA_CONDITION = 8;
+export const LFA_EXPOSURE = 9;
+export const LFA_MOTION = 10;
+export const LFA_EVENT = 11;
+export const LFA_WITH_ADJECTIVE = 12;
+export const LFA_WITHOUT_ADJECTIVE = 13;
+export const LFA_RELIGIOUS = 14;
+
 /**
  * Это еще не стабилизированная часть API.
  *
@@ -24,40 +42,40 @@ export function LocativeForm(preposition, word, attributes) {
  * Затем к ним еще добавлены синтаксические особенности употребления.
  */
 export const LocativeFormAttribute = Object.freeze({
-    CONTAINER: 1,
-    LOCATION: 2,
-    STRUCTURE: 4,
-    SURFACE: 8,
+    CONTAINER: leftShift(LFA_CONTAINER),
+    LOCATION: leftShift(LFA_LOCATION),
+    STRUCTURE: leftShift(LFA_STRUCTURE),
+    SURFACE: leftShift(LFA_SURFACE),
 
     // Метафорический путь. Луч времени, на (или в) котором лежат события.
-    WAY: 16,
+    WAY: leftShift(LFA_WAY),
 
     // Объект с функциональной (не обязательно плоской) поверхностью.
-    OBJECT_WITH_FUNCTIONAL_SURFACE: 32,
+    OBJECT_WITH_FUNCTIONAL_SURFACE: leftShift(LFA_OBJ_W_SURFACE),
 
     // Вещество (обволакивающее или покрывающее).
-    SUBSTANCE: 64,
+    SUBSTANCE: leftShift(LFA_SUBSTANCE),
     // Материал, средство изготовления, приготовления (еды), ремонта.
-    RESOURCE: 128,
+    RESOURCE: leftShift(LFA_RESOURCE),
 
     // Состояние, свойство, положение дел.
-    CONDITION: 256,
+    CONDITION: leftShift(LFA_CONDITION),
 
     // Испытываемое воздействие (стихии или внимания/отношения человека).
-    EXPOSURE: 512,
+    EXPOSURE: leftShift(LFA_EXPOSURE),
 
     // Перемещение или кратковременное пространственное положение.
-    MOTION: 1024,
+    MOTION: leftShift(LFA_MOTION),
 
     // Мероприятие.
-    EVENT: 2048,
+    EVENT: leftShift(LFA_EVENT),
 
-    WITH_ADJECTIVE: 4096,
-    WITHOUT_ADJECTIVE: 8192,
+    WITH_ADJECTIVE: leftShift(LFA_WITH_ADJECTIVE),
+    WITHOUT_ADJECTIVE: leftShift(LFA_WITHOUT_ADJECTIVE),
 
     // Я еще не до конца понял этот аспект.
     // Этот флаг наверняка исчезнет в будущих релизах.
-    RELIGIOUS: 16384
+    RELIGIOUS: leftShift(LFA_RELIGIOUS)
 });
 
 /**
