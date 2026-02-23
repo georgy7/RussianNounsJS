@@ -207,7 +207,10 @@ ${cap(pl(снег, 1))} ${pl(неведомая, 2)} ${pl(высота, 2)}.`);
 This library does not prevent you from misusing [singularia tantum](https://en.wikipedia.org/wiki/Plurale_tantum#Singulare_tantum).
 
 ## References
-- Современный русский язык. Морфология - Камынина А.А., Уч. пос. 1999 - 240 с.
+- Современный русский язык. Морфология: Учебное пособие
+  для студентов филологических факультетов государственных университетов /
+  А.А. Камынина – Москва : Изд-во Моск. ун-та, 1999. – 240 с.;
+  ISBN 5-211-04133-X
 - [Russian grammar — Wikipedia](http://en.wikipedia.org/wiki/Russian_grammar)
 - [OpenCorpora](http://opencorpora.org/)
 - [Russian National Corpus](https://ruscorpora.ru/)
