@@ -78,6 +78,9 @@ export const LocativeFormAttribute = Object.freeze({
     RELIGIOUS: leftShift(LFA_RELIGIOUS)
 });
 
+export const LDT_PREP = 1;
+export const LDT_U = 2;
+
 /**
  * Под это число в конфиге будет выделено 3 бита (не более восьми состояний).
  */
@@ -89,10 +92,10 @@ export const LocativeDeclensionType = Object.freeze({
      * но если добавить еще определённый атрибут или несколько,
      * форма должна снова переключиться в обычную.
      */
-    PREPOSITIONAL: 1,
+    PREPOSITIONAL: LDT_PREP,
 
     // Окончания -у/-ю.
-    U_SUFFIX: 2
+    U_SUFFIX: LDT_U
 });
 
 /**

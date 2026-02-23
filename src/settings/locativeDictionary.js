@@ -1,6 +1,7 @@
 import { Gender } from "../Gender.js";
 import { leftShift } from "../utils/decompress.js";
-import { LocativePreposition, LocativeDeclensionType, encodeLocativeConfig,
+import { LocativePreposition, encodeLocativeConfig,
+    LDT_PREP, LDT_U,
     LFA_CONTAINER, LFA_LOCATION, LFA_STRUCTURE, LFA_SURFACE,
     LFA_WAY, LFA_OBJ_W_SURFACE, LFA_SUBSTANCE, LFA_RESOURCE,
     LFA_CONDITION, LFA_EXPOSURE, LFA_MOTION, LFA_EVENT,
@@ -20,7 +21,7 @@ function makeDefaultLocativeDictionary() {
         // а если строка, то можно будет, наверно, здесь же предусмотреть
         // особую форму слова, если она не совпадает с предложным падежом.
         // Но пока что это не потребовалось.
-        const declensionTypes = (dTypes instanceof Array) ? dTypes : [LocativeDeclensionType.U_SUFFIX];
+        const declensionTypes = (dTypes instanceof Array) ? dTypes : [LDT_U];
 
         for (let word of words) {
             lemmaOptions.text = word;
@@ -61,7 +62,7 @@ function makeDefaultLocativeDictionary() {
     // Не исключено, что это имеет совершенно другой религиозный смысл, чем вместилище,
     // поэтому и склонение отличается.
     addConfig(masc, leftShift(LFA_CONTAINER)|leftShift(LFA_RELIGIOUS),
-        vo, 'гроб', [LocativeDeclensionType.PREPOSITIONAL]);
+        vo, 'гроб', [LDT_PREP]);
 
     // 2. пространства («в»)
     addConfig(masc, leftShift(LFA_LOCATION), v,
@@ -100,7 +101,7 @@ function makeDefaultLocativeDictionary() {
     );
     addConfig(masc, leftShift(LFA_OBJ_W_SURFACE), na, '' +
         'крюк,болт',
-        [LocativeDeclensionType.PREPOSITIONAL, LocativeDeclensionType.U_SUFFIX]
+        [LDT_PREP, LDT_U]
     );
 
     // 6. вещества и материалы («в» и «на»)
