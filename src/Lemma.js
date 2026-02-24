@@ -99,7 +99,7 @@ export class Lemma {
     }
 
     getGender() {
-        const i = (0b111 & this._flags);
+        const i = getIntGender(this);
         if ((i >= 1) && (i <= 4)) {
             return GenderValues[i-1];
         }
@@ -157,6 +157,11 @@ export class Lemma {
             return d;
         }
     }
+}
+
+
+export function getIntGender(lemma) {
+    return 0b111 & lemma._flags;
 }
 
 

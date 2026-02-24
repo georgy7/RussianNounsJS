@@ -11,3 +11,8 @@ export const Gender = Object.freeze({
     "NEUTER": GenderValues[2],
     "COMMON": GenderValues[3]
 });
+
+export const FEM = 1;
+export const MASC = 2;
+export const NEU = 3;
+export const COM = 4;

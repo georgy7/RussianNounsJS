@@ -1,4 +1,5 @@
-import { Gender } from "../Gender.js";
+import { FEM, MASC, NEU, COM } from "../Gender.js";
+import { getIntGender } from "../Lemma.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 
@@ -6,7 +7,7 @@ const highPriorityBloomFilter = new BloomFilter();
 const highPriorityExceptions = Object.freeze([
     [
         [
-            Gender.MASCULINE,
+            MASC,
             undefined
         ],
         {
@@ -28,7 +29,7 @@ const highPriorityExceptions = Object.freeze([
     ],
     [
         [
-            Gender.MASCULINE,
+            MASC,
             true
         ],
         {
@@ -39,7 +40,7 @@ const highPriorityExceptions = Object.freeze([
     ],
     [
         [
-            Gender.FEMININE,
+            FEM,
             undefined
         ],
         {
@@ -65,7 +66,7 @@ const highPriorityExceptions = Object.freeze([
     ],
     [
         [
-            Gender.NEUTER,
+            NEU,
             undefined
         ],
         {
@@ -104,7 +105,7 @@ for (const rule of highPriorityExceptions) {
 export function getPluralForms(lemma, lcWord) {
     if (highPriorityBloomFilter.hasInteger(lemma._hash)) {
 
-        const gender = lemma.getGender();
+        const gender = getIntGender(lemma);
         const animate = lemma.isAnimate();
 
         for (const [key, genderExceptions] of highPriorityExceptions) {

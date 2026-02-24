@@ -1,4 +1,4 @@
-import { Gender } from "../Gender.js";
+import { FEM, MASC, NEU, COM } from "../Gender.js";
 import { getNounStem, okWord, ogoEndings, ogoEndings2, ogoEndings3, egoEndings, tsStem, eStem } from "./common.js";
 import { decline0 } from "./decline0.js";
 import { decline2 } from "./decline2.js";
@@ -13,7 +13,7 @@ import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
 import { init, last, takeLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
 import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
-import { fastClone } from "../Lemma.js";
+import { fastClone, getIntGender } from "../Lemma.js";
 
 const NOM = 0;
 const GEN = 1;
@@ -82,7 +82,6 @@ export function decline1(engine, lemma, caseIndex) {
     const lcWord = toLowerCaseRu(word);
 
     const lcLastChar = last(lcWord);
-    const gender = lemma.getGender();
 
     const stressedEnding = engine.sd.hasStressedEndingSingular(lemma, caseIndex);
 
@@ -166,7 +165,7 @@ export function decline1(engine, lemma, caseIndex) {
                     break;
 
                 case 'о':
-                    if (endsWithAny(lcWord, ['шко']) && (Gender.MASCULINE === gender)) {
+                    if (endsWithAny(lcWord, ['шко']) && (getIntGender(lemma) === MASC)) {
                         return head + 'и';
                     }
                     break;
@@ -223,7 +222,7 @@ export function decline1(engine, lemma, caseIndex) {
             return eStem(stressedEnding, stem, s => s + 'у');
 
         case ACC:
-            if ((gender === Gender.NEUTER) ||
+            if ((getIntGender(lemma) === NEU) ||
                     (hasChar('иы', lcLastChar) && half)) {
                 return word;
             }

@@ -1,5 +1,6 @@
 import { CaseValues } from "../Case.js";
-import { Gender } from "../Gender.js";
+import { FEM, MASC, NEU, COM } from "../Gender.js";
+import { getIntGender } from "../Lemma.js";
 import { getNounStem0, egoSoftPlural } from "./common.js";
 import { surnameType1Plural } from "./names.js";
 import { BloomFilter, toFakeHash } from "../utils/bloom.js";
@@ -217,12 +218,12 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
         }
     }
 
-    const gender = lemma.getGender();
+    const gender = getIntGender(lemma);
     const stem = lcPlural.endsWith('цы') ? init(plural) : getNounStem0(plural, lcPlural);
 
     const isSurnameType1 =
         endsWithSuffix(lcPlural, surnameType1Plural) &&
-        (lemma.isASurname() || (gender === Gender.COMMON)) &&
+        (lemma.isASurname() || (gender === COM)) &&
         !endsWithSuffix(lcPlural, explicitZeroSurnameLikeTree);
 
     // Из-за ветвления вверху функции, здесь grCaseNumber >= 2.
@@ -312,7 +313,7 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
 
         const lastOf2Initial = charFromEnd(lcPlural, 3);
 
-        if (Gender.FEMININE !== gender) {
+        if (FEM !== gender) {
             const pluralHash = toFakeHash(lcPlural);
             const inOvBloom = ovBloom.hasRaw(pluralHash);
 
@@ -328,11 +329,11 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
                     init(plural) + 'ов',
                     genitiveStem()
                 ];
-            } else if (((gender === Gender.COMMON)
+            } else if (((gender === COM)
                     && !endsWithAny(lcPlural, declinePluralEy)
                     && !hasChar('жшч', lastOf2Initial))
                 || (zeroBloom.hasRaw(pluralHash) && explicitZeroEnding.has(lcPlural))
-                || (lemma.isAName() && (gender === Gender.MASCULINE) && lemma.lower().endsWith('а'))
+                || (lemma.isAName() && (gender === MASC) && lemma.lower().endsWith('а'))
                 || (lemma.lower() === 'барин')) {
                 return genitiveStem();
             }
@@ -357,7 +358,7 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
                         if (lcPlural.endsWith('ульи')) {
                             return init(plural) + 'ев';
                         } if (lcPlural.endsWith('ьи')) {
-                            if (Gender.MASCULINE === gender) {
+                            if (MASC === gender) {
                                 return init(plural) + 'ёв';
                             } else {
                                 return dropLast(plural, 2) + 'ей';
@@ -371,7 +372,7 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
                         } else if (bincludes(vowels, charFromEnd(lcPlural, 2))) {
                             return init(plural) + 'ев';
                         } else if (endsWithSuffix(lcPlural, kiWords)
-                            && ((Gender.MASCULINE !== gender) || endsWithSuffix(unYo(lcPlural), mascSimilarToCommon))
+                            && ((MASC !== gender) || endsWithSuffix(unYo(lcPlural), mascSimilarToCommon))
                             && !endsWithSuffix(lemma.lower(), kiExceptions)) {
                             return genitiveStem();
                         }
@@ -382,7 +383,7 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
                         } else if (endsWithAny(lcPlural, ['зятья', 'кумовья', 'деверья', 'края', 'острия'])) {
                             return init(plural) + 'ёв';
                         } else if (endsWithAny(lcPlural, ['ья', 'ия'])) {
-                            if (Gender.MASCULINE === gender) {
+                            if (MASC === gender) {
                                 return dropLast(plural, 2) + 'ей';
                             } else {
                                 return dropLast(plural, 2) + 'ий';

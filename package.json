@@ -1,6 +1,6 @@
 {
   "name": "russian-nouns-js",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2-SNAPSHOT",
   "description": "Declension by cases. Pluralization.",
   "type": "module",
   "main": "dist/RussianNouns.cjs",

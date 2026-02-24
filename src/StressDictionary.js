@@ -1,8 +1,8 @@
 import { stressHashesA, stressHashesB } from "./settings/stressHashes.js";
 import { BloomFilter } from "./utils/bloom.js";
-import { Lemma } from "./Lemma.js";
+import { Lemma, getIntGender } from "./Lemma.js";
 import { toCaseIndex } from "./Case.js";
-import { Gender } from "./Gender.js";
+import { FEM, MASC, NEU, COM } from "./Gender.js";
 
 const stressBloomAB = (function () {
     const hashes = new BloomFilter();
@@ -137,7 +137,7 @@ export function StressDictionary() {
                 if (v) {
                     const singular = v.split('-')[0];
                     return _toResult(singular[caseIndex]);
-                } else if (query.getGender() === Gender.MASCULINE) {
+                } else if (getIntGender(query) === MASC) {
                     if (stressHashesA.has(query._hash)) {
                         return _toResult('SEESEEE'[caseIndex]);
                     } else if (stressHashesB.has(query._hash)) {
@@ -161,7 +161,7 @@ export function StressDictionary() {
                 if (v) {
                     const plural = v.split('-')[1];
                     return _toResult(plural[caseIndex]);
-                } else if ((query.getGender() === Gender.MASCULINE) &&
+                } else if ((getIntGender(query) === MASC) &&
                         (stressHashesA.has(query._hash) ||
                                 (query.isAnimate() && stressHashesB.has(query._hash)))) {
                     return _toResult('E');

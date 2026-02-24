@@ -1,4 +1,5 @@
-import { Gender } from "../Gender.js";
+import { FEM, MASC, NEU, COM } from "../Gender.js";
+import { getIntGender } from "../Lemma.js";
 import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
@@ -101,7 +102,7 @@ export function getStemSoftSign(lemma, word, lcWord) {
     if (mobileVowelA.has(lemma._hash) || endsWithSuffix(lcWord, mobileVowelB)) {
         return dropLast(word, 3) + charFromEnd(word, 2);
     } else if (lcWord.endsWith('ень') &&
-            (lemma.getGender() === Gender.MASCULINE) &&
+            (getIntGender(lemma) === MASC) &&
             !endsWithAny(lcWord, en2a2b)) {
         return dropLast(word, 3) + 'н';
     } else {

@@ -1,4 +1,5 @@
-import { Gender } from "../Gender.js";
+import { FEM, MASC, NEU, COM } from "../Gender.js";
+import { getIntGender } from "../Lemma.js";
 import { getNounStem, okWord, egoEndings, egoSoftM, tsStem, eStem } from "./common.js";
 import { softD1, isAdjectiveLike } from "./decline1.js";
 import { specialD3 } from "./decline3.js";
@@ -139,7 +140,7 @@ export function pluralize(engine, lemma) {
         );
     };
 
-    const gender = lemma.getGender();
+    const gender = getIntGender(lemma);
     const declension = lemma.getDeclension();
 
     const simpleFirstPart = (('й' === last(lcWord) || bincludes(vowels, last(lcWord))) && bincludes(vowels, last(init(lcWord))))
@@ -220,7 +221,7 @@ export function pluralize(engine, lemma) {
 
                 result.push(softStemD1 + 'я');
 
-            } else if (Gender.MASCULINE === gender) {
+            } else if (MASC === gender) {
 
                 const ya2 = [
                     'крюк',
@@ -335,7 +336,7 @@ export function pluralize(engine, lemma) {
                     yeruOrI();
                 }
 
-            } else if (Gender.NEUTER === gender) {
+            } else if (NEU === gender) {
 
                 if (endsWithAny(lcWord, ['ко', 'чо'])
                     && !endsWithAny(lcWord, ['войско', 'облако'])
@@ -422,7 +423,7 @@ export function pluralize(engine, lemma) {
                 result.push(stem + 'ена');
             } else if (Object.keys(specialD3).includes(lcWord)) {
                 result.push(init(specialD3[lcWord]) + 'и');
-            } else if (Gender.FEMININE === gender) {
+            } else if (FEM === gender) {
                 result.push(simpleFirstPart + 'и');
             } else {
                 if (last(simpleFirstPart) === 'и') {
