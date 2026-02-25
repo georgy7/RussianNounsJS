@@ -1,4 +1,4 @@
-import { GenderValues, Gender } from "./Gender.js";
+import { GenderValues, FEM, MASC, NEU, COM } from "./Gender.js";
 import { calculateHash } from "./utils/hash.js";
 import { bincludes, consonants } from "./utils/alphabet.js";
 import { last, takeLast } from "./utils/strings.js";
@@ -43,7 +43,7 @@ export class Lemma {
             this._flags |= (1 << 7) * (o.transport&1);
 
             this._flags |= leftShift(16) * (
-                2 + calculateDeclension(this._lc, o.pluraleTantum, o.gender, o.indeclinable)
+                2 + calculateDeclension(this._lc, o.pluraleTantum, getIntGender(this), o.indeclinable)
             );
         }
     }
@@ -226,19 +226,19 @@ function calculateDeclension(lcWord, pluraleTantum, gender, indeclinable) {
 
     const t = last(lcWord);
     switch (gender) {
-        case Gender.FEMININE:
+        case FEM:
             return t === "а" || t === "я" ? 2 :
                 bincludes(consonants, t) ? -1 : 3;
 
-        case Gender.MASCULINE:
+        case MASC:
             return t === "а" || t === "я" ? 2 :
                 lcWord === "путь" ? 0 : 1;
 
-        case Gender.NEUTER:
+        case NEU:
             return ['дитя', 'полудитя'].includes(lcWord) ? 0 :
                 takeLast(lcWord, 2) === "мя" ? 3 : 1;
 
-        case Gender.COMMON:
+        case COM:
             if (t === 'а' || t === 'я') {
                 return 2;
             } else if (t === 'и') {

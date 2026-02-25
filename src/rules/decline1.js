@@ -12,7 +12,7 @@ import { bincludes, consonants, vowelCount } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
 import { init, last, takeLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "../settings/locativeDictionary.js";
-import { extractDeclensionType, LocativeDeclensionType } from "../LocativeForm.js";
+import { extractDeclensionType, LDT_PREP, LDT_U } from "../LocativeForm.js";
 import { fastClone, getIntGender } from "../Lemma.js";
 
 const NOM = 0;
@@ -399,7 +399,7 @@ function halfSomething(lcWord) {
 }
 
 export function toLocativeSingular1(engine, lemma, declensionType) {
-    if (LocativeDeclensionType.U_SUFFIX === declensionType) {
+    if (LDT_U === declensionType) {
         const word = lemma.text();
         const lcWord = lemma.lower();
         let stem = getNounStem(lemma, lcWord);
@@ -417,7 +417,7 @@ export function toLocativeSingular1(engine, lemma, declensionType) {
         } else {
             return unYo(stem) + 'у';
         }
-    } else if (LocativeDeclensionType.PREPOSITIONAL === declensionType) {
+    } else if (LDT_PREP === declensionType) {
         return decline1(engine, lemma, PREP);
     }
 }
