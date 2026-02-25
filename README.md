@@ -34,7 +34,7 @@
 ### Bundlers, backend
 
 ```
-npm i --save russian-nouns-js
+npm i --save russian-nouns-js@next
 ```
 
 ```js
