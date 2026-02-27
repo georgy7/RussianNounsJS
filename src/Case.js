@@ -18,6 +18,8 @@ export const Case = Object.freeze({
     LOCATIVE: CaseValues[6]
 });
 
+export const CaseIndices = Object.fromEntries(CaseValues.map((x, i) => [x, i]));
+
 export function toCaseIndex(grCase) {
-    return (typeof grCase === "number") ? grCase : CaseValues.indexOf(grCase);
+    return (typeof grCase === "number") ? grCase : CaseIndices[grCase];
 }

@@ -1,4 +1,3 @@
-import { CaseValues } from "../Case.js";
 import { FEM, MASC, NEU, COM } from "../Gender.js";
 import { getIntGender } from "../Lemma.js";
 import { getNounStem0, egoSoftPlural } from "./common.js";

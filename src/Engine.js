@@ -1,4 +1,4 @@
-import { CaseValues } from "./Case.js";
+import { CaseIndices } from "./Case.js";
 import { Lemma } from "./Lemma.js";
 import { makeDefaultStressDictionary } from "./settings/defaultStressDictionary.js";
 import { decline0 } from "./rules/decline0.js";
@@ -98,9 +98,10 @@ function declineAsList(engine, lemma, grCase, pluralForm) {
 
 function decline(engine, lemma, grCase, pluralForm) {
     const word = lemma.text();
-    const caseIndex = CaseValues.indexOf(grCase);
+    const caseIndex = CaseIndices[grCase];
+    const declension = lemma.getDeclension();
 
-    if (lemma.isIndeclinable()) {
+    if (declension === -1) {
         return word;
     }
 
@@ -110,11 +111,7 @@ function decline(engine, lemma, grCase, pluralForm) {
         return declinePlural(engine, lemma, caseIndex, pluralForm);
     }
 
-    const declension = lemma.getDeclension();
-
     switch (declension) {
-        case -1:
-            return word;
         case 0:
             return decline0(engine, lemma, caseIndex);
         case 1:
