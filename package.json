@@ -18,7 +18,7 @@
     "postbuild": "duk node_modules/core-js-bundle/minified.js dist/RussianNouns.es5.js dukTest.js",
     "dev": "rollup -c -w",
     "prepublishOnly": "npm run build",
-    "test": "node --test test/"
+    "test": "node --test"
   },
   "repository": {
     "type": "git",

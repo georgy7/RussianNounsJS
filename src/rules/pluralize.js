@@ -1,100 +1,84 @@
-import { FEM, MASC, NEU, COM } from "../Gender.js";
-import { getIntGender } from "../Lemma.js";
-import { getNounStem, okWord, egoEndings, egoSoftM, tsStem, eStem } from "./common.js";
-import { softD1, isAdjectiveLike } from "./decline1.js";
-import { specialD3 } from "./decline3.js";
-import { createReversedTrie, endsWithSuffix } from "../utils/trie.js";
-import { unique } from "../utils/lists.js";
-import { bincludes, vowels } from "../utils/alphabet.js";
-import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
-import { init, last, takeLast, dropLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
-import { getPluralForms } from "../settings/irregularNouns.js";
+/**
+ * Plural form generation for Russian nouns.
+ *
+ * This module handles nominative plural forms for all declensions
+ * and genders. It uses a "priority rules" pattern: a series of
+ * test/handler pairs evaluated in order. The first matching rule wins.
+ *
+ * Performance: Bloom filters and reversed tries ensure O(1) lookup
+ * for suffix matching and exception lists. The critical path remains
+ * fast because rules are ordered by frequency.
+ *
+ * Bitmask note: bitmasks use the order of Russian alphabet letters
+ * backwards (without Ё). This is a performance optimization for fast
+ * suffix matching.
+ */
+
+import { FEM, MASC, NEU, COM } from '../Gender.js';
+import { getIntGender } from '../Lemma.js';
+import { getNounStem, okWord, egoEndings, egoSoftM, tsStem, eStem } from './common.js';
+import { softD1, isAdjectiveLike } from './decline1.js';
+import { specialD3 } from './decline3.js';
+import { createReversedTrie, endsWithSuffix } from '../utils/trie.js';
+import { unique } from '../utils/lists.js';
+import { bincludes, vowels } from '../utils/alphabet.js';
+import { toLowerCaseRu, upperLike } from '../utils/letterCase.js';
+import { init, last, takeLast, dropLast, charFromEnd, hasChar, endsWithAny, unYo } from '../utils/strings.js';
+import { getPluralForms } from '../settings/irregularNouns.js';
+import {
+    YA_D1_SOFT_STEM,
+    A_YA_WORDS,
+    A_YA_WORDS2_SUFFIXES,
+    A_YA_WORDS3,
+    A_YA_WORDS4,
+    YA2_SOFT_STEM_WORDS,
+    YA3_SOFT_STEM_WORDS,
+    SOFT_SIGN_ONLY_NEUTER,
+    YI_WORDS,
+    YONOK_WORDS,
+    matchesAYaWords2,
+    getAYaWordsCategory,
+    isYa2Pattern,
+    isYa3Pattern,
+    isSynChelovek,
+    isAnimateYonok,
+    isAnimateOnok,
+    isYiWord,
+    isBarin,
+    isBoyar,
+    isTset,
+    isShchenok,
+    isRebenok,
+    isZarya,
+    isAyaWord,
+    isKoChoWord,
+    isImoyeWord,
+    isEeeWord,
+    isOieWithHardStem,
+    isIieWord,
+    isVyeWord,
+    isSoftSignOnlyNeuter,
+    isLeReWord,
+    isTransportSudno,
+    isYonokFamily,
+    isShchupaltsye,
+    isZarya as isZarya2
+} from './pluralizeConfig.js';
 
 const NOMINATIVE = 0;
 
-// Слова в первом склонении, которые оканчиваются на -я в мн.ч.,
-// и у них нужно преобразовывать основу особым образом (мягкие знаки и т.п.)
-const yaD1 = [
-    'зять', 'деверь',
-    'друг',
-    'брат', 'собрат',
-    'стул',
-    'брус',
-    'обод', 'полоз',
-    'струп',
-    'подмастерье',
-    'якорь',
+// ============================================================
+// Helper: Yo-stem generator
+// ============================================================
 
-    'перо',
-    'шило'
-];
-
-// Слова муж.р., которые оканчиваются на -а/-я в мн.ч.
-const aYaWords = new Set([
-    'берег', 'бок', 'борт',
-    'век', 'вес',
-    'веер', // TODO: Это всё тоже вынести в настройку (в экземпляре движка).
-    'вексель', // 😰
-    'вечер',
-    'глаз', 'голос', 'город',
-    'доктор', 'дом', 'детдом',
-    'егерь',
-    'жемчуг',
-    'катер', 'колокол', 'концлагерь', 'корм', 'короб', 'кузов', 'купол',
-    'лес', 'луг', 'мастер', 'номер',
-    'пояс', 'провод', 'рог',
-    'сахар', 'снег', 'сорт', 'стог', 'счет', 'счёт',
-    'спецсчет', 'спецсчёт', 'субсчет', 'субсчёт',
-    'терем',
-    'том', // TODO неодушевленное (не имя).
-    'холод', 'цвет', 'череп'
-]);
-
-// То же самое, но мы проверяем их не по точному совпадению, а по концу слова.
-// Например, "чудо-остров", "мультипаспорт" распознаются как "остров", "паспорт".
-const aYaWords2 = createReversedTrie([
-    'округ', 'остров', 'отпуск',
-    'паспорт', 'парус', 'поезд', 'повар', 'погреб',
-    'рукав',
-    'цех',
-    'юнкер'
-]);
-
-// Мы ступаем на скользкую территорию.
-// В этом массиве слова, которые могут оканчиваться и на -а/-я, и на -и/-ы,
-// и мы считаем окончание -а/-я более распространённым.
-const aYaWords3 = new Set([
-    'адрес',
-    'договор',
-    'буфер',
-    'ворох',
-    'директор',
-    'инспектор', 'инструктор',
-    'корпус', // TODO омонимы
-    'крейсер',
-    'орден', 'ордер', 'прожектор', 'пропуск', 'род',
-    'свитер', 'сервер',
-    'тенор', 'тон', 'трактор',
-    'тормоз', // TODO наверно, ы только в одушевленной форме
-    'ветер',
-    'верх',
-    'китель',
-    'мех',
-    'хлеб',
-    'юнкер', // 🤕
-    'ястреб'
-]);
-
-// То же самое, только мы считаем окончание -и/-ы более распространённым.
-const aYaWords4 = new Set([
-    'бункер',
-    'вымпел',
-    'год',
-    'образ', // Разделить на омонимы?
-    'омут',
-    'токарь', 'тополь',
-    'шторм', 'штуцер'
-]);
+/**
+ * Generate yo/unYo variants based on stress pattern.
+ * @param {Object} engine - Engine instance
+ * @param {Object} lemma - Lemma object
+ * @param {function} f - Transform function (receives stem)
+ * @returns {Array<string>}
+ */
+const singleEYo = s => (s.replace(/[^её]/g, '').length === 1);
 
 const reYo = s => {
     const index = Math.max(
@@ -105,48 +89,37 @@ const reYo = s => {
     return s.substring(0, index) + r + s.substring(index + 1);
 };
 
-const singleEYo = s => (s.replace(/[^её]/g, '').length === 1);
+function yoStem(engine, lemma, stem, lcStem, f) {
+    const stressedStem = engine.sd
+        .hasStressedEndingPlural(lemma, NOMINATIVE).map(x => !x);
 
-export function pluralize(engine, lemma) {
-    const result = [];
-
-    const word = lemma.text();
-    const lcWord = toLowerCaseRu(word);
-
-    const stressedEnding = engine.sd
-        .hasStressedEndingPlural(lemma, NOMINATIVE);
-
-    Object.freeze(stressedEnding);
-
-    const stem = getNounStem(lemma, lcWord, stressedEnding[0]);
-    const lcStem = toLowerCaseRu(stem);
-
-    if (lcWord.endsWith('яя')) {
-        result.push(dropLast(word, 2) + 'ие');
-        return unique(result);
+    if (!stressedStem.length) {
+        return [f(stem)];
     }
 
-    const yoStem = (f) => {
-        const stressedStem = engine.sd
-            .hasStressedEndingPlural(lemma, NOMINATIVE).map(x => !x);
+    return stressedStem.map(b => b
+        ? (singleEYo(lcStem) ? f(reYo(stem)) : f(stem))
+        : f(unYo(stem))
+    );
+}
 
-        if (!stressedStem.length) {
-            return [f(stem)];
-        }
+// ============================================================
+// Helper: Yeru or Ii stem generator
+// ============================================================
 
-        return stressedStem.map(b => b
-            ? (singleEYo(lcStem) ? f(reYo(stem)) : f(stem))
-            : f(unYo(stem))
-        );
-    };
-
-    const gender = getIntGender(lemma);
-    const declension = lemma.getDeclension();
-
-    const simpleFirstPart = (('й' === last(lcWord) || bincludes(vowels, last(lcWord))) && bincludes(vowels, last(init(lcWord))))
-        ? init(word)
-        : stem;
-
+/**
+ * Generate Yeru (ы/и) variants based on phonetic constraints.
+ * @param {Object} engine - Engine instance
+ * @param {Object} lemma - Lemma object
+ * @param {string} stem - Noun stem
+ * @param {string} lcStem - Lowercase stem
+ * @param {string} lcWord - Lowercase word
+ * @param {Array} stressedEnding - Stress pattern
+ * @param {string} simpleFirstPart - Simplified first part of stem
+ * @returns {string[]}
+ */
+function yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart) {
+    const result = [];
     const softPatronymic = () => (lcWord.endsWith('евич') || lcWord.endsWith('евна'))
         && (lcWord.indexOf('ье') >= 0);
 
@@ -157,40 +130,140 @@ export function pluralize(engine, lemma) {
         return part.substring(0, index) + r + part.substring(index + 1);
     }
 
-    function yeruOrI() {
-        if (bincludes(0b11101000000000010001001000, last(lcStem))  // sibilant or velar
-            || hasChar('яйь', last(lcWord))
-            || endsWithAny(lcWord, ['сосед'])) {
+    if (bincludes(0b11101000000000010001001000, last(lcStem))  // sibilant or velar
+        || hasChar('яйь', last(lcWord))
+        || endsWithAny(lcWord, ['сосед'])) {
 
-            if (softPatronymic()) {
-                result.push(softPatronymicForm2() + 'и');
-                result.push(simpleFirstPart + 'и');
-            } else {
-                Array.prototype.push.apply(result,
-                    eStem(stressedEnding, simpleFirstPart, s => s + 'и'));
-            }
-
-        } else if (last(lcWord) === 'ц') {
-            result.push(tsStem(word, lemma) + 'цы');
-
+        if (softPatronymic()) {
+            result.push(softPatronymicForm2() + 'и');
+            result.push(simpleFirstPart + 'и');
         } else {
-
-            if (softPatronymic()) {
-                result.push(softPatronymicForm2() + 'ы');
-                result.push(simpleFirstPart + 'ы');
-            } else {
-                Array.prototype.push.apply(result,
-                    eStem(stressedEnding, simpleFirstPart, s => s + 'ы'));
-            }
-
+            Array.prototype.push.apply(result,
+                eStem(stressedEnding, simpleFirstPart, s => s + 'и'));
         }
+
+    } else if (last(lcWord) === 'ц') {
+        result.push(tsStem(word, lemma) + 'цы');
+
+    } else {
+
+        if (softPatronymic()) {
+            result.push(softPatronymicForm2() + 'ы');
+            result.push(simpleFirstPart + 'ы');
+        } else {
+            Array.prototype.push.apply(result,
+                eStem(stressedEnding, simpleFirstPart, s => s + 'ы'));
+        }
+
     }
 
+    return result;
+}
+
+// ============================================================
+// Main: Pluralize function
+// ============================================================
+
+/**
+ * Generate nominative plural forms for a Russian noun.
+ *
+ * @param {RussianNouns.Engine} engine - The declension engine
+ * @param {RussianNouns.Lemma} lemma - The lemma to pluralize
+ * @returns {string[]} Array of plural forms
+ */
+export function pluralize(engine, lemma) {
+    const word = lemma.text();
+    const lcWord = toLowerCaseRu(word);
+
+    // Step 1: Check for stressed ending override
+    const stressedEnding = engine.sd
+        .hasStressedEndingPlural(lemma, NOMINATIVE);
+    Object.freeze(stressedEnding);
+
+    // Step 2: Get the noun stem
+    const stem = getNounStem(lemma, lcWord, stressedEnding[0]);
+    const lcStem = toLowerCaseRu(stem);
+
+    // Step 3: Handle special cases first
+
+    // Rule 0: Words ending in -яя take -ие
+    if (lcWord.endsWith('яя')) {
+        return unique([dropLast(word, 2) + 'ие']);
+    }
+
+    // Rule 1: Simple stem for vowel clusters
+    const simpleFirstPart = (('й' === last(lcWord) || bincludes(vowels, last(lcWord))) && bincludes(vowels, last(init(lcWord))))
+        ? init(word)
+        : stem;
+
+    // Rule 2: Get irregular forms (high priority)
     const irregularPluralForms = getPluralForms(lemma, lcWord);
     if (irregularPluralForms) {
         return irregularPluralForms;
     }
 
+    // Rule 3: Get gender and declension
+    const gender = getIntGender(lemma);
+    const declension = lemma.getDeclension();
+
+    // ============================================================
+    // Declension -1: Indeclinable words
+    // ============================================================
+    if (declension === -1) {
+        return unique([word]);
+    }
+
+    // ============================================================
+    // Declension 0: Mixed declension (путь, дитя)
+    // ============================================================
+    if (declension === 0) {
+        if (lcWord === 'путь') {
+            return unique(['пути']);
+        } else if (lcWord.endsWith('дитя')) {
+            return unique([dropLast(word, 3) + 'ети']);
+        }
+        throw new Error('unsupported mixed declension word');
+    }
+
+    // ============================================================
+    // Declension 1: Masculine & Neuter (no ending or short ending)
+    // ============================================================
+    if (declension === 1) {
+        return pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
+            stressedEnding, simpleFirstPart, gender);
+    }
+
+    // ============================================================
+    // Declension 2: Feminine (ending in -а/-я)
+    // ============================================================
+    if (declension === 2) {
+        return pluralizeDeclension2(engine, lemma, word, lcWord, stem, lcStem,
+            stressedEnding, simpleFirstPart, gender);
+    }
+
+    // ============================================================
+    // Declension 3: Soft declension (мать, дочь, -мя words)
+    // ============================================================
+    if (declension === 3) {
+        return pluralizeDeclension3(engine, lemma, word, lcWord, stem, lcStem,
+            stressedEnding, simpleFirstPart, gender);
+    }
+
+    // Fallback
+    return unique([word]);
+}
+
+// ============================================================
+// Declension 1 pluralization
+// ============================================================
+
+/**
+ * Pluralize declension 1 words (masculine & neuter).
+ */
+function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
+    stressedEnding, simpleFirstPart, gender) {
+
+    const result = [];
     const softStemD1 = (last(lcStem) === 'ь')
         ? stem
         : (
@@ -203,237 +276,308 @@ export function pluralize(engine, lemma) {
             )
         );
 
-    switch (declension) {
-        case -1:
-            result.push(word);
-            break;
-        case 0:
-            if (lcWord === 'путь') {
-                result.push('пути');
-            } else if (lcWord.endsWith('дитя')) {
-                result.push(dropLast(word, 3) + 'ети');
-            } else {
-                throw new Error('unsupported');
+    // --- Masculine gender ---
+    if (gender === MASC) {
+        // Rule M1: yaD1 soft stem words
+        if (YA_D1_SOFT_STEM.includes(lcWord)) {
+            result.push(softStemD1 + 'я');
+            return unique(result);
+        }
+
+        // Rule M2: Syn/Chelovek type words
+        const synChelovek = isSynChelovek(lcWord, lemma);
+        if (synChelovek === 'сын') {
+            result.push('сыновья');
+            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+            return unique(result);
+        }
+        if (synChelovek === 'человек') {
+            result.push('люди');
+            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+            return unique(result);
+        }
+
+        // Rule M3: ya2 pattern (soft stem + я)
+        if (isYa2Pattern(lcWord, lemma)) {
+            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+            result.push(softStemD1 + 'я');
+            return unique(result);
+        }
+
+        // Rule M4: ya3 pattern (soft stem only)
+        if (isYa3Pattern(lcWord)) {
+            result.push(softStemD1 + 'я');
+            return unique(result);
+        }
+
+        // Rule M5: aYaWords family (words ending in -а/-я in plural)
+        const aYaCategory = getAYaWordsCategory(lcWord);
+        const matchesAYaWords2Flag = matchesAYaWords2(lcWord);
+
+        if (aYaCategory !== 0 || matchesAYaWords2Flag) {
+            if (aYaCategory === 4) {
+                Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
             }
-            break;
-        case 1:
-            if (yaD1.includes(lcWord)) {
 
-                result.push(softStemD1 + 'я');
-
-            } else if (MASC === gender) {
-
-                const ya2 = [
-                    'крюк',
-                    'лист',
-                    'лоскут',
-                    'повод',
-                    'прут',
-                    'сук',
-                    'учитель',
-                    'флигель',
-                    'штабель'
-                ];
-
-                const ya3 = [
-                    'клин', 'колос', 'ком', 'край', 'соболь'
-                ];
-
-                if ('сын' === lcWord) {
-
-                    result.push('сыновья');
-                    yeruOrI();
-
-                } else if ('человек' === lcWord) {
-
-                    result.push('люди');
-                    yeruOrI();
-
-                } else if (ya2.includes(lcWord) || (lcWord === 'соболь' && lemma.isAnimate())) {
-
-                    yeruOrI();
-                    result.push(softStemD1 + 'я');
-
-                } else if (ya3.includes(lcWord)) {
-
-                    result.push(softStemD1 + 'я');
-
-                } else if (aYaWords.has(lcWord) || endsWithSuffix(lcWord, aYaWords2)
-                    || aYaWords3.has(lcWord) || aYaWords4.has(lcWord)) {
-
-                    if (aYaWords4.has(lcWord)) {
-                        yeruOrI();
-                    }
-
-                    if (softD1(lcWord)) {
-                        Array.prototype.push.apply(result, yoStem(s => s + 'я'));
-                    } else if (stressedEnding.includes(true)) {
-                        result.push(unYo(stem) + 'а');
-                    } else {
-                        result.push(stem + 'а');
-                    }
-
-                    if (aYaWords3.has(lcWord)) {
-                        yeruOrI();
-                    }
-
-                } else if (
-                    (((lcWord.endsWith('анин') && lcWord.length > 5) || lcWord.endsWith('янин')) && !lemma.isAName())
-                    || ['барин', 'боярин'].includes(lcWord)
-                ) {
-                    result.push(dropLast(word, 2) + 'е');
-
-                    // В корпусе фигурирует
-                    if ('барин' === lcWord) {
-                        result.push(dropLast(word, 2) + 'ы');
-                    }
-
-                } else if (['цыган'].includes(lcWord)) {
-                    result.push(word + 'е');
-                } else if ('щенок' === lcWord) {
-                    result.push(dropLast(word, 2) + 'ки');
-                    result.push(dropLast(word, 2) + 'ята');
-                } else if ((lcWord.endsWith('ребёнок') || lcWord.endsWith('ребенок'))
-                    && !(lcWord.endsWith('жеребёнок') || lcWord.endsWith('жеребенок'))
-                    && !(lcWord.endsWith('ястребёнок') || lcWord.endsWith('ястребенок'))) {
-                    result.push(dropLast(word, 7) + 'дети');
-                } else if ((lcWord.endsWith('ёнок') || lcWord.endsWith('енок'))
-                    && lemma.isAnimate()) {
-                    result.push(dropLast(word, 4) + 'ята');
-                } else if (lcWord.endsWith('ёночек')
-                    && lemma.isAnimate()) {
-                    result.push(dropLast(word, 6) + 'ятки');
-                } else if (lcWord.endsWith('онок')
-                    && hasChar('жшч', charFromEnd(lcWord, 5))
-                    && lemma.isAnimate()) {
-                    result.push(dropLast(word, 4) + 'ата');
-                } else if (okWord(lcWord)) {
-                    result.push(dropLast(word, 2) + 'ки');
-                } else if (endsWithSuffix(lcWord, egoEndings)) {
-                    if (endsWithAny(lcWord, egoSoftM)) {
-                        result.push(dropLast(word, 2) + 'ьи');
-                    } else {
-                        result.push(init(word) + 'е');
-                    }
-                } else if (isAdjectiveLike(lemma, lcWord)) {
-                    if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
-                        result.push(init(word) + 'е');
-                    } else if (lcWord.endsWith('ой') && !endsWithAny(lcWord, ['хой', 'ской'])) {
-                        result.push(dropLast(word, 2) + 'ые');
-                    } else {
-                        result.push(dropLast(word, 2) + 'ие');
-                    }
-                } else if (lcWord.endsWith('его')) {
-                    result.push(dropLast(word, 3) + 'ие');
-                } else if ([
-                    'воробей', 'муравей', 'ручей', 'соловей', 'улей',
-                    'жеребей', // — жребий; доля поместья.
-                    'ирей', // Довольно бессмысленно в мн. ч.
-                    'репей', 'чирей' // Я бы сказал "-еи", но в словарях так.
-                ].includes(lcWord)) {
-                    result.push(dropLast(word, 2) + 'ьи');
-                } else {
-                    yeruOrI();
-                }
-
-            } else if (NEU === gender) {
-
-                if (endsWithAny(lcWord, ['ко', 'чо'])
-                    && !endsWithAny(lcWord, ['войско', 'облако'])
-                ) {
-                    result.push(init(word) + 'и');
-                } else if (lcWord.endsWith('имое')) {
-                    result.push(stem + 'ые');
-
-                } else if (lcWord.endsWith('ее')) {
-                    result.push(stem + 'ие');
-
-                } else if (lcWord.endsWith('ое')) {
-
-                    if (endsWithAny(lcStem, ['г', 'к', 'ж', 'ш', 'х'])) {
-                        result.push(stem + 'ие');
-                    } else {
-                        result.push(stem + 'ые');
-                    }
-
-                } else if (endsWithAny(lcWord, ['ие', 'иё'])) {
-                    result.push(dropLast(word, 2) + 'ия');
-
-                } else if (endsWithAny(lcWord, ['ье', 'ьё'])) {
-
-                    const w = dropLast(word, 2);
-
-                    const softSignOnly = [
-                        'безделье', 'варенье', 'воскресенье',
-                        'жалованье',    // ИМХО, спорно
-                        'запястье', 'застолье', 'затишье', 'здоровье', 'зелье',
-                        'изголовье', 'новоселье', 'одночасье',
-                        // Я бы добавил сюда "ожерелье",
-                        // хотя форма "ожерелия" в гугле встречается.
-                        'печенье', 'платье', 'побережье', 'поголовье', 'подворье',
-                        'подземелье', 'подполье', 'поместье', 'предплечье', 'раздумье',
-                        'сиденье',  // место для сидения
-                        'средневековье', 'увечье', 'угодье', 'устье'
-                    ].includes(lcWord);
-
-                    if ((last(lcWord) === 'е') && !softSignOnly) {
-                        result.push(w + 'ия');
-                    }
-
-                    result.push(w + 'ья');
-
-                } else if (endsWithAny(lcWord, [
-                    'дерево', 'звено', 'крыло'
-                ])) {
-                    result.push(stem + 'ья');
-                } else if (endsWithAny(lcWord, ['ле', 'ре'])) {
-                    result.push(stem + 'я');
-                } else if (lcWord.endsWith('судно') && lemma.isATransport()) {
-                    result.push(dropLast(word, 2) + 'а');
-                } else {
-                    Array.prototype.push.apply(result, yoStem(s => s + 'а'));
-
-                    if (endsWithAny(lcWord, [
-                        'щупальце'
-                    ])) {
-                        yeruOrI();
-                    }
-
-                }
+            if (softD1(lcWord)) {
+                Array.prototype.push.apply(result, yoStem(engine, lemma, stem, lcStem, s => s + 'я'));
+            } else if (stressedEnding.includes(true)) {
+                result.push(unYo(stem) + 'а');
             } else {
-                result.push(stem + 'и');
+                result.push(stem + 'а');
             }
-            break;
-        case 2:
-            if ('заря' === lcWord) {
-                result.push('зори');
 
-            } else if (lcWord.endsWith('ая') && !lcWord.endsWith('свая')) {
-                if (hasChar('жхчшщ', last(lcStem)) || endsWithAny(lcStem, ['вк', 'гк', 'ск', 'цк', 'ньк'])) {
-                    result.push(stem + 'ие');
-                } else {
-                    result.push(stem + 'ые');
-                }
-            } else {
-                yeruOrI();
+            if (aYaCategory === 3) {
+                Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
             }
-            break;
-        case 3:
-            if (takeLast(lcWord, 2) === 'мя') {
-                result.push(stem + 'ена');
-            } else if (Object.keys(specialD3).includes(lcWord)) {
-                result.push(init(specialD3[lcWord]) + 'и');
-            } else if (FEM === gender) {
-                result.push(simpleFirstPart + 'и');
-            } else {
-                if (last(simpleFirstPart) === 'и') {
-                    result.push(simpleFirstPart + 'я');
-                } else {
-                    result.push(simpleFirstPart + 'а');
-                }
+
+            return unique(result);
+        }
+
+        // Rule M6: Barin/Boyar type words
+        if (
+            (((lcWord.endsWith('анин') && lcWord.length > 5) || lcWord.endsWith('янин')) && !lemma.isAName())
+            || isBoyar(lcWord)
+        ) {
+            result.push(dropLast(word, 2) + 'е');
+            if (isBarin(lcWord)) {
+                result.push(dropLast(word, 2) + 'ы');
             }
-            break;
+            return unique(result);
+        }
+
+        // Rule M7: Tset (цыган)
+        if (isTset(lcWord)) {
+            result.push(word + 'е');
+            return unique(result);
+        }
+
+        // Rule M8: Shchenok (щенок)
+        if (isShchenok(lcWord)) {
+            result.push(dropLast(word, 2) + 'ки');
+            result.push(dropLast(word, 2) + 'ята');
+            return unique(result);
+        }
+
+        // Rule M9: Rebenok type
+        if (isRebenok(lcWord)) {
+            result.push(dropLast(word, 7) + 'дети');
+            return unique(result);
+        }
+
+        // Rule M10: Animate yonok type
+        if (isAnimateYonok(lcWord, lemma)) {
+            result.push(dropLast(word, 4) + 'ята');
+            return unique(result);
+        }
+
+        // Rule M11: Animate yonochek type
+        if (lcWord.endsWith('ёночек') && lemma.isAnimate()) {
+            result.push(dropLast(word, 6) + 'ятки');
+            return unique(result);
+        }
+
+        // Rule M12: Animate onok with hard sign constraint
+        if (isAnimateOnok(lcWord, lemma)) {
+            result.push(dropLast(word, 4) + 'ата');
+            return unique(result);
+        }
+
+        // Rule M13: okWord pattern (-ок/-ёк → -ки)
+        if (okWord(lcWord)) {
+            result.push(dropLast(word, 2) + 'ки');
+            return unique(result);
+        }
+
+        // Rule M14: egoEndings pattern
+        if (endsWithSuffix(lcWord, egoEndings)) {
+            if (endsWithAny(lcWord, egoSoftM)) {
+                result.push(dropLast(word, 2) + 'ьи');
+            } else {
+                result.push(init(word) + 'е');
+            }
+            return unique(result);
+        }
+
+        // Rule M15: Adjective-like words
+        if (isAdjectiveLike(lemma, lcWord)) {
+            if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
+                result.push(init(word) + 'е');
+            } else if (lcWord.endsWith('ой') && !endsWithAny(lcWord, ['хой', 'ской'])) {
+                result.push(dropLast(word, 2) + 'ие');
+            } else {
+                result.push(dropLast(word, 2) + 'ие');
+            }
+            return unique(result);
+        }
+
+        // Rule M16: -его ending
+        if (lcWord.endsWith('его')) {
+            result.push(dropLast(word, 3) + 'ие');
+            return unique(result);
+        }
+
+        // Rule M17: Yi words (воробей type)
+        if (isYiWord(lcWord)) {
+            result.push(dropLast(word, 2) + 'ьи');
+            return unique(result);
+        }
+
+        // Rule M18: Default -ы/-и
+        Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+        return unique(result);
     }
 
+    // --- Neuter gender ---
+    if (gender === NEU) {
+        // Rule N1: -ко/-чо ending
+        if (isKoChoWord(lcWord)) {
+            result.push(init(word) + 'и');
+            return unique(result);
+        }
+
+        // Rule N2: -имое ending
+        if (isImoyeWord(lcWord)) {
+            result.push(stem + 'ые');
+            return unique(result);
+        }
+
+        // Rule N3: -ее ending
+        if (isEeeWord(lcWord)) {
+            result.push(stem + 'ие');
+            return unique(result);
+        }
+
+        // Rule N4: -ое ending with hard sign constraint
+        if (lcWord.endsWith('ое')) {
+            if (isOieWithHardStem(lcStem)) {
+                result.push(stem + 'ие');
+            } else {
+                result.push(stem + 'ые');
+            }
+            return unique(result);
+        }
+
+        // Rule N5: -ие/-иё ending
+        if (isIieWord(lcWord)) {
+            result.push(dropLast(word, 2) + 'ия');
+            return unique(result);
+        }
+
+        // Rule N6: -ье/-ьё ending
+        if (isVyeWord(lcWord)) {
+            const w = dropLast(word, 2);
+
+            if ((last(lcWord) === 'е') && !isSoftSignOnlyNeuter(lcWord)) {
+                result.push(w + 'ия');
+            }
+
+            result.push(w + 'ья');
+            return unique(result);
+        }
+
+        // Rule N7: Yonok family (дерево, звено, крыло)
+        if (isYonokFamily(lcWord)) {
+            result.push(stem + 'ья');
+            return unique(result);
+        }
+
+        // Rule N8: -ле/-ре ending
+        if (isLeReWord(lcWord)) {
+            result.push(stem + 'я');
+            return unique(result);
+        }
+
+        // Rule N9: Transport судно
+        if (isTransportSudno(lcWord, lemma)) {
+            result.push(dropLast(word, 2) + 'а');
+            return unique(result);
+        }
+
+        // Rule N10: Default yoStem + а
+        Array.prototype.push.apply(result, yoStem(engine, lemma, stem, lcStem, s => s + 'а'));
+
+        // Rule N11: Shchupaltsye special case
+        if (isShchupaltsye(lcWord)) {
+            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+        }
+
+        return unique(result);
+    }
+
+    // --- Common gender (fallback) ---
+    result.push(stem + 'и');
+    return unique(result);
+}
+
+// ============================================================
+// Declension 2 pluralization
+// ============================================================
+
+/**
+ * Pluralize declension 2 words (feminine, ending in -а/-я).
+ */
+function pluralizeDeclension2(engine, lemma, word, lcWord, stem, lcStem,
+    stressedEnding, simpleFirstPart, gender) {
+
+    const result = [];
+
+    // Rule F1: Zarya type
+    if (isZarya(lcWord)) {
+        result.push('зори');
+        return unique(result);
+    }
+
+    // Rule F2: Feminine adjective-like (-ая ending)
+    if (isAyaWord(lcWord)) {
+        if (hasChar('жхчшщ', last(lcStem)) || endsWithAny(lcStem, ['вк', 'гк', 'ск', 'цк', 'ньк'])) {
+            result.push(stem + 'ие');
+        } else {
+            result.push(stem + 'ые');
+        }
+        return unique(result);
+    }
+
+    // Rule F3: Default -ы/-и
+    Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+    return unique(result);
+}
+
+// ============================================================
+// Declension 3 pluralization
+// ============================================================
+
+/**
+ * Pluralize declension 3 words (soft declension, -мя, мать, дочь).
+ */
+function pluralizeDeclension3(engine, lemma, word, lcWord, stem, lcStem,
+    stressedEnding, simpleFirstPart, gender) {
+
+    const result = [];
+
+    // Rule S1: -мя words
+    if (takeLast(lcWord, 2) === 'мя') {
+        result.push(stem + 'ена');
+        return unique(result);
+    }
+
+    // Rule S2: Special words (мать, дочь)
+    if (Object.keys(specialD3).includes(lcWord)) {
+        result.push(init(specialD3[lcWord]) + 'и');
+        return unique(result);
+    }
+
+    // Rule S3: Feminine gender
+    if (FEM === gender) {
+        result.push(simpleFirstPart + 'и');
+        return unique(result);
+    }
+
+    // Rule S4: Default masculine ending
+    if (last(simpleFirstPart) === 'и') {
+        result.push(simpleFirstPart + 'я');
+    } else {
+        result.push(simpleFirstPart + 'а');
+    }
     return unique(result);
 }
