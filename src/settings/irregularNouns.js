@@ -3,122 +3,135 @@ import { getIntGender } from "../Lemma.js";
 import { BloomFilter } from "../utils/bloom.js";
 import { calculateHash } from "../utils/hash.js";
 
+/**
+ * Exception entries organized by gender category.
+ * Each entry maps lemma (lowercase) -> array of plural forms.
+ *
+ * Structure:
+ *   EXCEPTIONS[gender] = {
+ *     all: { word -> forms },  // matches both animate and inanimate
+ *     animateOnly: { word -> forms }  // matches only animate=true
+ *   }
+ */
+const EXCEPTIONS = Object.freeze({
+    [MASC]: Object.freeze({
+        all: Object.freeze({
+            'болгарин': Object.freeze(['болгары']),
+            'господин': Object.freeze(['господа']),
+            'дядя': Object.freeze(['дяди', 'дядья']),
+            'зуб': Object.freeze(['зубы', 'зубья']),
+            'клок': Object.freeze(['клочья', 'клоки']),
+            'князь': Object.freeze(['князи', 'князья']),
+            'кол': Object.freeze(['колы', 'колья']),
+            'месяц': Object.freeze(['месяцы']),
+            'полдень': Object.freeze(['полдни', 'полудни']),
+            'татарин': Object.freeze(['татары']),
+            'хозяин': Object.freeze(['хозяева']),
+            'цветок': Object.freeze(['цветки', 'цветы']),
+            'черт': Object.freeze(['черти']),
+            'чёрт': Object.freeze(['черти'])
+        }),
+        animateOnly: Object.freeze({
+            'кондуктор': Object.freeze(['кондуктора', 'кондукторы']),
+            'кум': Object.freeze(['кумовья']),
+            'муж': Object.freeze(['мужья', 'мужи'])
+        })
+    }),
+    [FEM]: Object.freeze({
+        all: Object.freeze({
+            'гроздь': Object.freeze(['грозди', 'гроздья']),
+            'курица': Object.freeze(['курицы', 'куры']),
+            'стая': Object.freeze(['стаи']),
+            'щека': Object.freeze(['щёки']),
+            'береста': Object.freeze(['берёсты']),
+            'верста': Object.freeze(['вёрсты']),
+            'десна': Object.freeze(['дёсны']),
+            'жена': Object.freeze(['жёны']),
+            'звезда': Object.freeze(['звёзды']),
+            'кинозвезда': Object.freeze(['кинозвёзды']),
+            'медсестра': Object.freeze(['медсёстры']),
+            'метла': Object.freeze(['мётлы']),
+            'пчела': Object.freeze(['пчёлы']),
+            'сестра': Object.freeze(['сёстры']),
+            'слеза': Object.freeze(['слёзы'])
+        })
+    }),
+    [NEU]: Object.freeze({
+        all: Object.freeze({
+            'брюхо': Object.freeze(['брюхи']),
+            'колено': Object.freeze(['колена', 'колени', 'коленья']),
+            'древо': Object.freeze(['древа', 'древеса']),
+            'ухо': Object.freeze(['уши']),
+            'око': Object.freeze(['очи']),
+            'дно': Object.freeze(['донья']),
+            'чудо': Object.freeze(['чудеса', 'чуда']),
+            'небо': Object.freeze(['небеса']),
+            'бревно': Object.freeze(['брёвна']),
+            'ведро': Object.freeze(['вёдра']),
+            'веретено': Object.freeze(['веретёна']),
+            'весло': Object.freeze(['вёсла']),
+            'гнездо': Object.freeze(['гнёзда']),
+            'зерно': Object.freeze(['зёрна']),
+            'знамя': Object.freeze(['знамёна']),
+            'колесо': Object.freeze(['колёса']),
+            'облачко': Object.freeze(['облачка']),
+            'озеро': Object.freeze(['озёра']),
+            'полсотни': Object.freeze(['полусотни']),
+            'ребро': Object.freeze(['рёбра']),
+            'ремесло': Object.freeze(['ремёсла']),
+            'седло': Object.freeze(['сёдла']),
+            'село': Object.freeze(['сёла'])
+        })
+    })
+});
+
+// Build bloom filter from all exception words
 const highPriorityBloomFilter = new BloomFilter();
-const highPriorityExceptions = Object.freeze([
-    [
-        [
-            MASC,
-            undefined
-        ],
-        {
-            'болгарин': ['болгары'],
-            'господин': ['господа'],
-            'дядя': ['дяди', 'дядья'],
-            'зуб': ['зубы', 'зубья'], // TODO: омонимы, переделать
-            'клок': ['клочья', 'клоки'],
-            'князь': ['князи', 'князья'],
-            'кол': ['колы', 'колья'], // TODO: можно разделить на омонимы
-            'месяц': ['месяцы'],
-            'полдень': ['полдни', 'полудни'],
-            'татарин': ['татары'],
-            'хозяин': ['хозяева'],
-            'цветок': ['цветки', 'цветы'],
-            'черт': ['черти'],
-            'чёрт': ['черти']
-        }
-    ],
-    [
-        [
-            MASC,
-            true
-        ],
-        {
-            'кондуктор': ['кондуктора', 'кондукторы'],
-            'кум': ['кумовья'],
-            'муж': ['мужья', 'мужи']
-        }
-    ],
-    [
-        [
-            FEM,
-            undefined
-        ],
-        {
-            'гроздь': ['грозди', 'гроздья'],
-            'курица': ['курицы', "куры"],
-            'стая': ['стаи'],
-            // И я решил зашить сюда даже случаи, когда итак слово норм обрабатывается,
-            // но в корпусе там буква Ё. И почему бы не выдавать так же букву Ё.
-            // В будущем это наверно надо отрефакторить.
-            'щека': ['щёки'],
-            'береста': ['берёсты'],
-            'верста': ['вёрсты'],
-            'десна': ['дёсны'],
-            'жена': ['жёны'],
-            'звезда': ['звёзды'],
-            'кинозвезда': ['кинозвёзды'],
-            'медсестра': ['медсёстры'],
-            'метла': ['мётлы'],
-            'пчела': ['пчёлы'],
-            'сестра': ['сёстры'],
-            'слеза': ['слёзы']
-        }
-    ],
-    [
-        [
-            NEU,
-            undefined
-        ],
-        {
-            'брюхо': ['брюхи'],
-            'колено': ['колена', 'колени', 'коленья'], // TODO: можно разделить на омонимы
-            'древо': ['древа', 'древеса'],
-            'ухо': ['уши'],
-            'око': ['очи'],
-            'дно': ['донья'],
-            'чудо': ['чудеса', 'чуда'],
-            'небо': ['небеса'],
-            // Буква Ё:
-            'бревно': ['брёвна'],
-            'ведро': ['вёдра'],
-            'веретено': ['веретёна'],
-            'весло': ['вёсла'],
-            'гнездо': ['гнёзда'],
-            'зерно': ['зёрна'],
-            'знамя': ['знамёна'],
-            'колесо': ['колёса'],
-            'облачко': ['облачка'],
-            'озеро': ['озёра'],
-            'полсотни': ['полусотни'],
-            'ребро': ['рёбра'],
-            'ремесло': ['ремёсла'],
-            'седло': ['сёдла'],
-            'село': ['сёла']
-        }
-    ]
-]);
-
-for (const rule of highPriorityExceptions) {
-    Object.keys(rule[1]).map(word => highPriorityBloomFilter.addInteger(calculateHash(word)));
-}
-
-export function getPluralForms(lemma, lcWord) {
-    if (highPriorityBloomFilter.hasInteger(lemma._hash)) {
-
-        const gender = getIntGender(lemma);
-        const animate = lemma.isAnimate();
-
-        for (const [key, genderExceptions] of highPriorityExceptions) {
-
-            const keyGender = key[0];
-            const keyAnimate = key[1];
-
-            if ((gender === keyGender)
-                    && ((keyAnimate == null) || (keyAnimate === animate))
-                    && genderExceptions.hasOwnProperty(lcWord)) {
-
-                return genderExceptions[lcWord].slice();
-            }
+for (const genderMap of Object.values(EXCEPTIONS)) {
+    for (const entry of Object.values(genderMap)) {
+        for (const word of Object.keys(entry)) {
+            highPriorityBloomFilter.addInteger(calculateHash(word));
         }
     }
+}
+
+/**
+ * Get plural forms for a lemma, checking exception lists.
+ * @param {RussianNouns.Lemma} lemma - The lemma object
+ * @param {string} lcWord - Lowercase word
+ * @returns {string[]|undefined} - Array of plural forms or undefined
+ */
+export function getPluralForms(lemma, lcWord) {
+    if (!highPriorityBloomFilter.hasInteger(lemma._hash)) {
+        return undefined;
+    }
+
+    const gender = getIntGender(lemma);
+    const animate = lemma.isAnimate();
+
+    const genderMap = EXCEPTIONS[gender];
+    if (!genderMap) return undefined;
+
+    // Check animate-specific entries first (more specific)
+    const animateOnly = genderMap.animateOnly;
+    if (animate && animateOnly && animateOnly.hasOwnProperty(lcWord)) {
+        return animateOnly[lcWord].slice();
+    }
+
+    // Check gender-specific entry (matches both animate and inanimate)
+    const all = genderMap.all;
+    if (all && all.hasOwnProperty(lcWord)) {
+        return all[lcWord].slice();
+    }
+
+    return undefined;
+}
+
+/**
+ * Check if a word has any exception forms.
+ * @param {string} lcWord - lowercase word
+ * @returns {boolean}
+ */
+export function hasException(lcWord) {
+    return highPriorityBloomFilter.hasInteger(calculateHash(lcWord));
 }
