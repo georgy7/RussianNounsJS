@@ -79,7 +79,7 @@ const ojeEngings = createReversedTrie([
  */
 export function decline1(engine, lemma, caseIndex) {
     const word = lemma.text();
-    const lcWord = toLowerCaseRu(word);
+    const lcWord = lemma.lower();
 
     const lcLastChar = last(lcWord);
 
