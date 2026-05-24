@@ -61,8 +61,7 @@ import {
     isLeReWord,
     isTransportSudno,
     isYonokFamily,
-    isShchupaltsye,
-    isZarya as isZarya2
+    isShchupaltsye
 } from '../settings/pluralizeConfig.js';
 
 const NOMINATIVE = 0;
@@ -138,8 +137,7 @@ function yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simp
             result.push(softPatronymicForm2() + 'и');
             result.push(simpleFirstPart + 'и');
         } else {
-            Array.prototype.push.apply(result,
-                eStem(stressedEnding, simpleFirstPart, s => s + 'и'));
+            result.push(...eStem(stressedEnding, simpleFirstPart, s => s + 'и'));
         }
 
     } else if (last(lcWord) === 'ц') {
@@ -151,8 +149,7 @@ function yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simp
             result.push(softPatronymicForm2() + 'ы');
             result.push(simpleFirstPart + 'ы');
         } else {
-            Array.prototype.push.apply(result,
-                eStem(stressedEnding, simpleFirstPart, s => s + 'ы'));
+            result.push(...eStem(stressedEnding, simpleFirstPart, s => s + 'ы'));
         }
 
     }
@@ -178,7 +175,6 @@ export function pluralize(engine, lemma) {
     // Step 1: Check for stressed ending override
     const stressedEnding = engine.sd
         .hasStressedEndingPlural(lemma, NOMINATIVE);
-    Object.freeze(stressedEnding);
 
     // Step 2: Get the noun stem
     const stem = getNounStem(lemma, lcWord, stressedEnding[0]);
@@ -288,18 +284,18 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
         const synChelovek = isSynChelovek(lcWord, lemma);
         if (synChelovek === 'сын') {
             result.push('сыновья');
-            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+            result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
             return unique(result);
         }
         if (synChelovek === 'человек') {
             result.push('люди');
-            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+            result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
             return unique(result);
         }
 
         // Rule M3: ya2 pattern (soft stem + я)
         if (isYa2Pattern(lcWord, lemma)) {
-            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+            result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
             result.push(softStemD1 + 'я');
             return unique(result);
         }
@@ -316,11 +312,11 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
 
         if (aYaCategory !== 0 || matchesAYaWords2Flag) {
             if (aYaCategory === 4) {
-                Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+                result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
             }
 
             if (softD1(lcWord)) {
-                Array.prototype.push.apply(result, yoStem(engine, lemma, stem, lcStem, s => s + 'я'));
+                result.push(...yoStem(engine, lemma, stem, lcStem, s => s + 'я'));
             } else if (stressedEnding.includes(true)) {
                 result.push(unYo(stem) + 'а');
             } else {
@@ -328,7 +324,7 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
             }
 
             if (aYaCategory === 3) {
-                Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+                result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
             }
 
             return unique(result);
@@ -424,7 +420,7 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
         }
 
         // Rule M18: Default -ы/-и
-        Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+        result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
         return unique(result);
     }
 
@@ -495,11 +491,11 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
         }
 
         // Rule N10: Default yoStem + а
-        Array.prototype.push.apply(result, yoStem(engine, lemma, stem, lcStem, s => s + 'а'));
+        result.push(...yoStem(engine, lemma, stem, lcStem, s => s + 'а'));
 
         // Rule N11: Shchupaltsye special case
         if (isShchupaltsye(lcWord)) {
-            Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+            result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
         }
 
         return unique(result);
@@ -539,7 +535,7 @@ function pluralizeDeclension2(engine, lemma, word, lcWord, stem, lcStem,
     }
 
     // Rule F3: Default -ы/-и
-    Array.prototype.push.apply(result, yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
+    result.push(...yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simpleFirstPart));
     return unique(result);
 }
 
