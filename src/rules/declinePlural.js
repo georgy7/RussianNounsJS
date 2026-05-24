@@ -57,7 +57,7 @@ import {
     endsInDetiLiudi,
     endsInVeriDocheri,
     endsInVny
-} from './declinePluralConfig.js';
+} from '../settings/declinePluralConfig.js';
 
 
 export function declinePlural(engine, lemma, caseIndex, plural) {

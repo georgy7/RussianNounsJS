@@ -63,7 +63,7 @@ import {
     isYonokFamily,
     isShchupaltsye,
     isZarya as isZarya2
-} from './pluralizeConfig.js';
+} from '../settings/pluralizeConfig.js';
 
 const NOMINATIVE = 0;
 
