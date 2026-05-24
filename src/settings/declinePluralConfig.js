@@ -10,7 +10,8 @@
  */
 
 import { createReversedTrie, endsWithSuffix } from '../utils/trie.js';
-import { BloomFilter, toFakeHash } from '../utils/bloom.js';
+import { BloomFilter } from '../utils/bloom.js';
+import { fastHash } from '../utils/hash.js';
 import { charFromEnd, endsWithAny } from '../utils/strings.js';
 import { bincludes, consonantsExceptJ } from "../utils/alphabet.js";
 
@@ -161,12 +162,12 @@ export const EXPLICIT_ZERO_ENDING = new Set([
 // These are built from the sets above for performance.
 // ============================================================
 export const OV_BLOOM = new BloomFilter();
-EXPLICIT_OV.forEach(s => OV_BLOOM.addRaw(toFakeHash(s)));
-EXPLICIT_ZERO_AND_OV.forEach(s => OV_BLOOM.addRaw(toFakeHash(s)));
-EXPLICIT_OV_AND_ZERO.forEach(s => OV_BLOOM.addRaw(toFakeHash(s)));
+EXPLICIT_OV.forEach(s => OV_BLOOM.addInteger(fastHash(s)));
+EXPLICIT_ZERO_AND_OV.forEach(s => OV_BLOOM.addInteger(fastHash(s)));
+EXPLICIT_OV_AND_ZERO.forEach(s => OV_BLOOM.addInteger(fastHash(s)));
 
 export const ZERO_BLOOM = new BloomFilter();
-EXPLICIT_ZERO_ENDING.forEach(s => ZERO_BLOOM.addRaw(toFakeHash(s)));
+EXPLICIT_ZERO_ENDING.forEach(s => ZERO_BLOOM.addInteger(fastHash(s)));
 
 // ============================================================
 // Data: Words ending in -и/-ы that take special genitive handling.
@@ -229,7 +230,7 @@ export const DNA_VTSA_TRIE = createReversedTrie([
  * @returns {boolean}
  */
 export function isInOvBloom(lcPlural, bloom) {
-    return bloom.hasRaw(toFakeHash(lcPlural));
+    return bloom.hasInteger(fastHash(lcPlural));
 }
 
 /**
@@ -239,7 +240,7 @@ export function isInOvBloom(lcPlural, bloom) {
  * @returns {boolean}
  */
 export function isInZeroBloom(lcPlural, bloom) {
-    return bloom.hasRaw(toFakeHash(lcPlural));
+    return bloom.hasInteger(fastHash(lcPlural));
 }
 
 /**

@@ -2,7 +2,6 @@ import { FEM, MASC, NEU, COM } from "../Gender.js";
 import { getIntGender } from "../Lemma.js";
 import { getNounStem0, egoSoftPlural } from "./common.js";
 import { surnameType1Plural } from "./names.js";
-import { toFakeHash } from "../utils/bloom.js";
 import { endsWithSuffix } from "../utils/trie.js";
 import { bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";

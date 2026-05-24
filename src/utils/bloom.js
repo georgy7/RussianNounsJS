@@ -1,47 +1,41 @@
 export class BloomFilter {
     constructor() {
-        this._filter = new Uint8ClampedArray(256);
+        this._filter = new Uint8ClampedArray(512); // 4096 bits
     }
 
     addInteger(x) {
-        this.addRaw(to11Bit(x));
+        this._filter[bytePos(_h1(x))] |= bitMask(_h1(x));
+        this._filter[bytePos(_h2(x))] |= bitMask(_h2(x));
     }
 
     hasInteger(x) {
-        return this.hasRaw(to11Bit(x));
-    }
-
-    addRaw(x) {
-        const index = x & 0x7ff;
-        const byteIndex = index >>> 3;
-        this._filter[byteIndex] = this._filter[byteIndex] | (1 << (7 - (index % 8)));
-    }
-
-    hasRaw(x) {
-        const index = x & 0x7ff;
-        return !!((this._filter[index >>> 3] >>> (7 - (index % 8))) & 1);
+        return !!(this._filter[bytePos(_h1(x))] & bitMask(_h1(x)))
+            && !!(this._filter[bytePos(_h2(x))] & bitMask(_h2(x)));
     }
 
     clone() {
-        return cloneFilter(this._filter);
+        const result = new BloomFilter();
+        result._filter = Uint8ClampedArray.from(this._filter);
+        return result;
     }
 }
 
-function cloneFilter(filter) {
-    const result = new BloomFilter();
-    result._filter = Uint8ClampedArray.from(filter);
-    return result;
+/**
+ * Two independent 12-bit hash derivations from a 32-bit DJB2 hash.
+ * _h1 uses the lower 12 bits; _h2 folds the upper 20 bits.
+ * Together they cover all 32 bits of the input, maximising independence.
+ */
+function _h1(h) {
+    return h & 0x0FFF;
+}
+function _h2(h) {
+    return ((h >>> 12) ^ (h >>> 24)) & 0x0FFF;
 }
 
-function to11Bit(intValue) {
-    return ((intValue >>> 22) & 0x7ff) ^
-            ((intValue >>> 11) & 0x7ff) ^
-            (intValue & 0x7ff);
+function bytePos(index) {
+    return index >>> 3;
 }
 
-export function toFakeHash(lcString) {
-    const prepared = lcString.padStart(3, 'а');
-    return ((prepared.charCodeAt(0) & 0x7) << 8) |
-            ((prepared.charCodeAt(1) & 0xF) << 4) |
-            (prepared.charCodeAt(2) & 0xF);
+function bitMask(index) {
+    return 1 << (7 - (index & 7));
 }

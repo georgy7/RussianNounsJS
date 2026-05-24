@@ -1,3 +1,18 @@
+/**
+ * Fast, lightweight hash producing ~32-bit output.
+ * Uses the DJB2 inner loop without the 5-bit packing overhead of calculateHash.
+ * Suitable for strings that need a quick hash for bloom filter lookups
+ * where computing calculateHash would be too expensive.
+ */
+export function fastHash(str) {
+    let h = 5381;
+    const len = str.length;
+    for (let i = 0; i < len; i++) {
+        h = (h * 33 + str.charCodeAt(i)) | 0;
+    }
+    return h >>> 0;
+}
+
 export function calculateHash(lowerCaseUnicodeString) {
     const preparedString = lowerCaseUnicodeString.replaceAll('ё', 'е');
 
