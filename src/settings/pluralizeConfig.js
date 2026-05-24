@@ -347,15 +347,6 @@ export function isRebenok(lcWord) {
 }
 
 /**
- * Check if a word is a "zarja" type word.
- * @param {string} lcWord - lowercase word
- * @returns {boolean}
- */
-export function isZarja(lcWord) {
-    return lcWord === 'заря';
-}
-
-/**
  * Check if a word ends in -ая (feminine adjective-like).
  * @param {string} lcWord - lowercase word
  * @returns {boolean}
