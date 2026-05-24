@@ -37,7 +37,7 @@ import {
     isTihoni,
     endsInYiIi,
     endsInNiWithConsonant,
-    isBaryshniFamily,
+    isBaryshni,
     isKuhni,
     isSotni,
     isSestryFamily,
@@ -342,7 +342,7 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
         }
 
         if (endsInNiWithConsonant(lcPlural)) {
-            if (isBaryshniFamily(lcPlural)) {
+            if (isBaryshni(lcPlural)) {
                 return dropLast(plural, 2) + 'ень';
             } else if (isKuhni(lcPlural)) {
                 return dropLast(plural, 2) + 'онь';

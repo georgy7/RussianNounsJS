@@ -276,14 +276,14 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
             )
         );
 
+    // Rule M1: yaD1 soft stem words
+    if (YA_D1_SOFT_STEM.includes(lcWord)) {
+        result.push(softStemD1 + 'я');
+        return unique(result);
+    }
+
     // --- Masculine gender ---
     if (gender === MASC) {
-        // Rule M1: yaD1 soft stem words
-        if (YA_D1_SOFT_STEM.includes(lcWord)) {
-            result.push(softStemD1 + 'я');
-            return unique(result);
-        }
-
         // Rule M2: Syn/Chelovek type words
         const synChelovek = isSynChelovek(lcWord, lemma);
         if (synChelovek === 'сын') {
@@ -337,7 +337,7 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
         // Rule M6: Barin/Boyar type words
         if (
             (((lcWord.endsWith('анин') && lcWord.length > 5) || lcWord.endsWith('янин')) && !lemma.isAName())
-            || isBoyar(lcWord)
+            || isBoyar(lcWord) || isBarin(lcWord)
         ) {
             result.push(dropLast(word, 2) + 'е');
             if (isBarin(lcWord)) {
@@ -404,7 +404,7 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
             if (lcWord.endsWith('ый') || lcWord.endsWith('ий')) {
                 result.push(init(word) + 'е');
             } else if (lcWord.endsWith('ой') && !endsWithAny(lcWord, ['хой', 'ской'])) {
-                result.push(dropLast(word, 2) + 'ие');
+                result.push(dropLast(word, 2) + 'ые');
             } else {
                 result.push(dropLast(word, 2) + 'ие');
             }

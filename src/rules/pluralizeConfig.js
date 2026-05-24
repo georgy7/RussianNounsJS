@@ -11,7 +11,7 @@
  */
 
 import { createReversedTrie, endsWithSuffix } from '../utils/trie.js';
-import { endsWithAny } from '../utils/strings.js';
+import { charFromEnd, hasChar, endsWithAny } from '../utils/strings.js';
 
 // ============================================================
 // Data: Words that take soft stem + "я" in nominative plural
@@ -281,7 +281,7 @@ export function isAnimateYonok(lcWord, lemma) {
  */
 export function isAnimateOnok(lcWord, lemma) {
     return lcWord.endsWith('онок') &&
-        endsWithAny(lcWord, ['ж', 'ш', 'ч']) &&
+        hasChar('жшч', charFromEnd(lcWord, 5)) &&
         lemma.isAnimate();
 }
 

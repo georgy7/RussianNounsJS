@@ -101,7 +101,7 @@ function decline(engine, lemma, grCase, pluralForm) {
     const caseIndex = CaseIndices[grCase];
     const declension = lemma.getDeclension();
 
-    if (declension === -1) {
+    if (lemma.isIndeclinable()) {
         return word;
     }
 
@@ -112,6 +112,8 @@ function decline(engine, lemma, grCase, pluralForm) {
     }
 
     switch (declension) {
+        case -1:
+            return word;
         case 0:
             return decline0(engine, lemma, caseIndex);
         case 1:

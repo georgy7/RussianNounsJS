@@ -11,7 +11,8 @@
 
 import { createReversedTrie, endsWithSuffix } from '../utils/trie.js';
 import { BloomFilter, toFakeHash } from '../utils/bloom.js';
-import { endsWithAny } from '../utils/strings.js';
+import { charFromEnd, endsWithAny } from '../utils/strings.js';
+import { bincludes, consonantsExceptJ } from "../utils/alphabet.js";
 
 // ============================================================
 // Data: Soft ending trie for plural declension.
@@ -332,12 +333,12 @@ export function endsInYiIi(lcPlural) {
 }
 
 /**
- * Check if a word ends in -ни with a consonant before it.
+ * Check if a word ends in -ни with a consonant except й before it.
  * @param {string} lcPlural - lowercase plural word
  * @returns {boolean}
  */
 export function endsInNiWithConsonant(lcPlural) {
-    return lcPlural.endsWith('ни') && lcPlural.length >= 3;
+    return lcPlural.endsWith('ни') && bincludes(consonantsExceptJ, charFromEnd(lcPlural, 3));
 }
 
 /**
@@ -345,7 +346,7 @@ export function endsInNiWithConsonant(lcPlural) {
  * @param {string} lcPlural - lowercase plural word
  * @returns {boolean}
  */
-export function isBaryshniFamily(lcPlural) {
+export function isBaryshni(lcPlural) {
     return ['барышни', 'боярышни', 'деревни'].includes(lcPlural);
 }
 
@@ -355,7 +356,7 @@ export function isBaryshniFamily(lcPlural) {
  * @returns {boolean}
  */
 export function isKuhni(lcPlural) {
-    return lcPlural === 'кухни';
+    return lcPlural.endsWith('кухни');
 }
 
 /**
