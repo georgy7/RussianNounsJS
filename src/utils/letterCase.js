@@ -26,3 +26,24 @@ export function toLowerCaseRu(s) {
 export function upperLike(str, pattern) {
     return (pattern === pattern.toUpperCase()) ? str.toUpperCase() : str;
 }
+
+export function capitalizeRu(str) {
+    if (str.length === 0) {
+        return "";
+    }
+
+    const ch = str.charCodeAt(0);
+
+    if ((ch >= 0x0430) && (ch <= 0x044F)) {
+        return String.fromCharCode(ch - 0x20) + str.slice(1);
+    } else if ((ch >= 0x0450) && (ch <= 0x045F)) {
+        return String.fromCharCode(ch - 0x50) + str.slice(1);
+    }
+
+    return str;
+}
+
+export function capitalizeAll(doIt, list) {
+    return doIt ? list.map(capitalizeRu) : list;
+}
+

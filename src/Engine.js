@@ -9,6 +9,7 @@ import { pluralize } from "./rules/pluralize.js";
 import { declinePlural } from "./rules/declinePlural.js";
 import { locativeDictionary, toLocativeDictionaryKey } from "./settings/locativeDictionary.js";
 import { LocativeForm, extractPreposition, extractDeclensionType, extractAttributes } from "./LocativeForm.js";
+import { toLowerCaseRu, capitalizeAll } from './utils/letterCase.js';
 
 export class Engine {
 
@@ -31,7 +32,15 @@ export class Engine {
      */
     decline(lemma, grammaticalCase, pluralForm) {
         const lemmaObject = Lemma.create(lemma);
-        return declineAsList(this, lemmaObject, grammaticalCase, pluralForm);
+
+        const shouldBeCapitalized = pluralForm ?
+                (toLowerCaseRu(pluralForm.charAt(0)) !== pluralForm.charAt(0)) :
+                (lemmaObject.lower().charCodeAt(0) !== lemmaObject.text().charCodeAt(0));
+
+        return capitalizeAll(
+            shouldBeCapitalized,
+            declineAsList(this, lemmaObject, grammaticalCase, pluralForm)
+        );
     }
 
     /**
@@ -44,7 +53,8 @@ export class Engine {
         if (o.isPluraleTantum()) {
             return [o.text()];
         } else {
-            return pluralize(this, o);
+            const capital = o.lower().charCodeAt(0) !== o.text().charCodeAt(0);
+            return capitalizeAll(capital, pluralize(this, o));
         }
     }
 

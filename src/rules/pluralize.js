@@ -170,7 +170,7 @@ function yeruOrI(engine, lemma, word, stem, lcStem, lcWord, stressedEnding, simp
  */
 export function pluralize(engine, lemma) {
     const word = lemma.text();
-    const lcWord = toLowerCaseRu(word);
+    const lcWord = lemma.lower();
 
     // Step 1: Check for stressed ending override
     const stressedEnding = engine.sd
@@ -184,7 +184,7 @@ export function pluralize(engine, lemma) {
 
     // Rule 0: Words ending in -яя take -ие
     if (lcWord.endsWith('яя')) {
-        return unique([dropLast(word, 2) + 'ие']);
+        return [dropLast(word, 2) + 'ие'];
     }
 
     // Rule 1: Simple stem for vowel clusters
@@ -206,7 +206,7 @@ export function pluralize(engine, lemma) {
     // Declension -1: Indeclinable words
     // ============================================================
     if (declension === -1) {
-        return unique([word]);
+        return [word];
     }
 
     // ============================================================
@@ -214,9 +214,9 @@ export function pluralize(engine, lemma) {
     // ============================================================
     if (declension === 0) {
         if (lcWord === 'путь') {
-            return unique(['пути']);
+            return ['пути'];
         } else if (lcWord.endsWith('дитя')) {
-            return unique([dropLast(word, 3) + 'ети']);
+            return [dropLast(word, 3) + 'ети'];
         }
         throw new Error('unsupported mixed declension word');
     }
@@ -246,7 +246,7 @@ export function pluralize(engine, lemma) {
     }
 
     // Fallback
-    return unique([word]);
+    return [word];
 }
 
 // ============================================================
