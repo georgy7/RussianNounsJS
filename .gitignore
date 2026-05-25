@@ -8,3 +8,5 @@
 /js/package.json
 /js/main
 annotated_*.txt
+all_errors.log
+frequent_errors.log
