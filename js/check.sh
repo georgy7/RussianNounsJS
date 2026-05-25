@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-trap 'echo "An error occurred. Exiting..."' EXIT
-
-
 # Before you run it for the first time:
 # ------------------------
 # npm i es-check
@@ -20,8 +17,8 @@ function show_md5 {
 }
 
 function check_it {
-    timeout 5s npx es-check "$1" "$2"
-    timeout 5s npx es-check "$1" "$2" --module
+    npm_config_offline=true timeout 5s npx es-check "$1" "$2"
+    npm_config_offline=true timeout 5s npx es-check "$1" "$2" --module
 }
 
 
