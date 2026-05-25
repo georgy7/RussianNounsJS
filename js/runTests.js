@@ -135,6 +135,7 @@ if (writeLogs) {
         }
         return {
             row: r.rowNumber,
+            lemma: r.lemma,
             gender: r.gender || '—',
             pluraleTantum: r.pluraleTantum,
             indeclinable: r.indeclinable,
@@ -146,7 +147,7 @@ if (writeLogs) {
     }
 
     function formatErrorEntry(e) {
-        let s = `#${e.row} | род: ${e.gender} | склон: ${e.declension} | `;
+        let s = `${e.lemma} | #${e.row} | род: ${e.gender} | склон: ${e.declension} | `;
         s += `pltm=${e.pluraleTantum} fixd=${e.indeclinable} anim=${e.animate} freq=${e.frequent}\n`;
         for (const f of e.failures) s += f + '\n';
         s += '\n';
@@ -160,12 +161,15 @@ if (writeLogs) {
         allErrorEntries.push(buildErrorEntry(r));
     }
 
+    // Sort alphabetically by lemma (Russian locale)
+    allErrorEntries.sort((a, b) => a.lemma.localeCompare(b.lemma, 'ru'));
+
     // Write all errors log
     const allLogPath = path.join(__dirname, '..', 'all_errors.log');
     fs.writeFileSync(allLogPath, allErrorEntries.map(formatErrorEntry).join(''), 'utf8');
     console.log(`\nВсе ошибки: ${allLogPath} (${allErrorEntries.length} слов)`);
 
-    // Write frequent-only log
+    // Write frequent-only log (inherits sorted order)
     const freqEntries = allErrorEntries.filter(e => e.frequent);
     const freqLogPath = path.join(__dirname, '..', 'frequent_errors.log');
     fs.writeFileSync(freqLogPath, freqEntries.map(formatErrorEntry).join(''), 'utf8');

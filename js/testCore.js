@@ -379,6 +379,7 @@ function createResultEntry(resultLength, resultWordForms, resultPluralForms, gen
     pluraleTantum, fixed, animate, declension, lemma, abbr, wordStatus, mostFrequent) {
     return {
         rowNumber: resultLength + 1,
+        lemma: lemma.lower().replaceAll('ё', 'е'),
         wordForms: resultWordForms,
         pluralForms: resultPluralForms,
         gender,
