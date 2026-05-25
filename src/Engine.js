@@ -15,7 +15,7 @@ export class Engine {
 
     /**
      * @description Словарь ударений. Его можно редактировать в рантайме.
-     * @type {StressDictionary}
+     * @type {Object}
      */
     sd = makeDefaultStressDictionary();
 

@@ -1,9 +1,9 @@
-import { StressDictionary } from "../StressDictionary.js";
+import { createStressDictionary } from "../StressDictionary.js";
 import { Gender } from "../Gender.js";
 
 export function makeDefaultStressDictionary() {
     let lemmaOptions;
-    const dictionary = new StressDictionary();
+    const dictionary = createStressDictionary();
 
     function putAll(value, joinedWordList) {
         const list = joinedWordList.split(',');

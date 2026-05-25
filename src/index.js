@@ -3,4 +3,3 @@ export { Gender } from "./Gender.js";
 export { LocativeFormAttribute, LocativeForm } from "./LocativeForm.js";
 export { Lemma, createLemma, createLemmaOrNull } from "./Lemma.js";
 export { Engine } from "./Engine.js";
-export { StressDictionary } from "./StressDictionary.js";
