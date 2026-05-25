@@ -78,8 +78,12 @@
                 };
 
                 await import('./dist/RussianNouns.umd.js');
+                await import('./testCore.js');
                 await import("./test2.js");
             }
+
+            // Load mostFrequent word list (shared by all workers)
+            const mostFrequent = await (await fetch('js/mostFrequent.json')).json();
 
             for (let part of parts) {
                 results.push([]);
@@ -94,6 +98,15 @@
                 }
 
                 jsonPromises.push([]);
+            }
+
+            // Send mostFrequent to all workers
+            for (let wi = 0; wi < workers.length; wi++) {
+                if (profileMode) {
+                    sendToWorker({ type: 'init', mostFrequent });
+                } else {
+                    workers[wi].postMessage({ type: 'init', mostFrequent });
+                }
             }
 
             const listenLetterPromise = (workerIndex, letterIndex) => {

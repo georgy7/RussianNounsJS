@@ -1,8 +1,8 @@
-'use strict';
-
 /*
  * testCore.js — shared test logic for RussianNounsJS testing.
- * Used by both the browser version (test2.js) and the CLI runner.
+ * UMD module — works in Web Worker (importScripts), browser (<script>), and Node.js (require).
+ *
+ * Exposes `testCore` global in browser/Worker, or `module.exports` in Node.js.
  *
  * Decoding functions (extractPair, decodeIncremental, knowThyself, Unpacker)
  * are pure and have no external dependencies.
@@ -10,6 +10,14 @@
  * Test functions (evaluateSingularCase, processSingularForms, processPluralForms)
  * accept a `rn` parameter (the RussianNouns namespace) so they work in any environment.
  */
+
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) {
+        module.exports = factory();
+    } else {
+        root.testCore = factory();
+    }
+})(typeof self !== 'undefined' ? self : this, function () {
 
 // ---------------------------------------------------------------------------
 // Decoding
@@ -396,7 +404,7 @@ function createResultEntry(resultLength, resultWordForms, resultPluralForms, gen
 // Main test function — processes one gender array
 // ---------------------------------------------------------------------------
 
-function testGender(rne, data, dictionary, gender, rn, mostFrequent, counters, results) {
+function testGender(rne, data, dictionary, gender, rn, mostFrequent, counters, results, onProgress) {
     const unpacker = new Unpacker(dictionary);
 
     for (let i = 0; i < data.length; i++) {
@@ -443,6 +451,10 @@ function testGender(rne, data, dictionary, gender, rn, mostFrequent, counters, r
         ));
 
         counters.totalWords++;
+
+        if (onProgress && (i % 250 === 0 || i === data.length - 1)) {
+            onProgress(i, data.length);
+        }
     }
 }
 
@@ -450,13 +462,12 @@ function testGender(rne, data, dictionary, gender, rn, mostFrequent, counters, r
 // Public API
 // ---------------------------------------------------------------------------
 
-module.exports = {
+return {
     extractPair,
     decodeIncremental,
     knowThyself,
     Unpacker,
     testGender,
-    // counters template — callers should pass a mutable object with these fields
     createCounters: () => ({
         totalCases: 0,
         wrongCases: 0,
@@ -470,3 +481,5 @@ module.exports = {
         wrongCasesPluralExceptTheNominativeCase: 0
     })
 };
+
+}); // end UMD factory
