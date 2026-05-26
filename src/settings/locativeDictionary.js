@@ -5,7 +5,7 @@ import { LocativePreposition, encodeLocativeConfig,
     LFA_CONTAINER, LFA_LOCATION, LFA_STRUCTURE, LFA_SURFACE,
     LFA_WAY, LFA_OBJ_W_SURFACE, LFA_SUBSTANCE, LFA_RESOURCE,
     LFA_CONDITION, LFA_EXPOSURE, LFA_MOTION, LFA_EVENT,
-    LFA_WITH_ADJECTIVE, LFA_WITHOUT_ADJECTIVE, LFA_RELIGIOUS } from "../LocativeForm.js";
+    LFA_WITH_ADJECTIVE, LFA_WITHOUT_ADJECTIVE } from "../LocativeForm.js";
 import { Lemma } from "../Lemma.js";
 
 function makeDefaultLocativeDictionary() {
@@ -58,11 +58,7 @@ function makeDefaultLocativeDictionary() {
     // since their conditions are checked by conjunction.
     addConfig(masc, leftShift(LFA_WAY), v, 'год');
     addConfig(masc, leftShift(LFA_CONTAINER), v, 'гроб');
-    // Not sure that the semantics of "in the coffin" is correct here.
-    // It's possible that it has a completely different religious meaning than a container,
-    // hence the different declension.
-    addConfig(masc, leftShift(LFA_CONTAINER)|leftShift(LFA_RELIGIOUS),
-        vo, 'гроб', [LDT_PREP]);
+    addConfig(masc, leftShift(LFA_CONTAINER), vo, 'гроб', [LDT_PREP]);
 
     // 2. spaces ("in")
     addConfig(masc, leftShift(LFA_LOCATION), v,

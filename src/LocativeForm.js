@@ -30,7 +30,6 @@ export const LFA_MOTION = 10;
 export const LFA_EVENT = 11;
 export const LFA_WITH_ADJECTIVE = 12;
 export const LFA_WITHOUT_ADJECTIVE = 13;
-export const LFA_RELIGIOUS = 14;
 
 /**
  * This is not yet a stabilized part of the API.
@@ -71,11 +70,7 @@ export const LocativeFormAttribute = Object.freeze({
     EVENT: leftShift(LFA_EVENT),
 
     WITH_ADJECTIVE: leftShift(LFA_WITH_ADJECTIVE),
-    WITHOUT_ADJECTIVE: leftShift(LFA_WITHOUT_ADJECTIVE),
-
-    // I haven't fully figured out this aspect yet.
-    // This flag will likely disappear in future releases.
-    RELIGIOUS: leftShift(LFA_RELIGIOUS)
+    WITHOUT_ADJECTIVE: leftShift(LFA_WITHOUT_ADJECTIVE)
 });
 
 export const LDT_PREP = 1;
