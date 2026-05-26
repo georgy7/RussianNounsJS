@@ -75,6 +75,11 @@ const PLURAL_ENDINGS_STEM = [
 const PLURAL_STEM_ROW = { 3: 0, 5: 1, 6: 2, 7: 2 };
 
 const GENITIVE_STRESS_DEPENDENT = ['жки', 'шки', 'чки', 'ножны'];
+const GENITIVE_CONSONANT_CLUSTERS = ['кн', 'кл', 'дк', 'нк', 'пк', 'зк', 'рк', 'тк', 'вк', 'лк', 'мк'];
+const GENITIVE_SESTRY = ['сестры', 'сёстры', 'серьги'];
+const GENITIVE_SOFT_CLUSTERS = ['льц', 'сьм', 'деньг', 'ьк', 'йк', 'дьб'];
+const GENITIVE_ZEMLI = ['земли', 'петли', 'пли', 'вли'];
+const GENITIVE_YAT_DEVER = ['зять', 'деверь'];
 
 
 export function declinePlural(engine, lemma, caseIndex, plural) {
@@ -140,7 +145,7 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
             const lcStem = toLowerCaseRu(stem);
 
             if ((
-                endsWithAny(lcStem, ['кн', 'кл', 'дк', 'нк', 'пк', 'зк', 'рк', 'тк', 'вк', 'лк', 'мк']) &&
+                endsWithAny(lcStem, GENITIVE_CONSONANT_CLUSTERS) &&
                 !lcPlural.endsWith('сумерки')
             ) || (
                 lcStem === 'зл'
@@ -159,16 +164,14 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
                 const end = charFromEnd(plural, 2);
                 return dropLast(plural, 2) + upperLike('е', end) + end;
             } else if (
-                endsWithAny(lcPlural, [
-                    'сестры', 'сёстры', 'серьги'
-                ])
+                endsWithAny(lcPlural, GENITIVE_SESTRY)
             ) {
                 const end = charFromEnd(plural, 2);
                 const h = (charFromEnd(lcPlural, 3) === 'ь')
                     ? unYo(dropLast(plural, 3))
                     : unYo(dropLast(plural, 2));
                 return h + upperLike('ё', end) + end;
-            } else if (endsWithAny(lcStem, ['льц', 'сьм', 'деньг', 'ьк', 'йк', 'дьб'])) {
+            } else if (endsWithAny(lcStem, GENITIVE_SOFT_CLUSTERS)) {
                 const end = last(stem);
                 return dropLast(stem, 2) + upperLike('е', end) + end;
             } else if (lcPlural.endsWith('сла') || lcPlural.endsWith('слы')) {
@@ -220,9 +223,7 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
                             endsWithSuffix(lcPlural, BORSCHEE_TRIE) ||
                             ('щи' === lcPlural) ||
                             isEyWord(lcPlural)) ||
-                        (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), [
-                            'зять', 'деверь'
-                        ]))) {
+                        (lemma.lower().endsWith('ь') && !endsWithAny(lemma.lower(), GENITIVE_YAT_DEVER))) {
 
                         let s = ('ь' === last(init(lcPlural))) ? dropLast(plural, 2) : init(plural);
                         return s + 'ей';
@@ -350,10 +351,12 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
 
         if ((stem.length === lcPlural.length - 1) && endsWithSuffix(lcPlural, SOFT_ENDINGS_TRIE)) {
 
-            if (hasChar('ьй', toLowerCaseRu(charFromEnd(stem, 2))) && !lemma.isAnimate()) {
+            const ch2 = charFromEnd(stem, 2).charCodeAt(0);
+            const lcCh2 = (ch2 >= 0x0410 && ch2 <= 0x042F) ? ch2 + 0x20 : ch2;
+            if ((lcCh2 === 0x044C || lcCh2 === 0x0439) && !lemma.isAnimate()) { // 'ь' or 'й'
                 const end = last(stem);
                 return dropLast(stem, 2) + upperLike('е', end) + end;
-            } else if (endsWithAny(lcPlural, ['земли', 'петли', 'пли', 'вли'])) {
+            } else if (endsWithAny(lcPlural, GENITIVE_ZEMLI)) {
                 return init(stem) + 'ель';
             } else {
                 return stem + 'ь';
