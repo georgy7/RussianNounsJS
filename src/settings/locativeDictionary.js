@@ -112,7 +112,7 @@ function makeDefaultLocativeDictionary() {
     // 7. situations and states ("in" and "on")
     addConfig(masc, leftShift(LFA_CONDITION), v,
         'бой,бред,быт,долг,плен,пыл,сок,ход,лад');
-    // I mean the meaning used in the current sentence.
+    // "иметь в виду" = "to mean" = "to have conviction in what is said"
     // Some sources say there's also the usage "в виду гор" meaning "where the mountains are visible".
     // I've never heard anyone say that. If this is to be included in this classification,
     // I'm not sure if it's EXPOSURE, CONDITION, or something third.

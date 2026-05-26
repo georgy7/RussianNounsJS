@@ -25,7 +25,7 @@ export function makeDefaultStressDictionary() {
     putAll('SSSSSSE-bEEbEE', 'год');
     putAll('SSSSSSb-bbbbbb', 'цех');
 
-    // Almost all words ending in zh/sh/ch/tsts with stress on the ending
+    // Almost all words ending in zh/sh/ch/ts with stress on the ending
     // are hashed (see stressHashes).
     putAll('SbbSbbb-bbbbbb', 'грош,шприц');
     putAll('SssSsss-ssssss', 'кишмиш,кряж,слеш,слэш');
@@ -47,7 +47,7 @@ export function makeDefaultStressDictionary() {
     lemmaOptions = {gender: Gender.FEMININE};
     putAll('EEEbEEE-SSESEE', 'щека');
     putAll('EEEEEEE-SSESEE', 'слеза');
-    // If the word stem ends in zh/sh/ch/chtsts/tsts,
+    // If the word stem ends in zh/sh/ch/shch/ts,
     // the instrumental singular ending depends on stress.
     // In other words, stress affects the genitive plural ending.
     putAll('EEEEEEE-SESSSS', 'семья,макросемья');

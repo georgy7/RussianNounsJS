@@ -67,7 +67,7 @@ export const LocativeFormAttribute = Object.freeze({
     // Movement or short-term spatial position.
     MOTION: leftShift(LFA_MOTION),
 
-    // Event.
+    // Social gathering.
     EVENT: leftShift(LFA_EVENT),
 
     WITH_ADJECTIVE: leftShift(LFA_WITH_ADJECTIVE),
@@ -87,10 +87,7 @@ export const LDT_U = 2;
 export const LocativeDeclensionType = Object.freeze({
     /**
      * For very special cases when the prepositional case form
-     * in the locative is an exception to the rule.
-     * That is, there are some attributes of the special locative form with a preposition,
-     * but if you add a certain attribute or several more,
-     * the form should switch back to the regular one.
+     * in the locative is an exception to a rule.
      */
     PREPOSITIONAL: LDT_PREP,
 

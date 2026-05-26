@@ -68,11 +68,10 @@ export class Engine {
      * The so-called attributes in LocativeForm objects are conjunctive.
      * That is, for a word form with a preposition to be applicable, all listed
      * predicates (attributes, conditions) must be true.
-     * Conversely, if even one predicate is false, this form should not be used.
-     * However, even if all are true, that is still not a sufficient condition.
-     * There should also be no more specific condition in the resulting list,
-     * i.e., one containing all the same predicates plus additional true ones.
-     * In that case, the more specific rule overrides the one we are considering.
+     *
+     * Among true sets of predicates, more specific ones
+     * (the same sets with extra predicates) shadows less specific ones.
+     * It's like CSS specificity.
      *
      * @param {RussianNouns.Lemma|Object} lemma
      * @returns {Array} Array of LocativeForm objects.

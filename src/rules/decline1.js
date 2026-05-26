@@ -388,9 +388,7 @@ function halfSomething(lcWord) {
         // In case of hyphens.
         let offset = subWord.search(/[а-яё]/);
 
-        // At the very least, soft and hard signs
-        // should not end up here, only vowels.
-
+        // It must not be a vowel, nor a soft sign, nor a hard sign.
         return (offset >= 0) && bincludes(consonants, subWord[offset]);
 
     } else {
