@@ -16,12 +16,11 @@ export function fastHash(str) {
 export function calculateHash(lowerCaseUnicodeString) {
     const preparedString = lowerCaseUnicodeString.replaceAll('ё', 'е');
 
-    // Дело в том, что когда данные так плотно упакованы, и у нас
-    // некоторые буквы кодируются нулевыми битами, если, например,
-    // первая буква - А, слово с этой буквой вначале и без неё
-    // будет выражено одним и тем же набором бит.
-    // Так что этот своего рода мигающий светодиод говорит, что что-то
-    // меняется. Это один из способов немного уменьшить коллизию.
+    // When data is so densely packed and some letters are encoded as zero bits,
+    // e.g., if the first letter is "А", a word starting with that letter and one
+    // without it would be expressed by the same set of bits.
+    // So this kind of blinking LED signals that something is changing.
+    // This is one way to slightly reduce collisions.
     let state = preparedString.length % 2;
     let readyBits = 1;
 
@@ -54,8 +53,8 @@ export function calculateHash(lowerCaseUnicodeString) {
         flushBits();
     }
 
-    // Но теперь у коротких строк одинаковой длины с соседними
-    // кодами первой буквы всё еще встречаются коллизии.
+    // But short strings of the same length with adjacent
+    // first letter codes still have collisions.
     const start = preparedString.charCodeAt(0) % 2;
     return ((0x7fffffff & hash) * 2) + start;
 }

@@ -5,18 +5,18 @@ import { last, takeLast } from "./utils/strings.js";
 import { leftShift } from "./utils/decompress.js";
 
 /**
- * Нормальная форма слова.
- * Объекты этого класса содержат также грамматическую и семантическую информацию,
- * позволяющую выбирать стратегии словоизменения и различать омонимы.
+ * The canonical form of a word.
+ * Objects of this class also contain grammatical and semantic information,
+ * allowing to choose inflection strategies and distinguish homonyms.
  *
- * Пожалуйста, используйте `Lemma.create`
- * или `Lemma.createOrNull` вместо конструктора.
+ * Please use `Lemma.create`
+ * or `Lemma.createOrNull` instead of the constructor.
  */
 export class Lemma {
 
     /**
-     * Пожалуйста, используйте статические методы create
-     * и createOrNull вместо конструктора.
+     * Please use the static methods create
+     * and createOrNull instead of the constructor.
      */
     constructor(o) {
         if (o instanceof Lemma) {
@@ -49,10 +49,10 @@ export class Lemma {
     }
 
     /**
-     * Если параметр — уже лемма, вернет тот же объект, а не копию.
+     * If the parameter is already a lemma, returns the same object, not a copy.
      *
      * @param {RussianNouns.Lemma|Object} o
-     * @throws {Error} Ошибки из конструктора леммы.
+     * @throws {Error} Errors from the lemma constructor.
      * @returns {RussianNouns.Lemma}
      */
     static create(o) {
@@ -69,7 +69,7 @@ export class Lemma {
     }
 
     /**
-     * Создание леммы с минимальными накладными расходами.
+     * Create a lemma with minimal overhead.
      *
      * @param {Object} options
      * @returns {RussianNouns.Lemma|null}
@@ -126,25 +126,25 @@ export class Lemma {
     }
 
     /**
-     * Склонение существительного.
+     * Noun declension.
      *
-     * Возможные значения:
-     * + -1 — несклоняемые, в основном заимствованные слова;
-     * + 0 — разносклоняемые "путь" и "дитя";
-     * + 1 — мужской и средний род без окончания;
-     * + 2 — слова на "а", "я" (м., ж. и общий род);
-     * + 3 — жен. род без окончания; слова, оканчивающиеся на "мя".
+     * Possible values:
+     * + -1 — indeclinable, mostly loanwords;
+     * + 0 — mixed declension ("путь" and "дитя");
+     * + 1 — masculine and neuter without ending;
+     * + 2 — words ending in "а", "я" (m., f. and common gender);
+     * + 3 — feminine without ending; words ending in "мя".
      *
-     * Понятие «склонение» сложно применить к словам plurale tantum,
-     * поэтому этот метод возвращает для них -2 (вместо undefined).
+     * The concept of "declension" is hard to apply to plurale tantum words,
+     * so this method returns -2 for them (instead of undefined).
      */
     getDeclension() {
         return (this._flags >> 16) - 2;
     }
 
     /**
-     * Возвращает «школьный» вариант склонения:
-     * «вода» — первое склонение; «стол», «окно» — второе склонение.
+     * Returns the "school" declension variant:
+     * "вода" — first declension; "стол", "окно" — second declension.
      */
     getSchoolDeclension() {
         const d = this.getDeclension();
@@ -170,16 +170,16 @@ export function fastClone(lemma, newText) {
     lemmaCopy._txt = newText;
     lemmaCopy._lc = newText.toLowerCase();
     lemmaCopy._hash = calculateHash(lemmaCopy.lower());
-    // Здесь не обновляется склонение, потому что
-    // везде, где я использую эту функцию, я уже знаю,
-    // какое склонение получится.
+    // Declension is not updated here because
+    // everywhere I use this function, I already know
+    // what declension will result.
     return Object.freeze(lemmaCopy);
 }
 
 
 /**
  * @param o A plain old JavaScript object.
- * @returns {string|null} Описание ошибки на английском или null.
+ * @returns {string|null} Error description in English, or null.
  */
 function validateCreateLemma(o) {
     if (null == o) {

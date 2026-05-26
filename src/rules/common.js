@@ -214,14 +214,14 @@ export function okWord(lcWord) {
 }
 
 /**
- * В русском языке практически не бывает безударных букв Ё.
- * Поэтому при ударном окончании, буква Ё должна исчезать из основы слова.
- * Данная функция подготавливает несколько вариантов основы слова, в зависимости от ударения.
+ * In Russian, the letter YO (ё) is almost never unstressed.
+ * Therefore, with a stressed ending, the letter YO must disappear from the word stem.
+ * This function prepares several variants of the word stem, depending on stress.
  *
- * @param {Array} stressedEnding Булевые значения, означающие ударное окончание
- * @param {string} stem Основа слова (может содержать ё)
- * @param {function} transform Функция постобработки получившихся строк (принимает флаг ударного окончания вторым аргументом)
- * @return {Array} Список основ, зависящих от ударения — в том порядке, в котором идут булевые значения в аргументах
+ * @param {Array} stressedEnding Boolean values indicating a stressed ending
+ * @param {string} stem Word stem (may contain ё)
+ * @param {function} transform Post-processing function for the resulting strings (takes a stressed ending flag as the second argument)
+ * @return {Array} List of stress-dependent stems — in the same order as the boolean values in the arguments
  */
 export function eStem(stressedEnding, stem, transform) {
     const stressList = stressedEnding.length ? stressedEnding : [false];

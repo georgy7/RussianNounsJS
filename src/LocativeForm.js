@@ -1,14 +1,14 @@
 import { leftShift } from "./utils/decompress.js";
 
 /**
- * Форма слова в местном падеже (ед. ч.) с предлогом
- * и списком условий применения, которые складываются через логическое И.
- * Т.е. если хотя бы один атрибут как предикат ложен,
- * то эта комбинация формы слова и предлога не может быть использована.
+ * A word form in the locative case (singular) with a preposition
+ * and a list of conditions combined with logical AND.
+ * That is, if at least one attribute as a predicate is false,
+ * this combination of word form and preposition cannot be used.
  *
- * @param {string} preposition Предлог.
- * @param {string} word Форма слова.
- * @param {number} attributes Предикаты, которые все должны быть истинными.
+ * @param {string} preposition Preposition.
+ * @param {string} word Word form.
+ * @param {number} attributes Predicates that must all be true.
  */
 export function LocativeForm(preposition, word, attributes) {
     this.preposition = preposition;
@@ -33,13 +33,13 @@ export const LFA_WITHOUT_ADJECTIVE = 13;
 export const LFA_RELIGIOUS = 14;
 
 /**
- * Это еще не стабилизированная часть API.
+ * This is not yet a stabilized part of the API.
  *
- * Предикаты, по которым можно узнать, уместно ли
- * в данном случае употреблять ту или иную форму локатива.
- * Тут взяты семантические классы (с небольшими изменениями)
- * из публикации «К семантике русского локатива».
- * Затем к ним еще добавлены синтаксические особенности употребления.
+ * Predicates that determine whether a particular locative form
+ * is appropriate to use in a given case.
+ * The semantic classes here (with minor modifications) are taken
+ * from the publication "On the Semantics of the Russian Locative".
+ * Syntactic usage features are also added to them.
  */
 export const LocativeFormAttribute = Object.freeze({
     CONTAINER: (1 << LFA_CONTAINER),
@@ -47,34 +47,34 @@ export const LocativeFormAttribute = Object.freeze({
     STRUCTURE: (1 << LFA_STRUCTURE),
     SURFACE: (1 << LFA_SURFACE),
 
-    // Метафорический путь. Луч времени, на (или в) котором лежат события.
+    // Metaphorical path. A timeline on (or in) which events lie.
     WAY: (1 << LFA_WAY),
 
-    // Объект с функциональной (не обязательно плоской) поверхностью.
+    // An object with a functional (not necessarily flat) surface.
     OBJECT_WITH_FUNCTIONAL_SURFACE: (1 << LFA_OBJ_W_SURFACE),
 
-    // Вещество (обволакивающее или покрывающее).
+    // Substance (enveloping or covering).
     SUBSTANCE: (1 << LFA_SUBSTANCE),
-    // Материал, средство изготовления, приготовления (еды), ремонта.
+    // Material, means of manufacture, cooking (food), repair.
     RESOURCE: (1 << LFA_RESOURCE),
 
-    // Состояние, свойство, положение дел.
+    // State, property, state of affairs.
     CONDITION: (1 << LFA_CONDITION),
 
-    // Испытываемое воздействие (стихии или внимания/отношения человека).
+    // Experienced impact (of elements or human attention/attitude).
     EXPOSURE: leftShift(LFA_EXPOSURE),
 
-    // Перемещение или кратковременное пространственное положение.
+    // Movement or short-term spatial position.
     MOTION: leftShift(LFA_MOTION),
 
-    // Мероприятие.
+    // Event.
     EVENT: leftShift(LFA_EVENT),
 
     WITH_ADJECTIVE: leftShift(LFA_WITH_ADJECTIVE),
     WITHOUT_ADJECTIVE: leftShift(LFA_WITHOUT_ADJECTIVE),
 
-    // Я еще не до конца понял этот аспект.
-    // Этот флаг наверняка исчезнет в будущих релизах.
+    // I haven't fully figured out this aspect yet.
+    // This flag will likely disappear in future releases.
     RELIGIOUS: leftShift(LFA_RELIGIOUS)
 });
 
@@ -82,24 +82,24 @@ export const LDT_PREP = 1;
 export const LDT_U = 2;
 
 /**
- * Под это число в конфиге будет выделено 3 бита (не более восьми состояний).
+ * 3 bits (no more than eight states) are allocated for this number in the config.
  */
 export const LocativeDeclensionType = Object.freeze({
     /**
-     * Для очень особых случаев, когда форма предложного падежа
-     * в локативе является исключением из правил.
-     * Т.е. вот есть какие-то атрибуты у особой формы локатива с предлогом,
-     * но если добавить еще определённый атрибут или несколько,
-     * форма должна снова переключиться в обычную.
+     * For very special cases when the prepositional case form
+     * in the locative is an exception to the rule.
+     * That is, there are some attributes of the special locative form with a preposition,
+     * but if you add a certain attribute or several more,
+     * the form should switch back to the regular one.
      */
     PREPOSITIONAL: LDT_PREP,
 
-    // Окончания -у/-ю.
+    // Endings -u/-yu.
     U_SUFFIX: LDT_U
 });
 
 /**
- * Под это число в конфиге будет выделено 3 бита (не более восьми состояний).
+ * 3 bits (no more than eight states) are allocated for this number in the config.
  */
 export const LocativePreposition = Object.freeze({
     V: 1,
@@ -110,7 +110,7 @@ export const LocativePreposition = Object.freeze({
 /**
  * @param {LocativePreposition} preposition
  * @param {LocativeDeclensionType} declensionType
- * @param {number} attributes - флаги LocativeFormAttribute.
+ * @param {number} attributes - LocativeFormAttribute flags.
  * @returns {number}
  */
 export function encodeLocativeConfig(preposition, declensionType, attributes) {

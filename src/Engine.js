@@ -14,21 +14,21 @@ import { toLowerCaseRu, capitalizeAll } from './utils/letterCase.js';
 export class Engine {
 
     /**
-     * @description Словарь ударений. Его можно редактировать в рантайме.
+     * @description Stress dictionary. Can be modified at runtime.
      * @type {Object}
      */
     sd = makeDefaultStressDictionary();
 
     /**
      *
-     * @param {RussianNouns.Lemma|Object} lemma Слово в именительном падеже с метаинформацией.
-     * @param {string} grammaticalCase Падеж.
-     * @param {string} pluralForm Форма во множественном числе.
-     * Если указана, результат будет тоже во множественном.
-     * У plurale tantum игнорируется.
-     * @returns {Array} Список, т.к. бывают вторые родительный, винительный падежи. Существительные
-     * женского рода в творительном могут иметь как окончания -ей -ой, так и -ею -ою.
-     * Второй предложный падеж (местный падеж, локатив) не включен в предложный.
+     * @param {RussianNouns.Lemma|Object} lemma Nominative singular word with metadata.
+     * @param {string} grammaticalCase Case.
+     * @param {string} pluralForm Plural form.
+     * If provided, the result will be in plural.
+     * Ignored for plurale tantum.
+     * @returns {Array} Array, since there can be secondary genitive and accusative cases. Feminine
+     * nouns in instrumental can have either -ей/-ой or -ею/-ою endings.
+     * The second prepositional case (locative) is not included in the prepositional.
      */
     decline(lemma, grammaticalCase, pluralForm) {
         const lemmaObject = Lemma.create(lemma);
@@ -59,24 +59,24 @@ export class Engine {
     }
 
     /**
-     * Экспериментальная возможность!
-     * Заточено под ед. число.
+     * Experimental feature!
+     * Designed for singular only.
      *
-     * Возвращает формы слов с условиями их использования (там смешаны
-     * семантические классы и некоторые синтаксические обстоятельства).
+     * Returns word forms with conditions for their usage (a mix of
+     * semantic classes and some syntactic circumstances).
      *
-     * Эти так называемые атрибуты в объектах LocativeForm конъюнктивны.
-     * Т.е. чтобы форма слова с предлогом могла применяться, должны быть истинными
-     * все перечисленные предикаты (атрибуты, условия применения).
-     * И напротив, если хотя бы один из предикатов ложен, не следует использовать это выражение.
-     * Однако, если они все истинны, это еще недостаточное условие для применения.
-     * Еще в полученном списке не должно быть более конкретного условия,
-     * т.е. содержащего все те же предикаты с еще дополнительными, тоже истинными.
-     * В последнем случае это уточнённое правило переопределит то, которое мы рассматриваем.
+     * The so-called attributes in LocativeForm objects are conjunctive.
+     * That is, for a word form with a preposition to be applicable, all listed
+     * predicates (attributes, conditions) must be true.
+     * Conversely, if even one predicate is false, this form should not be used.
+     * However, even if all are true, that is still not a sufficient condition.
+     * There should also be no more specific condition in the resulting list,
+     * i.e., one containing all the same predicates plus additional true ones.
+     * In that case, the more specific rule overrides the one we are considering.
      *
      * @param {RussianNouns.Lemma|Object} lemma
-     * @returns {Array} Массив объектов типа LocativeForm.
-     * Может быть пустым, если местный падеж в ед. ч. совпадает с предложным или не имеет смысла.
+     * @returns {Array} Array of LocativeForm objects.
+     * May be empty if the locative singular matches the prepositional or is meaningless.
      */
     getLocativeForms(lemma) {
         const engine = this;

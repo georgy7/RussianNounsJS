@@ -67,16 +67,16 @@ export function createStressDictionary() {
     return {
         /**
          * @param {RussianNouns.Lemma|Object} lemma
-         * @param {string} settings Строка настроек в формате 1234567-123456.
-         * До дефиса — единственное число, после дефиса — множественное.
-         * Номер символа — номер падежа в {@link RussianNouns.CASES}.
-         * Возможные значения каждого символа:
-         * S — ударение только на основу;
-         * s — чаще на основу;
-         * b — оба варианта употребляются одинаково часто ("b" значит "both");
-         * e — чаще на окончание;
-         * E — только на окончание.
-         * @throws {Error} Если некорректный формат значения.
+         * @param {string} settings Settings string in format 1234567-123456.
+         * Before the dash — singular, after the dash — plural.
+         * Character position — case number in {@link RussianNouns.CASES}.
+         * Possible values for each character:
+         * S — stress only on the stem;
+         * s — more often on the stem;
+         * b — both variants used equally often ("b" means "both");
+         * e — more often on the ending;
+         * E — only on the ending.
+         * @throws {Error} If the value format is invalid.
          */
         put(lemma, settings) {
             const parts = settings.split('-');

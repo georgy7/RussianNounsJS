@@ -25,8 +25,8 @@ export function makeDefaultStressDictionary() {
     putAll('SSSSSSE-bEEbEE', 'год');
     putAll('SSSSSSb-bbbbbb', 'цех');
 
-    // Почти все слова на ж/ш/ч/ц с ударением на окончание
-    // захешированы (см. stressHashes).
+    // Almost all words ending in zh/sh/ch/tsts with stress on the ending
+    // are hashed (see stressHashes).
     putAll('SbbSbbb-bbbbbb', 'грош,шприц');
     putAll('SssSsss-ssssss', 'кишмиш,кряж,слеш,слэш');
     putAll('SEESeEE-EEEEEE', 'стеллаж');
@@ -47,9 +47,9 @@ export function makeDefaultStressDictionary() {
     lemmaOptions = {gender: Gender.FEMININE};
     putAll('EEEbEEE-SSESEE', 'щека');
     putAll('EEEEEEE-SSESEE', 'слеза');
-    // Если основа слова заканчивается на буквы жшчщц,
-    // от ударения зависит окончание творительного падежа ед.ч.
-    // В остальных словах ударение влияет на окончание в р.п. мн.ч.
+    // If the word stem ends in zh/sh/ch/chtsts/tsts,
+    // the instrumental singular ending depends on stress.
+    // In other words, stress affects the genitive plural ending.
     putAll('EEEEEEE-SESSSS', 'семья,макросемья');
     putAll('EEEEEEE-SEESEE', 'вожжа,свеча');
     putAll('EEESEEE-SSSSSS', 'душа');

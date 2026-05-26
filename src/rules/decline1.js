@@ -254,7 +254,7 @@ export function decline1(engine, lemma, caseIndex) {
                         }
                     } else if (isAdjectiveLike(lemma, lcWord)) {
                         if ((charFromEnd(lcWord, 2) === 'и') || lcWord.endsWith('хой')) {
-                            // TODO добавить прилагательные в testing.html, выяснить, какая тут закономерность
+                            // TODO add adjectives to testing.html, figure out the pattern here
                             return stem + 'им';
                         } else {
                             return stem + 'ым';
@@ -385,11 +385,11 @@ function halfSomething(lcWord) {
 
         let subWord = lcWord.substring(3);
 
-        // На случай дефисов.
+        // In case of hyphens.
         let offset = subWord.search(/[а-яё]/);
 
-        // Сюда не должны попадать как минимум
-        // мягкий и твердый знаки помимо гласных.
+        // At the very least, soft and hard signs
+        // should not end up here, only vowels.
 
         return (offset >= 0) && bincludes(consonants, subWord[offset]);
 

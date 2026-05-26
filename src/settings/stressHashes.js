@@ -1,9 +1,9 @@
 import { deltaDecodeToSet } from "../utils/decompress.js";
 
-// Значительную часть слов решил фильтровать по хэшам, чтобы не раздувать
-// исходный код и увеличить скорость работы библиотеки.
+// A significant portion of words is filtered by hashes to avoid bloating
+// the source code and to improve library performance.
 
-// Слова вроде "багаж", "кругляш", "свинец"
+// Words like "багаж", "кругляш", "свинец"
 export const stressHashesA = deltaDecodeToSet([
     11720389, 548, 1024, 1479, 2622, 2867, 1222, 2642, 264, 1328, 137, 123, 397,
     65542229, 212447047, 31729170, 8094836, 1056, 21701789, 35520559, 40358, 21819,
@@ -24,8 +24,8 @@ export const stressHashesA = deltaDecodeToSet([
     3709, 61381, 17424, 30158, 80591, 11218, 44099, 260487
 ]);
 
-// Слова вроде "усач", "истец", "малыш" —
-// отличаются в винительном падеже
+// Words like "усач", "истец", "малыш" —
+// differ in the accusative case
 export const stressHashesB = deltaDecodeToSet([
     11720389, 548, 1024, 1060, 4, 5904, 1848, 4404, 330555234, 4691346, 3365076,
     1045362, 7414584, 960432, 10564312, 253286, 16178203, 4357, 4355, 11350, 31120,

@@ -1,12 +1,12 @@
-// Корень — конец всех строк массива.
-// В качестве ключей выступают последние буквы строк, а в качестве значений —
-// объекты, ключами в которых будут уже предпоследние буквы, и так далее.
-// Значение 0 вместо объекта означает начало строки.
+// The root is the end of all strings in the array.
+// Keys are the last letters of strings, and values are
+// objects whose keys are the second-to-last letters, and so on.
+// A value of 0 instead of an object means the start of a string.
 
-// При этом часть информации отбрасывается на этапе построения дерева:
-// если в массиве суффиксов есть строки "ый" и "итый", достаточно проверить
-// две последние буквы "ый", чтобы убедиться, что слово заканчивается на одно
-// из перечисленных окончаний.
+// At the same time, some information is discarded during tree construction:
+// if the suffix array contains strings "ый" and "итый", it is enough to check
+// the last two letters "ый" to be sure that the word ends in one
+// of the listed endings.
 
 export function createReversedTrie(suffixList) {
     let result = new Map();
