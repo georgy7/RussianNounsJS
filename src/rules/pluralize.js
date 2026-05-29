@@ -332,7 +332,7 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
 
         // Rule M6: Barin/Boyar type words
         if (
-            (((lcWord.endsWith('анин') && lcWord.length > 5) || lcWord.endsWith('янин')) && !lemma.isAName())
+            (lemma.isAnimate() && (lcWord.endsWith('анин') || lcWord.endsWith('янин')) && !lemma.isAName())
             || isBoyar(lcWord) || isBarin(lcWord)
         ) {
             result.push(dropLast(word, 2) + 'е');
