@@ -28,7 +28,6 @@ import { getPluralForms } from '../settings/irregularNouns.js';
 import {
     YA_D1_SOFT_STEM,
     A_YA_WORDS,
-    A_YA_WORDS2_SUFFIXES,
     A_YA_WORDS3,
     A_YA_WORDS4,
     YA2_SOFT_STEM_WORDS,
@@ -308,7 +307,7 @@ function pluralizeDeclension1(engine, lemma, word, lcWord, stem, lcStem,
 
         // Rule M5: aYaWords family (words ending in -а/-я in plural)
         const aYaCategory = getAYaWordsCategory(lcWord);
-        const matchesAYaWords2Flag = matchesAYaWords2(lcWord);
+        const matchesAYaWords2Flag = matchesAYaWords2(lcWord, lemma);
 
         if (aYaCategory !== 0 || matchesAYaWords2Flag) {
             if (aYaCategory === 4) {

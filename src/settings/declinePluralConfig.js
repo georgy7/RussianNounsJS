@@ -89,8 +89,10 @@ export const EXPLICIT_OV1 = [
     'юнкера', 'ястреба',
     'суда',
     'фельдшера', 'кучера',
-    'пристава', 'вахтера',
-    'ктора'
+    'пристава',
+
+    // Suffixes
+    'ктора', 'хтера'
 ];
 
 export const EXPLICIT_OV1_TREE = createReversedTrie(EXPLICIT_OV1);

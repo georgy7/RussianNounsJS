@@ -60,12 +60,15 @@ export const A_YA_WORDS = new Set([
 // Data: Suffix-based matching for masculine -а/-я words.
 // Words ending with these suffixes are treated as -а/-я words.
 // ============================================================
-export const A_YA_WORDS2_SUFFIXES = createReversedTrie([
+const A_YA_WORDS2_SUFFIXES_INANIMATE = createReversedTrie([
     'округ', 'остров', 'отпуск',
-    'паспорт', 'парус', 'поезд', 'повар', 'погреб',
+    'паспорт', 'парус', 'поезд', 'погреб',
     'рукав',
-    'цех',
-    'юнкер'
+    'цех'
+]);
+
+const A_YA_WORDS2_SUFFIXES_ANIMATE = createReversedTrie([
+    'повар', 'юнкер'
 ]);
 
 // ============================================================
@@ -246,8 +249,10 @@ export function getAYaWordsCategory(lcWord) {
  * @param {string} lcWord - lowercase word
  * @returns {boolean}
  */
-export function matchesAYaWords2(lcWord) {
-    return endsWithSuffix(lcWord, A_YA_WORDS2_SUFFIXES);
+export function matchesAYaWords2(lcWord, lemma) {
+    const a = lemma.isAnimate();
+    return (!a && endsWithSuffix(lcWord, A_YA_WORDS2_SUFFIXES_INANIMATE)) ||
+        (a && endsWithSuffix(lcWord, A_YA_WORDS2_SUFFIXES_ANIMATE));
 }
 
 /**
