@@ -10,3 +10,5 @@
 annotated_*.txt
 all_errors.log
 frequent_errors.log
+RN.js
+*.CP1251.js
