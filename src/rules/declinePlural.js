@@ -3,7 +3,7 @@ import { getIntGender } from "../Lemma.js";
 import { getNounStem0, egoSoftPlural } from "./common.js";
 import { surnameType1Plural } from "./names.js";
 import { endsWithSuffix } from "../utils/trie.js";
-import { bincludes, lcBit, vowels, consonantsExceptJ } from "../utils/alphabet.js";
+import { bincludes, lcBit, vowels, consonantsExceptJ, LOWERCASE_A, UPPERCASE_A } from "../utils/alphabet.js";
 import { toLowerCaseRu, upperLike } from "../utils/letterCase.js";
 import { init, last, dropLast, charFromEnd, hasChar, endsWithAny, unYo } from "../utils/strings.js";
 import {
@@ -352,8 +352,14 @@ export function declinePlural(engine, lemma, caseIndex, plural) {
         if ((stem.length === lcPlural.length - 1) && endsWithSuffix(lcPlural, SOFT_ENDINGS_TRIE)) {
 
             const ch2 = charFromEnd(stem, 2).charCodeAt(0);
-            const lcCh2 = (ch2 >= 0x0410 && ch2 <= 0x042F) ? ch2 + 0x20 : ch2;
-            if ((lcCh2 === 0x044C || lcCh2 === 0x0439) && !lemma.isAnimate()) { // 'ь' or 'й'
+
+            if (
+                (ch2 === LOWERCASE_A + 9        // й
+                || ch2 === LOWERCASE_A + 28     // ь
+                || ch2 === UPPERCASE_A + 9      // Й
+                || ch2 === UPPERCASE_A + 28)    // Ь
+                && !lemma.isAnimate()
+            ) {
                 const end = last(stem);
                 return dropLast(stem, 2) + upperLike('е', end) + end;
             } else if (endsWithAny(lcPlural, GENITIVE_ZEMLI)) {

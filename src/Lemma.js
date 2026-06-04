@@ -1,6 +1,7 @@
 import { GenderValues, FEM, MASC, NEU, COM } from "./Gender.js";
 import { calculateHash } from "./utils/hash.js";
 import { bincludes, consonants } from "./utils/alphabet.js";
+import { toLowerCasePortable } from "./utils/letterCase.js";
 import { last, takeLast } from "./utils/strings.js";
 import { leftShift } from "./utils/decompress.js";
 
@@ -33,7 +34,7 @@ export class Lemma {
             }
 
             this._txt = o.text;
-            this._lc = o.text.toLowerCase();
+            this._lc = toLowerCasePortable(o.text);
             this._hash = calculateHash(this._lc);
 
             this._flags |= (1 << 3) * (o.indeclinable&1);
@@ -168,7 +169,7 @@ export function getIntGender(lemma) {
 export function fastClone(lemma, newText) {
     const lemmaCopy = new Lemma(lemma);
     lemmaCopy._txt = newText;
-    lemmaCopy._lc = newText.toLowerCase();
+    lemmaCopy._lc = toLowerCasePortable(newText);
     lemmaCopy._hash = calculateHash(lemmaCopy.lower());
     // Declension is not updated here because
     // everywhere I use this function, I already know

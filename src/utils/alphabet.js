@@ -1,9 +1,25 @@
+export const LOWERCASE_A = 'а'.charCodeAt(0);
+export const UPPERCASE_A = 'А'.charCodeAt(0);
+
+export const LOWERCASE_YO = 'ё'.charCodeAt(0);
+export const UPPERCASE_YO = 'Ё'.charCodeAt(0);
+
+export const UNICODE = 0x0401 === UPPERCASE_YO;
+
+export const UPPERCASE_RANGE2_START = UNICODE ? 0x0400 : UPPERCASE_YO;
+export const UPPERCASE_RANGE2_END = UNICODE ? 0x040F : UPPERCASE_YO;
+
+export const LOWERCASE_RANGE2_START = UNICODE ? 0x0450 : LOWERCASE_YO;
+export const LOWERCASE_RANGE2_END = UNICODE ? 0x045F : LOWERCASE_YO;
+
+export const RANGE2_DIFF = LOWERCASE_RANGE2_START - UPPERCASE_RANGE2_START;
+
 export function lcBit(lcChar) {
-    // Relative to "а"
-    const offset = lcChar.charCodeAt(0) - 1072;
+    const code = lcChar.charCodeAt(0);
+    const offset = code - LOWERCASE_A;
 
     // Without ё, the Russian alphabet consists of 32 letters.
-    return (offset === 33) ? 0b100000 : // ё → е
+    return (code === LOWERCASE_YO) ? 0b100000 : // ё → е
             ((offset === (0x1F & offset)) ? (1 << offset) : 0);
 }
 

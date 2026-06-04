@@ -78,13 +78,13 @@ const NOMINATIVE = 0;
  */
 const singleEYo = s => (s.replace(/[^её]/g, '').length === 1);
 
-const reYo = s => {
+const reYo = (str, lowerCaseString) => {
     const index = Math.max(
-        s.toLowerCase().lastIndexOf('е'),
-        s.toLowerCase().lastIndexOf('ё')
+        lowerCaseString.lastIndexOf('е'),
+        lowerCaseString.lastIndexOf('ё')
     );
-    const r = upperLike('ё', s[index]);
-    return s.substring(0, index) + r + s.substring(index + 1);
+    const r = upperLike('ё', str[index]);
+    return str.substring(0, index) + r + str.substring(index + 1);
 };
 
 function yoStem(engine, lemma, stem, lcStem, f) {
@@ -96,7 +96,7 @@ function yoStem(engine, lemma, stem, lcStem, f) {
     }
 
     return stressedStem.map(b => b
-        ? (singleEYo(lcStem) ? f(reYo(stem)) : f(stem))
+        ? (singleEYo(lcStem) ? f(reYo(stem, lcStem)) : f(stem))
         : f(unYo(stem))
     );
 }

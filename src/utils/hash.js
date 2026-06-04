@@ -1,3 +1,5 @@
+import { LOWERCASE_A } from "./alphabet.js";
+
 /**
  * Fast, lightweight hash producing ~32-bit output.
  * Uses the DJB2 inner loop without the 5-bit packing overhead of calculateHash.
@@ -40,7 +42,7 @@ export function calculateHash(lowerCaseUnicodeString) {
     for (let ch of preparedString) {
 
         // Packing the five-bit letters.
-        const chCode = (ch.charCodeAt(0) - 1072) & 0x1F;
+        const chCode = (ch.charCodeAt(0) - LOWERCASE_A) & 0x1F;
         state |= chCode << readyBits;
         readyBits += 5;
 
