@@ -54,10 +54,10 @@ var rne = new RussianNouns.Engine();
 
 (function () {
     var k = Lemma.create({
-        text: 'ножницы',
+        text: '\xED\xEE\xE6\xED\xE8\xF6\xFB',
         pluraleTantum: true
     });
-    assertEquals(k.text(), 'ножницы');
+    assertEquals(k.text(), '\xED\xEE\xE6\xED\xE8\xF6\xFB');
     assertEquals(k.isPluraleTantum(), true);
     assertEquals(k.getGender(), undefined);
     assertEquals(k.isIndeclinable(), false);
@@ -70,7 +70,7 @@ var rne = new RussianNouns.Engine();
 
 (function () {
     var mountain = RussianNouns.createLemma({
-        text: 'гора',
+        text: '\xE3\xEE\xF0\xE0',
         gender: Gender.FEMININE
     });
 
@@ -78,11 +78,19 @@ var rne = new RussianNouns.Engine();
         return rne.decline(mountain, c);
     });
 
-    assertAllCases(result, ['гора', 'горы', 'горе', 'гору', ['горой', 'горою'], 'горе', 'горе']);
+    assertAllCases(result, [
+        '\xE3\xEE\xF0\xE0',
+        '\xE3\xEE\xF0\xFB',
+        '\xE3\xEE\xF0\xE5',
+        '\xE3\xEE\xF0\xF3',
+        ['\xE3\xEE\xF0\xEE\xE9', '\xE3\xEE\xF0\xEE\xFE'],
+        '\xE3\xEE\xF0\xE5',
+        '\xE3\xEE\xF0\xE5'
+    ]);
     console.log('mountain, singular: OK');
 
     result = rne.pluralize(mountain);
-    assertEqualsSingleValue(result, "горы");
+    assertEqualsSingleValue(result, "\xE3\xEE\xF0\xFB");
     console.log('mountain, pluralize: OK');
 
     var pluralMountain = result[0];
@@ -91,13 +99,21 @@ var rne = new RussianNouns.Engine();
         return rne.decline(mountain, c, pluralMountain);
     });
 
-    assertAllCases(result, ['горы', 'гор', 'горам', 'горы', 'горами', 'горах', 'горах']);
+    assertAllCases(result, [
+        '\xE3\xEE\xF0\xFB',
+        '\xE3\xEE\xF0',
+        '\xE3\xEE\xF0\xE0\xEC',
+        '\xE3\xEE\xF0\xFB',
+        '\xE3\xEE\xF0\xE0\xEC\xE8',
+        '\xE3\xEE\xF0\xE0\xF5',
+        '\xE3\xEE\xF0\xE0\xF5'
+    ]);
     console.log('mountain, plural: OK');
 })();
 
 (function () {
     var mountain = RussianNouns.createLemma({
-        text: 'ГОРА',
+        text: '\xC3\xCE\xD0\xC0',
         gender: Gender.FEMININE
     });
 
@@ -105,14 +121,24 @@ var rne = new RussianNouns.Engine();
         return rne.decline(mountain, c);
     });
 
-    console.log('Uppercase mountain declension: ' + mountain.getDeclension());
-    console.log('_lc:' + JSON.stringify(mountain._lc));
+    assertEquals(mountain.getDeclension(), 2);
+    console.log('mountain declension, uppercase: OK');
+    assertEquals(mountain.lower(), '\xE3\xEE\xF0\xE0');
+    console.log('mountain.lower(): OK');
 
-    assertAllCases(result, ['ГОРА', 'ГОРы', 'ГОРе', 'ГОРу', ['ГОРой', 'ГОРою'], 'ГОРе', 'ГОРе']);
+    assertAllCases(result, [
+        '\xC3\xCE\xD0\xC0',
+        '\xC3\xCE\xD0\xFB',
+        '\xC3\xCE\xD0\xE5',
+        '\xC3\xCE\xD0\xF3',
+        ['\xC3\xCE\xD0\xEE\xE9', '\xC3\xCE\xD0\xEE\xFE'],
+        '\xC3\xCE\xD0\xE5',
+        '\xC3\xCE\xD0\xE5'
+    ]);
     console.log('mountain, singular, uppercase: OK');
 
     result = rne.pluralize(mountain);
-    assertEqualsSingleValue(result, "ГОРы");
+    assertEqualsSingleValue(result, "\xC3\xCE\xD0\xFB");
     console.log('mountain, pluralize, uppercase: OK');
 
     var pluralMountain = result[0];
@@ -121,12 +147,37 @@ var rne = new RussianNouns.Engine();
         return rne.decline(mountain, c, pluralMountain);
     });
 
-    assertAllCases(result, ['ГОРы', 'ГОР', 'ГОРам', 'ГОРы', 'ГОРами', 'ГОРах', 'ГОРах']);
+    assertAllCases(result, [
+        '\xC3\xCE\xD0\xFB',
+        '\xC3\xCE\xD0',
+        '\xC3\xCE\xD0\xE0\xEC',
+        '\xC3\xCE\xD0\xFB',
+        '\xC3\xCE\xD0\xE0\xEC\xE8',
+        '\xC3\xCE\xD0\xE0\xF5',
+        '\xC3\xCE\xD0\xE0\xF5'
+    ]);
     console.log('mountain, plural, uppercase: OK');
 })();
 
+(function () {
+    var hedgehog = RussianNouns.createLemma({
+        text: '\xA8\xC6',
+        gender: Gender.MASCULINE
+    });
+    assertEquals(hedgehog.lower(), '\xB8\xE6');
+    console.log('hedgehog.lower(): OK');
+})();
+
 assertEqualsSingleValue(
-    rne.pluralize({text: 'Болгарин', gender: Gender.MASCULINE}),
-    'Болгары'
+    rne.pluralize({text: '\xC1\xEE\xEB\xE3\xE0\xF0\xE8\xED', gender: Gender.MASCULINE}),
+    '\xC1\xEE\xEB\xE3\xE0\xF0\xFB'
 );
+console.log('capitalizeRu: OK');
+
+(function () {
+    assertEqualsSingleValue(rne.pluralize({text: '\xF1\xF2\xE5\xEA\xEB\xEE', gender: Gender.NEUTER}), '\xF1\xF2\xB8\xEA\xEB\xE0');
+    assertEquals(rne.pluralize({text: '\xF1\xF2\xE5\xEA\xEB\xEE', gender: Gender.NEUTER})[0][2], '\xB8');
+    assertEquals(rne.pluralize({text: '\xD1\xD2\xC5\xCA\xCB\xCE', gender: Gender.NEUTER})[0][2], '\xA8');
+    console.log('upperLike yo (in reYo function): OK');
+})();
 
