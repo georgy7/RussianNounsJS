@@ -1,311 +1,334 @@
 /*!
-  RussianNounsJS v3.0.0-alpha.2-SNAPSHOT
+  RussianNounsJS v3.0.0-alpha.2
   Copyright (c) 2011-2026 Georgy Ustinov
   Released under the MIT license
 */
-var RussianNouns=function(e){"use strict"
-;var r=Object.freeze(["именительный","родительный","дательный","винительный","творительный","предложный","местный"]),n=Object.freeze({
-NOMINATIVE:r[0],GENITIVE:r[1],DATIVE:r[2],ACCUSATIVE:r[3],INSTRUMENTAL:r[4],PREPOSITIONAL:r[5],LOCATIVE:r[6]})
-;function t(e){return"number"==typeof e?e:r.indexOf(e)}
-var i=Object.freeze(["женский","мужской","средний","общий"]),u=Object.freeze({FEMININE:i[0],MASCULINE:i[1],NEUTER:i[2],
-COMMON:i[3]});function a(e,r){(null==r||r>e.length)&&(r=e.length);for(var n=0,t=Array(r);n<r;n++)t[n]=e[n];return t}
-function s(e,r){if(!(e instanceof r))throw new TypeError("Cannot call a class as a function")}function c(e,r){
-for(var n=0;n<r.length;n++){var t=r[n];t.enumerable=t.enumerable||!1,t.configurable=!0,"value"in t&&(t.writable=!0),
-Object.defineProperty(e,l(t.key),t)}}function f(e,r,n){return r&&c(e.prototype,r),n&&c(e,n),
-Object.defineProperty(e,"prototype",{writable:!1}),e}function o(e,r){
-var n="undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(!n){if(Array.isArray(e)||(n=d(e))||r){n&&(e=n)
-;var t=0,i=function(){};return{s:i,n:function(){return t>=e.length?{done:!0}:{done:!1,value:e[t++]}},e:function(e){
-throw e},f:i}}
-throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")
-}var u,a=!0,s=!1;return{s:function(){n=n.call(e)},n:function(){var e=n.next();return a=e.done,e},e:function(e){s=!0,u=e
-},f:function(){try{a||null==n.return||n.return()}finally{if(s)throw u}}}}function h(e,r){return function(e){
-if(Array.isArray(e))return e}(e)||function(e,r){
-var n=null==e?null:"undefined"!=typeof Symbol&&e[Symbol.iterator]||e["@@iterator"];if(null!=n){
-var t,i,u,a,s=[],c=!0,f=!1;try{if(u=(n=n.call(e)).next,0===r);else for(;!(c=(t=u.call(n)).done)&&(s.push(t.value),
-s.length!==r);c=!0);}catch(e){f=!0,i=e}finally{try{if(!c&&null!=n.return&&(a=n.return(),Object(a)!==a))return}finally{
-if(f)throw i}}return s}}(e,r)||d(e,r)||function(){
-throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")
-}()}function l(e){var r=function(e,r){if("object"!=typeof e||!e)return e;var n=e[Symbol.toPrimitive];if(void 0!==n){
-var t=n.call(e,r);if("object"!=typeof t)return t;throw new TypeError("@@toPrimitive must return a primitive value.")}
-return String(e)}(e,"string");return"symbol"==typeof r?r:r+""}function d(e,r){if(e){if("string"==typeof e)return a(e,r)
-;var n={}.toString.call(e).slice(8,-1);return"Object"===n&&e.constructor&&(n=e.constructor.name),
-"Map"===n||"Set"===n?Array.from(e):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?a(e,r):void 0}}
-function E(e){var r,n=new Set,t=0,i=o(e);try{for(i.s();!(r=i.n()).done;){t+=r.value,n.add(t)}}catch(e){i.e(e)}finally{
-i.f()}return n}function S(e){return 1<<e}function v(e,r,n){this.preposition=e,this.word=r,this.attributes=n}
-var p=Object.freeze({CONTAINER:1,LOCATION:2,STRUCTURE:4,SURFACE:8,WAY:16,OBJECT_WITH_FUNCTIONAL_SURFACE:32,SUBSTANCE:64,
-RESOURCE:128,CONDITION:256,EXPOSURE:S(9),MOTION:S(10),EVENT:S(11),WITH_ADJECTIVE:S(12),WITHOUT_ADJECTIVE:S(13),
-RELIGIOUS:S(14)}),g=Object.freeze({V:1,VO:2,NA:3});function b(e,r,n){return n<<6|(e-1&7)<<3|r-1&7}function m(e){
-return 1+(7&e)}function y(e){var r=e.replaceAll("ё","е"),n=r.length%2,t=1,i=5381;function u(){
-i=(33*i+(255&n))%4294967296,n>>=8,t-=8}var a,s=o(r);try{for(s.s();!(a=s.n()).done;){var c=a.value.charCodeAt(0)-1072&31
-;n|=c<<t,(t+=5)>=8&&u()}}catch(e){s.e(e)}finally{s.f()}t>0&&u();var f=r.charCodeAt(0)%2;return 2*(2147483647&i)+f}
-function w(e){var r=e.charCodeAt(0)-1072;return 33===r?32:r===(31&r)?1<<r:0}function A(e,r){return 0!==(e&w(r))}
-var W=3892855073,_=66567902,O=66567390;function I(e){return A(W,e)}function C(e){return e.split("").filter(I).length}
-function N(e){return e.replaceAll("ё","е").replaceAll("Ё","Е")}function k(e,r){return e.substring(0,e.length-r)}
-function T(e,r){return e.substring(e.length-r)}function x(e){return k(e,1)}function M(e){return j(e,1)}function j(e,r){
-return e[e.length-r]||""}function R(e,r){return 1===r.length&&e.includes(r)}function U(e,r){return r.some(function(r){
-return e.endsWith(r)})}var L=function(){function e(r){s(this,e),r instanceof e?(this._txt=r._txt,this._lc=r._lc,
-this._hash=r._hash,this._flags=r._flags):(r.pluraleTantum?this._flags=5:this._flags=1+i.indexOf(r.gender),
-this._txt=r.text,this._lc=r.text.toLowerCase(),this._hash=y(this._lc),this._flags|=8*(1&r.indeclinable),
+var RussianNouns=function(n){"use strict"
+;var r=Object.freeze(["именительный","родительный","дательный","винительный","творительный","предложный","местный"]),e=Object.freeze({
+NOMINATIVE:r[0],GENITIVE:r[1],DATIVE:r[2],ACCUSATIVE:r[3],INSTRUMENTAL:r[4],PREPOSITIONAL:r[5],LOCATIVE:r[6]
+}),t=Object.fromEntries(r.map(function(n,r){return[n,r]}));function u(n){return"number"==typeof n?n:t[n]}
+var i=Object.freeze(["женский","мужской","средний","общий"]),s=Object.freeze({FEMININE:i[0],MASCULINE:i[1],NEUTER:i[2],
+COMMON:i[3]});function a(n){for(var r=new Set,e=0,t=0;t<n.length;t++){e+=n[t],r.add(e)}return r}function f(n){
+return 1<<n}function c(n,r,e){this.preposition=n,this.word=r,this.attributes=e}var h=Object.freeze({CONTAINER:1,
+LOCATION:2,STRUCTURE:4,SURFACE:8,WAY:16,OBJECT_WITH_FUNCTIONAL_SURFACE:32,SUBSTANCE:64,RESOURCE:128,CONDITION:256,
+EXPOSURE:f(9),MOTION:f(10),EVENT:f(11),WITH_ADJECTIVE:f(12),WITHOUT_ADJECTIVE:f(13)}),o=Object.freeze({V:1,VO:2,NA:3})
+;function l(n,r,e){return e<<6|(n-1&7)<<3|r-1&7}function d(n){return 1+(7&n)}
+var E="а".charCodeAt(0),S="А".charCodeAt(0),p="ё".charCodeAt(0),v="Ё".charCodeAt(0),g=1025===v,A=g?1024:v,W=g?1039:v,m=g?1104:p,b=g?1119:p,w=m-A
+;function _(n){var r=n.charCodeAt(0),e=r-E;return r===p?32:e===(31&e)?1<<e:0}function C(n,r){return 0!==(n&_(r))}
+var O=3892855073,I=66567902,N=66567390;function y(n){return C(O,n)}function x(n){return n.split("").filter(y).length}
+function T(n){for(var r=5381,e=n.length,t=0;t<e;t++)r=33*r+n.charCodeAt(t)|0;return r>>>0}function M(n){
+var r=n.replaceAll("ё","е"),e=r.length%2,t=1,u=5381;function i(){u=(33*u+(255&e))%4294967296,e>>=8,t-=8}
+for(var s=0;s<r.length;s++){var a=r[s].charCodeAt(0)-E&31;e|=a<<t,(t+=5)>=8&&i()}t>0&&i();var f=r.charCodeAt(0)%2
+;return 2*(2147483647&u)+f}function U(n){for(var r=0;r<n.length;r++){var e=n.charCodeAt(r)
+;if(e>=S&&e<=S+31||e>=A&&e<=W)break;if(r===n.length-1)return n}for(var t=new Array(n.length),u=0;u<n.length;u++){
+var i=n.charCodeAt(u);i>=S&&i<=S+31?i+=32:i>=A&&i<=W&&(i+=w),t[u]=i}return String.fromCharCode.apply(null,t)}
+function j(n){if(g)return n.toLowerCase();for(var r=new Array(n.length),e=0;e<n.length;e++){var t=n.charCodeAt(e)
+;t>=S&&t<=S+31||t>=65&&t<=90?t+=32:t>=A&&t<=W&&(t+=w),r[e]=t}return String.fromCharCode.apply(null,r)}function L(n,r){
+return r===j(r)?n:function(n){for(var r=new Array(n.length),e=0;e<n.length;e++){var t=n.charCodeAt(e)
+;t>=E&&t<=E+31?t-=32:t>=m&&t<=b&&(t-=w),r[e]=t}return String.fromCharCode.apply(null,r)}(n)}function k(n){
+if(0===n.length)return"";var r=n.charCodeAt(0)
+;return r>=E&&r<=E+31?String.fromCharCode(r-32)+n.slice(1):r>=m&&r<=b?String.fromCharCode(r-w)+n.slice(1):n}
+function V(n,r){return n?r.map(k):r}function P(n){return n.replaceAll("ё","е").replaceAll("Ё","Е")}function R(n,r){
+return n.substring(0,n.length-r)}function z(n,r){return n.substring(n.length-r)}function D(n){return R(n,1)}
+function F(n){return B(n,1)}function B(n,r){return n[n.length-r]||""}function q(n,r){return 1===r.length&&n.includes(r)}
+function G(n,r){return r.some(function(r){return n.endsWith(r)})}var H=function(){function n(r){
+r instanceof n?(this._txt=r._txt,
+this._lc=r._lc,this._hash=r._hash,this._flags=r._flags):(r.pluraleTantum?this._flags=5:this._flags=1+i.indexOf(r.gender),
+this._txt=r.text,this._lc=j(r.text),this._hash=M(this._lc),this._flags|=8*(1&r.indeclinable),
 this._flags|=16*(1&r.animate),this._flags|=32*(1&r.surname),this._flags|=64*(1&r.name),this._flags|=128*(1&r.transport),
-this._flags|=S(16)*(2+function(e,r,n,t){if(r)return-2;if(t)return-1;var i=M(e);switch(n){case 1:
-return"а"===i||"я"===i?2:A(_,i)?-1:3;case 2:return"а"===i||"я"===i?2:"путь"===e?0:1;case 3:
-return["дитя","полудитя"].includes(e)?0:"мя"===T(e,2)?3:1;case 4:return"а"===i||"я"===i?2:"и"===i?-1:1;default:return-2}
-}(this._lc,r.pluraleTantum,P(this),r.indeclinable)))}return f(e,[{key:"equals",value:function(r){
-return r instanceof e&&this._flags===r._flags&&this.lower()===r.lower()}},{key:"text",value:function(){return this._txt}
-},{key:"lower",value:function(){return this._lc}},{key:"isPluraleTantum",value:function(){return 5==(7&this._flags)}},{
-key:"getGender",value:function(){var e=P(this);if(e>=1&&e<=4)return i[e-1]}},{key:"isIndeclinable",value:function(){
-return!!(8&this._flags)}},{key:"isAnimate",value:function(){return!!(16&this._flags)||this.isASurname()||this.isAName()}
-},{key:"isASurname",value:function(){return!!(32&this._flags)}},{key:"isAName",value:function(){return!!(64&this._flags)
-}},{key:"isATransport",value:function(){return!!(128&this._flags)}},{key:"getDeclension",value:function(){
-return(this._flags>>16)-2}},{key:"getSchoolDeclension",value:function(){var e=this.getDeclension()
-;return 1===e?2:2===e?1:e}}],[{key:"create",value:function(e){if(e instanceof this)return e;var r=V(e)
-;if(r)throw new Error(r);return Object.freeze(new this(e))}},{key:"createOrNull",value:function(e){
-return null===V(e)?Object.freeze(new this(e)):null}}])}();function P(e){return 7&e._flags}function z(e,r){var n=new L(e)
-;return n._txt=r,n._lc=r.toLowerCase(),n._hash=y(n.lower()),Object.freeze(n)}function V(e){
-if(null==e)return"No parameters specified."
-;for(var r=0,n=["pluraleTantum","indeclinable","animate","surname","name","transport"];r<n.length;r++){var t=n[r]
-;if(function(e){return null!=e&&"boolean"!=typeof e}(e[t]))return t+" must be boolean."}
-if(null==e.text)return"A cyrillic word required.";if(!e.pluraleTantum){
-if(null==e.gender)return"A grammatical gender required.";if(!i.includes(e.gender))return"Bad grammatical gender."}
+this._flags|=f(16)*(2+function(n,r,e,t){if(r)return-2;if(t)return-1;var u=F(n);switch(e){case 1:
+return"а"===u||"я"===u?2:C(I,u)?-1:3;case 2:return"а"===u||"я"===u?2:"путь"===n?0:1;case 3:
+return["дитя","полудитя"].includes(n)?0:"мя"===z(n,2)?3:1;case 4:return"а"===u||"я"===u?2:"и"===u?-1:1;default:return-2}
+}(this._lc,r.pluraleTantum,J(this),r.indeclinable)))}n.create=function(n){if(n instanceof this)return n;var r=Y(n)
+;if(r)throw new Error(r);return Object.freeze(new this(n))},n.createOrNull=function(n){
+return null===Y(n)?Object.freeze(new this(n)):null};var r=n.prototype;return r.equals=function(r){
+return r instanceof n&&this._flags===r._flags&&this.lower()===r.lower()},r.text=function(){return this._txt},
+r.lower=function(){return this._lc},r.isPluraleTantum=function(){return 5==(7&this._flags)},r.getGender=function(){
+var n=J(this);if(n>=1&&n<=4)return i[n-1]},r.isIndeclinable=function(){return!!(8&this._flags)},r.isAnimate=function(){
+return!!(16&this._flags)||this.isASurname()||this.isAName()},r.isASurname=function(){return!!(32&this._flags)},
+r.isAName=function(){return!!(64&this._flags)},r.isATransport=function(){return!!(128&this._flags)},
+r.getDeclension=function(){return(this._flags>>16)-2},r.getSchoolDeclension=function(){var n=this.getDeclension()
+;return 1===n?2:2===n?1:n},n}();function J(n){return 7&n._flags}function X(n,r){var e=new H(n);return e._txt=r,
+e._lc=j(r),e._hash=M(e.lower()),Object.freeze(e)}function Y(n){if(null==n)return"No parameters specified."
+;for(var r=0,e=["pluraleTantum","indeclinable","animate","surname","name","transport"];r<e.length;r++){var t=e[r]
+;if(function(n){return null!=n&&"boolean"!=typeof n}(n[t]))return t+" must be boolean."}
+if(null==n.text)return"A cyrillic word required.";if(!n.pluraleTantum){
+if(null==n.gender)return"A grammatical gender required.";if(!i.includes(n.gender))return"Bad grammatical gender."}
 return null}
-var D=E([11720389,548,1024,1479,2622,2867,1222,2642,264,1328,137,123,397,65542229,212447047,31729170,8094836,1056,21701789,35520559,40358,21819,28248,119786,63892,31809,7356,74383,72369,5945,28902,90120738,21187517,91925642,3054826,1600765,65934,30948851,5569212,4205640,5412804,6787095,9749916,3940084,1511466,1303038,16090470,1376628,49919694,3827522,37915959,14032615,28701924,224587434,637275762,51079457,391103676,24108070,158999424,232633267,6058815,66599250,692781441,816204112,55209380,72754,90006,80058,45564,67845,42548,27193,21401,139393,750335,170896,4424,1566,6264,154969,17292,17229,175112,83011,117872,4183,13065,108972,108088,343663,66210,334,17090,380271,283272,59007,35796,230801,1067156,19992,157124,12433,252644,2626,23776,630482,531296,304718,90891,726,23116,47653,30493,167310,50156,123071,477118,241821,55660,908992,534269,205157,11218,2490,660,66391,46856,847526,68710,8450,36630,15642,109864,41716,354482,79820,51876,97325,5506,46436,191803,3957,40876,126323,2347821,338490,73216,475569,87602,29642,4220,10760,16896,50156,17424,35178,167244,126786,33643,30488,65045,35961,51453,55660,4,152461,138332,1958,34200,3709,61381,17424,30158,80591,11218,44099,260487]),F=E([11720389,548,1024,1060,4,5904,1848,4404,330555234,4691346,3365076,1045362,7414584,960432,10564312,253286,16178203,4357,4355,11350,31120,5248,40591,62367,54057,50487,13069,3664,39764,10263,3002,5810,8844,24551,4091,56761,21785,30553,55147139,15960625,1933097,12258067,16302047,54210486,45688435,1659767,4813249,33577763,2501798,10056946,672528,14209351,2012340,1655412,4652736,62568,148698,21186,71129124,260014161,108045611,1007583269,2026464,22799532,750068913,1499532,1285428194,74598,22348,6599,132273,309821,156816,397448,179394,148036,100257,21779,11218,36631,345954,50442,104394,2724,112115,30690,10552,31377,11286,7168,14612,51480,116537,192258,163145,65604,97951,1363157,212810,431243,2622,425588,275284,150351,570568,244701,16659,26136,130134,11040,159389,728373,3476,726,1290392,224730,189158,11218,2490,10750,21608,143747,65974,664563,84036,16283,17424,5758,45080,33066,1782,90658,37101,56107,233163,14216,5518,179264,2525,146957,111342,80594,2309,4217,25432,26905,29980,518951,1458289,523705,4202,477865,149368,126310,47828,212678,22744,269176,179119,4399,35997,69696,41777,41,127336,4202,73153,46372,114255,126869,23630,11218]),B=function(){
-return f(function e(){s(this,e),this._filter=new Uint8ClampedArray(256)},[{key:"addInteger",value:function(e){
-this.addRaw(q(e))}},{key:"hasInteger",value:function(e){return this.hasRaw(q(e))}},{key:"addRaw",value:function(e){
-var r=2047&e,n=r>>>3;this._filter[n]=this._filter[n]|1<<7-r%8}},{key:"hasRaw",value:function(e){var r=2047&e
-;return!!(this._filter[r>>>3]>>>7-r%8&1)}},{key:"clone",value:function(){return G(this._filter)}}])}();function G(e){
-var r=new B;return r._filter=Uint8ClampedArray.from(e),r}function q(e){return e>>>22&2047^e>>>11&2047^2047&e}
-function H(e){var r=e.padStart(3,"а");return(7&r.charCodeAt(0))<<8|(15&r.charCodeAt(1))<<4|15&r.charCodeAt(2)}
-var J,X=(J=new B,D.forEach(function(e){return J.addInteger(e)}),F.forEach(function(e){return J.addInteger(e)}),
-Object.freeze(J));function Y(){var e=new Map,r=X.clone(),n=function(e){return 4294967296*(31&e._flags)+e._hash
-},i=function(e){return e.lower().indexOf("ё")+1&255},u=function(r){var t=65504&r._flags,u=function(r){
-var t=n(r),i=e.get(t);return i instanceof Array?i:[]}(r).filter(function(e){return(e[0]&t)<=t}),a=u.filter(function(e){
-return e[0]>>16===i(r)});return a.length?a[0][1]:u.length?u[0][1]:void 0};this.put=function(t,u){
-var a=u.split("-"),s=function(e,r){return e.length!==r||e.split("").some(function(e){return!"SsbeE".includes(e)})}
-;if(2!==a.length||s(a[0],7)||s(a[1],6))throw new Error("Bad settings format.");var c=L.create(t),f=n(c),o=e.get(f)
-;o instanceof Array||(o=[],e.set(f,o));var h=65535&c._flags|i(c)<<16,l=o.find(function(e){return h===e[0]})
-;l?l[1]=u:o.push([h,u]),r.addInteger(c._hash)};var a=function(e){switch(e){case"E":return[!0];case"e":return[!0,!1]
-;case"b":case"s":return[!1,!0];default:return[!1]}};this.hasStressedEndingSingular=function(e,n){
-if(r.hasInteger(e._hash)){var i=t(n);if(i>=0){var s=u(e);if(s){var c=s.split("-")[0];return a(c[i])}if(2===P(e)){
-if(D.has(e._hash))return a("SEESEEE"[i]);if(F.has(e._hash))return a("SEEEEEE"[i])}}}return[]},
-this.hasStressedEndingPlural=function(e,n){if(r.hasInteger(e._hash)){var i=t(n);if(i>=0&&i<6){var s=u(e);if(s){
-var c=s.split("-")[1];return a(c[i])}if(2===P(e)&&(D.has(e._hash)||e.isAnimate()&&F.has(e._hash)))return a("E")}}
-return[]}}function $(e){var r,n=new Map,t=o(e);try{
-for(t.s();!(r=t.n()).done;)for(var i=r.value,u=n,a=i.length-1;a>=0;a--){var s=i.charCodeAt(a);if(a>0){var c=u.get(s)
-;if(0===c)break;void 0===c&&u.set(s,new Map),u=u.get(s)}else u.set(s,0)}}catch(e){t.e(e)}finally{t.f()}return n}
-function K(e,r){for(var n=r,t=e.length-1;t>=0;t--){var i=e.charCodeAt(t);if(!n.has(i))return!1;var u=n.get(i)
-;if(0===u)return!0;n=u}}function Q(e){for(var r=new Array(e.length),n=0;n<e.length;n++){var t=e.charCodeAt(n)
-;t>=1040&&t<=1071?t+=32:t>=1024&&t<=1039&&(t+=80),r[n]=t}return String.fromCharCode.apply(null,r)}function Z(e,r){
-return r===r.toUpperCase()?e.toUpperCase():e}
-var ee=$(["ое","нький","ский","ской","лстой","отой","утой","евой","овой","живой"]),re=$(["ее","ое","нький","ский","ской","лстой","отой","утой"]),ne=$(["евой","овой","отой","живой"]),te=$(["шний","жний","щий","ший","жий","чий"]),ie=["божий","ажий","яжий","ужий","южий","бульдожий","кабарожий","медвежий","носорожий","миножий"],ue=$(ie),ae=$(ie.map(function(e){
-return k(e,2)+"ьи"
-})),se=new Set(["бубен","бугор","ветер","вошь","вымысел","горшок","деготь","дёготь","дятел","домысел","замысел","кашель","коготь","лапоть","лоб","локоть","ломоть","молебен","мох","ноготь","овен","пепел","пес","пёс","петушок","помысел","порошок","промысел","псалом","пушок","ров","рожь","рот","сон","стебель","стишок","угол","умысел","хребет","церковь","шов","ковер","овес","костер"].map(y)),ce=new B
-;se.forEach(function(e){return ce.addInteger(e)})
-;var fe=$(["овёс","ковёр","костёр","шатер","шатёр","козел","козёл","котел","котёл","орел","орёл","осел","осёл","узел","уголь","чок","ешок","хол"])
-;function oe(e,r){var n=M(r);if(A(-402111711,n)){if(A(W,j(r,2))){var t=k(e,2);return K(r,ue)?t+Z("ь",t):t}
-if("й"!==n)return x(e)}return e}var he=["ясень","бюллетень","олень","тюлень","гордень","пельмень","ячмень"]
-;function le(e,r,n){var t,i=e.text(),u=M(r),a=w(u);return-133667019&a&&(-402111711&a?t=function(e,r,n){var t=j(r,2)
-;return"ь"===t||"о"===n&&A(2504708,t)?x(e):oe(e,r)}(i,r,u):"к"===u?t=function(e,r,n){
-return e.length>=4&&U(r,["рёк","нёк","лёк"])&&!1!==n?k(e,2)+"ьк":r.endsWith("ёк")&&A(W,j(r,3))?k(e,2)+"йк":void 0
-}(i,r,n):"ь"===u?t=function(e,r,n){
-return se.has(e._hash)||K(n,fe)?k(r,3)+j(r,2):n.endsWith("ень")&&2===P(e)&&!U(n,he)?k(r,3)+"н":x(r)
-}(e,i,r):(["лёд","лед","лён"].includes(r)||"лев"===r&&e.isAnimate())&&(t=k(i,2)+Z("ь",j(i,2))+M(i))),
-t||(t=function(e,r,n){
-return!!(199680&n)&&K(r,fe)&&!["новосел","новосёл"].includes(r)||!!(2571270&n)&&(ce.hasInteger(e._hash)&&se.has(e._hash)||e.isAnimate()&&r.endsWith("посол"))
-}(e,r,a)?k(i,2)+M(i):i),t}function de(e,r){var n=x(e),t=x(r.lower());if("а"===M(t))return n
-;if(U(t,["зне","жне","гре","спе","мудре"])||T(x(t),3).split("").every(function(e){return A(O,e)})||r.isAName())return n
-;if("ле"===T(t,2)){var i=j(t,3);return A(W,i)||"л"===i?x(n)+"ь":n}
-return A(W,M(t))&&"и"!==M(t)?A(W,M(x(t)))?k(e,2)+"й":U(r.lower(),["месяц"])?n:k(e,2):n}
-var Ee=$(["лапоток","желток","нишок","ришок","ишек"]),Se=["поток","приток","переток","проток","биоток","электроток","восток","водосток","водоток","воток","знаток"],ve=["инок","исток","обморок","порок","пророк","сток","урок"]
-;function pe(e){
-return U(e,["чек","шек"])&&e.length>=6||K(e,Ee)||e.endsWith("ок")&&!e.endsWith("шок")&&!ve.includes(e)&&!U(e,Se)&&!A(W,j(e,3))&&(A(W,j(e,4))||U(k(e,2),["ст","рт"]))&&e.length>=4
-}function ge(e,r,n){return(e.length?e:[!1]).map(function(e){return n(e?N(r):r,e)})}var be=0,me=3,ye={"дочь":"дочерь",
-"мать":"матерь"};function we(e,r,n){var t=r.text(),i=r.lower()
-;if(![be,me].includes(n)&&Object.keys(ye).includes(i))return we(e,z(r,ye[i]),n);var u=le(r,i);if(function(e){
-return e.endsWith("полночь")||e.startsWith("пол")&&A(134217984,M(e))&&C(e)>=2}(i)&&(u="полу"+u.substring(3)),
-"мя"===T(i,2))switch(n){case be:case me:return t;case 1:case 2:case 5:case 6:return u+"ени";case 4:return u+"енем"
-}else switch(n){case be:case me:return t;case 1:case 2:case 5:case 6:return u+"и";case 4:
-return U(i,["вошь","рожь","церковь"])?t+"ю":u+"ью"}}function Ae(e,r,n){var t=r.text(),i=r.lower()
-;if(i.endsWith("путь"))return 4===n?x(t)+"ём":we(e,r,n);if(!i.endsWith("дитя"))throw new Error("unsupported");switch(n){
-case 0:case 3:return t;case 1:case 2:case 5:case 6:return t+"ти";case 4:return[t+"тей",t+"тею"]}}function We(e,r,n){
-var t=r.text(),i=r.lower(),u=le(r,i),a=Q(u),s=x(t),c=x(i),f=function(){return"я"===M(i)},o=function(){
-return i.endsWith("ая")&&!(2===C(i)||A(W,M(a)))},h=function(){return i.endsWith("яя")&&!(2===C(i)||A(W,M(a)))
-},l=["жая","шая"];switch(n){case 0:return t;case 1:
-return h()||U(i,l)?u+"ей":o()?u+"ой":r.isASurname()&&!i.endsWith("да")?s+"ой":i.endsWith("ничья")?s+"ей":f()||A(60818504,M(a))?s+"и":s+"ы"
+var K=a([11720389,548,1024,1479,2622,2867,1222,2642,264,1328,137,123,397,65542229,212447047,31729170,8094836,1056,21701789,35520559,40358,21819,28248,119786,63892,31809,7356,74383,72369,5945,28902,90120738,21187517,91925642,3054826,1600765,65934,30948851,5569212,4205640,5412804,6787095,9749916,3940084,1511466,1303038,16090470,1376628,49919694,3827522,37915959,14032615,28701924,224587434,637275762,51079457,391103676,24108070,158999424,232633267,6058815,66599250,692781441,816204112,55209380,72754,90006,80058,45564,67845,42548,27193,21401,139393,750335,170896,4424,1566,6264,154969,17292,17229,175112,83011,117872,4183,13065,108972,108088,343663,66210,334,17090,380271,283272,59007,35796,230801,1067156,19992,157124,12433,252644,2626,23776,630482,531296,304718,90891,726,23116,47653,30493,167310,50156,123071,477118,241821,55660,908992,534269,205157,11218,2490,660,66391,46856,847526,68710,8450,36630,15642,109864,41716,354482,79820,51876,97325,5506,46436,191803,3957,40876,126323,2347821,338490,73216,475569,87602,29642,4220,10760,16896,50156,17424,35178,167244,126786,33643,30488,65045,35961,51453,55660,4,152461,138332,1958,34200,3709,61381,17424,30158,80591,11218,44099,260487]),Q=a([11720389,548,1024,1060,4,5904,1848,4404,330555234,4691346,3365076,1045362,7414584,960432,10564312,253286,16178203,4357,4355,11350,31120,5248,40591,62367,54057,50487,13069,3664,39764,10263,3002,5810,8844,24551,4091,56761,21785,30553,55147139,15960625,1933097,12258067,16302047,54210486,45688435,1659767,4813249,33577763,2501798,10056946,672528,14209351,2012340,1655412,4652736,62568,148698,21186,71129124,260014161,108045611,1007583269,2026464,22799532,750068913,1499532,1285428194,74598,22348,6599,132273,309821,156816,397448,179394,148036,100257,21779,11218,36631,345954,50442,104394,2724,112115,30690,10552,31377,11286,7168,14612,51480,116537,192258,163145,65604,97951,1363157,212810,431243,2622,425588,275284,150351,570568,244701,16659,26136,130134,11040,159389,728373,3476,726,1290392,224730,189158,11218,2490,10750,21608,143747,65974,664563,84036,16283,17424,5758,45080,33066,1782,90658,37101,56107,233163,14216,5518,179264,2525,146957,111342,80594,2309,4217,25432,26905,29980,518951,1458289,523705,4202,477865,149368,126310,47828,212678,22744,269176,179119,4399,35997,69696,41777,41,127336,4202,73153,46372,114255,126869,23630,11218]),Z=function(){
+function n(){this._filter=new Uint8ClampedArray(512)}var r=n.prototype;return r.addInteger=function(n){
+this._filter[rn($(n))]|=en($(n)),this._filter[rn(nn(n))]|=en(nn(n))},r.hasInteger=function(n){
+return!!(this._filter[rn($(n))]&en($(n)))&&!!(this._filter[rn(nn(n))]&en(nn(n)))},r.clone=function(){var r=new n
+;return r._filter=Uint8ClampedArray.from(this._filter),r},n}();function $(n){return 4095&n}function nn(n){
+return 4095&(n>>>12^n>>>24)}function rn(n){return n>>>3}function en(n){return 1<<7-(7&n)}var tn,un=(tn=new Z,
+K.forEach(function(n){return tn.addInteger(n)}),Q.forEach(function(n){return tn.addInteger(n)}),Object.freeze(tn))
+;function sn(){var n=new Map,r=un.clone(),e=function(n){return 4294967296*(31&n._flags)+n._hash},t=function(n){
+return n.lower().indexOf("ё")+1&255},i=function(r){var u=65504&r._flags,i=function(r){var t=n.get(e(r))
+;return t instanceof Array?t:[]}(r).filter(function(n){return(n[0]&u)<=u}),s=i.filter(function(n){return n[0]>>16===t(r)
+});return s.length?s[0][1]:i.length?i[0][1]:void 0},s=function(n){switch(n){case"E":return[!0];case"e":return[!0,!1]
+;case"b":case"s":return[!1,!0];default:return[!1]}};return{put:function(u,i){var s=i.split("-"),a=function(n,r){
+return n.length!==r||n.split("").some(function(n){return!"SsbeE".includes(n)})}
+;if(2!==s.length||a(s[0],7)||a(s[1],6))throw new Error("Bad settings format.");var f=H.create(u),c=e(f),h=n.get(c)
+;h instanceof Array||(h=[],n.set(c,h));var o=65535&f._flags|t(f)<<16,l=h.find(function(n){return o===n[0]})
+;l?l[1]=i:h.push([o,i]),r.addInteger(f._hash)},hasStressedEndingSingular:function(n,e){if(r.hasInteger(n._hash)){
+var t=u(e);if(t>=0){var a=i(n);if(a){var f=a.split("-")[0];return s(f[t])}if(2===J(n)){
+if(K.has(n._hash))return s("SEESEEE"[t]);if(Q.has(n._hash))return s("SEEEEEE"[t])}}}return[]},
+hasStressedEndingPlural:function(n,e){if(r.hasInteger(n._hash)){var t=u(e);if(t>=0&&t<6){var a=i(n);if(a){
+var f=a.split("-")[1];return s(f[t])}if(2===J(n)&&(K.has(n._hash)||n.isAnimate()&&Q.has(n._hash)))return s("E")}}
+return[]}}}function an(n){for(var r=new Map,e=0;e<n.length;e++)for(var t=n[e],u=r,i=t.length-1;i>=0;i--){
+var s=t.charCodeAt(i);if(i>0){var a=u.get(s);if(0===a)break;a===undefined&&u.set(s,new Map),u=u.get(s)}else u.set(s,0)}
+return r}function fn(n,r){for(var e=r,t=n.length-1;t>=0;t--){var u=n.charCodeAt(t);if(!e.has(u))return!1;var i=e.get(u)
+;if(0===i)return!0;e=i}}
+var cn=an(["ое","нький","ский","ской","лстой","отой","утой","евой","овой","живой"]),hn=an(["ее","ое","нький","ский","ской","лстой","отой","утой"]),on=an(["евой","овой","отой","живой"]),ln=an(["шний","жний","щий","ший","жий","чий"]),dn=["божий","ажий","яжий","ужий","южий","бульдожий","кабарожий","медвежий","носорожий","миножий"],En=an(dn),Sn=an(dn.map(function(n){
+return R(n,2)+"ьи"
+})),pn=new Set(["бубен","бугор","ветер","вошь","вымысел","горшок","деготь","дёготь","дятел","домысел","замысел","кашель","коготь","лапоть","лоб","локоть","ломоть","молебен","мох","ноготь","овен","пепел","пес","пёс","петушок","помысел","порошок","промысел","псалом","пушок","ров","рожь","рот","сон","стебель","стишок","угол","умысел","хребет","церковь","шов","ковер","овес","костер"].map(M)),vn=new Z
+;pn.forEach(function(n){return vn.addInteger(n)})
+;var gn=an(["овёс","ковёр","костёр","шатер","шатёр","козел","козёл","котел","котёл","орел","орёл","осел","осёл","узел","уголь","чок","ешок","хол"])
+;function An(n,r){var e=F(r);if(C(-402111711,e)){if(C(O,B(r,2))){var t=R(n,2);return fn(r,En)?t+L("ь",t):t}
+if("й"!==e)return D(n)}return n}var Wn=["ясень","бюллетень","олень","тюлень","гордень","пельмень","ячмень"]
+;function mn(n,r,e){var t,u=n.text(),i=F(r),s=_(i);return-133667019&s&&(-402111711&s?t=function(n,r,e){var t=B(r,2)
+;return"ь"===t||"о"===e&&C(2504708,t)?D(n):An(n,r)}(u,r,i):"к"===i?t=function(n,r,e){
+return n.length>=4&&G(r,["рёк","нёк","лёк"])&&!1!==e?R(n,2)+"ьк":r.endsWith("ёк")&&C(O,B(r,3))?R(n,2)+"йк":void 0
+}(u,r,e):"ь"===i?t=function(n,r,e){
+return pn.has(n._hash)||fn(e,gn)?R(r,3)+B(r,2):e.endsWith("ень")&&2===J(n)&&!G(e,Wn)?R(r,3)+"н":D(r)
+}(n,u,r):(["лёд","лед","лён"].includes(r)||"лев"===r&&n.isAnimate())&&(t=R(u,2)+L("ь",B(u,2))+F(u))),
+t||(t=function(n,r,e){
+return!!(199680&e)&&fn(r,gn)&&!["новосел","новосёл"].includes(r)||!!(2571270&e)&&(vn.hasInteger(n._hash)&&pn.has(n._hash)||n.isAnimate()&&r.endsWith("посол"))
+}(n,r,s)?R(u,2)+F(u):u),t}function bn(n,r){var e=D(n),t=D(r.lower());if("а"===F(t))return e
+;if(G(t,["зне","жне","гре","спе","мудре"])||z(D(t),3).split("").every(function(n){return C(N,n)})||r.isAName())return e
+;if("ле"===z(t,2)){var u=B(t,3);return C(O,u)||"л"===u?D(e)+"ь":e}
+return C(O,F(t))&&"и"!==F(t)?C(O,F(D(t)))?R(n,2)+"й":G(r.lower(),["месяц"])?e:R(n,2):e}
+var wn=an(["лапоток","желток","нишок","ришок","ишек"]),_n=["поток","приток","переток","проток","биоток","электроток","восток","водосток","водоток","воток","знаток"],Cn=["инок","исток","обморок","порок","пророк","сток","урок"]
+;function On(n){
+return G(n,["чек","шек"])&&n.length>=6||fn(n,wn)||n.endsWith("ок")&&!n.endsWith("шок")&&!Cn.includes(n)&&!G(n,_n)&&!C(O,B(n,3))&&(C(O,B(n,4))||G(R(n,2),["ст","рт"]))&&n.length>=4
+}function In(n,r,e){return(n.length?n:[!1]).map(function(n){return e(n?P(r):r,n)})}var Nn=0,yn=3,xn={"дочь":"дочерь",
+"мать":"матерь"};function Tn(n,r,e){var t=r.text(),u=r.lower()
+;if(![Nn,yn].includes(e)&&Object.keys(xn).includes(u))return Tn(n,X(r,xn[u]),e);var i=mn(r,u);if(function(n){
+return n.endsWith("полночь")||n.startsWith("пол")&&C(134217984,F(n))&&x(n)>=2}(u)&&(i="полу"+i.substring(3)),
+"мя"===z(u,2))switch(e){case Nn:case yn:return t;case 1:case 2:case 5:case 6:return i+"ени";case 4:return i+"енем"
+}else switch(e){case Nn:case yn:return t;case 1:case 2:case 5:case 6:return i+"и";case 4:
+return G(u,["вошь","рожь","церковь"])?t+"ю":i+"ью"}}function Mn(n,r,e){var t=r.text(),u=r.lower()
+;if(u.endsWith("путь"))return 4===e?D(t)+"ём":Tn(n,r,e);if(!u.endsWith("дитя"))throw new Error("unsupported");switch(e){
+case 0:case 3:return t;case 1:case 2:case 5:case 6:return t+"ти";case 4:return[t+"тей",t+"тею"]}}function Un(n,r,e){
+var t=r.text(),u=r.lower(),i=mn(r,u),s=U(i),a=D(t),f=D(u),c=function(){return"я"===F(u)},h=function(){
+return u.endsWith("ая")&&!(2===x(u)||C(O,F(s)))},o=function(){return u.endsWith("яя")&&!(2===x(u)||C(O,F(s)))
+},l=["жая","шая"];switch(e){case 0:return t;case 1:
+return o()||G(u,l)?i+"ей":h()?i+"ой":r.isASurname()&&!u.endsWith("да")?a+"ой":u.endsWith("ничья")?a+"ей":c()||C(60818504,F(s))?a+"и":a+"ы"
 ;case 2:case 5:case 6:
-return h()||U(i,l)?u+"ей":o()?u+"ой":r.isASurname()&&!i.endsWith("да")?s+"ой":"ия"===T(i,2)?s+"и":i.endsWith("ничья")?s+"ей":s+"е"
-;case 3:return o()?u+"ую":h()?u+"юю":f()?s+"ю":s+"у";case 4:
-return h()||U(i,l)?u+"ею":o()?[u+"ой",u+"ою"]:f()||R("жшчщц",M(a))&&!e.sd.hasStressedEndingSingular(r,n).includes(!0)?"и"===M(c)?s+"ей":[s+"ей",s+"ею"]:[s+"ой",s+"ою"]
-}}var _e=$(["ов","ев","ёв","ин","ын"]),Oe=function(e,r){for(var n=r,t=0;t<e.length;t++){var i=e.charCodeAt(t),u=n
-;(n=new Map).set(i,u)}return n}("ы",_e);function Ie(e){return e.filter(function(r,n){return e.indexOf(r)===n})}
-function Ce(e){var r=1&e.lower().includes("ё");return 4294967296*((65535&e._flags)<<1|r)+e._hash}
-var Ne=Object.freeze(function(){var e=new Map,r={gender:u.MASCULINE},n={gender:u.MASCULINE,animate:!0}
-;function t(r,n,t,i,u){var a,s=i.split(","),c=u instanceof Array?u:[2],f=o(s);try{for(f.s();!(a=f.n()).done;){
-var h=a.value;r.text=h;var l=Ce(L.create(r)),d=e.get(l);d||(d=[],e.set(l,d));var E,S=o(t);try{
-for(S.s();!(E=S.n()).done;){var v,p=E.value,g=o(c);try{for(g.s();!(v=g.n()).done;){var m=v.value;d.push(b(p,m,n))}
-}catch(e){g.e(e)}finally{g.f()}}}catch(e){S.e(e)}finally{S.f()}}}catch(e){f.e(e)}finally{f.f()}}
-var i=[g.V],a=[g.VO],s=[g.NA];t(r,S(0),i,"мозг,пруд,стог,таз,год"),t(r,S(0),a,"рот"),t(r,S(4),i,"год"),
-t(r,S(0),i,"гроб"),t(r,S(0)|S(14),a,"гроб",[1]),t(r,S(1),i,"ад,бор,лес,порт,аэропорт,рай,сад,детсад,тыл,низ,хлев"),
-t(r,S(2),i,"круг,полк,артполк,ряд,род,строй,лад"),t(r,S(3),s,"баз,берег,бережок,вал,кон,круг,луг,пол,яр"),
-t(r,S(4),s,"век,день"),t(r,S(4),i,"час"),t(r,S(4),s,"корень"),t(n,S(5),s,"вор"),
-t(r,S(5),s,"повод,бочок,борт,воз,горб,кол,мост,плот,сук,х"+String.fromCharCode(1091)+"й"),t(r,S(5),s,"крюк,болт",[1,2])
-;var c=",мёд,мех,пар,пух";t(r,S(6),i,"дым,жир,мел,пушок"+c),t(r,S(7),s,"газ,клей,спирт"+c),
-t(r,S(8),i,"бой,бред,быт,долг,плен,пыл,сок,ход,лад"),t(r,S(9),i.concat(s),"вид"),
-t(r,S(9),s,"слух,счёт,ветер,ветр,свет"),t(r,S(10),s,"ход,бег,вес"),t(r,S(10)|S(12),s,"шаг"),t(r,S(11),s,"бал,пир"),
-t(r,S(8),s,"дух,плав"),t(r,S(10)|S(12),s,"газ"),t(r,S(0),i,"глаз,зоб,нос,шкаф"),t(r,S(0),a,"лоб"),
-t(r,S(5),s,"глаз,лоб,нос,шкаф,холм");var f="бок,верх,зад,угол";return t(r,S(1),i,f),t(r,S(5),s,f),
-t(r,S(1)|S(13),i,"край"),t(r,S(5)|S(13),s,"край"),t(r,S(3),s,"лёд,мох,снег"),t(r,S(6),a,"лёд,лён,мох"),
-t(r,S(6),i,"снег"),e
-}()),ke=new Set("клей,чай,дом,дух,дым,дымок,газ,год,горошек,жар,жир,квас,пар,пыл,род,рост,сахар,свет,сироп,смех,снег,снежок,сок,сор,спор,срок,соус,спирт,страх,суп,сыр,табак,творог,толк,торф,туман,убыток,укроп,уксус,ход,цемент,чеснок,шаг,шик,шиповник,шоколад,шорох,шум,яд".split(",")),Te=new B
-;ke.forEach(function(e){return Te.addInteger(y(e))})
-;var xe=$(["й","ие","иё"]),Me=$(["воробей","муравей","ручей","соловей","улей"]),je=$(["мой","ной","дой","шой","жой","рзой","осой","хой","латой","витой","литой","питой","житой","отой","утой","ятой","лагой","рагой","огой","угой","лубой","любой","илой","ылой","злой","малой","овой","евой","живой","ской","акой","укой","нний","ский","йкий","цкий","зкий","ткий","лкий","мкий","хкий","оркий","аркий","яркий","ький","ёкий","бокий","оокий","cокий","токий","ликий","дикий","укий","ыкий","який","пкий","дкий","бкий","нкий","жкий","чкий","гкий","овкий","авкий"])
-;function Re(e,r){return"ый"===T(r,2)||(r.endsWith("кривой")||K(r,je))&&C(r)>=2}
-var Ue=$(["ий","ие","чье","тье","дье","вье","бье","жалованье","енье","ружье","божье","верье","мужье"]),Le=$(["вое","лое","мое","ное","рое","тое","той","ый"])
-;function Pe(e,r,n){var t=r.text(),i=Q(t),u=M(i),a=e.sd.hasStressedEndingSingular(r,n),s=le(r,i,a[0]),c=x(t),f=Ve(i)
-;f&&(s="полу"+s.substring(3),c="полу"+c.substring(3));var o=Q(s),h=function(){return f&&i.endsWith("я")||Fe(i)
-},l=K(i,xe),d=function(){return K(i,Me)?x(c)+Z("ь",M(c)):c},E=function(){return R("чщ",M(o))};function S(e){
-return!r.isAnimate()&&Te.hasInteger(r._hash)&&ke.has(i)&&("й"===u?e.push(x(t)+Z("ю",M(t))):e=e.concat(ge(a,s,function(e){
-return e+Z("у",M(e))}))),e}switch(n){case 0:return t;case 1:switch(u){case"и":case"ы":if(f)return ze(e,r,n,i);break
-;case"й":case"е":if(l&&r.isASurname()||Re(0,i)||K(i,ee))return s+"ого";if(K(i,te)||i.endsWith("ее"))return s+"его"
-;case"ё":case"я":case"ь":if(l)return S([d()+"я"]);if(h()&&!E())return s+"я";break;case"ц":return de(t,r)+"ца";case"к":
-if(pe(i))return x(c)+"ка";break;case"о":if(U(i,["шко"])&&2===P(r))return c+"и"}
-return S(r.isASurname()||-1===o.indexOf("ё")?[s+"а"]:ge(a,s,function(e){return e+"а"}));case 2:switch(u){case"и":
-case"ы":if(f)return ze(e,r,n,i);break;case"й":case"е":if(l&&r.isASurname()||Re(0,i)||K(i,ee))return s+"ому"
-;if(K(i,te)||i.endsWith("ее"))return s+"ему";case"ё":case"я":case"ь":if(l)return d()+"ю";if(h()&&!E())return s+"ю";break
-;case"ц":return de(t,r)+"цу";case"к":if(pe(i))return x(c)+"ку"}
-return r.isASurname()||-1===o.indexOf("ё")?s+"у":ge(a,s,function(e){return e+"у"});case 3:
-return 3===P(r)||R("иы",u)&&f?t:r.isAnimate()?Pe(e,r,1):t;case 4:switch(u){case"и":case"ы":if(f)return ze(e,r,n,i);break
-;case"й":case"е":case"ё":case"я":case"ь":if(l&&r.isASurname()||K(i,re))return K(i,Le)?s+"ым":s+"им"
-;if(Re(0,i))return"и"===j(i,2)||i.endsWith("хой")?s+"им":s+"ым";if(K(i,ne))return s+"ым";if(K(i,te))return s+"им"
-;if(l)return d()+"ем";if(i.endsWith("це"))return t+"м";break;case"ц":return ge(a,t,function(e,n){
-return n?de(e,r)+"цом":de(e,r)+"цем"});case"к":if(pe(i))return x(c)+"ком";break;case"н":case"в":
-if(r.isASurname()&&K(i,_e))return t+"ым"}return h()||R("жшчщ",M(o))?ge(a,s,function(e,r){return r?e+"ом":e+"ем"
-}):r.isASurname()||-1===o.indexOf("ё")?s+"ом":ge(a,s,function(e){return e+"ом"});case 6:if("полпути"===i)return t
-;var v=Ne.get(Ce(r));if(v)return Ie(v.map(function(e){return m(e)})).map(function(n){return De(e,r,n)});case 5:
-switch(u){case"и":if("полпути"===i)return t;case"ы":if(f)return ze(e,r,n,i);break;case"й":case"е":case"ё":case"я":
-case"ь":if(l&&r.isASurname()||Re(0,i)||K(i,ee))return s+"ом";if(K(i,te)||i.endsWith("ее"))return s+"ем"
-;if(U(i,["воробей"])){var p=x(c);return p+Z("ье",M(p))}
-if(K(i,Ue)&&!U(i,["запястье","здоровье","изголовье","платье"]))return c+"и";if("й"===u||"иё"===T(i,2))return d()+"е"
-;break;case"ц":return de(t,r)+"це";case"к":if(pe(i))return x(c)+"ке"}
-return r.isASurname()||-1===o.indexOf("ё")?s+"е":ge(a,s,function(e){return e+"е"})}}function ze(e,r,n,t){
-var i=function(){return"полминуты"!==t?"полу"+r.text().substring(3):r.text()}
-;return"полпути"===t?Ae(e,z(r,x(i())+"ь"),n):t.endsWith("зни")||t.endsWith("сти")?we(e,z(r,x(i())+"ь"),n):We(e,z(r,x(i())+("ни"===T(t,2)?"я":"а")),n)
-}function Ve(e){if(e.startsWith("пол")&&A(2550137089,M(e))&&"л"!==e[3]&&C(e)>=2){
-var r=e.substring(3),n=r.search(/[а-яё]/);return n>=0&&A(_,r[n])}return!1}function De(e,r,n){if(2===n){
-var t=r.text(),i=r.lower(),u=le(r,i),a=x(t),s=Ve(i)&&i.endsWith("я")||Fe(i)
-;return"й"===M(i)?N(a)+"ю":s?N(u)+"ю":pe(i)?N(x(a))+"ку":N(u)+"у"}if(1===n)return Pe(e,r,5)}function Fe(e){
-return"ь"===M(e)&&!e.endsWith("господь")||R("её",M(e))&&!U(e,["це","же"])}
-var Be,Ge=new B,qe=Object.freeze([[[2,void 0],{"болгарин":["болгары"],"господин":["господа"],"дядя":["дяди","дядья"],
-"зуб":["зубы","зубья"],"клок":["клочья","клоки"],"князь":["князи","князья"],"кол":["колы","колья"],"месяц":["месяцы"],
-"полдень":["полдни","полудни"],"татарин":["татары"],"хозяин":["хозяева"],"цветок":["цветки","цветы"],"черт":["черти"],
-"чёрт":["черти"]}],[[2,!0],{"кондуктор":["кондуктора","кондукторы"],"кум":["кумовья"],"муж":["мужья","мужи"]
-}],[[1,void 0],{"гроздь":["грозди","гроздья"],"курица":["курицы","куры"],"стая":["стаи"],"щека":["щёки"],
-"береста":["берёсты"],"верста":["вёрсты"],"десна":["дёсны"],"жена":["жёны"],"звезда":["звёзды"],
-"кинозвезда":["кинозвёзды"],"медсестра":["медсёстры"],"метла":["мётлы"],"пчела":["пчёлы"],"сестра":["сёстры"],
-"слеза":["слёзы"]}],[[3,void 0],{"брюхо":["брюхи"],"колено":["колена","колени","коленья"],"древо":["древа","древеса"],
-"ухо":["уши"],"око":["очи"],"дно":["донья"],"чудо":["чудеса","чуда"],"небо":["небеса"],"бревно":["брёвна"],
-"ведро":["вёдра"],"веретено":["веретёна"],"весло":["вёсла"],"гнездо":["гнёзда"],"зерно":["зёрна"],"знамя":["знамёна"],
-"колесо":["колёса"],"облачко":["облачка"],"озеро":["озёра"],"полсотни":["полусотни"],"ребро":["рёбра"],
-"ремесло":["ремёсла"],"седло":["сёдла"],"село":["сёла"]}]]),He=o(qe);try{for(He.s();!(Be=He.n()).done;){var Je=Be.value
-;Object.keys(Je[1]).map(function(e){return Ge.addInteger(y(e))})}}catch(e){He.e(e)}finally{He.f()}
-var Xe=["зять","деверь","друг","брат","собрат","стул","брус","обод","полоз","струп","подмастерье","якорь","перо","шило"],Ye=new Set(["берег","бок","борт","век","вес","веер","вексель","вечер","глаз","голос","город","доктор","дом","детдом","егерь","жемчуг","катер","колокол","концлагерь","корм","короб","кузов","купол","лес","луг","мастер","номер","пояс","провод","рог","сахар","снег","сорт","стог","счет","счёт","спецсчет","спецсчёт","субсчет","субсчёт","терем","том","холод","цвет","череп"]),$e=$(["округ","остров","отпуск","паспорт","парус","поезд","повар","погреб","рукав","цех","юнкер"]),Ke=new Set(["адрес","договор","буфер","ворох","директор","инспектор","инструктор","корпус","крейсер","орден","ордер","прожектор","пропуск","род","свитер","сервер","тенор","тон","трактор","тормоз","ветер","верх","китель","мех","хлеб","юнкер","ястреб"]),Qe=new Set(["бункер","вымпел","год","образ","омут","токарь","тополь","шторм","штуцер"])
-;function Ze(e,r){var n=[],t=r.text(),i=Q(t),u=e.sd.hasStressedEndingPlural(r,0);Object.freeze(u)
-;var a=le(r,i,u[0]),s=Q(a);if(i.endsWith("яя"))return n.push(k(t,2)+"ие"),Ie(n);var c=function(n){
-var t=e.sd.hasStressedEndingPlural(r,0).map(function(e){return!e});return t.length?t.map(function(e){
-return e?1===s.replace(/[^её]/g,"").length?n(function(e){
-var r=Math.max(e.toLowerCase().lastIndexOf("е"),e.toLowerCase().lastIndexOf("ё")),n=Z("ё",e[r])
-;return e.substring(0,r)+n+e.substring(r+1)}(a)):n(a):n(N(a))}):[n(a)]
-},f=P(r),l=r.getDeclension(),d=("й"===M(i)||A(W,M(i)))&&A(W,M(x(i)))?x(t):a,E=function(){
-return(i.endsWith("евич")||i.endsWith("евна"))&&i.indexOf("ье")>=0};function S(){
-var e=d,r=Q(e).indexOf("ье"),n=Z("и",e[r]);return e.substring(0,r)+n+e.substring(r+1)}function v(){
-A(60818504,M(s))||R("яйь",M(i))||U(i,["сосед"])?E()?(n.push(S()+"и"),
-n.push(d+"и")):Array.prototype.push.apply(n,ge(u,d,function(e){return e+"и"
-})):"ц"===M(i)?n.push(de(t,r)+"цы"):E()?(n.push(S()+"ы"),n.push(d+"ы")):Array.prototype.push.apply(n,ge(u,d,function(e){
-return e+"ы"}))}var p=function(e,r){if(Ge.hasInteger(e._hash)){var n,t=P(e),i=e.isAnimate(),u=o(qe);try{
-for(u.s();!(n=u.n()).done;){var a=h(n.value,2),s=a[0],c=a[1],f=s[0],l=s[1]
-;if(t===f&&(null==l||l===i)&&c.hasOwnProperty(r))return c[r].slice()}}catch(e){u.e(e)}finally{u.f()}}}(r,i)
-;if(p)return p;var g="ь"===M(s)?a:"к"===M(s)?x(a)+"чь":"г"===M(s)?x(a)+"зь":"й"===M(i)?x(t):U(i,["рь","ль"])?a:a+"ь"
-;switch(l){case-1:n.push(t);break;case 0:if("путь"===i)n.push("пути");else{
-if(!i.endsWith("дитя"))throw new Error("unsupported");n.push(k(t,3)+"ети")}break;case 1:
-if(Xe.includes(i))n.push(g+"я");else if(2===f){"сын"===i?(n.push("сыновья"),v()):"человек"===i?(n.push("люди"),
-v()):["крюк","лист","лоскут","повод","прут","сук","учитель","флигель","штабель"].includes(i)||"соболь"===i&&r.isAnimate()?(v(),
-n.push(g+"я")):["клин","колос","ком","край","соболь"].includes(i)?n.push(g+"я"):Ye.has(i)||K(i,$e)||Ke.has(i)||Qe.has(i)?(Qe.has(i)&&v(),
-Fe(i)?Array.prototype.push.apply(n,c(function(e){return e+"я"})):u.includes(!0)?n.push(N(a)+"а"):n.push(a+"а"),
-Ke.has(i)&&v()):(i.endsWith("анин")&&i.length>5||i.endsWith("янин"))&&!r.isAName()||["барин","боярин"].includes(i)?(n.push(k(t,2)+"е"),
-"барин"===i&&n.push(k(t,2)+"ы")):["цыган"].includes(i)?n.push(t+"е"):"щенок"===i?(n.push(k(t,2)+"ки"),
-n.push(k(t,2)+"ята")):!i.endsWith("ребёнок")&&!i.endsWith("ребенок")||i.endsWith("жеребёнок")||i.endsWith("жеребенок")||i.endsWith("ястребёнок")||i.endsWith("ястребенок")?(i.endsWith("ёнок")||i.endsWith("енок"))&&r.isAnimate()?n.push(k(t,4)+"ята"):i.endsWith("ёночек")&&r.isAnimate()?n.push(k(t,6)+"ятки"):i.endsWith("онок")&&R("жшч",j(i,5))&&r.isAnimate()?n.push(k(t,4)+"ата"):pe(i)?n.push(k(t,2)+"ки"):K(i,te)?U(i,ie)?n.push(k(t,2)+"ьи"):n.push(x(t)+"е"):Re(0,i)?i.endsWith("ый")||i.endsWith("ий")?n.push(x(t)+"е"):i.endsWith("ой")&&!U(i,["хой","ской"])?n.push(k(t,2)+"ые"):n.push(k(t,2)+"ие"):i.endsWith("его")?n.push(k(t,3)+"ие"):["воробей","муравей","ручей","соловей","улей","жеребей","ирей","репей","чирей"].includes(i)?n.push(k(t,2)+"ьи"):v():n.push(k(t,7)+"дети")
-}else if(3===f)if(U(i,["ко","чо"])&&!U(i,["войско","облако"]))n.push(x(t)+"и");else if(i.endsWith("имое"))n.push(a+"ые");else if(i.endsWith("ее"))n.push(a+"ие");else if(i.endsWith("ое"))U(s,["г","к","ж","ш","х"])?n.push(a+"ие"):n.push(a+"ые");else if(U(i,["ие","иё"]))n.push(k(t,2)+"ия");else if(U(i,["ье","ьё"])){
-var b=k(t,2),m=["безделье","варенье","воскресенье","жалованье","запястье","застолье","затишье","здоровье","зелье","изголовье","новоселье","одночасье","печенье","платье","побережье","поголовье","подворье","подземелье","подполье","поместье","предплечье","раздумье","сиденье","средневековье","увечье","угодье","устье"].includes(i)
-;"е"!==M(i)||m||n.push(b+"ия"),n.push(b+"ья")
-}else U(i,["дерево","звено","крыло"])?n.push(a+"ья"):U(i,["ле","ре"])?n.push(a+"я"):i.endsWith("судно")&&r.isATransport()?n.push(k(t,2)+"а"):(Array.prototype.push.apply(n,c(function(e){
-return e+"а"})),U(i,["щупальце"])&&v());else n.push(a+"и");break;case 2:
-"заря"===i?n.push("зори"):i.endsWith("ая")&&!i.endsWith("свая")?R("жхчшщ",M(s))||U(s,["вк","гк","ск","цк","ньк"])?n.push(a+"ие"):n.push(a+"ые"):v()
-;break;case 3:
-"мя"===T(i,2)?n.push(a+"ена"):Object.keys(ye).includes(i)?n.push(x(ye[i])+"и"):1===f?n.push(d+"и"):"и"===M(d)?n.push(d+"я"):n.push(d+"а")
-}return Ie(n)}
-var er=$(["ли","си","би","ви","ди","ти","пи","ри","ни","фи","зи","ьи","ья","ия","ря","ля","ая","аи","ои","уи","эи","ыи","яи","ёи","юи","еи","ии"]),rr=["беготни","болтовни","будни","вожжи","возни","доли","лапши","левши","люди","марли","моря","мощи","ноздри","пени","пятерни","распри","родни","сакли","сени","ступни","судьи","фигни","чукчи"],nr=["головы","громадины","детины","деревенщины","дохлятины","дубины","ехидины","жадины","зверины","идиотины","кислятины","молодчины","орясины","остолопины","сиротины","скотины","старейшины","старины","старшины","уродины"],tr=$(nr),ir=["адреса","паспорта","поезда","цеха","снега","бункера","буфера","берега","вымпела","голоса","города","директора","договора","доктора","жемчуга","инспектора","инструктора","колокола","кондуктора","короба","корпуса","крейсера","кузова","леса","мастера","номера","облачка","острова","отпуска","паруса","повара","погреба","пояса","провода","прожектора","пропуска","рукава","сахара","свитера","сервера","счета","трактора","тормоза","холода","цвета","черепа","шторма","штуцера","юнкера","ястреба","суда","корм"],ur=$(ir),ar=new Set(ir.concat(["бега","беглецы","близнецы","бойцы","бока","борта","борцы","бруствера","брюшки","веера","века","венцы","верха","веса","весы","вечера","вороха","глупцы","года","гонцы","дворцы","дельцы","детдома","детдомы","дома","жеребцы","жильцы","жрецы","затишки","зубцы","излишки","истцы","катера","концы","корма","кузнецы","купола","купцы","лишки","луга","мертвецы","меха","мудрецы","облака","образа","образцы","огурцы","округа","омута","ордена","ордера","отцы","очки","певцы","песцы","пловцы","подлецы","продавцы","птенцы","резцы","рога","рода","рубцы","самцы","свинцы","сорта","соуса","спецы","стога","столбцы","стрельцы","творцы","тельцы","тенора","терема","тома","тона","торцы","хлеба","штришки","юнцы"])),sr=new Set(["авары","аланы","аршины","баклажаны","буквы","гольфы","граммы","гусары","дела","кадеты","килограммы","омы","помидоры","рентгены","ботинки","человеки","чулки","шорты"]),cr=new Set(["гектары","рельсы"]),fr=new B
-;ar.forEach(function(e){return fr.addRaw(H(e))}),sr.forEach(function(e){return fr.addRaw(H(e))}),cr.forEach(function(e){
-return fr.addRaw(H(e))})
-;var or=new Set(nr.concat(["абазины","авы","аввы","бедняги","бедолаги","болгары","бродяги","брызги","брюки","брюхи","будды","бусы","валенки","веки","вельможи","верзилы","вилы","владыки","воеводы","волосы","вояки","главы","грузины","задворки","задиры","железы","жилы","зануды","зеваки","именины","калеки","кальсоны","каникулы","колготки","коллеги","крохи","курицы","куры","ладоши","ламы","лыки","макароны","мужчины","нападки","нары","непоседы","носилки","ножны","папы","папаши","таты","падлы","партизаны","погоны","поминки","посиделки","похороны","предтечи","работяги","разы","ребятки","румыны","самоубийцы","санки","убийцы","сапоги","сатаны","сироты","сливки","слуги","солдаты","старосты","сумерки","сутки","татары","телеса","хитрюги","четвереньки","шляпы","шмотки","яблоки","дядьки","дяденьки","зайки","кроссовки","малютки","малолетки","попки","турки","узы","хлопоты","шахматы"])),hr=new B
-;or.forEach(function(e){return hr.addRaw(H(e))})
-;var lr=["х","ых","их","м","ым","им","х","ых","их","ми","ыми","ими","х","ых","их"],dr=["ям","ам","","","ями","ами","ях","ах"],Er=$(["вна","вца","вцы","пла","дца","дра","судна","рки","рцы","тлы","рна","тна","енца","десны","дёсны","рёбра","ребра","сосны"]),Sr=$(["жи","ши","чи","ля","ли","чи","ри","ти","ди","сани","борщи","клещи","товарищи","плащи","прыщи","хрящи"]),vr=$(["братья","брусья","деревья","донья","звенья","клинья","клочья","коленья","колосья","колья","комья","крылья","крючья","листья","лоскутья","лохмотья","перья","платья","поводья","прутья","стулья","сучья","хлопья","шилья"]),pr=$(["ишки","дружки","тки","папочки","дедушки","дядюшки","батюшки","катанки","петрушки","шестерки"]),gr=$(["жки","шки","чки","рки","натки","хатки","ятки","етки","чётки","мки","нки","педки","илки"]),br=$(["шок","щок","жок","зок","аток","яток","еток"])
-;function mr(e,r,n,t){var i=Q(t),u=M(i),a=w(u),s=n+1;if(1===s||4===s&&!r.isAnimate())return t
-;if(134217984&a)if(2===s||4===s){if(U(i,["овичи","евичи"]))return x(t)+"ей"
-;if(U(i,["вны","полусотни"])&&"овны"!==i)return k(t,2)+"ен"}else if(5===s){
-if(U(i,["дети","люди"])&&!U(i,["нелюди"]))return x(t)+"ьми";if(U(i,["вери","дочери"]))return[x(t)+"ями",x(t)+"ьми"]}
-var c=P(r),f=i.endsWith("цы")?x(t):oe(t,i),o=K(i,Oe)&&(r.isASurname()||4===c)&&!K(i,tr),h=3*Math.min(Math.round(lr.length/3-1),s-2)
-;if(o||i.endsWith("ничьи"))return t+lr[h];if(i.endsWith("ые"))return k(t,2)+lr[h+1]
-;if(i.endsWith("ие")||K(i,ae))return f+lr[h+2];if(s>2&&4!==s){var l=2*Math.min(Math.round(dr.length/2-1),s-3)
-;return K(i,er)?x(t)+dr[l]:e.sd.hasStressedEndingPlural(r,n).includes(!0)?N(f)+dr[l+1]:f+dr[l+1]}
-var d=r.getDeclension(),E=function(){var u=Q(f),a=["жки","шки","чки","ножны"]
-;if(U(u,["кн","кл","дк","нк","пк","зк","рк","тк","вк","лк","мк"])&&!U(i,["сумерки"])||"зл"===u||U(i,a)&&e.sd.hasStressedEndingPlural(r,n).includes(!0)){
-var s=M(f);return x(f)+Z("о",s)+s}if(K(i,Er)&&!i.endsWith("недра")||U(i,a)){var c=j(t,2);return k(t,2)+Z("е",c)+c}
-if(U(i,["сестры","сёстры","серьги"])){var o=j(t,2);return("ь"===j(i,3)?N(k(t,3)):N(k(t,2)))+Z("ё",o)+o}
-if(U(u,["льц","сьм","деньг","ьк","йк","дьб"])){var h=M(f);return k(f,2)+Z("е",h)+h}return U(i,["сла","слы"])?x(f)+"ел":f
-};if([3,0].includes(d)){if(i.endsWith("и"))return x(t)+"ей";if(["гроздья"].includes(i))return x(t)+"ев"}var S=j(i,3)
-;if(1!==c){var v=H(i),p=fr.hasRaw(v);if(p&&ar.has(i))return x(t)+"ов"
-;if(p&&sr.has(i)&&!r.isAName())return[E(),x(t)+"ов"];if(p&&cr.has(i))return[x(t)+"ов",E()]
-;if(4===c&&!U(i,rr)&&!R("жшч",S)||hr.hasRaw(v)&&or.has(i)||r.isAName()&&2===c&&r.lower().endsWith("а")||"барин"===r.lower())return E()
-;switch(u){case"и":case"я":
-if(K(i,Sr)||"щи"===i||rr.includes(i)||r.lower().endsWith("ь")&&!U(r.lower(),["зять","деверь"]))return("ь"===M(x(i))?k(t,2):x(t))+"ей"
-;if("и"===u)return i.endsWith("ульи")?x(t)+"ев":i.endsWith("ьи")?2===c?x(t)+"ёв":k(t,2)+"ей":["ча","кле","холу","ху"].includes(x(i))?x(t)+"ёв":i.endsWith("ищи")?E():i.endsWith("мессии")?x(t)+"й":A(W,j(i,2))?x(t)+"ев":!K(i,gr)||2===c&&!K(N(i),pr)||K(r.lower(),br)?x(t)+"ов":E()
-;if(K(i,vr))return x(t)+"ев";if(U(i,["зятья","кумовья","деверья","края","острия"]))return x(t)+"ёв"
-;if(U(i,["ья","ия"]))return 2===c?k(t,2)+"ей":k(t,2)+"ий";break;case"а":
-return U(i,["семена","стремена"])?k(t,3)+"ян":i.endsWith("мена")?k(t,3)+"ён":r.lower().endsWith("яйцо")?Z("яиц",x(t)):i.endsWith("нца")?[E(),x(t)+"ев"]:K(i,ur)?x(t)+"ов":E()
-;case"ы":return U(i,["ницы","лицы","пицы","бицы"])?x(t):i.endsWith("цы")?x(t)+"ев":x(t)+"ов";default:
-if(i.endsWith("не"))return E()}}if(i.endsWith("йки"))return k(t,3)+"ек";if(i.endsWith("ки")){if("ь"===S){var g=M(x(t))
-;return k(t,3)+Z("е",g)+g}if(R("жшч",S))return E();if(A(O,S))return k(t,2)+"ок"}if(rr.includes(i))return x(t)+"ей"
-;if(U(i,["аи","ои","еи","эи","уи"]))return x(t)+"й";if("свечи"===i)return[x(t),x(t)+"ей"]
-;if("пригоршни"===i)return[x(t)+"ей",k(t,2)+"ен"];if("тихони"===i)return[k(t,2)+"нь",x(t)+"ей"]
-;if(U(i,["ьи","ии"]))return e.sd.hasStressedEndingSingular(r,n).includes(!0)?k(t,2)+"ей":k(t,2)+"ий"
-;if(i.endsWith("ни")&&A(O,j(i,3)))return["барышни","боярышни","деревни"].includes(i)?k(t,2)+"ень":i.endsWith("кухни")?k(t,2)+"онь":"сотни"===i?[k(t,2),k(t,2)+"ен"]:k(t,2)+"ен"
-;if(Q(f).endsWith("ийк"))return k(f,2)+"ек";if(f.length===i.length-1&&K(i,er)){if(R("ьй",Q(j(f,2)))&&!r.isAnimate()){
-var b=M(f);return k(f,2)+Z("е",b)+b}return U(i,["земли","петли","пли","вли"])?x(f)+"ель":f+"ь"}return E()}
-var yr=function(){return f(function e(){var r,n,t;s(this,e),r=this,n="sd",t=function(){var e,r=new Y;function n(n,t){
-var i,u=o(t.split(","));try{for(u.s();!(i=u.n()).done;){var a=i.value;e.text=a,r.put(e,n)}}catch(e){u.e(e)}finally{u.f()
-}}return e={pluraleTantum:!0},n("SSSSSSS-SSSSSS","ножны"),e={gender:u.MASCULINE},
-n("SSSSSSS-SSSSSS","брёх,дёрн,идиш,имидж,мед,упрёк"),
-n("SSSSSSS-EEEEEE","адрес,век,вечер,город,детдом,поезд,спецсчёт,субсчёт"),
-n("SSSSSSE-EEEEEE","берег,бок,вес,лес,снег,дом,катер,счёт,мёд"),n("SSSSSSS-bbbbbb","вексель,ветер"),
-n("SSSSSSE-ESEEEE","глаз"),n("SSSSSSE-bEEbEE","год"),n("SSSSSSb-bbbbbb","цех"),n("SbbSbbb-bbbbbb","грош,шприц"),
-n("SssSsss-ssssss","кишмиш,кряж,слеш,слэш"),n("SEESeEE-EEEEEE","стеллаж"),n("SeeSeee-eeeeee","шиномонтаж"),e={
-gender:u.MASCULINE,animate:!0},n("Sssssss-ssssss","паныч"),n("SSSSSSS-SSSSSS","балансёр,шофёр"),e={gender:u.NEUTER},
-n("EEEEEEE-SsESEE","плечо"),
-n("EEEEEEE-SSSSSS","тесло,стекло,автостекло,бронестекло,оргстекло,пеностекло,смарт-стекло,спецстекло,бедро,берцо,блесна,чело,стегно,стебло"),
-e={gender:u.FEMININE},n("EEEbEEE-SSESEE","щека"),n("EEEEEEE-SSESEE","слеза"),n("EEEEEEE-SESSSS","семья,макросемья"),
-n("EEEEEEE-SEESEE","вожжа,свеча"),n("EEESEEE-SSSSSS","душа"),n("EEEEEEE-eEeeee","скамья"),
-n("EEEEEEE-EEEEEE","башка,кишка,ладья,лапша,моча,пыльца,статья"),e={gender:u.FEMININE,animate:!0},
-n("EEEEEEE-SESESS","свинья,овца"),e={gender:u.COMMON,animate:!0},n("EEEEEEE-SSSSSS","судья"),
-n("EEEEEEE-EEEEEE","левша"),r}(),(n=l(n))in r?Object.defineProperty(r,n,{value:t,enumerable:!0,configurable:!0,
-writable:!0}):r[n]=t},[{key:"decline",value:function(e,r,n){return wr(this,L.create(e),r,n)}},{key:"pluralize",
-value:function(e){var r=L.create(e);return r.isPluraleTantum()?[r.text()]:Ze(this,r)}},{key:"getLocativeForms",
-value:function(e){var r=this,n=L.create(e),t=n.getDeclension();if(t&&t>=0){var i=Ne.get(Ce(n))
-;if(i instanceof Array)return i.map(function(e){return new v(function(e){switch(1+(e>>3&7)){case g.V:return"в"
-;case g.VO:return"во";case g.NA:return"на"}}(e),function(e,r,n,t){var i=5;switch(r){case 0:return Ae(e,n,i);case 1:
-return De(e,n,t);case 2:return We(e,n,i);case 3:return we(e,n,i)}}(r,t,n,m(e)),e>>6)})}return[]}}])}()
-;function wr(e,n,t,i){var u=function(e,n,t,i){var u=n.text(),a=r.indexOf(t);if(n.isIndeclinable())return u
-;if(n.isPluraleTantum())return mr(e,n,a,u);if(i)return mr(e,n,a,i);switch(n.getDeclension()){case-1:return u;case 0:
-return Ae(e,n,a);case 1:return Pe(e,n,a);case 2:return We(e,n,a);case 3:return we(e,n,a)}}(e,n,t,i)
-;return u instanceof Array?u:[u]}return e.CASES=r,e.Case=n,e.Engine=yr,e.Gender=u,e.Lemma=L,e.LocativeForm=v,
-e.LocativeFormAttribute=p,e.StressDictionary=Y,e.createLemma=function(e){return L.create(e)},
-e.createLemmaOrNull=function(e){return L.createOrNull(e)},e}({});
+return o()||G(u,l)?i+"ей":h()?i+"ой":r.isASurname()&&!u.endsWith("да")?a+"ой":"ия"===z(u,2)?a+"и":u.endsWith("ничья")?a+"ей":a+"е"
+;case 3:return h()?i+"ую":o()?i+"юю":c()?a+"ю":a+"у";case 4:
+return o()||G(u,l)?i+"ею":h()?[i+"ой",i+"ою"]:c()||q("жшчщц",F(s))&&!n.sd.hasStressedEndingSingular(r,e).includes(!0)?"и"===F(f)?a+"ей":[a+"ей",a+"ею"]:[a+"ой",a+"ою"]
+}}var jn=an(["ов","ев","ёв","ин","ын"]),Ln=function(n,r){for(var e=r,t=0;t<n.length;t++){var u=n.charCodeAt(t),i=e
+;(e=new Map).set(u,i)}return e}("ы",jn);function kn(n){return n.filter(function(r,e){return n.indexOf(r)===e})}
+function Vn(n){var r=1&n.lower().includes("ё");return 4294967296*((65535&n._flags)<<1|r)+n._hash}
+var Pn=Object.freeze(function(){var n=new Map,r={gender:s.MASCULINE},e={gender:s.MASCULINE,animate:!0}
+;function t(r,e,t,u,i){for(var s=u.split(","),a=i instanceof Array?i:[2],f=0;f<s.length;f++){var c=s[f];r.text=c
+;var h=Vn(H.create(r)),o=n.get(h);o||(o=[],n.set(h,o));for(var d=0;d<t.length;d++)for(var E=t[d],S=0;S<a.length;S++){
+var p=a[S];o.push(l(E,p,e))}}}var u=[o.V],i=[o.VO],a=[o.NA];t(r,f(0),u,"мозг,пруд,стог,таз,год"),t(r,f(0),i,"рот"),
+t(r,f(4),u,"год"),
+t(r,f(0),u,"гроб"),t(r,f(0),i,"гроб",[1]),t(r,f(1),u,"ад,бор,лес,порт,аэропорт,рай,сад,детсад,тыл,низ,хлев"),
+t(r,f(2),u,"круг,полк,артполк,ряд,род,строй,лад"),t(r,f(3),a,"баз,берег,бережок,вал,кон,круг,луг,пол,яр"),
+t(r,f(4),a,"век,день"),t(r,f(4),u,"час"),t(r,f(4),a,"корень"),t(e,f(5),a,"вор"),
+t(r,f(5),a,"повод,бочок,борт,воз,горб,кол,мост,плот,сук,х"+String.fromCharCode(1091)+"й"),t(r,f(5),a,"крюк,болт",[1,2])
+;var c=",мёд,мех,пар,пух";t(r,f(6),u,"дым,жир,мел,пушок"+c),t(r,f(7),a,"газ,клей,спирт"+c),
+t(r,f(8),u,"бой,бред,быт,долг,плен,пыл,сок,ход,лад"),t(r,f(9),u.concat(a),"вид"),
+t(r,f(9),a,"слух,счёт,ветер,ветр,свет"),t(r,f(10),a,"ход,бег,вес"),t(r,f(10)|f(12),a,"шаг"),t(r,f(11),a,"бал,пир"),
+t(r,f(8),a,"дух,плав"),t(r,f(10)|f(12),a,"газ"),t(r,f(0),u,"глаз,зоб,нос,шкаф"),t(r,f(0),i,"лоб"),
+t(r,f(5),a,"глаз,лоб,нос,шкаф,холм");var h="бок,верх,зад,угол";return t(r,f(1),u,h),t(r,f(5),a,h),
+t(r,f(1)|f(13),u,"край"),t(r,f(5)|f(13),a,"край"),t(r,f(3),a,"лёд,мох,снег"),t(r,f(6),i,"лёд,лён,мох"),
+t(r,f(6),u,"снег"),n
+}()),Rn=new Set("клей,чай,дом,дух,дым,дымок,газ,год,горошек,жар,жир,квас,пар,пыл,род,рост,сахар,свет,сироп,смех,снег,снежок,сок,сор,спор,срок,соус,спирт,страх,суп,сыр,табак,творог,толк,торф,туман,убыток,укроп,уксус,ход,цемент,чеснок,шаг,шик,шиповник,шоколад,шорох,шум,яд".split(",")),zn=new Z
+;Rn.forEach(function(n){return zn.addInteger(M(n))})
+;var Dn=an(["й","ие","иё"]),Fn=an(["воробей","муравей","ручей","соловей","улей"]),Bn=an(["мой","ной","дой","шой","жой","рзой","осой","хой","латой","витой","литой","питой","житой","отой","утой","ятой","лагой","рагой","огой","угой","лубой","любой","илой","ылой","злой","малой","овой","евой","живой","ской","акой","укой","нний","ский","йкий","цкий","зкий","ткий","лкий","мкий","хкий","оркий","аркий","яркий","ький","ёкий","бокий","оокий","cокий","токий","ликий","дикий","укий","ыкий","який","пкий","дкий","бкий","нкий","жкий","чкий","гкий","овкий","авкий"])
+;function qn(n,r){return"ый"===z(r,2)||(r.endsWith("кривой")||fn(r,Bn))&&x(r)>=2}
+var Gn,Hn=an(["ий","ие","чье","тье","дье","вье","бье","жалованье","енье","ружье","божье","верье","мужье"]),Jn=an(["вое","лое","мое","ное","рое","тое","той","ый"])
+;function Xn(n,r,e){
+var t=r.text(),u=r.lower(),i=F(u),s=n.sd.hasStressedEndingSingular(r,e),a=mn(r,u,s[0]),f=D(t),c=Kn(u)
+;c&&(a="полу"+a.substring(3),f="полу"+f.substring(3));var h=U(a),o=function(){return c&&u.endsWith("я")||Zn(u)
+},l=fn(u,Dn),E=function(){return fn(u,Fn)?D(f)+L("ь",F(f)):f},S=function(){return q("чщ",F(h))};function p(n){
+return!r.isAnimate()&&zn.hasInteger(r._hash)&&Rn.has(u)&&("й"===i?n.push(D(t)+L("ю",F(t))):n=n.concat(In(s,a,function(n){
+return n+L("у",F(n))}))),n}switch(e){case 0:return t;case 1:switch(i){case"и":case"ы":if(c)return Yn(n,r,e,u);break
+;case"й":case"е":if(l&&r.isASurname()||qn(0,u)||fn(u,cn))return a+"ого";if(fn(u,ln)||u.endsWith("ее"))return a+"его"
+;case"ё":case"я":case"ь":if(l)return p([E()+"я"]);if(o()&&!S())return a+"я";break;case"ц":return bn(t,r)+"ца";case"к":
+if(On(u))return D(f)+"ка";break;case"о":if(G(u,["шко"])&&2===J(r))return f+"и"}
+return p(r.isASurname()||-1===h.indexOf("ё")?[a+"а"]:In(s,a,function(n){return n+"а"}));case 2:switch(i){case"и":
+case"ы":if(c)return Yn(n,r,e,u);break;case"й":case"е":if(l&&r.isASurname()||qn(0,u)||fn(u,cn))return a+"ому"
+;if(fn(u,ln)||u.endsWith("ее"))return a+"ему";case"ё":case"я":case"ь":if(l)return E()+"ю";if(o()&&!S())return a+"ю"
+;break;case"ц":return bn(t,r)+"цу";case"к":if(On(u))return D(f)+"ку"}
+return r.isASurname()||-1===h.indexOf("ё")?a+"у":In(s,a,function(n){return n+"у"});case 3:
+return 3===J(r)||q("иы",i)&&c?t:r.isAnimate()?Xn(n,r,1):t;case 4:switch(i){case"и":case"ы":if(c)return Yn(n,r,e,u);break
+;case"й":case"е":case"ё":case"я":case"ь":if(l&&r.isASurname()||fn(u,hn))return fn(u,Jn)?a+"ым":a+"им"
+;if(qn(0,u))return"и"===B(u,2)||u.endsWith("хой")?a+"им":a+"ым";if(fn(u,on))return a+"ым";if(fn(u,ln))return a+"им"
+;if(l)return E()+"ем";if(u.endsWith("це"))return t+"м";break;case"ц":return In(s,t,function(n,e){
+return e?bn(n,r)+"цом":bn(n,r)+"цем"});case"к":if(On(u))return D(f)+"ком";break;case"н":case"в":
+if(r.isASurname()&&fn(u,jn))return t+"ым"}return o()||q("жшчщ",F(h))?In(s,a,function(n,r){return r?n+"ом":n+"ем"
+}):r.isASurname()||-1===h.indexOf("ё")?a+"ом":In(s,a,function(n){return n+"ом"});case 6:if("полпути"===u)return t
+;var v=Pn.get(Vn(r));if(v)return kn(v.map(function(n){return d(n)})).map(function(e){return Qn(n,r,e)});case 5:
+switch(i){case"и":if("полпути"===u)return t;case"ы":if(c)return Yn(n,r,e,u);break;case"й":case"е":case"ё":case"я":
+case"ь":if(l&&r.isASurname()||qn(0,u)||fn(u,cn))return a+"ом";if(fn(u,ln)||u.endsWith("ее"))return a+"ем"
+;if(G(u,["воробей"])){var g=D(f);return g+L("ье",F(g))}
+if(fn(u,Hn)&&!G(u,["запястье","здоровье","изголовье","платье"]))return f+"и";if("й"===i||"иё"===z(u,2))return E()+"е"
+;break;case"ц":return bn(t,r)+"це";case"к":if(On(u))return D(f)+"ке"}
+return r.isASurname()||-1===h.indexOf("ё")?a+"е":In(s,a,function(n){return n+"е"})}}function Yn(n,r,e,t){
+var u=function(){return"полминуты"!==t?"полу"+r.text().substring(3):r.text()}
+;return"полпути"===t?Mn(n,X(r,D(u())+"ь"),e):t.endsWith("зни")||t.endsWith("сти")?Tn(n,X(r,D(u())+"ь"),e):Un(n,X(r,D(u())+("ни"===z(t,2)?"я":"а")),e)
+}function Kn(n){if(n.startsWith("пол")&&C(2550137089,F(n))&&"л"!==n[3]&&x(n)>=2){
+var r=n.substring(3),e=r.search(/[а-яё]/);return e>=0&&C(I,r[e])}return!1}function Qn(n,r,e){if(2===e){
+var t=r.text(),u=r.lower(),i=mn(r,u),s=D(t),a=Kn(u)&&u.endsWith("я")||Zn(u)
+;return"й"===F(u)?P(s)+"ю":a?P(i)+"ю":On(u)?P(D(s))+"ку":P(i)+"у"}if(1===e)return Xn(n,r,5)}function Zn(n){
+return"ь"===F(n)&&!n.endsWith("господь")||q("её",F(n))&&!G(n,["це","же"])}for(var $n=((Gn={})[2]={all:{
+"болгарин":["болгары"],"господин":["господа"],"дядя":["дяди","дядья"],"зуб":["зубы","зубья"],"клок":["клочья","клоки"],
+"князь":["князи","князья"],"кол":["колы","колья"],"месяц":["месяцы"],"полдень":["полдни","полудни"],
+"татарин":["татары"],"хозяин":["хозяева"],"цветок":["цветки","цветы"],"черт":["черти"],"чёрт":["черти"],
+"электротрактор":["электротракторы","электротрактора"],"мини-трактор":["мини-трактора"]},animateOnly:{
+"авиаконструктор":["авиаконструктора","авиаконструкторы"],"автоинспектор":["автоинспектора","автоинспекторы"],
+"арт-директор":["арт-директора"],"бесёнок":["бесенята"],"вице-директор":["вице-директора"],
+"госавтоинспектор":["госавтоинспектора","госавтоинспекторы"],"госинспектор":["госинспектора"],
+"кондуктор":["кондуктора","кондукторы"],"конструктор":["конструктора","конструкторы"],"кум":["кумовья"],
+"корректор":["корректора","корректоры"],"муж":["мужья","мужи"],"охотинспектор":["охотинспектора"],
+"пристав":["пристава","приставы"],"проспектор":["проспектора"],"редактор":["редактора","редакторы"],
+"ректор":["ректора","ректоры"],"санинструктор":["санинструктора","санинструкторы"],"слесарь":["слесари","слесаря"],
+"сторож":["сторожа","сторожи"],"вахтер":["вахтера","вахтёры"],"фельдшер":["фельдшера","фельдшеры"],
+"член-корреспондент":["член-корреспонденты","члены-корреспонденты"],"цыган":["цыгане","цыганы"]}},Gn[1]={all:{
+"гроздь":["грозди","гроздья"],"курица":["курицы","куры"],"стая":["стаи"],"щека":["щёки"],"береста":["берёсты"],
+"верста":["вёрсты"],"десна":["дёсны"],"жена":["жёны"],"звезда":["звёзды"],"кинозвезда":["кинозвёзды"],
+"медсестра":["медсёстры"],"метла":["мётлы"],"пчела":["пчёлы"],"сестра":["сёстры"],"слеза":["слёзы"]}},Gn[3]={all:{
+"брюхо":["брюхи"],"колено":["колена","колени","коленья"],"древо":["древа","древеса"],"ухо":["уши"],"око":["очи"],
+"дно":["донья"],"чудо":["чудеса","чуда"],"небо":["небеса"],"бревно":["брёвна"],"ведро":["вёдра"],
+"веретено":["веретёна"],"весло":["вёсла"],"гнездо":["гнёзда"],"зерно":["зёрна"],"знамя":["знамёна"],"колесо":["колёса"],
+"облачко":["облачка"],"озеро":["озёра"],"полсотни":["полусотни"],"ребро":["рёбра"],"ремесло":["ремёсла"],
+"седло":["сёдла"],"село":["сёла"]}
+},Gn),nr=new Z,rr=0,er=Object.values($n);rr<er.length;rr++)for(var tr=er[rr],ur=0,ir=Object.values(tr);ur<ir.length;ur++)for(var sr=ir[ur],ar=0,fr=Object.keys(sr);ar<fr.length;ar++){
+var cr=fr[ar];nr.addInteger(M(cr))}
+var hr=["зять","деверь","друг","брат","собрат","стул","брус","обод","полоз","струп","подмастерье","якорь","перо","шило"],or=new Set(["берег","бок","борт","век","вес","веер","вексель","вечер","глаз","голос","город","директор","доктор","дом","детдом","егерь","жемчуг","катер","колокол","концлагерь","корм","короб","кузов","купол","кучер","лес","луг","мастер","номер","пояс","провод","рог","сахар","снег","сорт","стог","счет","счёт","спецсчет","спецсчёт","субсчет","субсчёт","терем","том","холод","хутор","цвет","череп"]),lr=an(["округ","остров","отпуск","паспорт","парус","поезд","погреб","рукав","цех"]),dr=an(["повар","юнкер"]),Er=new Set(["адрес","договор","буфер","ворох","инспектор","инструктор","корпус","крейсер","орден","ордер","прожектор","пропуск","род","свитер","сектор","сервер","тенор","тон","трактор","тормоз","ветер","верх","китель","мех","хлеб","юнкер","ястреб"]),Sr=new Set(["бункер","вымпел","год","лекарь","образ","омут","писарь","пудель","токарь","тополь","шторм","штуцер"]),pr=["крюк","лист","лоскут","повод","прут","сук","учитель","флигель","штабель"],vr=["клин","колос","ком","край","соболь"],gr=["дерево","звено","крыло"],Ar=["безделье","варенье","воскресенье","жалованье","запястье","застолье","затишье","здоровье","зелье","изголовье","новоселье","одночасье","печенье","платье","побережье","поголовье","подворье","подземелье","подполье","поместье","предплечье","раздумье","сиденье","средневековье","увечье","угодье","устье"],Wr=["воробей","муравей","ручей","соловей","улей","жеребей","ирей","репей","чирей"]
+;function mr(n){return"барин"===n}function br(n,r,e,t,u){var i=n.sd.hasStressedEndingPlural(r,0).map(function(n){
+return!n});return i.length?i.map(function(n){return n?1===t.replace(/[^её]/g,"").length?u((r=e,i=t,
+s=Math.max(i.lastIndexOf("е"),i.lastIndexOf("ё")),a=L("ё",r[s]),r.substring(0,s)+a+r.substring(s+1))):u(e):u(P(e))
+;var r,i,s,a}):[u(e)]}function wr(n,r,e,t,u,i,s,a){var f=[],c=function(){
+return(i.endsWith("евич")||i.endsWith("евна"))&&i.indexOf("ье")>=0};function h(){
+var n=a,r=U(n).indexOf("ье"),e=L("и",n[r]);return n.substring(0,r)+e+n.substring(r+1)}
+return C(60818504,F(u))||q("яйь",F(i))||G(i,["сосед"])?c()?(f.push(h()+"и"),
+f.push(a+"и")):f.push.apply(f,In(s,a,function(n){return n+"и"})):"ц"===F(i)?f.push(bn(e,r)+"цы"):c()?(f.push(h()+"ы"),
+f.push(a+"ы")):f.push.apply(f,In(s,a,function(n){return n+"ы"})),f}function _r(n,r){
+var e=r.text(),t=r.lower(),u=n.sd.hasStressedEndingPlural(r,0),i=mn(r,t,u[0]),s=U(i)
+;if(t.endsWith("яя"))return[R(e,2)+"ие"];var a=("й"===F(t)||C(O,F(t)))&&C(O,F(D(t)))?D(e):i,f=function(n,r){
+if(!nr.hasInteger(n._hash))return undefined;var e=J(n),t=n.isAnimate(),u=$n[e];if(!u)return undefined
+;var i=u.animateOnly;if(t&&i&&i.hasOwnProperty(r))return i[r].slice();var s=u.all
+;return s&&s.hasOwnProperty(r)?s[r].slice():undefined}(r,t);if(f)return f;var c=J(r),h=r.getDeclension()
+;if(-1===h)return[e];if(0===h){if("путь"===t)return["пути"];if(t.endsWith("дитя"))return[R(e,3)+"ети"]
+;throw new Error("unsupported mixed declension word")}return 1===h?function(n,r,e,t,u,i,s,a,f){
+var c=[],h="ь"===F(i)?u:"к"===F(i)?D(u)+"чь":"г"===F(i)?D(u)+"зь":"й"===F(t)?D(e):G(t,["рь","ль"])?u:u+"ь"
+;if(hr.includes(t))return c.push(h+"я"),kn(c);if(2===f){var o=function(n){
+return"сын"===n?"сын":"человек"===n?"человек":null}(t);if("сын"===o)return c.push("сыновья"),
+c.push.apply(c,wr(0,r,e,0,i,t,s,a)),kn(c);if("человек"===o)return c.push("люди"),c.push.apply(c,wr(0,r,e,0,i,t,s,a)),
+kn(c);if(function(n,r){return!!pr.includes(n)||!("соболь"!==n||!r.isAnimate())
+}(t,r))return c.push.apply(c,wr(0,r,e,0,i,t,s,a)),c.push(h+"я"),kn(c);if(function(n){return vr.includes(n)
+}(t))return c.push(h+"я"),kn(c);var l=function(n){return or.has(n)?1:Er.has(n)?3:Sr.has(n)?4:0}(t),d=function(n,r){
+var e=r.isAnimate();return!e&&fn(n,lr)||e&&fn(n,dr)}(t,r);return 0!==l||d?(4===l&&c.push.apply(c,wr(0,r,e,0,i,t,s,a)),
+Zn(t)?c.push.apply(c,br(n,r,u,i,function(n){return n+"я"})):s.includes(!0)?c.push(P(u)+"а"):c.push(u+"а"),
+3===l&&c.push.apply(c,wr(0,r,e,0,i,t,s,a)),
+kn(c)):r.isAnimate()&&(t.endsWith("анин")||t.endsWith("янин"))&&!r.isAName()||function(n){return"боярин"===n
+}(t)||mr(t)?(c.push(R(e,2)+"е"),mr(t)&&c.push(R(e,2)+"ы"),kn(c)):function(n){return"цыган"===n}(t)?(c.push(e+"е"),
+kn(c)):function(n){return"щенок"===n}(t)?(c.push(R(e,2)+"ки"),c.push(R(e,2)+"ята"),kn(c)):function(n){
+return!(!n.endsWith("ребёнок")&&!n.endsWith("ребенок")||n.endsWith("жеребёнок")||n.endsWith("жеребенок")||n.endsWith("ястребёнок")||n.endsWith("ястребенок"))
+}(t)?(c.push(R(e,7)+"дети"),kn(c)):function(n,r){return(n.endsWith("ёнок")||n.endsWith("енок"))&&r.isAnimate()
+}(t,r)?(c.push(R(e,4)+"ята"),kn(c)):t.endsWith("ёночек")&&r.isAnimate()?(c.push(R(e,6)+"ятки"),kn(c)):function(n,r){
+return n.endsWith("онок")&&q("жшч",B(n,5))&&r.isAnimate()}(t,r)?(c.push(R(e,4)+"ата"),kn(c)):On(t)?(c.push(R(e,2)+"ки"),
+kn(c)):fn(t,ln)?(G(t,dn)?c.push(R(e,2)+"ьи"):c.push(D(e)+"е"),
+kn(c)):qn(0,t)?(t.endsWith("ый")||t.endsWith("ий")?c.push(D(e)+"е"):t.endsWith("ой")&&!G(t,["хой","ской"])?c.push(R(e,2)+"ые"):c.push(R(e,2)+"ие"),
+kn(c)):t.endsWith("его")?(c.push(R(e,3)+"ие"),kn(c)):function(n){return Wr.includes(n)}(t)?(c.push(R(e,2)+"ьи"),
+kn(c)):(c.push.apply(c,wr(0,r,e,0,i,t,s,a)),kn(c))}if(3===f){if(function(n){
+return G(n,["ко","чо"])&&!G(n,["войско","облако"])}(t))return c.push(D(e)+"и"),kn(c);if(function(n){
+return n.endsWith("имое")}(t))return c.push(u+"ые"),kn(c);if(function(n){return n.endsWith("ее")
+}(t))return c.push(u+"ие"),kn(c);if(t.endsWith("ое"))return!function(n){return G(n,["г","к","ж","ш","х"])
+}(i)?c.push(u+"ые"):c.push(u+"ие"),kn(c);if(function(n){return G(n,["ие","иё"])}(t))return c.push(R(e,2)+"ия"),kn(c)
+;if(function(n){return G(n,["ье","ьё"])}(t)){var E=R(e,2);return"е"!==F(t)||function(n){return Ar.includes(n)
+}(t)||c.push(E+"ия"),c.push(E+"ья"),kn(c)}return function(n){return G(n,gr)}(t)?(c.push(u+"ья"),kn(c)):function(n){
+return G(n,["ле","ре"])}(t)?(c.push(u+"я"),kn(c)):function(n,r){return n.endsWith("судно")&&r.isATransport()
+}(t,r)?(c.push(R(e,2)+"а"),kn(c)):(c.push.apply(c,br(n,r,u,i,function(n){return n+"а"})),function(n){
+return n.endsWith("щупальце")}(t)&&c.push.apply(c,wr(0,r,e,0,i,t,s,a)),kn(c))}return c.push(u+"и"),kn(c)
+}(n,r,e,t,i,s,u,a,c):2===h?function(n,r,e,t,u,i,s,a){var f=[];if(function(n){return"заря"===n}(t))return f.push("зори"),
+kn(f);if(function(n){return n.endsWith("ая")&&!n.endsWith("свая")
+}(t))return q("жхчшщ",F(i))||G(i,["вк","гк","ск","цк","ньк"])?f.push(u+"ие"):f.push(u+"ые"),kn(f)
+;return f.push.apply(f,wr(0,r,e,0,i,t,s,a)),kn(f)}(0,r,e,t,i,s,u,a):3===h?function(n,r,e,t,u,i,s,a,f){var c=[]
+;if("мя"===z(t,2))return c.push(u+"ена"),kn(c);if(Object.keys(xn).includes(t))return c.push(D(xn[t])+"и"),kn(c)
+;if(1===f)return c.push(a+"и"),kn(c);"и"===F(a)?c.push(a+"я"):c.push(a+"а");return kn(c)}(0,0,0,t,i,0,0,a,c):[e]}
+var Cr=an(["ли","си","би","ви","ди","ти","пи","ри","ни","фи","зи","ьи","ья","ия","ря","ля","ая","аи","ои","уи","эи","ыи","яи","ёи","юи","еи","ии"]),Or=["беготни","болтовни","будни","вожжи","возни","доли","лапши","левши","люди","марли","моря","мощи","ноздри","пени","пятерни","распри","родни","сакли","сени","ступни","судьи","фигни","чукчи"],Ir=["головы","громадины","детины","деревенщины","дохлятины","дубины","ехидины","жадины","зверины","идиотины","кислятины","молодчины","орясины","остолопины","сиротины","скотины","старейшины","старины","старшины","уродины"],Nr=an(Ir),yr=["адреса","паспорта","поезда","цеха","снега","бункера","буфера","берега","вымпела","голоса","города","договора","жемчуга","колокола","короба","корпуса","крейсера","кузова","леса","мастера","номера","облачка","острова","отпуска","паруса","повара","погреба","пояса","провода","пропуска","рукава","сахара","свитера","сервера","счета","тормоза","холода","хутора","цвета","черепа","шторма","штуцера","юнкера","ястреба","суда","фельдшера","кучера","пристава"],xr=an([].concat(yr,["ктора","хтера"])),Tr=new Set([].concat(yr,["бега","беглецы","близнецы","бойцы","бока","борта","борцы","бруствера","брюшки","веера","века","венцы","верха","веса","весы","вечера","вороха","глупцы","года","гонцы","дворцы","дельцы","детдома","детдомы","дома","жеребцы","жильцы","жрецы","затишки","зубцы","излишки","истцы","катера","концы","корма","кузнецы","купола","купцы","лишки","луга","мертвецы","меха","мудрецы","облака","образа","образцы","огурцы","округа","омута","ордена","ордера","отцы","очки","певцы","песцы","пловцы","подлецы","продавцы","птенцы","резцы","рога","рода","рубцы","самцы","свинцы","сорта","соуса","спецы","стога","столбцы","стрельцы","творцы","тельцы","тенора","терема","тома","тона","торцы","хлеба","штришки","юнцы"])),Mr=new Set(["авары","аланы","аршины","баклажаны","буквы","гольфы","граммы","гусары","дела","кадеты","килограммы","омы","помидоры","рентгены","ботинки","человеки","чулки","шорты"]),Ur=new Set(["гектары","рельсы"]),jr=new Set([].concat(Ir,["абазины","авы","аввы","бедняги","бедолаги","болгары","бродяги","брызги","брюки","брюхи","будды","бусы","валенки","веки","вельможи","верзилы","вилы","владыки","воеводы","волосы","вояки","главы","грузины","задворки","задиры","железы","жилы","зануды","зеваки","именины","калеки","кальсоны","каникулы","колготки","коллеги","крохи","курицы","куры","ладоши","ламы","лыки","макароны","мужчины","нападки","нары","непоседы","носилки","ножны","папы","папаши","таты","падлы","партизаны","погоны","поминки","посиделки","похороны","предтечи","работяги","разы","ребятки","румыны","самоубийцы","санки","убийцы","сапоги","сатаны","сироты","сливки","слуги","солдаты","старосты","сумерки","сутки","татары","телеса","хитрюги","четвереньки","шляпы","шмотки","яблоки","дядьки","дяденьки","зайки","кроссовки","малютки","малолетки","попки","турки","узы","хлопоты","шахматы"])),Lr=new Z
+;Tr.forEach(function(n){return Lr.addInteger(T(n))}),Mr.forEach(function(n){return Lr.addInteger(T(n))}),
+Ur.forEach(function(n){return Lr.addInteger(T(n))});var kr=new Z;jr.forEach(function(n){return kr.addInteger(T(n))})
+;var Vr=an(["жи","ши","чи","ля","ли","чи","ри","ти","ди","сани","борщи","клещи","товарищи","плащи","прыщи","хрящи"]),Pr=an(["братья","брусья","деревья","донья","звенья","клинья","клочья","коленья","колосья","колья","комья","крылья","крючья","листья","лоскутья","лохмотья","перья","платья","поводья","прутья","стулья","сучья","хлопья","шилья"]),Rr=an(["ишки","дружки","тки","папочки","дедушки","дядюшки","батюшки","катанки","петрушки","шестерки"]),zr=an(["жки","шки","чки","рки","натки","хатки","ятки","етки","чётки","мки","нки","педки","илки"]),Dr=an(["шок","щок","жок","зок","аток","яток","еток"]),Fr=an(["вна","вца","вцы","пла","дца","дра","судна","рки","рцы","тлы","рна","тна","енца","десны","дёсны","рёбра","ребра","сосны"])
+;function Br(n){return Or.includes(n)}
+var qr=[["х","ых","их"],["м","ым","им"],["х","ых","их"],["ми","ыми","ими"],["х","ых","их"]],Gr={2:0,3:1,4:2,5:3,6:4,7:4
+},Hr=[["ям","ам"],["ями","ами"],["ях","ах"]],Jr={3:0,5:1,6:2,7:2
+},Xr=["жки","шки","чки","ножны"],Yr=["кн","кл","дк","нк","пк","зк","рк","тк","вк","лк","мк"],Kr=["сестры","сёстры","серьги"],Qr=["льц","сьм","деньг","ьк","йк","дьб"],Zr=["земли","петли","пли","вли"],$r=["зять","деверь"]
+;function ne(n,r,e,t){var u=U(t),i=F(u),s=_(i),a=e+1;if(1===a||4===a&&!r.isAnimate())return t
+;if(134217984&s)if(2===a||4===a){if(u.endsWith("овичи")||u.endsWith("евичи"))return D(t)+"ей"
+;if((u.endsWith("вны")||u.endsWith("полусотни"))&&"овны"!==u)return R(t,2)+"ен"}else if(5===a){
+if((u.endsWith("дети")||u.endsWith("люди"))&&!u.endsWith("нелюди"))return D(t)+"ьми"
+;if(u.endsWith("вери")||u.endsWith("дочери"))return[D(t)+"ями",D(t)+"ьми"]}
+var f=J(r),c=u.endsWith("цы")?D(t):An(t,u),h=fn(u,Ln)&&(r.isASurname()||4===f)&&!fn(u,Nr),o=qr[Gr[a]]
+;if(h||u.endsWith("ничьи"))return t+o[0];if(u.endsWith("ые"))return R(t,2)+o[1]
+;if(u.endsWith("ие")||fn(u,Sn))return c+o[2];if(a>2&&4!==a){var l=Hr[Jr[a]]
+;return fn(u,Cr)?D(t)+l[0]:n.sd.hasStressedEndingPlural(r,e).includes(!0)?P(c)+l[1]:c+l[1]}
+var d=r.getDeclension(),p=function(){var i=U(c)
+;if(G(i,Yr)&&!u.endsWith("сумерки")||"зл"===i||G(u,Xr)&&n.sd.hasStressedEndingPlural(r,e).includes(!0)){var s=F(c)
+;return D(c)+L("о",s)+s}if(fn(u,Fr)&&!u.endsWith("недра")||G(u,Xr)){var a=B(t,2);return R(t,2)+L("е",a)+a}if(G(u,Kr)){
+var f=B(t,2);return("ь"===B(u,3)?P(R(t,3)):P(R(t,2)))+L("ё",f)+f}if(G(i,Qr)){var h=F(c);return R(c,2)+L("е",h)+h}
+return u.endsWith("сла")||u.endsWith("слы")?D(c)+"ел":c};if([3,0].includes(d)){if(u.endsWith("и"))return D(t)+"ей"
+;if(function(n){return"гроздья"===n}(u))return D(t)+"ев"}var v=B(u,3);if(1!==f){var g=function(n,r){
+return r.hasInteger(T(n))}(u,Lr);if(g&&function(n){return Tr.has(n)}(u))return D(t)+"ов";if(g&&function(n){
+return Mr.has(n)}(u)&&!r.isAName())return[p(),D(t)+"ов"];if(g&&function(n){return Ur.has(n)}(u))return[D(t)+"ов",p()]
+;if(4===f&&!Br(u)&&!q("жшч",v)||function(n,r){return r.hasInteger(T(n))}(u,kr)&&function(n){return jr.has(n)
+}(u)||r.isAName()&&2===f&&r.lower().endsWith("а")||"барин"===r.lower())return p();switch(i){case"и":case"я":
+if(fn(u,Vr)||"щи"===u||Br(u)||r.lower().endsWith("ь")&&!G(r.lower(),$r))return("ь"===F(D(u))?R(t,2):D(t))+"ей"
+;if("и"===i)return function(n){return n.endsWith("ульи")
+}(u)?D(t)+"ев":u.endsWith("ьи")?2===f?D(t)+"ёв":R(t,2)+"ей":function(n){
+return["ча","кле","холу","ху"].includes(n.slice(0,-1))}(u)?D(t)+"ёв":u.endsWith("ищи")?p():function(n){
+return n.endsWith("мессии")
+}(u)?D(t)+"й":C(O,B(u,2))?D(t)+"ев":!fn(u,zr)||2===f&&!fn(P(u),Rr)||fn(r.lower(),Dr)?D(t)+"ов":p()
+;if(fn(u,Pr))return D(t)+"ев";if(function(n){return G(n,["зятья","кумовья","деверья","края","острия"])
+}(u))return D(t)+"ёв";if(function(n){return G(n,["ья","ия"])}(u))return 2===f?R(t,2)+"ей":R(t,2)+"ий";break;case"а":
+var A=function(n){return n.endsWith("семена")?"семена":n.endsWith("стремена")?"стремена":null}(u)
+;return A?R(t,3)+"ян":function(n){return!n.endsWith("мена")||n.endsWith("семена")||n.endsWith("стремена")?null:"мена"
+}(u)?R(t,3)+"ён":r.lower().endsWith("яйцо")?L("яиц",D(t)):u.endsWith("нца")?[p(),D(t)+"ев"]:fn(u,xr)?D(t)+"ов":p()
+;case"ы":return function(n){
+return n.endsWith("ницы")||n.endsWith("лицы")||n.endsWith("пицы")||n.endsWith("бицы")?n.slice(-3):null
+}(u)?D(t):u.endsWith("цы")?D(t)+"ев":D(t)+"ов";default:if(function(n){return n.endsWith("не")}(u))return p()}}
+if(function(n){return n.endsWith("йки")}(u))return R(t,3)+"ек";if(u.endsWith("ки")){if("ь"===v){var W=F(D(t))
+;return R(t,3)+L("е",W)+W}if(q("жшч",v))return p();if(C(N,v))return R(t,2)+"ок"}if(Br(u))return D(t)+"ей"
+;if(function(n){return G(n,["аи","ои","еи","эи","уи"])}(u))return D(t)+"й";if(function(n){return"свечи"===n
+}(u))return[D(t),D(t)+"ей"];if(function(n){return"пригоршни"===n}(u))return[D(t)+"ей",R(t,2)+"ен"];if(function(n){
+return"тихони"===n}(u))return[R(t,2)+"нь",D(t)+"ей"];if(function(n){return G(n,["ьи","ии"])
+}(u))return n.sd.hasStressedEndingSingular(r,e).includes(!0)?R(t,2)+"ей":R(t,2)+"ий";if(function(n){
+return n.endsWith("ни")&&C(N,B(n,3))}(u))return function(n){return["барышни","боярышни","деревни"].includes(n)
+}(u)?R(t,2)+"ень":function(n){return n.endsWith("кухни")}(u)?R(t,2)+"онь":function(n){return"сотни"===n
+}(u)?[R(t,2),R(t,2)+"ен"]:R(t,2)+"ен";if(U(c).endsWith("ийк"))return R(c,2)+"ек";if(c.length===u.length-1&&fn(u,Cr)){
+var m=B(c,2).charCodeAt(0);if(m!==E+9&&m!==E+28&&m!==S+9&&m!==S+28||r.isAnimate())return G(u,Zr)?D(c)+"ель":c+"ь"
+;var b=F(c);return R(c,2)+L("е",b)+b}return p()}var re=function(){function n(){this.sd=function(){var n,r=sn()
+;function e(e,t){for(var u=t.split(","),i=0;i<u.length;i++){var s=u[i];n.text=s,r.put(n,e)}}return n={pluraleTantum:!0},
+e("SSSSSSS-SSSSSS","ножны"),n={gender:s.MASCULINE},e("SSSSSSS-SSSSSS","брёх,дёрн,идиш,имидж,мед,упрёк"),
+e("SSSSSSS-EEEEEE","адрес,век,вечер,город,детдом,поезд,спецсчёт,субсчёт"),
+e("SSSSSSE-EEEEEE","берег,бок,вес,лес,снег,дом,катер,счёт,мёд"),e("SSSSSSS-bbbbbb","вексель,ветер"),
+e("SSSSSSE-ESEEEE","глаз"),e("SSSSSSE-bEEbEE","год"),e("SSSSSSb-bbbbbb","цех"),e("SbbSbbb-bbbbbb","грош,шприц"),
+e("SssSsss-ssssss","кишмиш,кряж,слеш,слэш"),e("SEESeEE-EEEEEE","стеллаж"),e("SeeSeee-eeeeee","шиномонтаж"),n={
+gender:s.MASCULINE,animate:!0},e("Sssssss-ssssss","паныч"),e("SSSSSSS-SSSSSS","балансёр,шофёр"),n={gender:s.NEUTER},
+e("EEEEEEE-SsESEE","плечо"),
+e("EEEEEEE-SSSSSS","тесло,стекло,автостекло,бронестекло,оргстекло,пеностекло,смарт-стекло,спецстекло,бедро,берцо,блесна,чело,стегно,стебло"),
+n={gender:s.FEMININE},e("EEEbEEE-SSESEE","щека"),e("EEEEEEE-SSESEE","слеза"),e("EEEEEEE-SESSSS","семья,макросемья"),
+e("EEEEEEE-SEESEE","вожжа,свеча"),e("EEESEEE-SSSSSS","душа"),e("EEEEEEE-eEeeee","скамья"),
+e("EEEEEEE-EEEEEE","башка,кишка,ладья,лапша,моча,пыльца,статья"),n={gender:s.FEMININE,animate:!0},
+e("EEEEEEE-SESESS","свинья,овца"),n={gender:s.COMMON,animate:!0},e("EEEEEEE-SSSSSS","судья"),
+e("EEEEEEE-EEEEEE","левша"),r}()}var r=n.prototype;return r.decline=function(n,r,e){var t=H.create(n)
+;return V(e?U(e.charAt(0))!==e.charAt(0):t.lower().charCodeAt(0)!==t.text().charCodeAt(0),ee(this,t,r,e))},
+r.pluralize=function(n){var r=H.create(n)
+;return r.isPluraleTantum()?[r.text()]:V(r.lower().charCodeAt(0)!==r.text().charCodeAt(0),_r(this,r))},
+r.getLocativeForms=function(n){var r=this,e=H.create(n),t=e.getDeclension();if(t&&t>=0){var u=Pn.get(Vn(e))
+;if(u instanceof Array)return u.map(function(n){return new c(function(n){switch(1+(n>>3&7)){case o.V:return"в"
+;case o.VO:return"во";case o.NA:return"на"}}(n),function(n,r,e,t){var u=5;switch(r){case 0:return Mn(n,e,u);case 1:
+return Qn(n,e,t);case 2:return Un(n,e,u);case 3:return Tn(n,e,u)}}(r,t,e,d(n)),n>>6)})}return[]},n}()
+;function ee(n,r,e,u){var i=function(n,r,e,u){var i=r.text(),s=t[e],a=r.getDeclension();if(r.isIndeclinable())return i
+;if(r.isPluraleTantum())return ne(n,r,s,i);if(u)return ne(n,r,s,u);switch(a){case-1:return i;case 0:return Mn(n,r,s)
+;case 1:return Xn(n,r,s);case 2:return Un(n,r,s);case 3:return Tn(n,r,s)}}(n,r,e,u);return i instanceof Array?i:[i]}
+return n.CASES=r,n.Case=e,n.Engine=re,n.Gender=s,n.Lemma=H,n.LocativeForm=c,n.LocativeFormAttribute=h,
+n.createLemma=function(n){return H.create(n)},n.createLemmaOrNull=function(n){return H.createOrNull(n)},n}({});
 //# sourceMappingURL=RussianNouns.es5.js.map
