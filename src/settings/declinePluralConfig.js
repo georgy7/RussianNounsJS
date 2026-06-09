@@ -74,7 +74,7 @@ export const EXPLICIT_ZERO_SURNAMES_TREE = createReversedTrie(
 // Data: Words ending in -а that easily merge with other roots.
 // These take -ов in genitive plural.
 // ============================================================
-export const EXPLICIT_OV1 = [
+const EXPLICIT_OV1 = [
     'адреса', 'паспорта', 'поезда', 'цеха', 'снега',
     'бункера', 'буфера',
     'берега', 'вымпела', 'голоса', 'города',
@@ -89,13 +89,13 @@ export const EXPLICIT_OV1 = [
     'юнкера', 'ястреба',
     'суда',
     'фельдшера', 'кучера',
-    'пристава',
-
-    // Suffixes
-    'ктора', 'хтера'
+    'пристава'
 ];
 
-export const EXPLICIT_OV1_TREE = createReversedTrie(EXPLICIT_OV1);
+export const EXPLICIT_OV1_TREE = createReversedTrie([
+    ...EXPLICIT_OV1,
+    'ктора', 'хтера'
+]);
 
 // ============================================================
 // Data: Extended set of words that take -ов in genitive plural.
